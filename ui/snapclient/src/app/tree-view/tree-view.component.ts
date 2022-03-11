@@ -1,3 +1,19 @@
+/*
+ * Copyright © 2022 SNOMED International
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 import {Component, Input, OnDestroy, OnInit} from '@angular/core';
 import {NestedTreeControl} from '@angular/cdk/tree';
 import {FhirService} from '../_services/fhir.service';
@@ -24,7 +40,7 @@ export class TreeViewComponent implements OnInit, OnDestroy {
 
   private subscription = new Subscription();
   private focus?: Node;
- 
+
   treeControl: NestedTreeControl<Node>;
   nestedData: MatTreeNestedDataSource<Node>;
 
@@ -35,8 +51,8 @@ export class TreeViewComponent implements OnInit, OnDestroy {
     this.treeControl = new NestedTreeControl<Node>(this.getChildren);
     this.nestedData = new MatTreeNestedDataSource<Node>();
     this.nestedData.data = [];
-  }  
-  
+  }
+
   getChildren = (node: Node): Node[] => {
     return node.children ?? [];
   }
