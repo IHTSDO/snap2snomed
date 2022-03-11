@@ -1,0 +1,54 @@
+<ng-template #snackBarTemplate>
+  <app-errormessage [error]="error" (closed)="dismiss()"></app-errormessage>
+</ng-template>
+<div class="table-panel">
+  <table mat-table matTableFilter class="compact-table full-width-table show-borders"
+         [dataSource]="dataSource" matSort (matSortChange)="sortData($event)" fixedLayout="false">
+    <!-- Source display Column -->
+    <ng-container matColumnDef="sourceDisplay">
+      <th mat-header-cell *matHeaderCellDef>{{'TABLE.SOURCE_DISPLAY' | translate}}</th>
+      <td mat-cell *matCellDef="let maprow">{{maprow.sourceDisplay}}</td>
+    </ng-container>
+    <!-- Relationship Column -->
+    <ng-container matColumnDef="relationship">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header>{{'TABLE.RELATIONSHIP' | translate}}</th>
+      <td mat-cell *matCellDef="let maprow; let i = index"
+          #tooltip="matTooltip" matTooltip="{{explainRelationship(maprow.relationship)}}">
+        {{'RELATIONSHIP.' + maprow.relationship | translate}}
+    </ng-container>
+    <!-- Target code Column -->
+    <ng-container matColumnDef="targetCode">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header>{{'TABLE.TARGET_CODE' | translate}}</th>
+      <td mat-cell *matCellDef="let maprow; let i = index">
+        <span>{{maprow.targetCode}}</span>
+      </td>
+    </ng-container>
+    <!-- Target display Column -->
+    <ng-container matColumnDef="targetDisplay">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header>{{'TABLE.TARGET_DISPLAY' | translate}}</th>
+      <td mat-cell *matCellDef="let maprow; let i = index">
+        <span>{{maprow.targetDisplay}}</span>
+      </td>
+    </ng-container>
+    <ng-container matColumnDef="actions">
+      <th mat-header-cell *matHeaderCellDef>{{'TABLE.ACTIONS' | translate}}</th>
+      <td mat-cell *matCellDef="let maprow">
+        <button color="default" mat-mini-fab (click)="updateFlagged(maprow)"
+                #tooltip="matTooltip" matTooltip="{{'MAP.TARGET_FLAGGED' | translate}}">
+          <mat-icon [color]="maprow.flagged ? 'accent' : 'default'">flag</mat-icon>
+        </button>
+        <span class="space-fill"></span>
+        <button *ngIf="canDelete()" color="accent" mat-mini-fab
+                (click)="removeRow(maprow)"
+                #tooltip="matTooltip" matTooltip="{{'DETAILS.DELETE' | translate}}">
+          <mat-icon>remove</mat-icon>
+        </button>
+      </td>
+    </ng-container>
+
+    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+
+    <tr mat-row *matRowDef="let row; columns: displayedColumns; let idx = index"></tr>
+
+  </table>
+</div>

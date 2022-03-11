@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Snap2SNOMED</title>
+  <base href="/">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" type="image/x-icon" href="favicon.ico"/>
+</head>
+<body>
+<section class="main">
+  <div id="backenderror" class="backenderror" style="display: none;">
+    <img src="assets/img/logo.png"/>
+    <div class="alert alert-danger middle">
+      <h2>
+        <span class="material-icons">warning_amber</span>
+        <span>Service is currently unavailable</span>
+        <button mat-raised-button color="primary" onclick="window.location.reload();">Retry</button>
+      </h2>
+    </div>
+  </div>
+  <app-root></app-root>
+</section>
+</body>
+</html>

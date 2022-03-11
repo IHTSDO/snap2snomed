@@ -1,0 +1,36 @@
+﻿Source code	Source display	Target code	Target display	Relationship type code	Relationship type display	No map flag	Status
+map row code 1.	map row display 1	abc	XYZ	TARGET_INEXACT	Target is an inexact match to source	false	MAPPED
+map row code 1.	map row display 1	def	D E F	TARGET_INEXACT	Target is an inexact match to source	false	MAPPED
+map row code 2.	map row display 2					true	DRAFT
+map row code 3.	map row display 3					true	DRAFT
+map row code 4.	map row display 4	broader	Broader	TARGET_BROADER	Target is broader than source	false	DRAFT
+map row code 5.	map row display 5	narrower	Narrower	TARGET_NARROWER	Target is narrower than source	false	DRAFT
+map row code 6.	map row display 6	equivalent	Equivalent	TARGET_EQUIVALENT	Target is equivalent to source	false	DRAFT
+map row code 7.	map row display 7	equivalent	Equivalent	TARGET_INEXACT	Target is an inexact match to source	false	DRAFT
+map row code 8.	map row display 8	utf8	ሰማይ አይታረስ ንጉሥ አይከሰስ።	TARGET_EQUIVALENT	Target is equivalent to source	false	DRAFT
+map row code 9.	map row display 9	quotes	"This is a bit of text that has ""quotes"", as well as some commas to stir things up"	TARGET_EQUIVALENT	Target is equivalent to source	false	DRAFT
+map row code 10.	map row display 10	tabby	"This display has a tab 	 to ensure this is handled"	TARGET_EQUIVALENT	Target is equivalent to source	false	DRAFT
+map row code 11.	map row display 11	inreview	in review row	TARGET_EQUIVALENT	Target is equivalent to source	false	INREVIEW
+map row code 12.	map row display 12					false	UNMAPPED
+map row code 13.	map row display 13					false	UNMAPPED
+map row code 14.	map row display 14					false	UNMAPPED
+map row code 15.	map row display 15					false	UNMAPPED
+map row code 16.	map row display 16					false	UNMAPPED
+map row code 17.	map row display 17					false	UNMAPPED
+map row code 18.	map row display 18					false	UNMAPPED
+map row code 19.	map row display 19					false	UNMAPPED
+map row code 20.	map row display 20					false	UNMAPPED
+map row code 21.	map row display 21					false	UNMAPPED
+map row code 22.	map row display 22					false	UNMAPPED
+map row code 23.	map row display 23					false	UNMAPPED
+map row code 24.	map row display 24					false	UNMAPPED
+map row code 25.	map row display 25					false	UNMAPPED
+map row code 26.	map row display 26					false	UNMAPPED
+map row code 27.	map row display 27					false	UNMAPPED
+map row code 28.	map row display 28					false	UNMAPPED
+map row code 29.	map row display 29					false	UNMAPPED
+map row code 30.	map row display 30					false	UNMAPPED
+map row code 31.	map row display 31					false	UNMAPPED
+map row code 32.	map row display 32					false	UNMAPPED
+map row code 33.	map row display 33					false	UNMAPPED
+map row code 34.	map row display 34					false	UNMAPPED

@@ -1,0 +1,6 @@
+Source code	Source display	Target code	Target display	Relationship type code	Relationship type display	No map flag	Status
+210632005	àáâäæãåā	275716001	Mycology (procedure)	TARGET_BROADER	Target is broader than source	false	MAPPED
+300138002	èéêëēėę	272393004	Tests (qualifier value)	TARGET_EQUIVALENT	Target is equivalent to source	false	MAPPED
+	èéêëēėę	236915005	Tubal embryo transfer (procedure)	TARGET_BROADER	Target is broader than source	false	MAPPED
+315594003	îïíīįì		Mycologist (occupation)	TARGET_BROADER	Target is broader than source	false	MAPPED
+34014006	ôöòóœøōõő	44644008	Mycotoxin (substance)	TARGET_NARROWER	Target is narrower than source	false	MAPPED

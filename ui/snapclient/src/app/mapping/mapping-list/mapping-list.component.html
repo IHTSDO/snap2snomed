@@ -1,0 +1,66 @@
+<mat-drawer-container>
+  <mat-drawer class="mapping-add" mode="over" position="end" [(opened)]="opened">
+    <app-mapping-add (closed)="closeCreate()" [mapping]="newMapping" [mode]="mode"></app-mapping-add>
+  </mat-drawer>
+  <mat-toolbar>
+    <span class="space-fill"></span>
+    <button mat-raised-button color="accent" (click)="createMap()">{{'MAP.MAP_ADD' | translate}}</button>
+  </mat-toolbar>
+  <app-errormessage [error]="error"></app-errormessage>
+
+  <div class="container-scroll-list">
+    <ng-container *ngIf="projects.length > 0; else noResults">
+      <mat-paginator #paginator
+                     [length]="totalElements || 0"
+                     [pageIndex]="currentPage"
+                     [pageSize]="pageSize"
+                     [pageSizeOptions]="pageSizeOptions"
+                     (page)="pageChanged($event)"
+                     [showFirstLastButtons]="true">
+      </mat-paginator>
+      <mat-grid-list [cols]="1" rowHeight="200px" gutterSize="0">
+        <mat-grid-tile *ngFor="let project of projects;">
+          <mat-card class="project-card">
+            <mat-card-content>
+              <div class="card-column-flex col-main">
+                <h2 class="one-line-ellipse">{{project.title}}</h2>
+                <small><i>{{'MAP.LAST_UPDATED' | translate}}: {{selectedMapping[project.id]?.modified | lastupdated}}</i></small>
+                <p class="description">{{project.description}}</p>
+                <app-project-badges [project]="project"></app-project-badges>
+              </div>
+              <div class="card-column-flex col-side">
+                <mat-form-field>
+                  <mat-label>Version</mat-label>
+                  <mat-select [(value)]="selectedMapping[project.id]">
+                    <mat-option *ngFor="let m of project.maps" [value]="m">
+                      {{m.mapVersion}}
+                    </mat-option>
+                  </mat-select>
+                </mat-form-field>
+                <div class="column-fill"></div>
+                <div class="button-row">
+                  <button mat-stroked-button color="primary"
+                          [disabled]="!isOwner(project)" (click)="newVersion(project)">{{'MAP.NEW_VERSION' | translate}}</button>
+                  <span class="space-fill">&nbsp;</span>
+                  <button mat-stroked-button color="primary"
+                          [disabled]="!hasProjectRole(project)" (click)="viewMapping(project)">{{'FORM.VIEW' | translate}}</button>
+                </div>
+              </div>
+            </mat-card-content>
+          </mat-card>
+        </mat-grid-tile>
+      </mat-grid-list>
+    </ng-container>
+    <ng-template #noResults>
+      <div class="project-card">
+        <mat-card>
+          <mat-card-header>
+            <mat-card-title>
+              <mat-icon>info</mat-icon>
+              {{'MAP.NO_MAPS_FOUND' | translate}}</mat-card-title>
+          </mat-card-header>
+        </mat-card>
+      </div>
+    </ng-template>
+  </div>
+</mat-drawer-container>

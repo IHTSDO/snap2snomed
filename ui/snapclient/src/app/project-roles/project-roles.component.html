@@ -1,0 +1,56 @@
+<div class="mat-elevation-z1">
+  <mat-table id="project-role-table" mat-table [dataSource]="members"
+             matSort class="field-full-width" matSortActive="project_role" matSortDirection="asc">
+
+    <ng-container matColumnDef="username">
+      <mat-header-cell mat-header-cell *matHeaderCellDef mat-sort-header> Name
+      </mat-header-cell>
+      <mat-cell mat-cell *matCellDef="let element">
+        <app-user-chip [user]="element.user"></app-user-chip>
+        <span class="name-display">{{element.username}}</span></mat-cell>
+    </ng-container>
+
+    <ng-container matColumnDef="project_role">
+      <mat-header-cell mat-header-cell *matHeaderCellDef mat-sort-header> Role
+      </mat-header-cell>
+      <mat-cell mat-cell *matCellDef="let element">
+        <mat-select [id]="element.user.id.toString()" [(ngModel)]="element.project_role"
+                    (selectionChange)="onRoleChange($event)" [disabled]="readonly">
+          <mat-option *ngFor="let role of projectRoles" [value]="role">
+            {{'ROLE.' + role | translate}}&nbsp;
+          </mat-option>
+        </mat-select>
+      </mat-cell>
+    </ng-container>
+
+    <ng-container matColumnDef="filter_name">
+      <mat-header-cell *matHeaderCellDef [attr.colspan]="1">
+        <mat-form-field class="filterclass" appearance="outline">
+          <input matInput autocapitalize="off" autocomplete="false" list="no_name"
+                 [(ngModel)]="filterValues.username" [formControl]="usernameFilterControl">
+          <datalist id="no_name"></datalist>
+        </mat-form-field>
+      </mat-header-cell>
+    </ng-container>
+
+    <ng-container matColumnDef="filter_role">
+      <mat-header-cell *matHeaderCellDef [attr.colspan]="1">
+        <mat-form-field class="filterclass" appearance="outline">
+          <mat-select [(ngModel)]="filterValues.project_role" (selectionChange)="applyFilter()"
+                      multiple>
+            <mat-option [id]="role.toString()" *ngFor="let role of projectRoles" [value]="role">
+              {{'ROLE.' + role | translate}}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+      </mat-header-cell>
+    </ng-container>
+
+    <mat-header-row
+      *matHeaderRowDef="displayedColumns; sticky: true"></mat-header-row>
+    <mat-header-row
+      *matHeaderRowDef="displayedFilterColumns; sticky: true"></mat-header-row>
+    <mat-row *matRowDef="let row; columns: displayedColumns; let entry"
+             [ngClass]="{ 'notInProject': entry.project_role == 'NONE' }"></mat-row>
+  </mat-table>
+</div>

@@ -1,0 +1,41 @@
+
+.search-results {
+  overflow-y: auto;
+  max-height: 230px;
+}
+
+#search-input ::ng-deep .mat-form-field-wrapper {
+  padding-bottom: 0 !important;
+}
+
+mat-card-header {
+  display: flex;
+  justify-content: space-between;
+}
+
+.search-footer {
+  padding: 6px;
+  margin: 0 10px;
+  font-size: 0.9em;
+}
+
+.field-full-width-no-margin {
+  width: 100%;
+}
+
+.search-field {
+  margin-bottom: 0;
+  margin-top: 0;
+}
+
+button {
+  color: rgba(0,0,0,.54);
+}
+
+@media only screen and (max-width: 1640px) {
+  .container-table-search {
+    float: left;
+    padding: 0 0 20px 0;
+  }
+}
+

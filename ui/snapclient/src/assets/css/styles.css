@@ -1,0 +1,363 @@
+@import 'https://fonts.googleapis.com/icon?family=Material+Icons';
+
+html {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  margin: 0 1vw;
+  padding: 0;
+  font-family: Montserrat, sans-serif !important;
+  font-weight: normal;
+}
+
+/*** Header ***/
+header {
+  height: 70px;
+  background-color: #434a55;
+  color: #ffffff;
+}
+
+/*** Content ***/
+.main {
+  width: 100% !important;
+  display: block;
+}
+
+.alert {
+  min-width: 150px;
+  padding: 8px;
+  margin-bottom: 20px;
+  border-radius: 3px;
+  color: #004085;
+  background-color: #cce5ff;
+  border: 1px solid #b8daff;
+}
+
+.alert-success {
+  color: #155724;
+  background-color: #d4edda;
+  border-color: #c3e6cb;
+}
+
+.alert-warning {
+  color: #856404;
+  background-color: #fff3cd;
+  border-color: #ffeeba;
+}
+
+.alert-danger {
+  color: #721c24;
+  background-color: #f8d7da;
+  border-color: #f5c6cb;
+}
+
+.close-alert {
+  -webkit-appearance: none;
+  position: relative;
+  float: right;
+  padding: 0;
+  border: 0;
+  cursor: pointer;
+  color: inherit;
+  background: 0 0;
+  font-size: 21px;
+  line-height: 1;
+  font-weight: bold;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, .7);
+  filter: alpha(opacity=40);
+  opacity: .4;
+}
+
+.close-alert:hover {
+  filter: alpha(opacity=70);
+  opacity: .7;
+}
+
+/*** Form fields ***/
+.field-full-width {
+  width: 100%;
+  margin: 10px 0 5px 0;
+}
+
+.field-withbutton-width {
+  width: 80%;
+  margin: 10px 0;
+}
+
+/*** Menu ***/
+.user-menu-button {
+  color: white;
+  background-color: #434a55;
+}
+
+.user-menu {
+  padding: 0 10px !important;
+}
+
+.space-fill {
+  -webkit-flex: 1; /* Safari 6.1+ */
+  -ms-flex: 1; /* IE 10 */
+  flex: 1 1 auto;
+}
+
+.pull-right {
+  float: right;
+}
+
+.mat-toolbar {
+  background-color: white;
+}
+
+.mat-card-actions {
+  margin-top: 12px !important;
+  margin-left: 16px !important;
+  margin-bottom: 0px !important;
+}
+
+.mat-paginator-sticky {
+  bottom: 0px;
+  position: sticky;
+  z-index: 10;
+}
+
+/** Top panel settings */
+.one-line-ellipse {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.two-line-ellipse {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.three-line-ellipse {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.card-column-flex {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-content: flex-start;
+}
+
+.col-left {
+  width: 65%;
+  padding-left: 10px;
+  margin-top: -10px;
+}
+
+.col-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: space-between;
+  max-width: 20%;
+  min-width: 200px;
+}
+
+.col-2-left {
+  width: 50%;
+  float: left;
+}
+
+.col-2-right {
+  width: 49%;
+  float: right;
+  display: flex;
+  flex-direction: column;
+}
+
+.details-card {
+  height: 120px;
+  margin: 10px;
+}
+
+.details-card h2 {
+  margin-bottom: 2px;
+  margin-top: 5px;
+}
+
+.details-card .row {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+}
+
+.review-actions {
+  width: 120px;
+  display: inline-flex;
+}
+
+.mat-drawer-container {
+  background-color: transparent;
+  margin: 0;
+  padding: 0;
+}
+
+/*** Footer ***/
+footer {
+  clear: both;
+  height: 30px;
+  width: 100%;
+  position: sticky;
+  margin-top: 20px;
+  display: flex;
+  flex-direction: row;
+  align-content: flex-start;
+  justify-content: space-evenly;
+  flex-wrap: nowrap;
+  z-index: 100;
+}
+
+.footer-link {
+  padding: 0 20px 0 20px;
+  color: darkgray;
+  font-size: 0.8em;
+}
+
+@media only screen and (max-width: 1640px) {
+  footer {
+    /*float: left;*/
+  }
+}
+
+
+/*** Backend error message ***/
+.backenderror {
+  text-align: center;
+  padding-top: 15px;
+}
+
+.backenderror div {
+  margin: 15px auto;
+  text-align: left;
+  max-width: 560px;
+}
+
+.backenderror button {
+  margin-left: 20px;
+  position: relative;
+  display: inline-block;
+  box-sizing: border-box;
+  border: none;
+  border-radius: 4px;
+  padding: 0 16px;
+  min-width: 64px;
+  height: 36px;
+  vertical-align: middle;
+  text-align: center;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  color: rgb(var(--pure-material-onprimary-rgb, 255, 255, 255));
+  background-color: rgb(var(--pure-material-primary-rgb, 33, 150, 243));
+  box-shadow: 0 3px 1px -2px rgba(0, 0, 0, 0.2), 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12);
+  font-family: var(--pure-material-font, "Roboto", "Segoe UI", BlinkMacSystemFont, system-ui, -apple-system);
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 36px;
+  overflow: hidden;
+  outline: none;
+  cursor: pointer;
+  transition: box-shadow 0.2s;
+}
+
+/* Config load error styling */
+.backenderror button:hover,
+.backenderror button:focus {
+    box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.2), 0 4px 5px 0 rgba(0, 0, 0, 0.14), 0 1px 10px 0 rgba(0, 0, 0, 0.12);
+    color: #e0e0e0;
+}
+
+.backenderror button:hover::before {
+  opacity: 0.08;
+}
+
+.backenderror button:focus::before {
+  opacity: 0.24;
+}
+
+.backenderror button:focus::before {
+  opacity: 0.3;
+}
+
+.backenderror button:active {
+  box-shadow: 0 5px 5px -3px rgba(0, 0, 0, 0.2), 0 8px 10px 1px rgba(0, 0, 0, 0.14), 0 3px 14px 2px rgba(0, 0, 0, 0.12);
+}
+
+.backenderror button:active::after {
+  opacity: 0.32;
+  transform: translate(-50%, -50%) scale(0);
+  transition: transform 0s;
+}
+
+.backenderror button::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  border-radius: 50%;
+  padding: 50%;
+  width: 32px; /* Safari */
+  height: 32px; /* Safari */
+  background-color: rgb(var(--pure-material-onprimary-rgb, 255, 255, 255));
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(1);
+  transition: opacity 1s, transform 0.5s;
+}
+
+.backenderror h2 span {
+  text-align: left;
+  vertical-align: middle;
+}
+
+.backenderror h2 .material-icons {
+  font-size: 1.5em;
+  margin-left: 15px;
+}
+
+/* Error notification styling */
+.backenderror-snackbar {
+  color: #721c24;
+  background-color: #f8d7da;
+  border-color: #f5c6cb;
+}
+
+.backenderror-snackbar .mat-simple-snackbar-action span:before {
+    content: "\e5c9";
+    font-family: "Material Icons";
+    font-size: 1.5em;
+}
+
+.mat-snack-bar-container {
+  background-color: #ffffff !important;
+}
+
+flag {
+  vertical-align: middle;
+}
+
+.selected-row {
+  background-color: aliceblue;
+}
+
+.mat-tooltip {
+  font-size: 0.8em;
+}
+
+/** reduce font-size in tables **/
+.mat-cell td {
+  font-size: smaller;
+}
+

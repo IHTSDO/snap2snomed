@@ -1,0 +1,36 @@
+
+.item-list {
+  border-top: 1px solid #00000010;
+}
+
+.highlight {
+  background-color: deepskyblue !important;
+}
+
+.strike {
+  text-decoration: line-through;
+}
+    
+.mat-table {
+  margin-top: 0;
+  display: table;
+}
+  
+.mat-row {
+  height: auto;
+}
+.mat-row:hover:not(.highlight) {
+  background-color: #dcf1fc !important;
+}
+.mat-row:nth-child(even){
+  background-color: #00000010;
+}
+  
+.item-list .mat-cell {
+  padding: 3px 6px;
+}
+  
+.semantic-tag {
+  text-align: right;
+}
+  

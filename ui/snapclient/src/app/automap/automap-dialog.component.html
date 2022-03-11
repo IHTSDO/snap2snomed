@@ -1,0 +1,21 @@
+<h1 mat-dialog-title>{{data.title}}</h1>
+<div mat-dialog-content>
+  <p *ngIf="data.error; else noerror" class="text-danger">{{data.error}}</p>
+  <ng-template #noerror>
+    <p>{{data.message}}</p>
+    <mat-progress-bar class="automap-progress" mode="determinate"
+                      (animationEnd)="complete($event)"
+                      [value]="data.automapPercent | async"></mat-progress-bar>
+    <div class="mat-progress-text"> {{rounded(data.automapPercent | async)}}%</div>
+  </ng-template>
+</div>
+<div mat-dialog-actions class="pull-right">
+  <button mat-raised-button color="any"
+          [disabled]="processing"
+          (click)="dialogRef.close(true)">{{data.button}}</button>
+  <button mat-raised-button color="primary"
+          [disabled]="!processing"
+          (click)="dialogRef.close(false)">{{data.cancel}}</button>
+</div>
+
+

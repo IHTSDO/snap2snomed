@@ -1,0 +1,85 @@
+
+.container-scroll-list {
+  overflow-y: auto;
+  margin: 10px;
+  height: calc(100vh - 249px);
+}
+
+.mapping-add {
+  background-color: #e6e6e6;
+}
+
+h2 {
+  margin: 2px 0 5px 0;
+  color: #434a55;
+}
+
+small {
+  color: #434a55;
+}
+
+.project-card {
+  width: calc(100% - 5vw);
+}
+
+.project-card:hover {
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+  transform: scale(1.01);
+}
+
+.card-column-flex {
+  float: left;
+  margin: 0 5px;
+  height: 100%;
+}
+
+.col-main {
+  width: calc(80% - 2em);
+}
+
+.col-side {
+  width: 20%;
+  align-items: flex-end;
+}
+
+.button-row {
+  display: flex;
+  align-items: flex-end;
+  width: 200px;
+}
+
+.description {
+  font-size: 0.9em;
+  color: #434a55;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+}
+
+.column-fill {
+  min-height: 26px;
+}
+
+@media only screen and (max-width: 700px) {
+  .mat-grid-tile {
+    height: 300px;
+  }
+
+  .project-card {
+    height: auto;
+  }
+
+  .col-left, .col-right {
+    width: 100%;
+    float: left;
+  }
+}
+
+@media only screen and (max-height: 920px) {
+  .container-scroll-list {
+    height: calc(99vh - 249px);
+  }
+}
+

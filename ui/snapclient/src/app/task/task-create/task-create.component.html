@@ -1,0 +1,76 @@
+<div *ngIf="data">
+  <mat-card-header>
+    <mat-card-title>{{'TASK.CONFLICTS_TITLE' | translate }}</mat-card-title>
+  </mat-card-header>
+  <mat-card>
+    <div class="conflictmessage" *ngIf="existingConflicts > 0">
+      <mat-chip>{{existingConflicts}}</mat-chip>
+      {{ 'TASK.EXISTING_TASK' | translate : {taskType: data.task?.type} }}
+      <div class="assign-select" *ngIf="data.isOwner">
+        <mat-slide-toggle class="slide"
+                          matTooltip="{{ 'TASK.REASSIGN_TOOLTIP' | translate : {taskType: data.task?.type} }}"
+                          matTooltipPosition="above" [(ngModel)]="data.task.reassignAlreadyAssignedRows">
+          {{ 'TASK.REASSIGN' | translate }}</mat-slide-toggle>
+      </div>
+    </div>
+    <div class="conflictmessage" *ngIf="roleConflicts > 0">
+      <mat-chip>{{roleConflicts}}</mat-chip>
+      {{ 'TASK.ROLE_CONFLICT_TASK' | translate : {oppositeType: getTaskOppositeType()} }}
+      <div class="assign-select" *ngIf="data.isOwner">
+        <mat-slide-toggle class="slide" matTooltip="{{ 'TASK.ALLOW_SAME_AUTHOR_REVIEWER_TOOLTIP' | translate }}"
+                          matTooltipPosition="above"
+                          [(ngModel)]="data.task.allowAssigneeToBeAuthorAndReviewer">
+          {{ 'TASK.ALLOW_SAME_AUTHOR_REVIEWER' | translate }}</mat-slide-toggle>
+      </div>
+    </div>
+    <p *ngIf="existingAndRoleConflicts > 0" class="conflict-note">
+      {{'TASK.BOTH_ROW_CONFLICT_TYPES_EXIST' | translate : {count: existingAndRoleConflicts} }}
+    </p>
+  </mat-card>
+  <mat-card-actions class="matcardactions">
+    <div class="matcardactions-left" *ngIf="data.errorMessage">
+      <button *ngIf="data.errorMessage.indexSpecificationWithAllConflictsRemoved
+        && data.errorMessage.indexSpecificationWithAllConflictsRemoved.count > 0
+        && !data.task.allowAssigneeToBeAuthorAndReviewer
+        && !data.task.reassignAlreadyAssignedRows" mat-raised-button color="primary" type="cancel"
+              (click)="onCreateAnyway()">
+        {{ 'TASK.CREATE_TASK_ANYWAY' | translate : {
+        total: calculateRowCountToCreate(),
+        original: data.errorMessage.originalIndexSpecification.count,
+        skipped: calculateSkippedCount()
+      }
+        }}</button>
+      <button
+        *ngIf="calculateRowCountToCreate() > 0 && (data.task.allowAssigneeToBeAuthorAndReviewer || data.task.reassignAlreadyAssignedRows)"
+        mat-raised-button color="primary" type="cancel"
+        (click)="onCreateWithOverride()">
+        {{ 'TASK.CREATE_TASK_OVERRIDE' | translate : {
+        total: calculateRowCountToCreate(),
+        original: data.errorMessage.originalIndexSpecification.count,
+        skipped: calculateSkippedCount(),
+        overridden: calculateOverriddenCount()
+      }
+        }}
+      </button>
+      <p *ngIf="data.errorMessage.indexSpecificationWithAllConflictsRemoved
+        && data.errorMessage.indexSpecificationWithAllConflictsRemoved.count == 0
+        && !data.task.allowAssigneeToBeAuthorAndReviewer
+        && !data.task.reassignAlreadyAssignedRows">
+        {{(data.isOwner ? 'TASK.NO_ROWS_CAN_BE_ASSIGNED_OWNER' : 'TASK.NO_ROWS_CAN_BE_ASSIGNED')
+        | translate : {originalCount: data.errorMessage.originalIndexSpecification.count}
+        }}
+      </p>
+      <p
+        *ngIf="calculateRowCountToCreate() == 0 && (data.task.allowAssigneeToBeAuthorAndReviewer || data.task.reassignAlreadyAssignedRows)">
+        {{'TASK.NO_ROWS_CAN_BE_ASSIGNED_DESPITE_OVERRIDES' | translate : {
+        overridden: calculateOverriddenCount(),
+        originalCount: data.errorMessage.originalIndexSpecification.count
+      } }}
+      </p>
+    </div>
+    <div class="matcardactions-right">
+      <button mat-raised-button color="default" type="cancel"
+              (click)="onCancel(false)">{{ 'FORM.CANCEL' | translate }}</button>
+    </div>
+  </mat-card-actions>
+</div>

@@ -1,0 +1,90 @@
+.banner__row {
+  display: flex;
+  flex-direction: row;
+  height: 90vh;
+}
+
+.banner__container {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  width: 60%;
+  position: relative;
+  z-index: 3;
+  min-height: 570px;
+
+}
+
+.banner__logo {
+  background-color: white;
+}
+
+.banner__logo img {
+  max-width: 400px;
+}
+
+.banner__title {
+  margin: 2em 5em;
+}
+
+.banner__title img {
+  max-width: 350px;
+}
+
+.banner__summary {
+  padding: 0 2em 0 2em;
+}
+
+.banner__side {
+  width: 40%;
+  min-width: 550px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-around;
+  color: #ffffff;
+  background-color: #434a55;
+}
+
+.banner__side a {
+  color: #ffffff;
+}
+
+.banner__login {
+  margin: 10% 30%;
+}
+
+.banner__login button {
+  height: 70px;
+  width: 200px;
+  font-size: 1.2em;
+  margin-bottom: 10vh;
+}
+
+.login__error {
+  color: salmon;
+  padding: 20px;
+  margin-top: 180px;
+}
+
+.container__notice {
+  margin: 0 20%;
+  text-align: center;
+  font-size: 14px;
+}
+
+.container__notice a {
+  color: salmon;
+  padding: 20px;
+}
+
+@media only screen and (max-width: 1240px) {
+  .banner__row {
+    flex-direction: column;
+  }
+  .banner__container, .banner__side {
+    width: 100%;
+    height: fit-content;
+    margin: 20px 0;
+  }
+}

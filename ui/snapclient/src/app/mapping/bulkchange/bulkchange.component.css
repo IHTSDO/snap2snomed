@@ -1,0 +1,56 @@
+.setwidth {
+  width: 450px;
+  height: 100%;
+  overflow: unset;
+}
+
+.mat-icon {
+  margin-right: 10px;
+}
+
+.box {
+  display: flex;
+  align-items: center;
+}
+
+.spaced {
+  justify-content: space-between;
+}
+
+.mat-divider {
+  margin-top: 15px;
+  margin-bottom: 15px;
+}
+
+.mat-checkbox {
+  margin-right: 5px;
+}
+
+.auto-margin-top {
+  margin-top: auto;
+}
+
+.mat-card {
+  margin-bottom: 15px;
+}
+
+.change-radio-group {
+  display: flex;
+  flex-direction: row;
+  margin: 15px 0;
+}
+
+.change-radio-button {
+  margin: 5px 10px;
+}
+
+.alert-warning, .alert-danger {
+  padding: 10px;
+  border-width: 1px;
+  border-style: solid;
+  border-radius: 3px;
+}
+
+.alert {
+  margin-top: 10px;
+}

@@ -1,0 +1,68 @@
+.member-badges {
+  margin-top: 0;
+}
+
+.total {
+  font-size: 0.8em;
+  margin-right: 10px;
+}
+
+.member-badges {
+  transition: box-shadow 280ms cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 20px;
+  height: 40px;
+  display:inline-flex;
+  align-items:center;
+  width: fit-content;
+  padding-right: 5px;
+  padding-left: 8px;
+  margin-right: 5px;
+}
+
+.member-badges .mat-chip-list {
+  display: inline-flex;
+  margin: 0px;
+}
+
+.member-label {
+  font-weight: bold;
+  margin-right: 8px;
+}
+
+.member-badges .mat-chip-list-wrapper {
+  display: inline-flex !important;
+  align-items: flex-start !important;
+  justify-content: space-between !important;
+}
+
+.member-badges .mat-standard-chip {
+  padding: 10px;
+}
+
+.member-badges-wrap {
+  margin-top: 8px;
+  height: 40px;
+  margin-left: 10px;
+}
+
+.user-container {
+  max-width: 95px;
+  white-space: nowrap;
+  overflow: hidden;
+  padding: 5px 5px 5px 5px;
+  display: inline;
+  display: flex;
+  text-align: center;
+}
+
+.mat-badge-content {
+  background-color: #ff4081 ;
+}
+
+.mat-badge-medium.mat-badge-overlap.mat-badge-after .mat-badge-content {
+  right: -5px;
+}
+
+.mat-badge-medium.mat-badge-above .mat-badge-content {
+  top: -10px;
+}

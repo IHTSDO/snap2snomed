@@ -1,0 +1,35 @@
+.container {
+  width: 33vw;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+}
+
+.automap-progress {
+  flex: 1;
+  margin-right: 10px;
+  height: 35px;
+}
+
+.mat-dialog-title{
+  margin: 0;
+}
+
+.mat-dialog-content {
+  max-height: 80vh !important;
+  margin: 0;
+}
+
+.mat-progress-bar {
+  height: 20px;
+  border-radius: 10px;
+}
+
+.mat-progress-text {
+  position: absolute;
+  padding: 5px;
+  color: white;
+  margin-top: -23px;
+  font-size: 0.8em;
+}

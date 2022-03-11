@@ -1,0 +1,41 @@
+<div class="taskcard" #taskcard *ngIf="task">
+  <div class="task-card">
+    <mat-card (click)="taskMapping()" [ngClass]="isAssigned(task) ? 'available' : 'not-available'">
+      <app-errormessage #errorMessage [error]="error" (click)="$event.stopPropagation()"></app-errormessage>
+      <mat-card-header>
+        <mat-card-title>
+          <app-user-chip [user]="task.assignee"></app-user-chip>
+          <div class="description">{{task.description}}</div>
+        </mat-card-title>
+        <mat-card-title>
+          <mat-progress-bar mode="determinate" [value]="percentComplete"></mat-progress-bar>
+          <div class="mat-progress-text"> {{rounded(percentComplete)}}% </div>
+        </mat-card-title>
+      </mat-card-header>
+      <mat-divider></mat-divider>
+      <mat-card-content>
+        <small>
+          <mat-icon class="tab-icon" *ngIf="task.type == 'AUTHOR'">edit</mat-icon>
+          <mat-icon class="tab-icon" *ngIf="task.type == 'REVIEW'">checklist</mat-icon>
+          <span class="task-type">{{task.type || '' | translate}}</span>
+        </small>
+        <span class="space-fill"></span>
+        <span class="two-line-ellipse">{{'TASK.ROWS_LABEL' | translate}} {{task.sourceRowSpecification}}</span>
+        <span class="space-fill"></span>
+        <button *ngIf="isAssigned(task)"
+                [disabled]="incompleteRows && incompleteRows.count != 0"
+                mat-icon-button color="primary"
+                #tooltip="matTooltip" matTooltip="{{'TASK.COMPLETE_TASK_TOOL_TIP' | translate}}"
+                (click)="onCompleteTask($event, 'COMPLETE')">
+          <mat-icon>check_circle_outline</mat-icon>
+        </button>
+        <button *ngIf="isOwner || isAdmin"
+                mat-icon-button color="warn"
+                #tooltip="matTooltip" matTooltip="{{'TASK.CANCEL_TASK_TOOL_TIP' | translate}}"
+                (click)="onCompleteTask($event, 'CANCEL')">
+          <mat-icon>remove_circle</mat-icon>
+        </button>
+      </mat-card-content>
+    </mat-card>
+  </div>
+</div>

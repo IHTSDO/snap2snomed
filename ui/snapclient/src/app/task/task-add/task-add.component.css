@@ -1,0 +1,55 @@
+.tasks-panel {
+  margin: 10px 10px 0 0;
+  color: #555555;
+}
+
+h3 {
+  color: #555555;
+}
+
+.mat-card-actions {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
+
+.field-full-width {
+  width: 100%;
+  margin-bottom: 10px;
+}
+
+.field-half-width {
+  width: 50%;
+}
+
+.task-radio {
+  margin-left: 10px
+}
+
+.task-radio-group {
+  display: flex;
+  flex-direction: row;
+  margin: 15px 0;
+}
+
+.task-radio-button {
+  margin: 5px 10px;
+}
+
+.text-danger {
+  color: darkred;
+}
+
+.selected-rows {
+  padding: 0 10px;
+  display: -webkit-box;
+  -webkit-line-clamp: 6;
+  -webkit-box-orient: vertical;
+  overflow-wrap: anywhere;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.userchip {
+  display: inline-flex;
+}

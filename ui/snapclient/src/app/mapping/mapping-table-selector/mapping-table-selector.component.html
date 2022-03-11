@@ -1,0 +1,25 @@
+<ng-container matColumnDef="id">
+  <th class="table-selector-cell" mat-header-cell *matHeaderCellDef>
+    <mat-checkbox [matBadge]="getSelectedRowsCount()"
+                  matBadgeSize="small"
+                  [matBadgeHidden]="selectedRows && selectedRows.length == 0"
+                  matTooltip="{{ isAllSelected ? ('SELECTION.CLEAR' | translate) : ('SELECTION.SELECT_ALL' | translate) }}"
+                  (change)="$event ? selectAllToggle($event) : null"
+                  [checked]="isAllSelected"
+                  [indeterminate]="isIndeterminateSelectAll()">
+    </mat-checkbox>
+    <mat-checkbox class="select-all-on-page" color="primary"
+                  matTooltip="{{ isPageSelected ? ('SELECTION.CLEAR_PAGE_SELECTION' | translate) : ('SELECTION.SELECT_ALL_ON_PAGE' | translate) }}"
+                  (change)="$event ? selectPageToggle($event) : null"
+                  [checked]="isPageSelected"
+                  [indeterminate]="(isAnySelected && !isPageSelected)">
+    </mat-checkbox>
+  </th>
+  <td class="table-selector-cell" mat-cell *matCellDef="let row; let idx = index">
+    <mat-checkbox [ngClass]="{'highlight-check': isSelectionFocus(idx)}"
+                  (click)="$event.stopPropagation(); shiftKeySelect($event, row);"
+                  (change)="$event ? toggleSelection($event, row, idx) : null"
+                  [checked]="checkSelected(row)">
+    </mat-checkbox>
+  </td>
+</ng-container>

@@ -1,0 +1,50 @@
+
+.tree-content {
+  min-height: 200px;
+  max-height: 370px;
+  overflow: auto;
+}
+
+.tree-view {
+  width: 100%;
+}
+
+.mat-tree-node, .mat-tree-leaf {
+  display: block ruby;
+  justify-content: start;
+  min-height: 38px !important;
+}
+
+.mat-icon {
+  color: cornflowerblue;
+}
+
+.tree-text {
+  padding: 4px 6px;
+  font-size: 0.8em;
+}
+
+.definition-status {
+  height: 24px;
+  line-height: 24px;
+  cursor: grab;
+  background-color: cornsilk;
+  border: solid 0.5px goldenrod;
+  border-radius: 6px;
+  padding: 0 4px;
+  margin-right: 4px;
+  text-align: center;
+  width: 10px;
+}
+
+/*
+ * This padding sets alignment of the nested nodes.
+ */
+.tree-view .mat-nested-tree-node div[role=group] {
+  padding-left: 30px;
+}
+
+.tree-label {
+  max-width: 20em;
+  display: inline-flex;
+}

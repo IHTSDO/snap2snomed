@@ -1,0 +1,27 @@
+version: '3.2'
+services:
+  clair:
+    container_name: snap2snomed_api
+    image: quay.io/aehrc/snap2snomed:latest
+    environment:
+      - snap2snomed.cors.allowedOriginPatterns=*
+      - snap2snomed.cors.allowedHeaders=*
+      - snap2snomed.cors.allowedMethods=OPTIONS,GET,POST,PUT,PATCH
+      - snap2snomed.cors.maxAge=3600
+      - snap2snomed.swagger.applicationVersion=0.1.0-SNAPSHOT
+      - snap2snomed.swagger.applicationDescription=API Backend for the Snap2Snomed mapping tool
+      - snap2snomed.swagger.applicationName=Snap2SNOMED API
+      - snap2snomed.swagger.termsOfService=http://swagger.io/terms/
+      - snap2snomed.swagger.licenseName=Apache 2.0
+      - snap2snomed.swagger.licenseUrl=https://www.apache.org/licenses/LICENSE-2.0
+      - snap2snomed.swagger.contactName=Australian e-Health Research Centre, CSIRO
+      - snap2snomed.swagger.contactEmail=ontoserver-support@csiro.au
+      - snap2snomed.swagger.contactUrl=https://aehrc.com/
+      - snap2snomed.security.authDomainUrl=https://snap-2-snomed-test.auth.ap-southeast-2.amazoncognito.com
+      - snap2snomed.defaultTerminologyServer.url=https://r4.ontoserver.csiro.au/fhir
+      - spring.datasource.url=jdbc:h2:/opt/snap2snomed/db
+      - snap2snomed.security.adminGroup=AdminGroup
+    ports:
+      - "8080:8080"
+    volumes:
+      - /opt/snap2snomed/db:/opt/snap2snomed/db

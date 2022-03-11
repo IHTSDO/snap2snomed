@@ -1,0 +1,35 @@
+<mat-dialog-content>
+  <div class="alert-danger warning-message" *ngIf="!createMode">
+    <mat-icon>warning</mat-icon>
+    {{ 'IMPORT.IMPORT_WARNING' | translate }}
+  </div>
+  <div class="alert-warning warning-message">
+    <mat-icon>info</mat-icon>
+    <div [innerHtml]="'IMPORT.IMPORT_INFO' | translate" class="infotext"></div>
+  </div> 
+  <div class="field-full-width source-file mat-elevation-z2">
+    <div class="file">
+      <label>{{ 'SOURCE.FILE' | translate }}</label>
+      <button id="fileUploadButton" mat-button mat-raised-button type="button" (click)="fileUpload.click()">{{
+        'FORM.FILE' | translate }}</button>
+      <input matInput id="fileUploadName" type="text" readonly [(ngModel)]="file_name" [ngModelOptions]="ngModelOptions"
+        required />
+      <input hidden type="file" class="file-upload" id="fileUpload" name="fileUpload" accept="{{fileaccept}}"
+        #fileUpload (change)="onFileSelected($event)" />
+      <p><small>{{fileUploadInstructions}}</small></p>
+    </div>
+    <div class="delimiter-group">
+      <mat-form-field class="field-one-character">
+        <mat-label>{{ 'SOURCE.DELIMITERTEXT' | translate }}</mat-label>
+        <input id="delimiter" name="delimiter" matInput [ngModel]="data.source.delimiter" #delimiterinput="ngModel"
+          [ngModelOptions]="ngModelOptions" [maxLength]="1" [disabled]="true">
+      </mat-form-field>
+    </div>
+  </div>
+  <mat-error>{{error.message}}</mat-error>
+  <mat-card-actions>
+    <button mat-raised-button color="primary" type="submit" [disabled]="disableSubmit()" (click)="onSubmit()">{{
+      createMode ? ('FORM.SELECT_FILE' | translate) : ('FORM.IMPORT_EXISTING_MAP' | translate) }}</button>
+    <button mat-raised-button color="default" type="cancel" (click)="onClose()">{{ 'FORM.CLOSE' | translate }}</button>
+  </mat-card-actions>
+</mat-dialog-content>

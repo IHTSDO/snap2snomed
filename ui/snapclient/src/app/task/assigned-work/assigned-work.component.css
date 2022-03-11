@@ -1,0 +1,32 @@
+.tab-icon {
+  margin-right: 8px;
+}
+
+.mat-card {
+  margin: 0 10px;
+}
+
+::ng-deep.sidebar-col {
+  max-width: 600px;
+}
+
+::ng-deep.mat-tab-header {
+  margin-bottom: 12px;
+}
+
+::ng-deep.mat-tab-label.mat-tab-label-active:not(.mat-tab-disabled),
+::ng-deep.mat-tab-label.mat-tab-label-active.cdk-keyboard-focused:not(.mat-tab-disabled) {
+  font-weight: 700;
+  color: #555555;
+  opacity: 1;
+}
+
+::ng-deep.mat-tab-label, ::ng-deep.mat-tab-label-active {
+  min-width: 120px !important;
+  padding: 5px !important;
+  margin: 3px !important;
+}
+
+h3 {
+  color: #555555;
+}

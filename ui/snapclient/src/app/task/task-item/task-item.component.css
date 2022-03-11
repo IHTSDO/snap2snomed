@@ -1,0 +1,17 @@
+.task-item {
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.task-item .mat-icon {
+  vertical-align: middle;
+}
+
+.task-item.AUTHOR {
+  color: #4b6b85;
+}
+.task-item.REVIEW {
+  color: #043c36;
+}

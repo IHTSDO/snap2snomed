@@ -1,0 +1,122 @@
+.summary-task-card {
+  width: 80%;
+}
+
+.summary-task-card .mat-card {
+  height: 35px;
+  background-color: #4b6b85;
+  color: white;
+}
+
+.summary-task-card .mat-card-content {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  height: 100%;
+}
+
+.summary-task-card hr, .task-details li {
+  white-space: break-spaces;
+}
+
+.summary-task-card .task-details {
+  list-style: none;
+  margin: 0;
+}
+
+.summary-task-card .mat-card-content small {
+  margin-left: 0;
+}
+
+.task-card {
+  padding: 8px 6px 8px 6px;
+}
+
+.task-card .mat-card {
+  box-shadow: rgba(0, 0, 0, 0.25) 0 0.0625em 0.0625em, rgba(0, 0, 0, 0.25) 0 0.125em 0.5em, rgba(255, 255, 255, 0.1) 0 0 0 1px inset;
+  color: #555555;
+
+}
+
+.task-card .mat-card-title {
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+}
+
+.task-card .mat-card-content {
+  display: flex;
+  align-items: center;
+  color: #888888;
+  margin-top: 6px;
+}
+
+.task-card .description {
+  margin-left: 5px;
+}
+
+::ng-deep .mat-card-header-text {
+  margin: 0;
+  width: 100%;
+}
+
+.mat-card .mat-card {
+  padding: 8px;
+}
+
+.mat-checkbox {
+  margin-right: 4px;
+}
+
+.mat-chip {
+  min-width: 45px;
+  margin-right: 5px;
+}
+
+.clickable:hover {
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+  transform: scale(1.02);
+  color: #004085;
+  cursor: pointer;
+}
+
+.not-available {
+  box-shadow: none;
+}
+
+.not-available .mat-card-title, .not-available .mat-card-content {
+  color: #b0b0b0;
+}
+
+small {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  white-space: nowrap;
+}
+
+.task-type {
+  margin-left: 4px;
+}
+
+.confirm-panel-button {
+  width: 100px;
+}
+
+.confirm-panel-buttons {
+  width: 100px;
+  margin-left: 5px
+}
+
+.mat-progress-bar {
+  height: 20px;
+  border-radius: 10px;
+}
+
+.mat-progress-text {
+  position: absolute;
+  padding: 5px;
+  color: white;
+  font-size: 0.8em;
+}

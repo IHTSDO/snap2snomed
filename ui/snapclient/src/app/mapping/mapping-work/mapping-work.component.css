@@ -1,0 +1,144 @@
+#table-view {
+  height: calc(100vh - 180px);
+  min-width: 940px;
+}
+
+.automap-progress {
+  margin-top: -4px;
+}
+
+.card-col {
+  margin: 0 10px;
+  max-height: 405px;
+  min-width: 20%;
+}
+
+.search-container {
+  max-height: 405px;
+  margin: 0 10px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.tree-view {
+  flex: 2;
+  max-height: 380px;
+  position: relative;
+}
+
+.view-toggle {
+  position: absolute;
+  top: 2px;
+  right: 28px;
+  z-index: 10;
+}
+
+.hierarchy-view {
+  height: 380px;
+  max-height: 380px;
+}
+
+.search-view {
+  flex: 1;
+}
+
+.properties-view {
+  flex: 1;
+}
+
+.details-drawer {
+  background-color: #e6e6e6;
+}
+
+.sources-list {
+  list-style: none;
+}
+
+.sources-list li {
+  height: 30px;
+}
+
+/* Table */
+#container-table-work {
+  padding: 10px 5px;
+  margin: 0 5px;
+}
+
+.container-table {
+  height: 42vh;
+  overflow: auto;
+}
+
+.container-table-search {
+  flex: 1;
+  max-width: 27%;
+}
+
+.col-right {
+  flex-direction: column-reverse;
+  min-width: unset;
+  max-width: 10%;
+}
+
+.col-left {
+  padding-left: 0px;
+  width: 75%
+}
+
+.row-actions {
+  display: flex;
+  align-items: center;
+}
+
+.row-actions button {
+  margin-left: 5px;
+}
+
+
+@media screen and (max-height: 850px) {
+  .container-table {
+    height: calc(56vh - 50px);
+  }
+}
+
+.table-actions {
+  display: flex;
+  align-items: flex-end;
+  background-color: white;
+  padding: 10px;
+}
+
+.table-actions-columns {
+  display: flex;
+  flex: 1;
+}
+
+.colleft {
+  align-items: flex-start;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.colright {
+  align-items: center;
+  justify-content: space-between;
+  max-width: 250px;
+}
+
+.mapping-details {
+  flex: 1;
+}
+
+.actions-card {
+  flex: 1;
+  min-width: 40%;
+  margin: 10px;
+  display: flex;
+  flex-wrap: nowrap;
+  justify-content: space-between;
+}
+
+.top-row {
+  display: flex;
+  justify-content: space-between;
+}

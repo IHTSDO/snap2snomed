@@ -1,0 +1,11 @@
+<h1 mat-dialog-title>{{data.title}}</h1>
+<p class="mat-card-subtitle" [class.fixed-size]="isFixedSize" *ngIf="data.subtitle">{{data.subtitle}}</p>
+<div class="confirm-dialog-content" mat-dialog-content>
+   <p>{{data.message}}</p>
+</div>
+<div mat-dialog-actions class="pull-right">
+  <button mat-raised-button color="any" (click)="dialogRef.close(true)"
+          cdkFocusInitial>{{data.button}}</button>
+  <button *ngIf="data.type === 'CONFIRM'" mat-raised-button color="primary"
+          (click)="dialogRef.close(false)">{{data.cancel}}</button>
+</div>

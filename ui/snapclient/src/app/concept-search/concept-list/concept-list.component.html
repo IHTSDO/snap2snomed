@@ -1,0 +1,24 @@
+<div class="item-list">
+  <mat-table [dataSource]="items" class="field-full-width mat-elevation-z0">
+    <!-- Label Column -->
+    <ng-container matColumnDef="label">
+      <th mat-header-cell *matHeaderCellDef>{{'SEARCH.DISPLAY' | translate}}</th>
+      <td mat-cell [ngClass]="{strike: element.inactive}" *matCellDef="let element">
+        <span> {{element.label}} </span>
+      </td>
+    </ng-container>
+
+    <!-- Tag Column -->
+    <ng-container matColumnDef="tag">
+      <th mat-header-cell *matHeaderCellDef>{{'SEARCH.TAG' | translate}}</th>
+      <td mat-cell class="semantic-tag" *matCellDef="let element"> {{element.tag}} </td>
+    </ng-container>
+
+    <tr (click)="click(idx)"
+        mat-row
+        *matRowDef="let row; columns: displayedColumns; let idx = index;"
+        [ngClass]="{highlight: idx === selected, strike: row.inactive}"
+        [appDraggable]="{data:row, zones:['conceptZone', 'relationshipZone']}"
+    ></tr>
+  </mat-table>
+</div>

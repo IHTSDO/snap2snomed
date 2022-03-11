@@ -1,0 +1,21 @@
+<table id="source-details-panel" class="mat-table" *ngIf="source">
+  <tr id="source-index-row">
+    <th>{{'TABLE.SOURCE_INDEX' | translate}}</th>
+    <td>{{source.index}}</td>
+  </tr>
+  <tr id="source-code-row">
+    <th>{{'TABLE.SOURCE_CODE' | translate}}</th>
+    <td>{{source.code}}</td>
+  </tr>
+  <tr id="source-code-display">
+    <th>{{'TABLE.SOURCE_DISPLAY' | translate}}</th>
+    <td>
+      <span class="source-label-box">
+        <span>{{source.display}}</span>
+        <button mat-mini-fab color="any" type="button" [cdkCopyToClipboard]="source.display">
+              <mat-icon>content_copy</mat-icon>
+            </button>
+    </span>
+    </td>
+  </tr>
+</table>

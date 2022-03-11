@@ -1,0 +1,32 @@
+<div>
+  <span *ngIf="project.owners && project.owners.length > 0" [matBadgeHidden]="project.owners && project.owners.length <= 3"
+        [matBadge]="'+' + (project.owners.length - 3)"
+        class="member-badges">
+    <span class="member-label">{{'MAP.OWNERS' | translate}}</span>
+    <span class="user-container">
+      <mat-chip-list *ngFor="let user of project.owners | slice:0:3">
+        <app-user-chip [user]="user"></app-user-chip>
+      </mat-chip-list>
+    </span>
+  </span>
+  <span *ngIf="project.members && project.members.length > 0" [matBadgeHidden]="project.members && project.members.length <= 3"
+        [matBadge]="'+' + (project.members.length - 3)"
+        class="member-badges">
+    <span class="member-label">{{'MAP.MEMBERS' | translate}}</span>
+    <span class="user-container">
+      <mat-chip-list *ngFor="let user of project.members | slice:0:3">
+        <app-user-chip [user]="user"></app-user-chip>
+      </mat-chip-list>
+    </span>
+  </span>
+  <span *ngIf="project.guests && project.guests.length > 0" [matBadgeHidden]="project.guests && project.guests.length <= 3"
+        [matBadge]="'+' + (project.guests.length - 3)"
+        class="member-badges">
+    <span class="member-label">{{'MAP.GUESTS' | translate}}</span>
+    <span class="user-container">
+      <mat-chip-list *ngFor="let user of project.guests | slice:0:3">
+        <app-user-chip [user]="user"></app-user-chip>
+      </mat-chip-list>
+    </span>
+  </span>
+</div>

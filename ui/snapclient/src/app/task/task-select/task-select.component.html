@@ -1,0 +1,15 @@
+<div id="task-select">
+  <app-errormessage [error]="error"></app-errormessage>
+  <mat-form-field>
+    <mat-label>{{selectedLabel}}</mat-label>
+    <mat-select id="task-select-dropdown" #taskSelect [(ngModel)]="selectedTask" (selectionChange)="changeTask($event)">
+      <mat-select-trigger *ngIf="selectedTask">
+        <app-task-item [task]="selectedTask"></app-task-item>
+      </mat-select-trigger>
+      <mat-option *ngFor="let maptask of myTasks" [value]="maptask">
+        <app-task-item [task]="maptask" [showRows]="showRows"></app-task-item>
+      </mat-option>
+    </mat-select>
+  </mat-form-field>
+</div>
+<p id="task-select-rows" class="one-line-ellipse" *ngIf="selectedTask"><label>{{'TASK.ROWS_LABEL' | translate}}</label>&nbsp;{{selectedTask.sourceRowSpecification}}&nbsp;</p>

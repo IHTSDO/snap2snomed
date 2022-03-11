@@ -1,0 +1,266 @@
+.mapping-edit {
+  background-color: #e6e6e6;
+}
+
+.mat-card {
+  margin: 10px;
+  flex-grow: 1;
+}
+
+.mat-cell {
+  padding-right: 10px;
+}
+
+p.description {
+  margin-right: 10px;
+  padding: 0;
+}
+
+.sources-list {
+  list-style: none;
+  margin-top: 0;
+}
+
+ul.sources-list li {
+  height: 30px;
+  white-space: nowrap;
+}
+
+.actions {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
+
+.actions-card {
+  min-width: 40%;
+}
+
+.actions-card .mat-card-content {
+  height: 100%;
+}
+
+.task-dropdown {
+  margin-bottom: 20px;
+}
+
+/* Table */
+.container-table {
+  height: calc(75vh - 100px);
+}
+
+.container-sidebar {
+  width: calc(25vw - 50px);
+  margin-right: -2px;
+}
+
+.compact-table {
+  width: 100% !important;
+}
+
+.compact-table .mat-row {
+  height: 30px;
+}
+
+.mat-header-cell {
+  padding: 0 5px 0 0;
+}
+
+.mat-slide-toggle {
+  margin-top: 1px;
+  margin-right: 10px;
+}
+
+/** columns **/
+.mat-column-filter-id,
+.mat-column-id {
+  width: 35px;
+  text-align: center;
+}
+
+.mat-column-filter-source-index,
+.mat-column-sourceIndex {
+  width: 35px;
+  text-align: center;
+
+}
+
+.mat-column-filter-author,
+.mat-column-assignedAuthor,
+.mat-column-filter-reviewer,
+.mat-column-assignedReviewer,
+.mat-column-filter-last-author-reviewer,
+.mat-column-lastAuthorReviewer {
+  width: 35px;
+  text-align: center;
+}
+
+.mat-column-filter-last-author-reviewer,
+.mat-column-lastAuthorReviewer {
+  text-align: left;
+}
+
+.mat-column-filter-source-code, .mat-column-filter-target-code,
+.mat-column-filter-source-code .mat-form-field, .mat-column-filter-target-code .mat-form-field,
+.mat-column-sourceCode, .mat-column-targetCode {
+  width: 100px;
+  max-width: 150px; /* wide enough for an 18 digit SNOMED code */
+  overflow-wrap: break-word;
+}
+
+.mat-column-filter-source-display, .mat-column-filter-target-display,
+.mat-column-sourceDisplay, .mat-column-targetDisplay {
+  min-width: 100px;
+}
+
+.mat-column-filter-source-display .mat-form-field-type-mat-input {
+  width: 95% !important;
+}
+
+.mat-column-filter-target-display .mat-form-field-type-mat-input {
+  width: 95% !important;
+}
+
+.mat-column-noMap {
+  width: 100px;
+  text-align: center;
+}
+
+::ng-deep .mat-column-filter-noMap .mat-form-field {
+  width: 100px;
+}
+
+::ng-deep .mat-column-filter-flagged .mat-form-field{
+  width: 60px;
+}
+
+::ng-deep .mat-column-filter-author .mat-form-field {
+  width: 60px;
+  text-align: center;
+}
+
+::ng-deep .mat-column-filter-reviewer .mat-form-field {
+  width: 60px;
+  text-align: center;
+}
+
+::ng-deep .mat-column-filter-last-author-reviewer .mat-form-field {
+  width: 60px;
+  text-align: center;
+}
+
+.mat-column-relationship, .mat-column-status {
+  width: 100px;
+  font-size: 0.8em;
+}
+
+::ng-deep .mat-column-filter-relationship .mat-form-field,
+::ng-deep .mat-column-filter-status .mat-form-field {
+  width: 100px;
+}
+
+.mat-standard-chip {
+  height: auto;
+}
+
+#table-mapping ::ng-deep .mat-form-field-wrapper {
+  padding-bottom: 0!important;
+}
+
+td.mat-cell {
+  padding: 0 5px;
+}
+::ng-deep .highlight-check .mat-checkbox-inner-container .mat-checkbox-persistent-ripple {
+  opacity: .1;
+  background-color: blueviolet !important;
+}
+
+.col-left {
+  width: 30%;
+}
+
+.col-middle {
+  flex: 1;
+}
+
+.col-right {
+  width: 20%;
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.bottom {
+  position:absolute;
+  bottom:0;
+}
+
+.project-badges {
+  margin-bottom: 15px;
+}
+
+@media screen and (max-height: 850px) {
+  .container-table {
+    height: calc(56vh - 50px);
+  }
+}
+
+.top-row {
+  display: flex;
+  justify-content: space-between;
+}
+
+.table-actions {
+  display: flex;
+  align-items: center;
+  margin-bottom: 0px;
+  justify-content: flex-end;
+  background-color: white;
+  padding: 10px;
+}
+
+.button-row {
+  display: flex;
+  align-items: flex-end;
+}
+
+.mapping-details {
+  flex: 1;
+}
+
+.actions-card {
+  flex: 1;
+  max-width: 50%;
+}
+
+
+/* med size viewport */
+@media screen and (max-width: 1480px) {
+  .col-right {
+    margin-left: 0;
+    margin-top: 0;
+  }
+}
+
+/* small size viewport */
+@media screen and (max-width: 1140px) {
+  .col-right {
+    align-items: flex-start;
+    margin-top: -25px;
+  }
+}
+
+/* very small size viewport */
+@media screen and (max-width: 780px) {
+  .col-left {
+    width: 100%;
+    padding: 0;
+  }
+
+  .col-right {
+    align-items: flex-start;
+    margin-top: -25px;
+  }
+}

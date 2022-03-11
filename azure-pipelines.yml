@@ -1,0 +1,110 @@
+name: snap2snomed-$(Date:yyyyMMdd)$(Rev:.r)_$(SourceBranchName)
+
+trigger:
+  branches:
+    include:
+    - '*'
+    
+pr: none
+
+pool:
+  vmImage: ubuntu-latest
+
+variables:
+  mavenCache: $(Pipeline.Workspace)/.m2/repository
+  mavenOptions: '-Dmaven.repo.local=$(mavenCache)'
+
+stages:
+  - stage: build
+    displayName: Build
+    jobs:
+      - job: build
+        timeoutInMinutes: 45
+        displayName: Build
+        steps:
+          - task: Cache@2
+            displayName: Cache Maven local repo
+            inputs:
+              key: 'maven | "$(Agent.OS)" | **/pom.xml'
+              restoreKeys: |
+                maven | "$(Agent.OS)"
+                maven
+              path: $(mavenCache)
+          - task: DownloadSecureFile@1
+            name: mavenSettings
+            displayName: 'Download Maven settings.xml'
+            inputs:
+              secureFile: 'agent-settings.xml'
+          - task: npmAuthenticate@0
+            inputs:
+              workingFile: ui/snapclient/.npmrc
+          - task: Maven@3
+            displayName: Build
+            inputs:
+              mavenPomFile: 'pom.xml'
+              options: '-B -s $(mavenSettings.secureFilePath) -Ddocker.registry.host=$(dockerRegistry) -Ddocker.repository=$(registryPath) -Djib.to.tags=$(Build.SourceBranchName),$(Build.BuildNumber)'
+              mavenFeedAuthenticate: true
+              mavenOptions: ' $(mavenOptions)'
+              javaHomeOption: 'JDKVersion'
+              jdkVersionOption: '1.11'
+              jdkArchitectureOption: 'x64'
+              publishJUnitResults: true
+              testResultsFiles: '**/*/TEST*-*.xml'
+              goals: 'clean verify -Pazure-devops -DskipUITests=$(skipUITests)'
+          - task: PublishCodeCoverageResults@1
+            displayName: Publish Code Coverage
+            inputs:
+              enabled: $(enableCodeCoverage)
+              codeCoverageTool: 'JaCoCo'
+              summaryFileLocation: '**/target/site/jacoco/jacoco.xml'
+              reportDirectory: '**/target/site/jacoco'
+              additionalCodeCoverageFiles: '**/target/jacoco.exec'
+          - script: |
+              export VERSION=`git rev-parse --short=7 HEAD` && \
+              yarn exec sentry-cli releases new $VERSION && \
+              yarn exec sentry-cli releases set-commits $VERSION -- --auto --ignore-missing && \
+              yarn exec sentry-cli releases files $VERSION upload-sourcemaps ../target/site
+            displayName: Notify Sentry of release
+            workingDirectory: $(System.DefaultWorkingDirectory)/ui/snapclient
+            env:
+              SENTRY_ORG: $(sentryOrg)
+              SENTRY_PROJECT: $(sentryProject)
+              SENTRY_AUTH_TOKEN: $(sentryAuthToken)
+          - task: Docker@2
+            condition: succeeded()
+            displayName: Build customised Dex Docker image
+            inputs:
+              command: buildAndPush
+              containerRegistry: $(serviceConnection)
+              repository: $(dexRegistryPath)
+              dockerFile: dex/snomed.Dockerfile
+              tags: |
+                $(Build.BuildNumber)
+          - task: Docker@2
+            condition: succeeded()
+            displayName: Push image
+            inputs:
+              containerRegistry: $(serviceConnection)
+              repository: $(registryPath)
+              command: push
+              tags: |
+                $(Build.SourceBranchName)
+          - task: Docker@2
+            condition: contains(variables['build.sourceBranch'], 'refs/heads/main')
+            displayName: Push image
+            inputs:
+              containerRegistry: $(serviceConnection)
+              repository: $(registryPath)
+              command: push
+              tags: |
+                $(Build.BuildNumber)
+          - task: PublishPipelineArtifact@1
+            inputs:
+              targetPath: '$(System.DefaultWorkingDirectory)/ui/target/site'
+              artifact: 'snap2snomed-ui'
+              publishLocation: 'pipeline'
+          - task: PublishPipelineArtifact@1
+            inputs:
+              targetPath: '$(System.DefaultWorkingDirectory)/terraform'
+              artifact: 'snap2snomed-terraform'
+              publishLocation: 'pipeline'

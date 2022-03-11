@@ -1,0 +1,245 @@
+<ng-template #snackBarTemplate>
+  <app-errormessage [error]="error" (closed)="dismiss()"></app-errormessage>
+</ng-template>
+<div>
+  <table id="table-mapping" #maptable mat-table matTableFilter class="compact-table full-width-table show-borders"
+       [exampleEntity]="filterEntity"
+       [filterType]="filterType"
+       [dataSource]="page.data" matSort fixedLayout="false">
+
+  <!-- ID Column -->
+  <app-mapping-table-selector
+      name="id"
+      [allSourceDetails]="allSourceDetails"
+      [page]="page">
+  </app-mapping-table-selector>
+  <!-- Source index Column -->
+  <ng-container matColumnDef="sourceIndex">
+    <th mat-header-cell *matHeaderCellDef mat-sort-header>{{'TABLE.SOURCE_INDEX' | translate}}</th>
+    <td mat-cell *matCellDef="let maprow">{{maprow.sourceIndex}}</td>
+  </ng-container>
+  <!-- Source code Column -->
+  <ng-container matColumnDef="sourceCode">
+    <th mat-header-cell *matHeaderCellDef mat-sort-header>{{'TABLE.SOURCE_CODE' | translate}}</th>
+    <td mat-cell *matCellDef="let maprow">{{maprow.sourceCode}}</td>
+  </ng-container>
+  <!-- Source display Column -->
+  <ng-container matColumnDef="sourceDisplay">
+    <th mat-header-cell *matHeaderCellDef mat-sort-header>{{'TABLE.SOURCE_DISPLAY' | translate}}</th>
+    <td mat-cell *matCellDef="let maprow">{{maprow.sourceDisplay}}</td>
+  </ng-container>
+  <!-- Relationship Column -->
+  <ng-container matColumnDef="relationship">
+    <th mat-header-cell *matHeaderCellDef mat-sort-header>{{'TABLE.RELATIONSHIP' | translate}}</th>
+    <td mat-cell *matCellDef="let maprow; let i = index"
+        #tooltip="matTooltip" matTooltip="{{explainRelationship(maprow.relationship)}}">
+      <mat-select [(ngModel)]="maprow.relationship" [value]="maprow.relationship"
+                  *ngIf="!maprow.noMap && maprow.targetCode"
+                  (selectionChange)="updateMapRowTarget(maprow, i)">
+        <mat-option *ngFor="let relationship of relationships" [value]="relationship"
+                    [disabled]="writeDisableUtils.isEditDisabled(this.task?.type, maprow.status)">
+          {{'RELATIONSHIP.' + relationship | translate}}
+        </mat-option>
+      </mat-select>
+  </ng-container>
+  <!-- Target code Column -->
+  <ng-container matColumnDef="targetCode">
+    <th mat-header-cell *matHeaderCellDef mat-sort-header>{{'TABLE.TARGET_CODE' | translate}}</th>
+    <td mat-cell *matCellDef="let maprow; let i = index" (click)="clickRow(i, maprow)">
+      <span *ngIf="!maprow.noMap">{{maprow.targetCode}}</span>
+    </td>
+  </ng-container>
+  <!-- Target display Column -->
+  <ng-container matColumnDef="targetDisplay">
+    <th mat-header-cell *matHeaderCellDef mat-sort-header>{{'TABLE.TARGET_DISPLAY' | translate}}</th>
+    <td mat-cell *matCellDef="let maprow; let i = index" (click)="clickRow(i, maprow)">
+      <span *ngIf="!maprow.noMap">{{maprow.targetDisplay}}</span>
+    </td>
+  </ng-container>
+  <!-- No Map Column -->
+  <ng-container matColumnDef="noMap">
+    <th mat-header-cell *matHeaderCellDef mat-sort-header>{{'TABLE.NO_MAP' | translate}}</th>
+    <td mat-cell *matCellDef="let maprow; let i = index">
+      &nbsp;&nbsp;
+      <mat-checkbox (change)="updateNoMapRow($event, i)" color="primary"
+                    [disabled]="writeDisableUtils.isEditDisabled(this.task?.type, maprow.status)"
+                    [value]="maprow.noMap" [(ngModel)]="maprow.noMap"></mat-checkbox>
+    </td>
+  </ng-container>
+  <!-- Status Column -->
+  <ng-container matColumnDef="status">
+    <th mat-header-cell *matHeaderCellDef mat-sort-header>{{'TABLE.STATUS' | translate}}</th>
+    <td mat-cell *matCellDef="let maprow; let i = index">
+      <mat-select [(ngModel)]="maprow.status" [disabled]="writeDisableUtils.isStatusSelectionDisabled(this.task?.type, maprow.status)"
+                  (selectionChange)="updateMapRow(maprow, i)">
+        <mat-option *ngFor="let status of getStatuses(maprow); let j = index" [value]="status"
+                    [disabled]="isStatusDisabled(maprow, status)">
+          {{'STATUS.' + status | translate}}
+        </mat-option>
+      </mat-select>
+    </td>
+  </ng-container>
+  <!-- Note Column -->
+  <ng-container matColumnDef="latestNote">
+    <th mat-header-cell *matHeaderCellDef mat-sort-header>{{'TABLE.NOTES' | translate}}</th>
+    <td mat-cell *matCellDef="let maprow; let i = index">
+      <button *ngIf="maprow.latestNote" mat-icon-button
+              #tooltip="matTooltip" matTooltip="{{maprow.latestNote | date: 'medium' }}"
+              (click)="detailsView(i)"
+      ><mat-icon>chat_bubble_outline</mat-icon></button>
+    </td>
+  </ng-container>
+  <!-- Flagged Column -->
+  <ng-container matColumnDef="flagged">
+    <th mat-header-cell *matHeaderCellDef mat-sort-header>{{'TABLE.FLAG' | translate}}</th>
+    <td mat-cell *matCellDef="let maprow">
+      <button mat-icon-button (click)="updateFlag(maprow)"
+              [ngClass]="['flag']" *ngIf="hasTarget(maprow)"
+              [disabled]="writeDisableUtils.isFlaggingDisabled(this.task?.type, maprow.status)"
+              #tooltip="matTooltip" matTooltip="{{'MAP.TARGET_FLAGGED' | translate}}"
+      >
+        <mat-icon *ngIf="maprow.flagged; else noflag" color="accent">flag</mat-icon>
+        <ng-template #noflag>
+          <mat-icon>outlined_flag</mat-icon>
+        </ng-template>
+      </button>
+    </td>
+  </ng-container>
+  <ng-container matColumnDef="actions">
+    <th mat-header-cell *matHeaderCellDef>{{'TABLE.ACTIONS' | translate}}</th>
+    <td mat-cell *matCellDef="let maprow; let i = index">
+      <button mat-icon-button #tooltip="matTooltip" matTooltip="{{'MAP.MAP_DETAILS' | translate}}"
+              (click)="detailsView(i)"
+      ><mat-icon>loupe</mat-icon></button>
+    </td>
+  </ng-container>
+
+  <!-- Filter Id -->
+  <ng-container matColumnDef="filter-id">
+    <th mat-header-cell *matHeaderCellDef [attr.colspan]="1"></th>
+  </ng-container>
+  <!-- Filter SourceIndex -->
+  <ng-container matColumnDef="filter-source-index">
+    <th mat-header-cell *matHeaderCellDef [attr.colspan]="1"></th>
+  </ng-container>
+  <!-- Filter SourceCode -->
+  <ng-container matColumnDef="filter-source-code">
+    <th mat-header-cell *matHeaderCellDef [attr.colspan]="1">
+      <mat-form-field appearance="outline">
+        <input matInput autocapitalize="off" autocomplete="false" list="no_source_code"
+               [(ngModel)]="filterEntity.sourceCode" [formControl]="sourceCodeFilterControl">
+        <datalist id="no_source_code"></datalist><!-- workaround for Edge ignoring autocomplete="false" -->
+        <button *ngIf="filterEntity.sourceCode" matSuffix mat-icon-button aria-label="Clear" (click)="filterEntity.sourceCode=''">
+          <mat-icon>cancel</mat-icon>
+        </button>
+      </mat-form-field>
+    </th>
+  </ng-container>
+  <!-- Filter SourceCode -->
+  <ng-container matColumnDef="filter-source-display">
+    <th mat-header-cell *matHeaderCellDef [attr.colspan]="1">
+      <mat-form-field appearance="outline">
+        <input matInput autocapitalize="off" autocomplete="false" list="no_source_display"
+               [(ngModel)]="filterEntity.sourceDisplay" [formControl]="sourceDisplayFilterControl">
+        <datalist id="no_source_display"></datalist><!-- workaround for Edge ignoring autocomplete="false" -->
+        <button *ngIf="filterEntity.sourceDisplay" matSuffix mat-icon-button aria-label="Clear" (click)="filterEntity.sourceDisplay=''">
+          <mat-icon>cancel</mat-icon>
+        </button>
+      </mat-form-field>
+    </th>
+  </ng-container>
+  <!-- Filter Relationship -->
+  <ng-container matColumnDef="filter-relationship">
+    <th mat-header-cell *matHeaderCellDef [attr.colspan]="1">
+      <mat-form-field appearance="outline">
+        <mat-select [(ngModel)]="filterEntity.relationship" (selectionChange)="filterUpdate()" multiple
+                    id="relationship" name="relationship" #relationship="ngModel">
+          <mat-option *ngFor="let rel of relationships"
+                      [value]="rel">{{'RELATIONSHIP.' + rel | translate}}</mat-option>
+        </mat-select>
+      </mat-form-field>
+    </th>
+  </ng-container>
+  <!-- Filter Target Code -->
+  <ng-container matColumnDef="filter-target-code">
+    <th mat-header-cell *matHeaderCellDef [attr.colspan]="1">
+      <mat-form-field appearance="outline">
+        <input matInput autocapitalize="off" autocomplete="false" list="no_target_code"
+               [(ngModel)]="filterEntity.targetCode" [formControl]="targetCodeFilterControl">
+        <datalist id="no_target_code"></datalist><!-- workaround for Edge ignoring autocomplete="false" -->
+        <button *ngIf="filterEntity.targetCode" matSuffix mat-icon-button aria-label="Clear" (click)="filterEntity.targetCode=''">
+          <mat-icon>cancel</mat-icon>
+        </button>
+      </mat-form-field>
+    </th>
+  </ng-container>
+  <!-- Filter Target Display -->
+  <ng-container matColumnDef="filter-target-display">
+    <th mat-header-cell *matHeaderCellDef [attr.colspan]="1">
+      <mat-form-field appearance="outline">
+        <input matInput autocapitalize="off" autocomplete="false" list="no_target_display"
+               [(ngModel)]="filterEntity.targetDisplay" [formControl]="targetDisplayFilterControl">
+        <datalist id="no_target_display"></datalist><!-- workaround for Edge ignoring autocomplete="false" -->
+        <button *ngIf="filterEntity.targetDisplay" matSuffix mat-icon-button aria-label="Clear" (click)="filterEntity.targetDisplay=''">
+          <mat-icon>cancel</mat-icon>
+        </button>
+      </mat-form-field>
+    </th>
+  </ng-container>
+  <!-- Filter NoMap -->
+  <ng-container matColumnDef="filter-noMap">
+    <th mat-header-cell *matHeaderCellDef [attr.colspan]="1">
+      <mat-form-field appearance="outline">
+        <mat-select [(ngModel)]="filterEntity.noMap" (selectionChange)="filterUpdate()"
+                    id="noMap" name="noMap" #noMap="ngModel">
+          <mat-option [value]="">---</mat-option>
+          <mat-option *ngFor="let opt of yesNoOptions"
+                      [value]="opt[1]">{{'NOMAP.' + opt[0] | translate}}</mat-option>
+        </mat-select>
+      </mat-form-field>
+    </th>
+  </ng-container>
+  <!-- Filter Status -->
+  <ng-container matColumnDef="filter-status">
+    <th mat-header-cell *matHeaderCellDef [attr.colspan]="1">
+      <mat-form-field appearance="outline">
+        <mat-select [(ngModel)]="filterEntity.status" (selectionChange)="filterUpdate()" multiple
+                    id="status" name="status" #status="ngModel">
+          <mat-option *ngFor="let rel of statuses" [value]="rel">{{'STATUS.' + rel | translate}}</mat-option>
+        </mat-select>
+      </mat-form-field>
+    </th>
+  </ng-container>
+  <!-- Filter Flagged -->
+  <ng-container matColumnDef="filter-flagged">
+    <th mat-header-cell *matHeaderCellDef [attr.colspan]="1">
+      <mat-form-field appearance="outline">
+        <mat-select [(ngModel)]="filterEntity.flagged" (selectionChange)="filterUpdate()"
+                    id="flagged" name="flagged" #flagged="ngModel">
+          <mat-option [value]="">---</mat-option>
+          <mat-option *ngFor="let opt of yesNoOptions"
+                      [value]="opt[1]">{{'NOMAP.' + opt[0] | translate}}</mat-option>
+        </mat-select>
+      </mat-form-field>
+    </th>
+  </ng-container>
+
+  <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
+  <tr mat-header-row *matHeaderRowDef="filteredColumns" [attr.hidden]="filterEnabled? null : true"></tr>
+
+  <tr mat-row *matRowDef="let row; columns: displayedColumns; let idx = index"
+      [appDroppable]="{zone: 'conceptZone'}"
+      [dropDisabled]="row.noMap || writeDisableUtils.isEditDisabled(this.task?.type, row.status)"
+      [class.clicked-row]="isClicked(idx)"
+      [class.selected-row]="mappingTableSelector?.checkSelected(row)"
+      (onDroppableComplete)="onDrop($event, idx)"></tr>
+
+  </table>
+</div>
+<mat-paginator #paginator class="mat-paginator-sticky"
+               [length]="page?.totalElements || 0"
+               [pageIndex]="page?.pageIndex"
+               [pageSize]="page?.size"
+               [showFirstLastButtons]="true"
+               [pageSizeOptions]="[10, 20, 50, 100, 250]">>
+</mat-paginator>

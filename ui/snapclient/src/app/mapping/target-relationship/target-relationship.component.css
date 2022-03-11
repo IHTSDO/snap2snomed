@@ -1,0 +1,77 @@
+.card-relationship {
+  /*min-height: 130px;*/
+  max-height: 570px;
+  overflow-y: auto;
+}
+
+.mat-card {
+  margin: 10px 0;
+}
+
+.mat-card-title {
+  margin-bottom: 0;
+  color: rgba(0,0,0,.54);
+}
+
+.mat-card-title span {
+  font-size: 0.7em;
+  margin-left: 20px;
+}
+
+.mat-option {
+  font-size: 1em;
+  line-height: 1;
+  white-space: break-spaces;
+  height: 100%;
+  padding: 2px 0;
+}
+
+.mat-option button {
+  height: 30px;
+  width: 30px;
+  box-shadow: none;
+}
+
+.mat-option .mat-icon {
+  height: 30px;
+  width: 30px;
+  line-height: 16px;
+
+}
+.row-target {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
+
+.mat-selection-list {
+  max-height: 500px;
+  overflow: auto;
+}
+
+.mat-selected {
+  background-color: white !important;
+}
+
+.cbNoMap {
+  margin-top: -45px;
+}
+
+.js-app-droppable--zone {
+  border-color: #85ca7f !important;
+  background-color: #ebffe8;
+}
+
+.selection-text {
+  margin-top: auto;
+  margin-bottom: auto;
+  flex: 2;
+}
+
+.review-actions button {
+  margin: 0 10px;
+}
+
+.flag {
+  color: rgba(0,0,0,0.45);
+}

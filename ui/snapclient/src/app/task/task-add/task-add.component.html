@@ -1,0 +1,75 @@
+<div class="tasks-panel">
+  <mat-card *ngIf="task && (isAdmin || isMember || isOwner)">
+    <form #taskForm="ngForm">
+      <mat-card-content>
+        <app-errormessage [error]="error" (closed)="clearError()"></app-errormessage>
+        <!-- Task Description -->
+        <mat-form-field class="field-full-width" hintLabel="{{'FORM.MAX_CHARS' | translate}} {{MAX_TASK_DESCRIPTION}}">
+          <mat-label>{{ 'TASK.DESCRIPTION' | translate }}</mat-label>
+          <input matInput id="description" name="description"
+                 [(ngModel)]="task.description" #name="ngModel"
+                 [ngModelOptions]="ngModelOptions"
+                 [maxLength]="MAX_TASK_DESCRIPTION" [pattern]="VALID_STRING_PATTERN">
+          <mat-hint align="end">{{name.value?.length || 0}}/{{MAX_TASK_DESCRIPTION}}</mat-hint>
+          <mat-error *ngIf="name.invalid">{{ 'TASK.DESCRIPTION_ERROR' | translate }}</mat-error>
+        </mat-form-field>
+        <br/>
+
+        <!-- Assign To -->
+        <mat-form-field class="field-full-width">
+          <mat-label>{{ 'TASK.ASSIGN_TO' | translate }}
+            <span *ngIf="isMember">({{ 'TASK.ONLY_PROJECT_OWNERS_ASSIGN_TO_OTHERS' | translate }})</span>
+          </mat-label>
+          <mat-select [disabled]="isMember" id="assignee"
+                      [compareWith]="compareUsers"
+                      [ngModelOptions]="ngModelOptions"
+                      [(ngModel)]="task.assignee" #name="ngModel" required>
+            <mat-select-trigger *ngFor="let member of members; let j = index">
+              <span *ngIf="members[j].id === task.assignee.id"><app-user-chip [user]="task.assignee"></app-user-chip>
+                {{task.assignee.givenName}} {{task.assignee.familyName}}</span>
+            </mat-select-trigger>
+            <mat-option *ngFor="let member of members" [value]="member">
+              <app-user-chip [user]="member"></app-user-chip>
+              {{member.givenName}} {{member.familyName}}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <!-- Assign As-->
+        <div class="task-radio">
+          <label id="assignAs-label">{{ 'TASK.ASSIGN_AS' | translate }}</label>
+          <mat-radio-group id="type" name="type" class="task-radio-group" aria-labelledby="assignAs-label"
+                           [(ngModel)]="task.type" #name="ngModel"
+                           [ngModelOptions]="ngModelOptions"
+                           (change)="updateDescription(name.dirty)" required>
+            <mat-radio-button class="task-radio-button" *ngFor="let type of type_options"
+                              [value]="type">{{ 'TASK.TYPE_' + type | translate }}</mat-radio-button>
+          </mat-radio-group>
+        </div>
+
+        <!-- Rows -->
+        <div class="task-radio" *ngIf="task.type">
+          <label id="assignRows-label">{{ 'TASK.ASSIGN_ROWS' | translate }}</label>
+          <mat-radio-group id="assignRows" name="assignRows" aria-labelledby="assignRows-label"
+                           class="task-radio-group" [value]="assignRows"
+                           (change)="setRowSelection($event, name.dirty)" required>
+            <mat-radio-button class="task-radio-button" *ngFor="let row of row_options" [value]="row"
+                              [disabled]="row === 'SELECTED' && mappingTableSelector?.selectedRows?.length === 0">
+              {{ 'TASK.ROWS_' + row | translate }}</mat-radio-button>
+          </mat-radio-group>
+
+          <!-- selected input -->
+          <p class="selected-rows" *ngIf="assignRows === 'SELECTED'">
+            <b>{{'TASK.ROWS_SELECTED' | translate}}:</b>&nbsp;{{task.sourceRowSpecification}}</p>
+        </div>
+      </mat-card-content>
+      <mat-card-actions>
+        <button mat-raised-button color="primary" type="submit"
+                [disabled]="disableSubmit(taskForm)"
+                (click)="onSubmit(taskForm, $event)">{{ 'TASK.ASSIGN' | translate }}</button>
+        <button mat-raised-button color="default" type="cancel"
+                (click)="onCancel(taskForm, $event)">{{ 'FORM.CLEAR' | translate }}</button>
+      </mat-card-actions>
+    </form>
+  </mat-card>
+</div>

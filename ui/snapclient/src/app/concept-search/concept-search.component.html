@@ -1,0 +1,56 @@
+<mat-card class="search-control">
+  <mat-card-header>
+    <mat-card-title>
+      <ng-content select=".search-title"></ng-content>
+    </mat-card-title>
+    <span class="activeOnly pull-right">
+      <mat-checkbox [checked]="activeOnly"
+                    (change)="updateActiveOnly($event)">{{'SEARCH.ACTIVE_ONLY' | translate}}</mat-checkbox>
+    </span>
+  </mat-card-header>
+  <mat-card-content>
+    <div layout="column">
+      <form (keydown.enter)="$event.preventDefault()">
+        <app-errormessage [error]="error"></app-errormessage>
+
+        <app-concept-autosuggest *ngIf="autosuggest"
+                                 [version]="version"
+                                 [scope]="scope"
+                                 [activeOnly]="activeOnly"
+                                 [search]="autosuggest"
+        ></app-concept-autosuggest>
+
+        <mat-form-field id="search-input" class="search-field field-full-width-no-margin"
+                        appearance="outline">
+          <mat-label>{{'SEARCH.INPUT_LABEL' | translate}}
+          </mat-label>
+          <input id="conceptSearch" type="search"
+                 matInput
+                 [formControl]="searchControl"
+                 autocapitalize="false" autocomplete="false" list="none" spellcheck="false"
+                 placeholder="{{'SEARCH.PLACEHOLDER' | translate}}">
+          <button id="btn-search-clear" *ngIf="searchControl.value.trim()" matSuffix mat-icon-button
+                  aria-label="Clear" (click)="searchControl.setValue('')">
+            <mat-icon>cancel</mat-icon>
+          </button>
+          <datalist id="none"></datalist>
+          <!-- workaround for Edge ignoring autocomplete="false" -->
+        </mat-form-field>
+
+        <div *ngIf="!total" class="search-footer">
+          &nbsp;<div class="pull-right">{{(searchControl.value.trim() ? 'SEARCH.NO_MATCHES'
+          : 'SEARCH.NO_SEARCH') | translate }}</div>
+        </div>
+        <div id="searchResults" class="search-results">
+          <app-concept-list [items]="matches"></app-concept-list>
+        </div>
+        <div *ngIf="total" class="search-footer">
+          &nbsp;<div class="pull-right">{{'SEARCH.MATCHES' | translate : {
+          count: matches.length,
+          total: total
+        } }}</div>
+        </div>
+      </form>
+    </div>
+  </mat-card-content>
+</mat-card>

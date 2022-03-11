@@ -1,0 +1,336 @@
+<div *ngIf="loading">
+  <app-loading-spinner></app-loading-spinner>
+</div>
+<div class="container">
+  <app-errormessage [error]="error"></app-errormessage>
+  <mat-drawer-container *ngIf="mapping">
+    <mat-drawer class="mapping-edit" mode="over" position="end" [(opened)]="opened">
+      <app-mapping-add [mapping]="mapping" (closed)="closeEdit()" [mode]="isOwner() || isAdmin ? 'FORM.EDIT' : 'FORM.VIEW'"></app-mapping-add>
+    </mat-drawer>
+    <div class="top-row">
+      <div class="mapping-details">
+        <app-mapping-details-card [mapping]="mapping" (clicked)="editMapping()" [editable]="isOwner() || isAdmin"></app-mapping-details-card>
+      </div>
+      <mat-card class="actions-card">
+        <mat-card-content>
+          <div class="task-dropdown" *ngIf="myTasks.length > 0; else notasks">
+            <app-task-select [selectedLabel]="selectedLabel" [myTasks]="myTasks" [showRows]="true"></app-task-select>
+          </div>
+          <div class="button-row">
+            <span>
+              <button class="mat-primary" mat-stroked-button
+                      [matMenuTriggerFor]="exportMenu">{{'MAP.EXPORT' | translate}}</button>
+              <mat-menu #exportMenu="matMenu">
+                <a mat-menu-item (click)="exportMapView('csv')">{{'MAP.EXPORT_CSV' | translate}}</a>
+                <a mat-menu-item (click)="exportMapView('tsv')">{{'MAP.EXPORT_TSV' | translate}}</a>
+                <a mat-menu-item (click)="exportMapView('xlsx')">{{'MAP.EXPORT_XLSX' | translate}}</a>
+              </mat-menu>
+            </span>
+            <button class="mat-primary" mat-stroked-button *ngIf="isOwner()"
+                (click)="clickImport()">{{'MAP.IMPORT' | translate}}</button>
+            <span class="space-fill">&nbsp;</span>
+            <ng-template #notasks>
+              <p>
+                <mat-chip color="accent" selected>
+                  <mat-icon>warning</mat-icon>
+                  {{'MAP.NO_MY_TASKS' | translate}}</mat-chip>
+              </p>
+            </ng-template>
+            <span class="space-fill">&nbsp;</span>
+            <button id="validate-targets" mat-stroked-button *ngIf="isOwner()" (click)="clickValidateTargets()"
+                    matTooltip="{{'MAP.VALIDATE_TARGETS_TOOLTIP' | translate}}"
+                    matTooltipShowDelay="1000">
+              {{'MAP.VALIDATE_TARGETS' | translate}}
+            </button>
+            <button id="bulk-change" mat-stroked-button *ngIf="isOwner()" (click)="clickBulkChange()">
+              {{'TABLE.BULK_CHANGE' | translate}}
+            </button>
+            <span><button class="mat-primary" mat-stroked-button
+                          (click)="sidenav.toggle()">{{'TASK.TASKS_BUTTON' | translate }}</button></span>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+    <div class="table-actions">
+      <mat-slide-toggle
+        [(ngModel)]="filterEnabled">{{'TABLE_FILTER.TABLE_FILTER_TOGGLE_NAME' | translate}}</mat-slide-toggle>
+      <button mat-stroked-button [disabled]="!filterEnabled"
+              (click)="clearFilter()">{{'TABLE_FILTER.CLEAR_FILTER_BUTTON_NAME' | translate}}</button>
+      &nbsp;
+    </div>
+    <mat-sidenav-container autosize>
+      <mat-sidenav-content>
+        <div class="container-table">
+          <table id="table-mapping" mat-table matTableFilter class="compact-table"
+                 [exampleEntity]="filterEntity" [filterType]="filterType"
+                 [dataSource]="page.data" matSort fixedLayout="false">
+            <!-- ID Column -->
+            <app-mapping-table-selector
+              name="id"
+              [allSourceDetails]="allSourceDetails"
+              [page]="page">
+            </app-mapping-table-selector>
+            <!-- Source index Column -->
+            <ng-container matColumnDef="sourceIndex">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header>{{'TABLE.SOURCE_INDEX' | translate}}</th>
+              <td mat-cell *matCellDef="let maprow">{{maprow.sourceIndex}}</td>
+            </ng-container>
+            <!-- Source code Column -->
+            <ng-container matColumnDef="sourceCode">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header>{{'TABLE.SOURCE_CODE' | translate}}</th>
+              <td mat-cell *matCellDef="let maprow">{{maprow.sourceCode}}</td>
+            </ng-container>
+            <!-- Source display Column -->
+            <ng-container matColumnDef="sourceDisplay">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header>{{'TABLE.SOURCE_DISPLAY' | translate}}</th>
+              <td mat-cell *matCellDef="let maprow">{{maprow.sourceDisplay}}</td>
+            </ng-container>
+            <!-- Relationship Column -->
+            <ng-container matColumnDef="relationship">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header>{{'TABLE.RELATIONSHIP' | translate}}</th>
+              <td mat-cell *matCellDef="let maprow"
+                  #tooltip="matTooltip" matTooltip="{{explainRelationship(maprow.relationship)}}">
+                {{maprow.relationship && 'RELATIONSHIP.' + maprow.relationship | translate}}
+              </td>
+            </ng-container>
+            <!-- Target code Column -->
+            <ng-container matColumnDef="targetCode">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header>{{'TABLE.TARGET_CODE' | translate}}</th>
+              <td mat-cell *matCellDef="let maprow">{{maprow.targetCode}}</td>
+            </ng-container>
+            <!-- Target display Column -->
+            <ng-container matColumnDef="targetDisplay">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header>{{'TABLE.TARGET_DISPLAY' | translate}}</th>
+              <td mat-cell *matCellDef="let maprow">{{maprow.targetDisplay}}</td>
+            </ng-container>
+            <!-- No Map Column -->
+            <ng-container matColumnDef="noMap">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header>{{'TABLE.NO_MAP' | translate}}</th>
+              <td mat-cell *matCellDef="let maprow">
+                <span *ngIf="maprow.noMap"><mat-icon>done</mat-icon></span></td>
+            </ng-container>
+            <!-- Status Column -->
+            <ng-container matColumnDef="status">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header>{{'TABLE.STATUS' | translate}}</th>
+              <td mat-cell *matCellDef="let maprow">{{maprow.status}}</td>
+            </ng-container>
+            <!-- Flagged Column -->
+            <ng-container matColumnDef="flagged">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header>{{'TABLE.FLAG' | translate}}</th>
+              <td mat-cell *matCellDef="let maprow">
+                <mat-icon *ngIf="maprow.flagged" color="accent">flag</mat-icon>
+              </td>
+            </ng-container>
+            <!-- Last Author Column -->
+            <ng-container matColumnDef="lastAuthorReviewer">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header>{{'TABLE.LAST_AUTHOR_REVIEWER' | translate}}</th>
+              <td mat-cell *matCellDef="let maprow">
+                <app-user-chip *ngIf="maprow.lastAuthor" [user]="maprow.lastAuthor"
+                               [font_size]="'12px'"></app-user-chip>
+                <app-user-chip *ngIf="maprow.lastReviewer" [user]="maprow.lastReviewer"
+                               [font_size]="'12px'"></app-user-chip>
+              </td>
+            </ng-container>
+            <!-- Author Column -->
+            <ng-container matColumnDef="assignedAuthor">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header>{{'TABLE.AUTHOR' | translate}}</th>
+              <td mat-cell *matCellDef="let maprow">
+                <app-user-chip *ngIf="maprow.assignedAuthor" [user]="maprow.assignedAuthor"
+                               [font_size]="'12px'"></app-user-chip>
+              </td>
+            </ng-container>
+            <!-- Reviewer Column -->
+            <ng-container matColumnDef="assignedReviewer">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header>{{'TABLE.REVIEWER' | translate}}</th>
+              <td mat-cell *matCellDef="let maprow">
+                <app-user-chip *ngIf="maprow.assignedReviewer" [user]="maprow.assignedReviewer"
+                               [font_size]="'12px'"></app-user-chip>
+              </td>
+            </ng-container>
+
+            <!-- Filter Id -->
+            <ng-container matColumnDef="filter-id">
+              <th mat-header-cell *matHeaderCellDef [attr.colspan]="1"></th>
+            </ng-container>
+            <!-- Filter SourceIndex -->
+            <ng-container matColumnDef="filter-source-index">
+              <th mat-header-cell *matHeaderCellDef [attr.colspan]="1"></th>
+            </ng-container>
+            <!-- Filter SourceCode -->
+            <ng-container matColumnDef="filter-source-code">
+              <th mat-header-cell *matHeaderCellDef [attr.colspan]="1">
+                <mat-form-field appearance="outline">
+                  <input matInput autocapitalize="off" autocomplete="false" list="no_source_code"
+                         [(ngModel)]="filterEntity.sourceCode" [formControl]="sourceCodeFilterControl">
+                  <datalist id="no_source_code"></datalist><!-- workaround for Edge ignoring autocomplete="false" -->
+                  <button *ngIf="filterEntity.sourceCode" matSuffix mat-icon-button aria-label="Clear"
+                          (click)="filterEntity.sourceCode=''">
+                    <mat-icon>cancel</mat-icon>
+                  </button>
+                </mat-form-field>
+              </th>
+            </ng-container>
+            <!-- Filter SourceCode -->
+            <ng-container matColumnDef="filter-source-display">
+              <th mat-header-cell *matHeaderCellDef [attr.colspan]="1">
+                <mat-form-field appearance="outline">
+                  <input matInput autocapitalize="off" autocomplete="false" list="no_source_display"
+                         [(ngModel)]="filterEntity.sourceDisplay" [formControl]="sourceDisplayFilterControl">
+                  <datalist id="no_source_display"></datalist>
+                  <!-- workaround for Edge ignoring autocomplete="false" -->
+                  <button *ngIf="filterEntity.sourceDisplay" matSuffix mat-icon-button aria-label="Clear"
+                          (click)="filterEntity.sourceDisplay=''">
+                    <mat-icon>cancel</mat-icon>
+                  </button>
+                </mat-form-field>
+              </th>
+            </ng-container>
+            <!-- Filter Relationship -->
+            <ng-container matColumnDef="filter-relationship">
+              <th mat-header-cell *matHeaderCellDef [attr.colspan]="1">
+                <mat-form-field appearance="outline">
+                  <mat-select [(ngModel)]="filterEntity.relationship" (selectionChange)="filterChange()" multiple>
+                    <mat-option *ngFor="let rel of relationships"
+                                [value]="rel">{{'RELATIONSHIP.' + rel | translate}}</mat-option>
+                  </mat-select>
+                </mat-form-field>
+              </th>
+            </ng-container>
+            <!-- Filter Target Code -->
+            <ng-container matColumnDef="filter-target-code">
+              <th mat-header-cell *matHeaderCellDef [attr.colspan]="1">
+                <mat-form-field appearance="outline">
+                  <input matInput autocapitalize="off" autocomplete="false" list="no_target_code"
+                         [(ngModel)]="filterEntity.targetCode" [formControl]="targetCodeFilterControl">
+                  <datalist id="no_target_code"></datalist><!-- workaround for Edge ignoring autocomplete="false" -->
+                  <button *ngIf="filterEntity.targetCode" matSuffix mat-icon-button aria-label="Clear"
+                          (click)="filterEntity.targetCode=''">
+                    <mat-icon>cancel</mat-icon>
+                  </button>
+                </mat-form-field>
+              </th>
+            </ng-container>
+            <!-- Filter Target Display -->
+            <ng-container matColumnDef="filter-target-display">
+              <th mat-header-cell *matHeaderCellDef [attr.colspan]="1">
+                <mat-form-field appearance="outline">
+                  <input matInput autocapitalize="off" autocomplete="false" list="no_target_display"
+                         [(ngModel)]="filterEntity.targetDisplay" [formControl]="targetDisplayFilterControl">
+                  <datalist id="no_target_display"></datalist>
+                  <!-- workaround for Edge ignoring autocomplete="false" -->
+                  <button *ngIf="filterEntity.targetDisplay" matSuffix mat-icon-button aria-label="Clear"
+                          (click)="filterEntity.targetDisplay=''">
+                    <mat-icon>cancel</mat-icon>
+                  </button>
+                </mat-form-field>
+              </th>
+            </ng-container>
+            <!-- Filter NoMap -->
+            <ng-container matColumnDef="filter-noMap">
+              <th mat-header-cell *matHeaderCellDef [attr.colspan]="1">
+                <mat-form-field appearance="outline">
+                  <mat-select [(ngModel)]="filterEntity.noMap" (selectionChange)="filterChange()">
+                    <mat-option [value]="">---</mat-option>
+                    <mat-option *ngFor="let opt of noMapOptions"
+                                [value]="opt[1]">{{'NOMAP.' + opt[0] | translate}}</mat-option>
+                  </mat-select>
+                </mat-form-field>
+              </th>
+            </ng-container>
+            <!-- Filter Status -->
+            <ng-container matColumnDef="filter-status">
+              <th mat-header-cell *matHeaderCellDef [attr.colspan]="1">
+                <mat-form-field appearance="outline">
+                  <mat-select [(ngModel)]="filterEntity.status" (selectionChange)="filterChange()" multiple>
+                    <mat-option *ngFor="let rel of statuses"
+                                [value]="rel">{{'STATUS.' + rel | translate}}</mat-option>
+                  </mat-select>
+                </mat-form-field>
+              </th>
+            </ng-container>
+            <!-- Filter Flagged -->
+            <ng-container matColumnDef="filter-flagged">
+              <th mat-header-cell *matHeaderCellDef [attr.colspan]="1">
+                <mat-form-field appearance="outline">
+                  <mat-select [(ngModel)]="filterEntity.flagged" (selectionChange)="filterChange()"
+                              id="flagged" name="flagged" #flagged="ngModel">
+                    <mat-option [value]="">---</mat-option>
+                    <mat-option *ngFor="let opt of noMapOptions"
+                                [value]="opt[1]">{{'NOMAP.' + opt[0] | translate}}</mat-option>
+                  </mat-select>
+                </mat-form-field>
+              </th>
+            </ng-container>
+            <!-- Filter Last Author/Reviewer -->
+            <ng-container matColumnDef="filter-last-author-reviewer">
+              <th mat-header-cell *matHeaderCellDef [attr.colspan]="1">
+                <mat-form-field appearance="outline">
+                  <mat-select [(ngModel)]="filterEntity.lastAuthorReviewer" (selectionChange)="filterChange()"
+                              multiple>
+                    <mat-option value="none">{{'TASK.UNASSIGNED' | translate}}</mat-option>
+                    <mat-option *ngFor="let member of members" [value]="member.id">
+                      <span class="userchip"><app-user-chip *ngIf="member" [user]="member"></app-user-chip></span>
+                      {{member.givenName}} {{member.familyName}}
+                    </mat-option>
+                  </mat-select>
+                </mat-form-field>
+              </th>
+            </ng-container>
+            <!-- Filter Author -->
+            <ng-container matColumnDef="filter-author">
+              <th mat-header-cell *matHeaderCellDef [attr.colspan]="1">
+                <mat-form-field appearance="outline">
+                  <mat-select [(ngModel)]="filterEntity.assignedAuthor" (selectionChange)="filterChange()" multiple>
+                    <mat-option value="none">{{'TASK.UNASSIGNED' | translate}}</mat-option>
+                    <mat-option *ngFor="let member of members" [value]="member.id">
+                      <span class="userchip"><app-user-chip *ngIf="member" [user]="member"></app-user-chip></span>
+                      {{member.givenName}} {{member.familyName}}
+                    </mat-option>
+                  </mat-select>
+                </mat-form-field>
+              </th>
+            </ng-container>
+            <!-- Filter Reviewer -->
+            <ng-container matColumnDef="filter-reviewer">
+              <th mat-header-cell *matHeaderCellDef [attr.colspan]="1">
+                <mat-form-field appearance="outline">
+                  <mat-select [(ngModel)]="filterEntity.assignedReviewer" (selectionChange)="filterChange()" multiple>
+                    <mat-option value="none">{{'TASK.UNASSIGNED' | translate}}</mat-option>
+                    <mat-option *ngFor="let member of members" [value]="member.id">
+                      <span class="userchip"><app-user-chip *ngIf="member" [user]="member"></app-user-chip></span>
+                      {{member.givenName}} {{member.familyName}}
+                    </mat-option>
+                  </mat-select>
+                </mat-form-field>
+              </th>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
+            <tr mat-header-row *matHeaderRowDef="filteredColumns"
+                [attr.hidden]="filterEnabled? null : true"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedColumns"
+                [class.selected-row]="mappingTableSelector?.checkSelected(row)"></tr>
+
+          </table>
+          <mat-paginator class="bottom-paginator"
+                         #paginator class="mat-paginator-sticky"
+                         [length]="page?.totalElements || 0"
+                         [pageIndex]="paging?.pageIndex"
+                         [pageSize]="paging?.pageSize"
+                         [showFirstLastButtons]="true"
+                         [pageSizeOptions]="[10, 20, 50, 100, 250]">
+          </mat-paginator>
+        </div>
+      </mat-sidenav-content>
+      <mat-sidenav class="container-sidebar" #sidenav mode="side" position="end">
+        <p>
+          <button mat-button color="accent" (click)="sidenav.toggle()"><mat-icon>cancel</mat-icon></button>
+        </p>
+        <app-assigned-work
+          [mapping]="mapping"
+          [mappingTableSelector]="mappingTableSelector"
+          (updateTableEvent)="refreshTable($event)"></app-assigned-work>
+      </mat-sidenav>
+    </mat-sidenav-container>
+  </mat-drawer-container>
+</div>

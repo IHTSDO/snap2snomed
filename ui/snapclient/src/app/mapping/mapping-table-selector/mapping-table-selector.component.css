@@ -1,0 +1,38 @@
+.table-selector-cell {
+  width: 30px;
+  max-width: 30px;
+  min-width: 30px;
+  text-align: center;
+  align-items: center;
+  padding-left: 10px;
+}
+
+::ng-deep .mat-badge-content {
+  width: auto !important;
+  padding-left: 4px;
+  padding-right: 4px;
+  top: -8px !important;
+  text-overflow: unset;
+  border-radius: 3px !important;
+  right: -6px !important;
+  font-size: 0.8em !important;
+  height: 14px !important;
+  line-height: 14px !important;
+}
+
+
+.mat-checkbox .mat-checkbox-frame {
+  transform: scale(2);
+}
+
+.mat-checkbox-checked .mat-checkbox-background {
+  transform: scale(2);
+}
+
+mat-checkbox.select-all-on-page {
+  margin: 2px 0;
+}
+
+.select-all-on-page {
+  display: block;
+}

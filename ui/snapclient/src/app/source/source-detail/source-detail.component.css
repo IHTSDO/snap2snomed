@@ -1,0 +1,22 @@
+#source-details-panel th {
+  text-align: left;
+  margin: 5px;
+  width: 120px;
+}
+
+table {
+  width: 100%;
+}
+
+.source-label-box {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+.source-label-box .mat-icon {
+  font-size: 20px;
+  color: #b0b0b0;
+}

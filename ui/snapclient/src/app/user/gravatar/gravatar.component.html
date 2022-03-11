@@ -1,0 +1,4 @@
+<div id="gravatar">
+  <img class="gravatar-image" mat-card-avatar *ngIf="gravatar" (error)="handleError()" src="{{src}}" alt="{{alt}}" style="{{style}}">
+  <div class="gravatar-image" #avatar mat-card-avatar *ngIf="!gravatar && alt?.length" style="{{style}}">{{alt}}</div>
+</div>

@@ -1,0 +1,52 @@
+.properties {
+  overflow: auto;
+  max-height: 340px;
+}
+
+.mat-table {
+  margin-top: 0;
+  display: table;
+}
+
+.mat-row {
+  height: auto;
+}
+
+.mat-row:nth-child(even){
+  background-color: #00000010;
+}
+
+.properties .mat-cell {
+  padding: 3px 6px;
+}
+
+.mat-column-aux {
+  width: 20px;
+  padding: 0 3px !important;
+}
+
+.mat-column-key {
+  text-transform: capitalize;
+  font-weight: bold;
+  min-width: 7em;
+}
+
+.mat-chip {
+  min-height: 20px;
+  text-align: center;
+  padding: 0 4px;
+  border-radius: 6px;
+  display: inherit;
+}
+
+.grip {
+  cursor: grab;
+  font-size: 16px;
+  text-align: center;
+  width: 28px;
+  height: 16px;
+}
+
+.properties-header {
+  width: 150px;
+}

@@ -1,0 +1,6 @@
+<mat-card *ngIf="note">
+  <mat-card-content> <span class="timestamp">{{note.modified | lastupdated}}</span>
+    <app-user-chip [user]="note.noteBy"></app-user-chip>
+    <p>{{note.noteText}}</p>
+  </mat-card-content>
+</mat-card>

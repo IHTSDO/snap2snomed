@@ -1,0 +1,45 @@
+<div class="content-wrapper">
+  <section>
+    <div class="header__row">
+      <div class="header__logo">
+        <!-- <img alt="icon" src="assets/img/si_logo_300.png"/> -->
+        <img class="header__title" alt="{{title}}" src="assets/img/logo.png"/>
+      </div>
+      <div class="header__container">
+        <div class="space-fill">&nbsp;</div>
+        <h4>{{title}}</h4>
+        <div class="space-fill">&nbsp;</div>
+        <p class="profile-menu">
+          <span class="text-danger" *ngIf="isAdmin">{{ 'HOME.ADMIN' | translate }} </span>
+          <span>{{ 'HOME.WELCOME' | translate }}, {{currentUser?.givenName}}
+            <app-gravatar [email]="currentUser?.email" [alt]="''"></app-gravatar>
+        </span>
+          <button class="user-menu-button" mat-icon-button [matMenuTriggerFor]="menu" aria-label="User menu">
+            <mat-icon>more_vert</mat-icon>
+          </button>
+          <mat-menu #menu="matMenu" class="user-menu">
+            <button mat-menu-item (click)="openUserGuide()">{{ 'HOME.USER_GUIDE' | translate}}</button>
+            <button mat-menu-item (click)="logOut()">{{ 'HOME.LOGOUT' | translate}}</button>
+          </mat-menu>
+        </p>
+      </div>
+    </div>
+    <div class="breadcrumbs">
+      <div class="space-fill">&nbsp;</div>
+      <xng-breadcrumb class="breadcrumb-list">
+        <ng-container *xngBreadcrumbItem="let breadcrumb">
+          <ng-container>{{ 'BREADCRUMBS.' + breadcrumb | translate }}</ng-container>
+        </ng-container>
+      </xng-breadcrumb>
+    </div>
+  </section>
+  <section>
+    <div class="main__content">
+      <app-errormessage [error]="error"></app-errormessage>
+      <!-- Main Content Here -->
+      <div *ngIf="currentUser">
+        <router-outlet (activate)='onActivate($event)'></router-outlet>
+      </div>
+    </div>
+  </section>
+</div>

@@ -1,0 +1,9 @@
+.container__centred {
+  margin: 10px 20%;
+  padding: 5% 10%;
+  text-align: center;
+}
+
+.breadcrumbs {
+  display: none;
+}

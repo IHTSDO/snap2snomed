@@ -1,0 +1,91 @@
+.full-page-container {
+  background-color: white;
+  margin: auto;
+  margin-top: 20px;
+  margin-bottom: 20px;
+  max-width: 800px;
+  min-width: 800px;
+}
+
+.mat-card {
+  padding: 25px;
+}
+
+.source-field {
+  display: flex;
+  flex-flow: row nowrap;
+  flex-direction: row;
+  justify-content: space-between;
+}
+
+.source-field button {
+  margin-top: 15px;
+}
+
+.ecl {
+  font-family: 'Courier New', Courier, monospace;
+}
+
+.info h3, .info table th, .info table td {
+  color: rgba(0, 0, 0, 0.57);
+}
+
+.info table {
+  width: 100%;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+
+table.details-table th {
+  text-align: left;
+  vertical-align: text-top;
+}
+
+table.details-table td {
+  max-width: 500px;
+  overflow-wrap: anywhere;
+}
+
+.project-roles {
+  margin-top: 1em;
+}
+
+.mat-icon {
+  position: relative;
+  top: -2px;
+  margin-left: 0px
+}
+
+.import-existing-map {
+  margin-top: 10px;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  justify-content: space-between;
+}
+
+.selectedfile {
+  margin-left: 10px;
+}
+
+.import-existing-map div {
+  width: 60%;
+  flex: 1;
+  border-radius: 5px;
+  border: 1px solid #dadada;
+  background-color: #eaeaea;
+  padding: 5px;
+  display: flex;
+  height: 30px;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.import-existing-map div .mat-icon:hover {
+  cursor: pointer;
+}
+
+.import-existing-map span {
+  display: flex;
+  margin-left: 10px;
+  margin-right: 10px;
+}

@@ -1,0 +1,10 @@
+{
+  "HOME": {
+    "WELCOME": "Bienvenue",
+    "LOGOUT": "Déconnexion",
+    "MAPS": "Plans"
+  },
+  "ERROR": {
+    "SERVER": "Erreur du serveur : impossible de charger les détails de l'utilisateur"
+  }
+}

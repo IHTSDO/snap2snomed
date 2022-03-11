@@ -1,0 +1,12 @@
+.alert-danger {
+  padding: 10px;
+}
+
+.sheet-container {
+  display: flex;
+  align-items: center;
+}
+
+mat-icon {
+  margin-right: 5px;
+}

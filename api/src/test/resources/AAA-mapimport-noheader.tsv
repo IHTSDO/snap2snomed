@@ -1,0 +1,15 @@
+1245324534654236135432346435652345346432546454354	Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer fringilla suscipit sem, id facilisis erat dictum non. In sodales, orci eu maximus sollicitudin, nulla nisl viverra quam, at interdum felis mi in quam. Cras feugiat erat sit amet diam malesuada, sed volutpat risus viverra. Orci varius natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Integer tempor augue sit amet nisl porttitor euismod vitae sed nulla.	3218000	Mycosis (disorder)	TARGET_BROADER	Target is broader than source	false	MAPPED
+210632005	àáâäæãåā	275716001	Mycology (procedure)	TARGET_BROADER	Target is broader than source	false	MAPPED
+300138002	èéêëēėę	272393004	Tests (qualifier value)	TARGET_EQUIVALENT	Target is equivalent to source	false	MAPPED
+300138002	èéêëēėę	236915005	Tubal embryo transfer (procedure)	TARGET_BROADER	Target is broader than source	false	MAPPED
+315594003	îïíīįì	159136000	Mycologist (occupation)	TARGET_BROADER	Target is broader than source	false	MAPPED
+34014006	ôöòóœøōõő	44644008	Mycotoxin (substance)	TARGET_NARROWER	Target is narrower than source	false	MAPPED
+34436003	ûüùúūű	281155009	Sisal (physical object)	TARGET_EQUIVALENT	Target is equivalent to source	false	MAPPED
+38341003	2015-11-28	17312001	11 (qualifier value)	TARGET_EQUIVALENT	Target is equivalent to source	false	MAPPED
+444019000	2015-12-02	264613005	Orthodontic bracket/band size 0215/028 (qualifier value)	TARGET_BROADER	Target is broader than source	false	MAPPED
+47505003	2015-12-01	82809009	12 (qualifier value)	TARGET_BROADER	Target is broader than source	false	MAPPED
+50711007	2015-11-30	20158009	Open fracture of ramus of mandible (disorder)	TARGET_BROADER	Target is broader than source	false	MAPPED
+75478009	2015-12-01	20158009	Open fracture of ramus of mandible (disorder)	TARGET_NARROWER	Target is narrower than source	false	MAPPED
+77176002						
+85224001	2015-12-02	264613005	Orthodontic bracket/band size 0215/028 (qualifier value)	TARGET_NARROWER	Target is narrower than source	false	MAPPED
+85224001	2015-12-02	20158009	Open fracture of ramus of mandible (disorder)	TARGET_INEXACT	Target is an inexact match to source	false	MAPPED

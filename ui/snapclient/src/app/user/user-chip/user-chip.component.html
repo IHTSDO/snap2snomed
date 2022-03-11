@@ -1,0 +1,9 @@
+<mat-chip *ngIf="role">
+  <span *ngIf="role">{{role}}</span>
+  <span #tooltip="matTooltip" matTooltip="{{user.givenName}} {{user.familyName}}">
+    <app-gravatar [s]="font_size" [email]="user.email" [alt]="(user.givenName | initials) + (user.familyName | initials)"></app-gravatar>
+  </span>
+</mat-chip>
+<span *ngIf="!role" #tooltip="matTooltip" matTooltip="{{user.givenName}} {{user.familyName}}">
+  <app-gravatar [s]="font_size" [email]="user.email" [alt]="(user.givenName | initials) + (user.familyName | initials)"></app-gravatar>
+</span>

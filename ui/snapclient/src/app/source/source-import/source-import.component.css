@@ -1,0 +1,72 @@
+.modal-content {
+  border: none;
+}
+
+#csv-headers .alert {
+  margin-top: 0;
+}
+
+#csv-headers .mat-icon {
+  vertical-align: bottom;
+}
+
+.source-file {
+  background-color: rgba(0, 0, 0, 0.04);
+  border-radius: 5px;
+  display: flex;
+}
+
+.source-file input {
+  margin: 10px 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.source-file label {
+  margin: 10px;
+  width: 100%;
+  float: left;
+}
+
+.column-fill {
+  padding: 10px;
+}
+
+.field-one-character {
+  width: 140px;
+  height: 50px;
+}
+
+.file {
+  padding-left: 10px;
+}
+
+.delimiter-group {
+  margin-top: 5px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: space-between;
+}
+
+#delimiter {
+  font-size: 1.5em;
+  text-align: center;
+}
+
+.autogen {
+  background:rgba(0,0,0,.04);
+  margin-top: 40px;
+  padding: 10px;
+  border-bottom: 1px solid rgba(0,0,0,.40);
+}
+
+.autogen-label {
+  font-family: Roboto, "Helvetica Neue", sans-serif;
+  color: rgba(0,0,0,.6);
+}
+
+.tab-button {
+  float: left;
+  margin: 20px 10px;
+}

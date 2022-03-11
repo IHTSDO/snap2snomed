@@ -1,0 +1,46 @@
+<mat-card class="assigned-work-card">
+  <app-errormessage [error]="error"></app-errormessage>
+  <mat-card-content>
+    <div *ngIf="loading">
+      <app-loading-spinner></app-loading-spinner>
+    </div>
+    <mat-tab-group class="task-list" [selectedIndex]="activeTab" (selectedTabChange)="setActiveTab($event)">
+      <mat-tab
+        *ngIf="mapping && (isAdmin || isUserInGroup(currentUser, mapping.project.owners) || isUserInGroup(currentUser, mapping.project.members))">
+        <ng-template mat-tab-label>
+          <mat-icon class="tab-icon">add_task</mat-icon>
+          <span>{{'TASK.ADD_TASK' | translate}}</span>
+        </ng-template>
+        <app-task-add [mappingTableSelector]="mappingTableSelector"
+                      [mapping]="mapping" [currentUser]="currentUser"
+                      (newTaskEvent)="selectTaskTab($event)"></app-task-add>
+      </mat-tab>
+
+      <mat-tab>
+        <ng-template mat-tab-label>
+          <mat-icon class="tab-icon">edit</mat-icon>
+          <span matBadge="{{authorTasks?.length}}" matBadgeSize="small"
+                matBadgeOverlap="false">{{'TASK.TAB_AUTHOR' | translate}}</span>
+        </ng-template>
+        <div *ngFor="let task of authorTasks">
+          <app-task-card [task]="task" [isClickable]="isAssigned(task)"
+                         [currentUser]="currentUser" [isOwner]="isOwner()"
+                         (updateTaskEvent)="selectTaskTab($event)"></app-task-card>
+        </div>
+      </mat-tab>
+
+      <mat-tab>
+        <ng-template mat-tab-label>
+          <mat-icon class="tab-icon">checklist</mat-icon>
+          <span matBadge="{{reviewTasks?.length}}" matBadgeSize="small"
+                matBadgeOverlap="false">{{'TASK.TAB_REVIEW' | translate}}</span>
+        </ng-template>
+        <div *ngFor="let task of reviewTasks">
+          <app-task-card [task]="task" [isClickable]="isAssigned(task)"
+                         [currentUser]="currentUser" [isOwner]="isOwner()"
+                         (updateTaskEvent)="selectTaskTab($event)"></app-task-card>
+        </div>
+      </mat-tab>
+    </mat-tab-group>
+  </mat-card-content>
+</mat-card>

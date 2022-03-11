@@ -1,0 +1,45 @@
+<div *ngIf="isAuthenticated; then loaded; else loading;"></div>
+<ng-template #loading>
+  <ng-container *ngIf="isLoading; else landing">
+    <app-loading-spinner></app-loading-spinner>
+  </ng-container>
+</ng-template>
+<ng-template #landing>
+  <section>
+    <div class="banner__row">
+      <div class="banner__container">
+        <div>
+          <div class="banner__logo">
+            <img alt="icon" src="assets/img/si_logo_400.png">
+          </div>
+          <h2 class="banner__title"><img alt="icon" src="assets/img/logo.png" title="{{title}}"></h2>
+          <p class="banner__summary">A hosted tool for SNOMED International Members to collaboratively create and
+            maintain simple maps to SNOMED CT.</p>
+
+        </div>
+      </div>
+
+      <div class="banner__side">
+        <div class="banner__login">
+          <button mat-raised-button color="primary" (click)="showLogin()">Login</button>
+        </div>
+        <div *ngIf="hasError" class="login__error">
+          <p>{{errorMsg}}</p>
+        </div>
+        <div class="container__notice" *ngIf="mainPageText">
+          <mat-card>
+            <mat-card-content>
+              <p [innerHtml]="mainPageText"></p>
+            </mat-card-content>
+          </mat-card>
+        </div>
+      </div>
+    </div>
+    <app-footer></app-footer>
+  </section>
+
+</ng-template>
+<ng-template #loaded>
+  <app-home></app-home>
+  <app-footer></app-footer>
+</ng-template>

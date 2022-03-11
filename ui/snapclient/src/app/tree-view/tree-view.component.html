@@ -1,0 +1,41 @@
+<mat-card>
+  <mat-card-content class="tree-content">
+    <mat-tree [dataSource]="nestedData" [treeControl]="treeControl" class="tree-view">
+      <!-- This is the tree node template for leaf nodes -->
+      <mat-tree-node *matTreeNodeDef="let node" matTreeNodeToggle class="tree-leaf">
+        <div class="mat-tree-leaf">
+          <button disabled mat-icon-button matTreeNodeToggle>
+            <mat-icon class="leaf-icon mat-icon-rtl-mirror">remove</mat-icon>
+          </button>
+          <span class="tree-label">
+            <span class="definition-status" [appDraggable]="{data: node.concept.payload, zones: ['conceptZone', 'relationshipZone']}">{{node.concept.primitive ? '&nbsp;' : '&#8801;'}}&nbsp;</span>
+            <span class="tree-text">{{node.concept.display}}</span>
+          </span>
+        </div>
+      </mat-tree-node>
+      <!-- This is the tree node template for expandable nodes -->
+      <mat-nested-tree-node *matTreeNodeDef="let node; when: hasChild">
+        <div class="mat-tree-node">
+          <button mat-icon-button matTreeNodeToggle
+                  (click)="toggle(node)"
+                  [attr.aria-label]="'Toggle ' + node.concept.display">
+            <mat-icon class="mat-icon-rtl-mirror">
+              {{node.isParent ? 'expand_less' : (treeControl.isExpanded(node) ? 'expand_more' : 'chevron_right')}}
+            </mat-icon>
+          </button>
+          <span class="tree-label">
+            <span class="definition-status" [appDraggable]="{data: node.concept.payload, zones: ['conceptZone', 'relationshipZone']}">{{node.concept.primitive ? '&nbsp;' : '&#8801;'}}&nbsp;</span>
+            <span class="tree-text">{{node.concept.display}}
+              <span *ngIf="node.children?.length"> ({{node.children?.length}})</span>
+            </span>
+          </span>
+        </div>
+        <!-- There is inline padding applied to this div using styles.
+             This padding value depends on the mat-icon-button width.  -->
+        <div *ngIf="treeControl.isExpanded(node)" role="group">
+          <ng-container matTreeNodeOutlet></ng-container>
+        </div>
+      </mat-nested-tree-node>
+    </mat-tree>
+  </mat-card-content>
+</mat-card>

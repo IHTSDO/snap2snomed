@@ -1,0 +1,49 @@
+.item-list .mat-cell {
+  padding: 3px 6px;
+}
+
+#project-role-table {
+  max-height: 375px;
+  overflow-y: auto;
+}
+
+#project-role-table ::ng-deep .mat-form-field-wrapper {
+  padding-bottom: 0!important;
+}
+
+.mat-table {
+  overflow: auto;
+  max-height: 600px;
+}
+
+.mat-cell {
+  padding-left: 5px;
+}
+
+.mat-header-cell {
+  padding-left: 0;
+}
+
+mat-header-cell.mat-sort-header {
+  padding-left: 10px;
+}
+
+.mat-column-project_role {
+  max-width: 110px;
+}
+
+.mat-column-filter_role {
+  max-width: 110px;
+}
+
+.filterclass {
+  min-width: 98%
+}
+
+.notInProject {
+  background: lightgrey;
+}
+
+.name-display {
+  margin-left: 10px;
+}

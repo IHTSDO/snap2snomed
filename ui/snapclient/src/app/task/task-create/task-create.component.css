@@ -1,0 +1,25 @@
+.conflictmessage {
+  margin-bottom: 15px;
+}
+
+.matcardactions {
+  display: flex;
+  margin-left: 5px !important;
+  margin-right: 5px !important;
+}
+
+.matcardactions-left {
+  align-items: flex-start;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 50%;
+}
+
+.matcardactions-right {
+  align-items: flex-end;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 50%;
+}

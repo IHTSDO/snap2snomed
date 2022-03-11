@@ -1,0 +1,115 @@
+<div *ngIf="task">
+  <mat-drawer-container class="container">
+    <div *ngIf="loading">
+      <app-loading-spinner></app-loading-spinner>
+    </div>
+    <app-errormessage [error]="error"></app-errormessage>
+    <div id="table-view" *ngIf="mapping">
+      <div class="top-row">
+        <div class="mapping-details">
+          <app-mapping-details-card [mapping]="mapping"></app-mapping-details-card>
+        </div>
+        <mat-card class="actions-card">
+          <div class="col-left">
+            <app-task-select [myTasks]="myTasks" [selectedTask]="task"></app-task-select>
+          </div>
+          <div class="col-right">
+            <div class="row-actions">
+                <span *ngIf="task.type === 'AUTHOR'">
+                  <span *ngIf="!automapping; else runAutomap">
+                  <button mat-stroked-button
+                          matTooltip="{{'AUTOMAP.AUTOMAP_TOOLTIP' | translate}}"
+                          matTooltipShowDelay="1000"
+                          (click)="launchAutomap()"
+                          [disabled]="isAdmin && currentUser?.id !== task.assignee?.id">{{'AUTOMAP.AUTOMAP' | translate}}</button>
+                  </span>
+                  <ng-template #runAutomap>
+                    <app-automap [mapping]="mapping"
+                                 [task_id]="task.id"
+                                 [data]="getData()"
+                                 (updateTableEvent)="updateTable($event)"></app-automap>
+                  </ng-template>
+                </span>
+              <button mat-stroked-button
+                      (click)="clickBulkChange()"
+                      [disabled]="isAdmin && currentUser?.id !== task.assignee?.id">
+                {{'TABLE.BULK_CHANGE' | translate}}
+              </button>
+            </div>
+            <h2>{{task.type | translate}}</h2>
+          </div>
+        </mat-card>
+      </div>
+      <div class="search-container" layout="row">
+        <div class="search-view card-col">
+          <app-concept-search [active]="!opened"
+                              [scope]="mapping?.toScope || ''"
+                              [version]="mapping?.toVersion || ''">
+            <span class="search-title">{{'MAP.SEARCH_TARGET' | translate}}</span>
+          </app-concept-search>
+        </div>
+        <div class="tree-view card-col">
+          <button class="view-toggle" mat-icon-button (click)="toggleHierarchy()"
+                  #tooltip="matTooltip"
+                  matTooltip="{{'MAP.SWITCH_VIEW' | translate}}">
+            <mat-icon color="{{hierarchyView === 'tree' ? 'accent' : undefined}}">account_tree</mat-icon>
+          </button>
+          <div *ngIf="hierarchyView === 'tree'">
+            <app-tree-view [active]="!opened"></app-tree-view>
+          </div>
+          <div class="hierarchy-view" *ngIf="hierarchyView !== 'tree'">
+            <mat-progress-bar mode="indeterminate" *ngIf="loadingHierarchy; else loadedHeirarchy"></mat-progress-bar>
+            <ng-template #loadedHeirarchy>
+              <lib-shrimp-hierarchy
+                [rows]="nodes"
+                (selected)="onSelected($event)"></lib-shrimp-hierarchy>
+            </ng-template>
+          </div>
+        </div>
+        <div class="properties-view card-col">
+          <app-concept-properties [active]="!opened" [version]="mapping?.toVersion || ''">
+            <span class="properties-title">{{'MAP.TARGET_PROPERTIES' | translate}}</span>
+          </app-concept-properties>
+        </div>
+      </div>
+      <div id="container-table-work">
+        <div class="table-actions">
+          <span class="space-fill"></span>
+          <div class="table-actions-columns colright">
+            <div>
+              <mat-slide-toggle
+                [(ngModel)]="filterEnabled"
+                ngDefaultControl>{{'TABLE_FILTER.TABLE_FILTER_TOGGLE_NAME' | translate}}</mat-slide-toggle>
+            </div>
+            <button mat-stroked-button
+                    (click)="mapTable.clearFilter()">{{'TABLE_FILTER.CLEAR_FILTER_BUTTON_NAME' | translate}}</button>
+          </div>
+        </div>
+        <div class="container-table">
+          <app-mapping-table #mapTable
+                             [task]="task"
+                             [isOwner]="false"
+                             [paging]="tableParams"
+                             [filterEntity]="tableFilter"
+                             [filterEnabled]="filterEnabled"
+                             (showDetail)="showDetail($event)"
+                             (filterChange)="filterChange($event)"
+                             (sortChange)="sortChange($event)"
+                             (pagingChange)="pagingChange($event)"
+                             (updateTableEvent)="updateTable($event)"
+          ></app-mapping-table>
+        </div>
+      </div>
+    </div> <!-- end Table view -->
+    <mat-drawer #drawer class="details-drawer" position="end" mode="over" [(opened)]="opened"
+                (closedStart)="hideDetail()">
+      <div id="details-view" *ngIf="isDetailsView()">
+        <app-mapping-detail [task]="task"
+                            (detailClose)="detailClosed()"
+                            [paging]="tableParams"
+                            [filterEntity]="tableFilter"
+        ></app-mapping-detail>
+      </div>
+    </mat-drawer>
+  </mat-drawer-container>
+</div>

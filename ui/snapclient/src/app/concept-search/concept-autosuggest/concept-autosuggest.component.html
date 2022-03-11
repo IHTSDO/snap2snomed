@@ -1,0 +1,7 @@
+<div>
+  <p>{{'SEARCH.SUGGESTED' | translate : {total: matches.length} }}:</p>
+  <div class="autosuggest">
+    <app-concept-list [items]="matches"></app-concept-list>
+  </div>
+  <hr style="margin-bottom: 0.75em">
+</div>
