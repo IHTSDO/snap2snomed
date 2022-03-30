@@ -29,14 +29,15 @@ import {TokenInterceptor} from '../_services/token-interceptor.service';
 import {MockStore, provideMockStore} from '@ngrx/store/testing';
 import {IAppState, initialAppState} from '../store/app.state';
 import {selectAuthState, selectToken} from '../store/auth-feature/auth.selectors';
-import {Refresh} from '../store/auth-feature/auth.actions';
 import {TokenMsg} from '../_models/user';
 import {RouterTestingModule} from '@angular/router/testing';
 import {testRoutes} from '../auth.guard.spec';
+import { AuthService } from '../_services/auth.service';
 
 describe('Snap2SnomedHttpErrorInterceptor', () => {
   let service: Snap2SnomedHttpErrorInterceptor;
   let tokenService: TokenInterceptor;
+  let authService: AuthService;
   let httpMock: HttpTestingController;
   let httpClient: HttpClient;
   let errorNotifier: ErrorNotifier;
@@ -68,7 +69,7 @@ describe('Snap2SnomedHttpErrorInterceptor', () => {
         provideMockStore({
           initialState: initialAppState,
           selectors: [
-            {selector: selectToken, value: {access_token: 'blah'}},
+            {selector: selectToken, value: tokenMsg},
             {selector: selectAuthState, value: {isAuthenticated: true, user: {token: tokenMsg}}}
           ]
         }),
@@ -87,6 +88,7 @@ describe('Snap2SnomedHttpErrorInterceptor', () => {
     service = TestBed.inject(Snap2SnomedHttpErrorInterceptor);
     errorNotifier = TestBed.inject(ErrorNotifier);
     tokenService = TestBed.inject(TokenInterceptor);
+    authService = TestBed.inject(AuthService);
     store = TestBed.inject(MockStore);
   });
 
@@ -96,6 +98,7 @@ describe('Snap2SnomedHttpErrorInterceptor', () => {
 
   it('should intercept errors', () => {
     spyOn(errorNotifier.snackBar, 'open');
+    spyOn(authService, 'isTokenExpired').and.returnValue(false);
     httpClient
       .get<string>(url)
       .subscribe(
@@ -114,6 +117,7 @@ describe('Snap2SnomedHttpErrorInterceptor', () => {
   it('should intercept errors but should not notify on 401 for api calls and refresh token should be called', () => {
     spyOn(errorNotifier.snackBar, 'open');
     spyOn(store, 'dispatch');
+    spyOn(authService, 'refreshAuthSession').and.callThrough();
     httpClient
       .get<string>(url)
       .subscribe(
@@ -124,11 +128,10 @@ describe('Snap2SnomedHttpErrorInterceptor', () => {
                 errorNotifier.snackBarOptions);
         }
       );
-    const req = httpMock.expectOne(url);
+    const req = httpMock.expectOne('undefined/oauth2/token');
     const expectedResponse = new HttpResponse({status: 401, statusText: 'boom', body: {}});
     req.error(new ErrorEvent('401 error'), expectedResponse);
-    const refreshCall = new Refresh(tokenMsg);
-    expect(store.dispatch).toHaveBeenCalledWith(refreshCall);
+    expect(authService.refreshAuthSession).toHaveBeenCalledWith(tokenMsg);
   });
 
 });

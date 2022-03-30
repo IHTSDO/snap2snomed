@@ -549,6 +549,25 @@ public class TaskResourceIT extends IntegrationTestBase {
   }
 
   @Test
+  public void shouldGetTasksForSpecifiedMapWhenUserIsAdmin() throws Exception {
+    restClient.createTask(DEFAULT_TEST_USER_SUBJECT, TaskType.AUTHOR, mapId, DEFAULT_TEST_USER_SUBJECT,
+            "1-3", false, false, null);
+    restClient.createTask(DEFAULT_TEST_USER_SUBJECT, TaskType.AUTHOR, map2Id, DEFAULT_TEST_USER_SUBJECT,
+            "1-3", false, false, null);
+
+    RequestSpecification adminUser = restClient.givenUserWithGroup(DEFAULT_TEST_ADMIN_USER_SUBJECT,
+            ContentType.JSON.getContentTypeStrings()[0],
+            ContentType.JSON,
+            config.getSecurity().getAdminGroup());
+
+    adminUser.when().queryParam("projection", "embeddedTaskDetails")
+            .queryParam("id", mapId)
+            .get("/tasks/search/findByMapId")
+            .then().statusCode(200)
+            .body("content", hasSize(1));
+  }
+
+  @Test
   public void shouldGetTaskRowCount() throws Exception {
     long authorTask = restClient.createTask(DEFAULT_TEST_USER_SUBJECT, TaskType.AUTHOR, mapId, DEFAULT_TEST_USER_SUBJECT,
         "1-4", false, false, null);

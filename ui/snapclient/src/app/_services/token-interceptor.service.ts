@@ -23,15 +23,16 @@ import {
   HttpParams,
   HttpRequest
 } from '@angular/common/http';
-import {Observable, throwError} from 'rxjs';
-import {catchError, map, switchMap} from 'rxjs/operators';
+import {BehaviorSubject, Observable, Subject, throwError} from 'rxjs';
+import {catchError, filter, finalize, map, switchMap, take} from 'rxjs/operators';
 import {Store} from '@ngrx/store';
 import {IAppState} from '../store/app.state';
-import {Refresh} from '../store/auth-feature/auth.actions';
+import {Refresh, RefreshFailure, RefreshSuccess} from '../store/auth-feature/auth.actions';
 import {selectAuthState, selectToken} from '../store/auth-feature/auth.selectors';
 import {APP_CONFIG, AppConfig} from '../app.config';
 import {AuthService} from './auth.service';
 import {Router} from '@angular/router';
+import {TokenMsg} from '../_models/user';
 
 @Injectable({
   providedIn: 'root'
@@ -40,7 +41,10 @@ export class TokenInterceptor implements HttpInterceptor {
 
   private proxyCors?: string;
 
-  private accessToken?: string;
+  private token: TokenMsg | null | undefined;
+  private refreshTokenInProgress = false;
+
+  private refreshTokenSubject: Subject<any> = new BehaviorSubject<any>(null);
 
   constructor(@Inject(APP_CONFIG) private config: AppConfig,
               private authService: AuthService,
@@ -48,7 +52,8 @@ export class TokenInterceptor implements HttpInterceptor {
               public store: Store<IAppState>) {
 
     this.store.select(selectToken).subscribe((token) => {
-      this.accessToken = token?.access_token;
+      this.refreshTokenInProgress = false;
+      this.token = token;
     });
   }
 
@@ -66,10 +71,50 @@ export class TokenInterceptor implements HttpInterceptor {
       const url = request.urlWithParams.replace(/%25/g, '%'); // Snowstorm
       const params: HttpParams = new HttpParams().set('url', url);
       request = request.clone({url: this.proxyCors, params});
+      return next.handle(request);
+    } else {
+      // Refreshing tokens make the call
+      if (request.url?.indexOf('/token') !== -1) {
+        return next.handle(request);
+      }
     }
 
-    if (this.accessToken && this.isApiRequest(request)) {
-      request = request.clone({setHeaders: {Authorization: `Bearer ${this.accessToken}`}});
+    const tokenExpired = this.authService.isTokenExpired();
+
+    if (this.token?.access_token && this.isApiRequest(request)) {
+      if (!tokenExpired) {
+        request = this.injectToken(request, this.token);
+      } else {
+        if (!this.refreshTokenInProgress) {
+          this.refreshTokenInProgress = true;
+          // Set the refreshTokenSubject to null so that subsequent API calls will wait until the new token has been retrieved
+          this.refreshTokenSubject.next(null);
+          return this.authService.refreshAuthSession(this.token).pipe(
+            switchMap((authResponse) => {
+              if (authResponse) {
+                this.token = authResponse;
+                this.refreshTokenSubject.next(authResponse);
+                this.store.dispatch(new RefreshSuccess({token: authResponse}));
+              } else {
+                this.store.dispatch(new RefreshFailure( {error: authResponse}));
+              }
+              this.refreshTokenInProgress = false;
+              return next.handle(this.injectToken(request, authResponse));
+            }),
+            finalize(() => {
+              this.refreshTokenInProgress = false;
+            }),
+          );
+        } else {
+          return this.refreshTokenSubject.pipe(
+            filter(result => result !== null && result !== undefined),
+            take(1),
+            switchMap((res) => {
+                return next.handle(this.injectToken(request, res));
+            })
+          );
+        }
+      }
     }
 
     return next.handle(request).pipe(
@@ -99,4 +144,9 @@ export class TokenInterceptor implements HttpInterceptor {
         }
       }));
   }
+
+  private injectToken(request: HttpRequest<any>, token: TokenMsg | null | undefined): HttpRequest<any> {
+    return request = request.clone({setHeaders: {Authorization: `Bearer ${token?.access_token}`}});
+  }
+
 }

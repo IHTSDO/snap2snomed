@@ -85,8 +85,9 @@ export class ConceptAutosuggestComponent implements OnInit, OnDestroy {
       this.store.dispatch(new AutoSuggest({
         text: this._search,
         version: this.version,
-        scope: this._activeOnly ? `(${this.scope}){{active=true}}` : this.scope,
+        scope: this.scope,
         strategy: this.strategy,
+        activeOnly: this._activeOnly
       }));
     } else {
       this.matches = [];

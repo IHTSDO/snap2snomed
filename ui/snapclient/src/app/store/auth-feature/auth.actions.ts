@@ -68,7 +68,7 @@ export class LogOutFailure implements Action {
 export class Refresh implements Action {
   readonly type = AuthActionTypes.REFRESH;
 
-  constructor(public payload: TokenMsg) {
+  constructor(public payload: TokenMsg | null | undefined) {
   }
 }
 
