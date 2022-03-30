@@ -20,7 +20,7 @@ public interface TaskRepository
   // Exported in REST interface
   // ---------------------------------
 
-  @Query("select t from Task t where true = ?#{@authenticationFacadeImpl.isAdminUser()} or exists (select 1 from User u where u.id = ?#{@authenticationFacadeImpl.principalSubject} and t.map.id = :id and (u member of t.map.project.owners or u member of t.map.project.members or u member of t.map.project.guests)) ")
+  @Query("select t from Task t where t.map.id = :id and (true = ?#{@authenticationFacadeImpl.isAdminUser()} or exists (select 1 from User u where u.id = ?#{@authenticationFacadeImpl.principalSubject} and (u member of t.map.project.owners or u member of t.map.project.members or u member of t.map.project.guests))) ")
   Page<Task> findByMapId(Long id, Pageable pageable);
 
   @Override

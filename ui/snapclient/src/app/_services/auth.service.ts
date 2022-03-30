@@ -182,8 +182,8 @@ export class AuthService {
   isTokenExpired(): boolean {
     let expired = true;
     this.store.select(selectToken).subscribe((state) => {
-      if (state && state.id_token) {
-        const decoded = jwt_decode(state.id_token);
+      if (state && state.access_token) {
+        const decoded = jwt_decode(state.access_token);
         // @ts-ignore
         const expireTime = decoded['exp'] ?? null;
         if (expireTime) {

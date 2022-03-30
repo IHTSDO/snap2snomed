@@ -44,7 +44,7 @@ export class FhirService {
           concept: targets.map(code => ({code: code}))
         }],
         exclude: [{
-          valueSet: [FhirService.toValueSet(toVersion, `(${toScope}){{active=true}}`)],
+          valueSet: [FhirService.toValueSet(toVersion, `(${toScope}){{C active=true}}`)],
         }]
       }
     };
@@ -77,13 +77,14 @@ export class FhirService {
   autoSuggest(text: string, version: string, scope: string, strategy: string, activeOnly: boolean = true, count: number = 5): Observable<Match[]> {
     if (this.isOntoserver) {
       const isMatch = (match: Match | null): match is Match => !!match;
+      const ecl = activeOnly ? `(${scope}){{C active=true}}` : scope;
 
       const url = `${this.config.fhirBaseUrl}/ConceptMap/$translate`;
       const params = {
         'code': text,
         'system': 'http://ontoserver.csiro.au/fhir/CodeSystem/codesystem-terms',
         'url': strategy,
-        'target': FhirService.toValueSet(version, scope),
+        'target': FhirService.toValueSet(version, ecl),
       };
       const options = ServiceUtils.getHTTPHeaders();
       options.headers = options.headers
@@ -98,7 +99,7 @@ export class FhirService {
         })
       );
     } else {
-      return this.findConcepts(text, version, scope, true, count).pipe(
+      return this.findConcepts(text, version, scope, activeOnly, count).pipe(
         map(valueset => {
           return valueset.expansion?.contains?.slice(0, count).map(entry => {
             return {
@@ -107,7 +108,7 @@ export class FhirService {
               version: entry.version,
               display: entry.display,
               label: entry.display,
-              inactive: false,
+              inactive: activeOnly ? false : !!entry.inactive,
             };
           }) ?? [];
         })
@@ -177,7 +178,11 @@ export class FhirService {
                 if ('code' == ext2.url) {
                   map.code = ext2.valueCode;
                 }
-                if ('value_x_' == ext2.url) {
+                if ('value' == ext2.url) {
+                  map.value = ext2;
+                }
+                // This is a fallback case for old versions of Ontoserver
+                if ('value_x_' == ext2.url && typeof map.value === 'undefined') {
                   map.value = ext2;
                 }
               });

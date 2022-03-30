@@ -84,7 +84,7 @@ export class AutomapComponent implements OnInit {
     if (!self.task_id || !self.mapping?.toScope || !self.mapping.toVersion) {
       return;
     }
-    const scope = `(${self.mapping?.toScope}){{active=true}}`;
+    const scope = self.mapping?.toScope;
     const version: string = self.mapping.toVersion;
 
     self.mapService.getTaskAuthorRows(self.task_id).subscribe(
