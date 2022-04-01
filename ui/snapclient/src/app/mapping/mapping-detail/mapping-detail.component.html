@@ -78,7 +78,7 @@
             <mat-icon color="{{hierarchyView === 'tree' ? 'accent' : undefined}}">account_tree</mat-icon>
           </button>
           <div *ngIf="hierarchyView === 'tree'">
-            <app-tree-view></app-tree-view>
+            <app-tree-view [task]="task"></app-tree-view>
           </div>
           <div class="hierarchy-view" *ngIf="hierarchyView !== 'tree'">
             <mat-progress-bar mode="indeterminate" *ngIf="loadingHierarchy; else heirarchyLoaded"></mat-progress-bar>
