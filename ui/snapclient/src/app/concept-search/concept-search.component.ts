@@ -79,7 +79,7 @@ export class ConceptSearchComponent implements OnInit, OnDestroy {
       (expansion) => {
         if (self.active) {
           self.total = expansion?.total;
-          self.matches = (expansion?.contains ?? []).map(self.toMatch);
+          self.matches = (expansion?.contains ?? []).map(self.toMatch.bind(this));
           if (resultsView) {
             resultsView.scrollTop = 0;
           }
@@ -127,8 +127,8 @@ export class ConceptSearchComponent implements OnInit, OnDestroy {
 
   private toMatch(concept: R4.IValueSet_Contains): Match {
     const allFsns = concept.designation?.filter(d => d.use?.code === '900000000000003001');
-    const enFsn = allFsns?.find(d => d.language === 'en')?.value;
-    const fsn = enFsn ?? allFsns?.find(() => true)?.value ?? concept.display;
+    const browserFsn = allFsns?.find(d => d.language === this.translate.getBrowserLang())?.value;
+    const fsn = browserFsn ?? allFsns?.find(() => true)?.value ?? concept.display;
     const match = fsn?.match(/^(.*) \(([^(]*)\)$/);
 
     const m: Match = {
