@@ -3,16 +3,17 @@
   display: flex;
   flex-wrap: wrap;
 }
-  
+
 .col-mapping {
   flex: 3;
   max-width: 30%;
 }
-  
+
 .col-project {
   flex: 2;
+  overflow: hidden;
 }
-  
+
 .col-action {
   max-width: 20%;
   flex: 1;
@@ -26,14 +27,14 @@
 p.description {
   margin-right: 10px;
   padding: 0;}
-  
+
 .sources-list {
   list-style: none;
   margin-top: 0;
   padding-left: 8px;
   margin-bottom: 0;
 }
-  
+
 ul.sources-list li {
   height: 30px;
   white-space: nowrap;
