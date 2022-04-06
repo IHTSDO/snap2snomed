@@ -1,11 +1,10 @@
 <mat-card class="details-card">
   <mat-card-content>
     <div class="row">
-      <div class="col-mapping">
-        <h2 id="map-title" class="one-line-ellipse">{{mapping.project.title}}</h2>
-        <p class="one-line-ellipse"><b>{{'MAP.VERSION' | translate}}</b>: {{mapping.mapVersion}}</p>
-        <p class="three-line-ellipse description">{{mapping.project.description}}</p>
-      </div>
+      <h2 id="map-title" class="one-line-ellipse">{{mapping.project.title}}</h2>
+      <p id="map-version" class="one-line-ellipse"><b>{{'MAP.VERSION' | translate}}</b>: {{mapping.mapVersion}}</p>
+    </div>
+    <div class="row">
       <div class="col-project">
         <ul class="sources-list">
           <li class="one-line-ellipse"><b>{{'SOURCE.SOURCE' | translate}}:</b>&nbsp;{{mapping.source.name}},
@@ -18,13 +17,9 @@
             {{mapping.toScope}}
           </li>
         </ul>
-        <div class="bottom project-badges">
-          <app-project-badges [project]="mapping.project"></app-project-badges>
-        </div>
       </div>
       <div class="col-action">
         <small><i>{{'MAP.LAST_UPDATED' | translate}}: {{mapping.modified | lastupdated}}</i></small>
-        <span class="space-fill">&nbsp;</span>
         <p *ngIf="hasHandler()">
           <a class="mat-primary" mat-stroked-button (click)="clickHandler()">
             {{(editable ? 'MAP.MAP_EDIT_BUTTON' : 'MAP.MAP_VIEW_BUTTON') | translate}}
