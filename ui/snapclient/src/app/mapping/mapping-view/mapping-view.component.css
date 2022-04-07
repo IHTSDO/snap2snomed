@@ -265,3 +265,15 @@ td.mat-cell {
     margin-top: -25px;
   }
 }
+
+.mat-chip {
+  transition: box-shadow 280ms cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 20px;
+  height: 40px;
+  display:inline-flex;
+  align-items:center;
+  width: fit-content;
+  padding-right: 5px;
+  padding-left: 8px;
+  margin-right: 5px;
+}
