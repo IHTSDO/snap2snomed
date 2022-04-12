@@ -19,6 +19,7 @@ package org.snomed.snap2snomed.security;
 import java.util.List;
 import java.util.NoSuchElementException;
 
+import lombok.extern.slf4j.Slf4j;
 import org.snomed.snap2snomed.config.Snap2snomedConfiguration;
 import org.snomed.snap2snomed.model.User;
 import org.snomed.snap2snomed.problem.auth.MissingJwtProblem;
@@ -30,6 +31,7 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtClaimNames;
 import org.springframework.stereotype.Component;
 
+@Slf4j
 @Component
 public class AuthenticationFacadeImpl implements AuthenticationFacade {
 
@@ -74,6 +76,7 @@ public class AuthenticationFacadeImpl implements AuthenticationFacade {
     Authentication authentication = getAuthentication();
     if (authentication.getPrincipal() instanceof Jwt) {
       List<String> groups = ((Jwt) authentication.getPrincipal()).getClaimAsStringList("cognito:groups");
+      log.info("User " + ((Jwt) authentication.getPrincipal()).getSubject() + (groups.contains(configuration.getSecurity().getAdminGroup()) ? " is admin " : " is NOT admin ") + " - has groups " + groups + " with admin group " + configuration.getSecurity().getAdminGroup());
       return groups.contains(configuration.getSecurity().getAdminGroup());
     } else {
       throw new MissingJwtProblem();

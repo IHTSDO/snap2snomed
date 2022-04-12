@@ -34,6 +34,7 @@ import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
@@ -45,7 +46,7 @@ import org.snomed.snap2snomed.integration.IntegrationTestBase;
 import org.snomed.snap2snomed.model.ImportedCode;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
-
+@Slf4j
 @TestInstance(Lifecycle.PER_CLASS)
 public class ImportedCodeSetResourceIT extends IntegrationTestBase {
 
@@ -447,6 +448,9 @@ public class ImportedCodeSetResourceIT extends IntegrationTestBase {
     restClient.givenUser(PROJECT_USER).get("/importedCodeSets")
         .then().statusCode(200)
         .body("content", hasItem(hasEntry("name", codeSetName)));
+
+    log.info("Testing admin user access to codesets");
+    restClient.givenUser(DEFAULT_TEST_ADMIN_USER_SUBJECT).get("/users/" + DEFAULT_TEST_ADMIN_USER_SUBJECT).then().log().body().statusCode(200);
 
     restClient.givenUser(DEFAULT_TEST_ADMIN_USER_SUBJECT).get("/importedCodeSets")
         .then().statusCode(200)
