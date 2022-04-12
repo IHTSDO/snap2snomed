@@ -445,15 +445,17 @@ public class ImportedCodeSetResourceIT extends IntegrationTestBase {
     restClient.createMap("Testing Map Version", "http://snomed.info/sct/32506021000036107/version/20210531",
         "http://map.test.toscope", projectId, codesetId);
 
+    log.info("getting /importedCodeSets as 'PROJECT_USER'" + PROJECT_USER);
     restClient.givenUser(PROJECT_USER).get("/importedCodeSets")
-        .then().statusCode(200)
+        .then().log().body().statusCode(200)
         .body("content", hasItem(hasEntry("name", codeSetName)));
 
     log.info("Testing admin user access to codesets");
     restClient.givenUser(DEFAULT_TEST_ADMIN_USER_SUBJECT).get("/users/" + DEFAULT_TEST_ADMIN_USER_SUBJECT).then().log().body().statusCode(200);
 
+    log.info("getting /importedCodeSets as 'DEFAULT_TEST_ADMIN_USER_SUBJECT'" + DEFAULT_TEST_ADMIN_USER_SUBJECT);
     restClient.givenUser(DEFAULT_TEST_ADMIN_USER_SUBJECT).get("/importedCodeSets")
-        .then().statusCode(200)
+        .then().log().body().statusCode(200)
         .body("content", hasItem(hasEntry("name", codeSetName)));
   }
 
