@@ -44,7 +44,7 @@
     "jwt-decode": "^3.1.2",
     "mat-table-filter": "^10.2.0",
     "ngrx-store-localstorage": "11.0.0",
-    "ngx-flags": "1.0.2",
+    "ngx-flags": "13.0.3",
     "rxjs": "~6.6.0",
     "ts-md5": "^1.2.9",
     "tslib": "^2.0.0",
