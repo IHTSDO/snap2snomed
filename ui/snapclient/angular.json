@@ -27,16 +27,17 @@
               "src/favicon.ico",
               "src/assets",
               {
-                "glob": "**/*",
-                "input": "./node_modules/ngx-flags/img/flags",
-                "output": "./assets/flags"
+                  "glob": "**/*",
+                  "input": "./node_modules/flag-icon-css/flags/4x3",
+                  "output": "./assets/flags"
               }
             ],
             "styles": [
               {
                 "input": "node_modules/@angular/material/prebuilt-themes/indigo-pink.css"
               },
-              "src/assets/css/styles.css"
+              "src/assets/css/styles.css",
+              "node_modules/flag-icon-css/css/flag-icons.min.css"
             ],
             "scripts": []
           },
@@ -94,12 +95,13 @@
               "src/assets",
               {
                   "glob": "**/*",
-                  "input": "./node_modules/ngx-flags/img/flags",
+                  "input": "./node_modules/flag-icon-css/flags/4x3",
                   "output": "./assets/flags"
               }
             ],
             "styles": [
-              "src/assets/css/styles.css"
+              "src/assets/css/styles.css",
+              "node_modules/flag-icon-css/css/flag-icons.min.css",
             ],
             "scripts": []
           }
