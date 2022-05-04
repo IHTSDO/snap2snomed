@@ -12,7 +12,7 @@ pool:
 
 variables:
   mavenCache: $(Pipeline.Workspace)/.m2/repository
-  mavenOptions: '-Dmaven.repo.local=$(mavenCache) -Dit.test=ImportedCodeSetResourceIT'
+  mavenOptions: '-Dmaven.repo.local=$(mavenCache) -Dit.test=ImportedCodeSetResourceIT,ProjectResourceIT'
 
 stages:
   - stage: build

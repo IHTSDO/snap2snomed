@@ -25,12 +25,7 @@
             "aot": true,
             "assets": [
               "src/favicon.ico",
-              "src/assets",
-              {
-                  "glob": "**/*",
-                  "input": "./node_modules/flag-icon-css/flags/4x3",
-                  "output": "./assets/flags"
-              }
+              "src/assets"
             ],
             "styles": [
               {
@@ -92,12 +87,7 @@
             "karmaConfig": "karma.conf.js",
             "assets": [
               "src/favicon.ico",
-              "src/assets",
-              {
-                  "glob": "**/*",
-                  "input": "./node_modules/flag-icon-css/flags/4x3",
-                  "output": "./assets/flags"
-              }
+              "src/assets"
             ],
             "styles": [
               "src/assets/css/styles.css",
