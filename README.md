@@ -1,7 +1,7 @@
 <!-- PROJECT LOGO -->
 <br />
 <p align="center">
-  <a href="https://github.com/aehrc/snap2snomed">
+  <a href="https://github.com/IHTSDO/snap2snomed">
     <img src="images/SNOMED_Snap_2_01-286.png" alt="Logo" height="200">
   </a>
 
@@ -36,7 +36,7 @@ This is an example of how to list things you need to use the software and how to
 
 1. Clone the repo
    ```sh
-   git clone https://github.com/aehrc/snap2snomed.git
+   git clone https://github.com/IHTSDO/snap2snomed.git
    ```
 2. Run the Maven build
    ```sh
@@ -68,7 +68,7 @@ Distributed under the Apache 2.0 License. See `LICENSE` for more information.
 <!-- CONTACT -->
 ## Contact
 
-Project Link: [https://github.com/aehrc/snap2snomed](https://github.com/aehrc/snap2snomed)
+Project Link: [https://github.com/IHTSDO/snap2snomed](https://github.com/IHTSDO/snap2snomed)
 
 
 
