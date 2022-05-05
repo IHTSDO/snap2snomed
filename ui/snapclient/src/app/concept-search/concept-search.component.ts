@@ -140,7 +140,7 @@ export class ConceptSearchComponent implements OnInit, OnDestroy {
     };
 
     if (match) {
-      m.label = match[1];
+      m.label = concept.display;
       m.tag = match[2];
     } else {
       m.label = fsn;
