@@ -8,7 +8,7 @@ trigger:
 pr: none
 
 pool:
-  vmImage: ubuntu-latest
+  vmImage: ubuntu-20.04
 
 variables:
   mavenCache: $(Pipeline.Workspace)/.m2/repository
