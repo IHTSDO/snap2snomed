@@ -13,6 +13,7 @@ pool:
 variables:
   mavenCache: $(Pipeline.Workspace)/.m2/repository
   mavenOptions: '-Dmaven.repo.local=$(mavenCache)'
+  trivyVersion: 0.27.1
 
 stages:
   - stage: build
@@ -60,6 +61,18 @@ stages:
               reportDirectory: '**/target/site/jacoco'
               additionalCodeCoverageFiles: '**/target/jacoco.exec'
           - script: |
+              sudo apt-get install rpm
+              wget https://github.com/aquasecurity/trivy/releases/download/v$(trivyVersion)/trivy_$(trivyVersion)_Linux-64bit.deb
+              sudo dpkg -i trivy_$(trivyVersion)_Linux-64bit.deb
+              trivy -v
+            displayName: 'Download and install Trivy'
+          - task: CmdLine@2
+            displayName: "Run trivy scan on snap2snomed"
+            inputs:
+              script: |
+                trivy image --exit-code 0 --severity LOW,MEDIUM $(dockerRegistry)/$(registryPath):$(Build.BuildNumber)
+                trivy image --exit-code 1 --severity HIGH,CRITICAL $(dockerRegistry)/$(registryPath):$(Build.BuildNumber)
+          - script: |
               export VERSION=`git rev-parse --short=7 HEAD` && \
               yarn exec sentry-cli releases new $VERSION && \
               yarn exec sentry-cli releases set-commits $VERSION -- --auto --ignore-missing && \
@@ -80,6 +93,12 @@ stages:
               dockerFile: dex/snomed.Dockerfile
               tags: |
                 $(Build.BuildNumber)
+          - task: CmdLine@2
+            displayName: "Run trivy scan on Dex"
+            inputs:
+              script: |
+                trivy image --exit-code 0 --severity LOW,MEDIUM $(dockerRegistry)/$(dexRegistryPath):$(Build.BuildNumber)
+                trivy image --exit-code 1 --severity HIGH,CRITICAL $(dockerRegistry)/$(dexRegistryPath):$(Build.BuildNumber)
           - task: Docker@2
             condition: succeeded()
             displayName: Push image
