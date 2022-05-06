@@ -241,11 +241,11 @@ public class ImportedMappingRestControllerIT extends IntegrationTestBase {
   }
 
   /**
-   * Test an input file > 100k rows
+   * Test an input file > 200k rows
    */
   @Test
   public void failCreateEntityFromTooLargeFile() throws Exception {
-    restClient.expectCreateImportedMapFail( 0, 2, 3, 4, true, ",", new File("target/too-large.csv"),
+    restClient.expectCreateImportedMapFail( 0, 2, 3, 4, true, ",", new File("target/too-large-new.csv"),
         "text/csv", mapId, 400, TOO_LARGE_FILE_PROBLEM_URI, DEFAULT_TEST_USER_SUBJECT);
   }
 
