@@ -106,7 +106,6 @@ import {DragDropModule} from '@angular/cdk/drag-drop';
 import {ConfirmDialogComponent} from './dialog/confirm-dialog/confirm-dialog.component';
 import {GravatarComponent} from './user/gravatar/gravatar.component';
 import {ClipboardModule} from '@angular/cdk/clipboard';
-import {NgxFlagsModule} from 'ngx-flags';
 import {MatSlideToggleModule} from '@angular/material/slide-toggle';
 import {NotesItemComponent} from './notes/notes-item/notes-item.component';
 import {NotesListComponent} from './notes/notes-list/notes-list.component';
@@ -239,7 +238,6 @@ export function HttpLoaderFactory(httpClient: HttpClient): TranslateHttpLoader {
     MatSidenavModule,
     DragDropModule,
     ClipboardModule,
-    NgxFlagsModule,
     MatBottomSheetModule,
     MatSlideToggleModule,
     ShrimpHierarchyViewModule,

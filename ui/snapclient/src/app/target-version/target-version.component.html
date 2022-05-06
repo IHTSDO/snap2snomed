@@ -1,5 +1,5 @@
 <span>
   <img *ngIf="country === 'int'" src="https://browser.ihtsdotools.org/img/logo.png" height="16px">
-  <flag *ngIf="country && country !== 'int'" country="{{country}}" size="s"></flag>
+  <span *ngIf="country && country !== 'int'" class="flag-icon flag-icon-{{country}}"></span>
   {{experimental}} {{label}}, {{effectiveTime}}
 </span>
