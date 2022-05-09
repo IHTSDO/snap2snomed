@@ -96,6 +96,7 @@ stages:
           - task: CmdLine@2
             displayName: "Run trivy scan on Dex"
             inputs:
+              workingDirectory: $(System.DefaultWorkingDirectory)
               script: |
                 trivy image --exit-code 0 --severity LOW,MEDIUM $(dockerRegistry)/$(dexRegistryPath):$(Build.BuildNumber)
                 trivy image --exit-code 1 --severity HIGH,CRITICAL $(dockerRegistry)/$(dexRegistryPath):$(Build.BuildNumber)
