@@ -22,7 +22,7 @@ COPY . .
 
 RUN make release-binary
 
-FROM alpine:3.15.0 AS gomplate
+FROM alpine:3.15.4 AS gomplate
 
 ARG TARGETOS
 ARG TARGETARCH
