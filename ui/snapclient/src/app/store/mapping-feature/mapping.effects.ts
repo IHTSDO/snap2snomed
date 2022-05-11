@@ -16,7 +16,7 @@
 
 import {Injectable} from '@angular/core';
 import {Actions, createEffect, ofType} from '@ngrx/effects';
-import {catchError, concatMap, debounceTime, map, mergeMap, switchMap, tap} from 'rxjs/operators';
+import {catchError, concatMap, map, mergeMap, switchMap, tap} from 'rxjs/operators';
 import {
   AddMappingFailure,
   AddMappingSuccess,
@@ -197,7 +197,6 @@ export class MappingEffects {
   ), {dispatch: true});
 
   loadMapView$ = createEffect(() => this.actions$.pipe(
-    debounceTime(100),
     ofType(MappingActionTypes.LOAD_MAP_VIEW),
     map((action) => action.payload),
     switchMap((payload) => {
@@ -211,7 +210,6 @@ export class MappingEffects {
   ), {dispatch: true});
 
   loadTaskView$ = createEffect(() => this.actions$.pipe(
-    debounceTime(100),
     ofType(MappingActionTypes.LOAD_TASK_VIEW),
     map((action) => action.payload),
     switchMap((payload) => {
