@@ -148,7 +148,7 @@ export class Snap2SnomedErrorHandler implements ErrorHandler {
     // Log error to sentry
     if (error instanceof HttpErrorResponse) {
       // Don't report 4XX errors to Sentry
-      if (error.status >= 400 && error.status < 500 ) {
+      if (false && error.status >= 400 && error.status < 500 ) {       // temporarily log all - lawley & loi
         return;
       }
     }
