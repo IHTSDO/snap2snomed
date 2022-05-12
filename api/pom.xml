@@ -33,22 +33,23 @@
     <java.version>11</java.version>
     <docker.repository>aehrc/snap2snomed</docker.repository>
     <docker.registry.host>quay.io</docker.registry.host>
-    <sentry.version>5.6.1</sentry.version>
-    <jacoco.version>0.8.7</jacoco.version>
+    <sentry.version>5.7.3</sentry.version>
+    <jacoco.version>0.8.8</jacoco.version>
     <commons-csv.version>1.9.0</commons-csv.version>
-    <mariadb-java-client.version>2.7.4</mariadb-java-client.version>
-    <org.springdoc.version>1.6.6</org.springdoc.version>
-    <jib.version>3.2.0</jib.version>
+    <mariadb-java-client.version>3.0.4</mariadb-java-client.version>
+    <org.springdoc.version>1.6.8</org.springdoc.version>
+    <jib.version>3.2.1</jib.version>
     <apt-maven-plugin.version>1.1.3</apt-maven-plugin.version>
     <problem-spring-web.version>0.27.0</problem-spring-web.version>
-    <swagger-request-validator.version>2.25.0</swagger-request-validator.version>
-    <apache-poi.version>5.2.0</apache-poi.version>
+    <swagger-request-validator.version>2.27.2</swagger-request-validator.version>
+    <apache-poi.version>5.2.2</apache-poi.version>
     <rest-assured.version>4.4.0</rest-assured.version>
-    <jjwt.version>0.11.2</jjwt.version>
-    <tc-mysql.version>1.16.2</tc-mysql.version>
-    <mockserver.version>5.11.2</mockserver.version>
+    <jjwt.version>0.11.5</jjwt.version>
+    <tc-mysql.version>1.17.1</tc-mysql.version>
+    <mockserver.version>5.13.2</mockserver.version>
     <hamcrest-test.version>1.3</hamcrest-test.version>
-    <hapi.version>5.6.2</hapi.version>
+    <hamcrest-date.version>2.0.8</hamcrest-date.version>
+    <hapi.version>5.7.2</hapi.version>
   </properties>
 
   <dependencies>
@@ -144,6 +145,7 @@
     <dependency>
       <groupId>com.h2database</groupId>
       <artifactId>h2</artifactId>
+      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>
@@ -232,7 +234,7 @@
     <dependency>
       <groupId>org.exparity</groupId>
       <artifactId>hamcrest-date</artifactId>
-      <version>2.0.7</version>
+      <version>${hamcrest-date.version}</version>
       <scope>test</scope>
     </dependency>
 
@@ -256,6 +258,13 @@
       <groupId>org.ihtsdo.snomed.util</groupId>
       <artifactId>snomed-utilities</artifactId>
       <version>1.4.1</version>
+    </dependency>
+    <!-- included to work around snomed-utilities which includes (transitively) an older version
+        PR open on SNOMED International to update snomed-utilities and this can be removed -->
+    <dependency>
+      <groupId>commons-validator</groupId>
+      <artifactId>commons-validator</artifactId>
+      <version>1.7</version>
     </dependency>
 
   </dependencies>
@@ -291,6 +300,7 @@
         <artifactId>jib-maven-plugin</artifactId>
         <version>${jib.version}</version>
         <configuration>
+          <from><image>eclipse-temurin:11-alpine</image></from>
           <container>
             <ports>
               <port>8080</port>

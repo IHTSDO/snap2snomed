@@ -16,7 +16,7 @@
 
 import { Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
-import { catchError, debounceTime, map, switchMap } from 'rxjs/operators';
+import { catchError, map, switchMap } from 'rxjs/operators';
 import { of } from 'rxjs/internal/observable/of';
 import { FhirService } from '../../_services/fhir.service';
 import { R4 } from '@ahryman40k/ts-fhir-types';
