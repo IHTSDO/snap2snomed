@@ -47,6 +47,7 @@ describe('TargetRelationshipComponent', () => {
   const sourceIndex = '1';
   const targetCode = '123456';
   const targetDisplay = 'Test target';
+  const targetSystem = 'http://snomed.info/sct/900000000000207008/version/20220228'
   const relationship = MapRowRelationship.EQUIVALENT;
   const target = new MapView('', '', sourceIndex, sourceCode, sourceDisplay, targetCode, targetDisplay, relationship,
     'DRAFT', false, null, null, null, null, null, false);
@@ -102,7 +103,7 @@ describe('TargetRelationshipComponent', () => {
     spyOn(component.newTargetEvent, 'emit');
     expect(component.targetRows.length).toEqual(0);
 
-    component.addSelection(targetCode, targetDisplay, relationship);
+    component.addSelection(targetCode, targetDisplay, targetSystem, relationship);
     fixture.detectChanges();
     expect(component.newTargetEvent.emit).toHaveBeenCalledOnceWith(target);
   });
@@ -113,7 +114,7 @@ describe('TargetRelationshipComponent', () => {
     expect(component.targetRows.length).toEqual(1);
     expect(component.source).toBeTruthy();
     // Add same targetCode
-    component.addSelection(targetCode, targetDisplay, relationship);
+    component.addSelection(targetCode, targetDisplay, targetSystem, relationship);
     fixture.detectChanges();
     expect(component.targetRows.length).toEqual(1);
     expect(component.error.message).toEqual('ERROR.DUPLICATE_TARGET_ERROR');
