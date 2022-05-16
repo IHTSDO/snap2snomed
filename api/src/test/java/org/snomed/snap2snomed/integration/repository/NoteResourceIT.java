@@ -107,26 +107,26 @@ public class NoteResourceIT extends IntegrationTestBase {
         .body("content", hasSize(20))
         .body("content[0].sourceCode", is("map1 row code 1."))
         .body("content[1].sourceCode", is("map1 row code 2."))
-        .body("content[1].latestNote".substring(0, 23) + "Z", is(note3Modified.replace("\"", "").substring(0, 23) + "Z"))
+        .body("content[1].latestNote", is(note3Modified.replace("\"", "")))
         .body("content[2].sourceCode", is("map1 row code 3."))
-        .body("content[2].latestNote".substring(0, 23) + "Z", is(note4Modified.replace("\"", "").substring(0, 23) + "Z"));
+        .body("content[2].latestNote", is(note4Modified.replace("\"", "")));
 
     restClient.givenDefaultUser().get("/mapView/" + mapId + "?sort=latestNote&page=1").then().log()
         .ifValidationFails(LogDetail.BODY).statusCode(200)
         .body("content", hasSize(14))
         .body("content[0].latestNote", nullValue())
         .body("content[12].sourceCode", is("map1 row code 2."))
-        .body("content[12].latestNote", is(note3Modified.replace("\"", "").substring(0, 23) + "Z"))
+        .body("content[12].latestNote", is(note3Modified.replace("\"", "")))
         .body("content[13].sourceCode", is("map1 row code 3."))
-        .body("content[13].latestNote", is(note4Modified.replace("\"", "").substring(0, 23) + "Z"));
+        .body("content[13].latestNote", is(note4Modified.replace("\"", "")));
 
     restClient.givenDefaultUser().get("/mapView/" + mapId + "?sort=latestNote,desc").then().log()
         .ifValidationFails(LogDetail.BODY).statusCode(200)
         .body("content", hasSize(20))
         .body("content[0].sourceCode", is("map1 row code 3."))
-        .body("content[0].latestNote", is(note4Modified.replace("\"", "").substring(0, 23) + "Z"))
+        .body("content[0].latestNote", is(note4Modified.replace("\"", "")))
         .body("content[1].sourceCode", is("map1 row code 2."))
-        .body("content[1].latestNote", is(note3Modified.replace("\"", "").substring(0, 23) + "Z"));
+        .body("content[1].latestNote", is(note3Modified.replace("\"", "")));
   }
 
 
