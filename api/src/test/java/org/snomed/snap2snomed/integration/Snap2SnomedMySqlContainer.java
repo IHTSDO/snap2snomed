@@ -52,7 +52,8 @@ public class Snap2SnomedMySqlContainer extends MySQLContainer {
   @Override
   public void start() {
     super.start();
-    System.setProperty("DB_URL", container.getJdbcUrl());
+    // Match Connection string to the Aurora connection string in Terraform's terraform/api/locals.tf file so we test the same connection as the deployment
+    System.setProperty("DB_URL", container.getJdbcUrl() + "?cachePrepStmts=true&useServerPrepStmts=false&rewriteBatchedStatements=true");
     System.setProperty("DB_USERNAME", container.getUsername());
     System.setProperty("DB_PASSWORD", container.getPassword());
   }

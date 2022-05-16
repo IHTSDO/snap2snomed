@@ -137,6 +137,10 @@ locals {
         {
           name  = "DEX_DB_CREATE"
           value = "true"
+        },
+        {
+          name  = "DEX_LOG_LEVEL"
+          value = "debug"
         }
   ]
 }
