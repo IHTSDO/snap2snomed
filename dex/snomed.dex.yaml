@@ -40,5 +40,5 @@ expiry:
   authRequests: 24h
 
 logger:
-  level: debug
+  level: {{ getenv "DEX_LOG_LEVEL" "debug" }}
   format: text
