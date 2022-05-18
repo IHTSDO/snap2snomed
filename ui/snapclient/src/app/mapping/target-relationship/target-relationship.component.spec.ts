@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {ComponentFixture, fakeAsync, TestBed} from '@angular/core/testing';
+import {ComponentFixture, fakeAsync, TestBed, flush, discardPeriodicTasks} from '@angular/core/testing';
 
 import {TargetRelationshipComponent} from './target-relationship.component';
 import {RouterTestingModule} from '@angular/router/testing';
@@ -33,6 +33,11 @@ import {SelectionService} from 'src/app/_services/selection.service';
 import {By} from '@angular/platform-browser';
 import {MapRowRelationship, MapRowStatus, MapView} from 'src/app/_models/map_row';
 import {MatIconModule} from '@angular/material/icon';
+import {ErrormessageComponent} from 'src/app/errormessage/errormessage.component';
+import {MatCardModule} from '@angular/material/card';
+import {MatListModule} from '@angular/material/list';
+import {DroppableDirective} from 'src/app/_directives/droppable.directive';
+import {DraggableDirective} from 'src/app/_directives/draggable.directive';
 
 describe('TargetRelationshipComponent', () => {
   let component: TargetRelationshipComponent;
@@ -63,6 +68,8 @@ describe('TargetRelationshipComponent', () => {
         MatSnackBarModule,
         MatTooltipModule,
         MatIconModule,
+        MatCardModule,
+        MatListModule,
         TranslateModule.forRoot({
           loader: {
             provide: TranslateLoader,
@@ -76,7 +83,7 @@ describe('TargetRelationshipComponent', () => {
         provideMockStore({
           initialState: initialAppState,
         }), TranslateService, SelectionService],
-      declarations: [TargetRelationshipComponent]
+      declarations: [TargetRelationshipComponent, ErrormessageComponent, DroppableDirective, DraggableDirective]
     })
       .compileComponents();
     store = TestBed.inject(MockStore);
@@ -147,7 +154,7 @@ describe('TargetRelationshipComponent', () => {
     expect(component.newTargetEvent.emit).toHaveBeenCalledWith(calledWith);
   });
 
-  it('button should not add duplicated selection', () => {
+  it('button should not add duplicated selection', fakeAsync(() => {
     fixture.detectChanges();
 
     const code = '1234567';
@@ -156,9 +163,19 @@ describe('TargetRelationshipComponent', () => {
     component.targetRows.push(new MapView('', '', sourceIndex, sourceCode, sourceDisplay, code, display, relationship,
       'DRAFT', false, null, null, null, null, null, false));
     selectionService.select({code, display});
-    el = fixture.debugElement.query(By.css('button'));
-    el.triggerEventHandler('click', null);
-    expect(component.error).toEqual({message: 'ERROR.DUPLICATE_TARGET_ERROR'});
-  });
+    fixture.whenStable().then(() => {
+      el = fixture.debugElement.query(By.css('button'));
+      console.log(el);
+      el.triggerEventHandler('click', null);
+      fixture.detectChanges();
+      fixture.whenStable().then(() => {
+        fixture.detectChanges();
+        console.log(component.error);
+        expect(component.error).toEqual({message: 'ERROR.DUPLICATE_TARGET_ERROR'});
+      });
+    });
+    flush();
+    discardPeriodicTasks();
+  }));
 
 });
