@@ -106,7 +106,7 @@ data "aws_iam_policy_document" "dex" {
     resources = [
       aws_secretsmanager_secret.api.arn,
       aws_kms_key.api.arn,
-      aws_cloudwatch_log_group.api.arn,
+      aws_cloudwatch_log_group.dex.arn,
       "${aws_cloudwatch_log_group.dex.arn}:log-stream:*"
     ]
   }
