@@ -226,7 +226,6 @@ public class ImportedCodeSetResourceIT extends IntegrationTestBase {
 
     restClient.createMap("Testing Map Version", "http://snomed.info/sct/32506021000036107/version/20210531",
         "http://map.test.toscope", projectId, codesetId);
-    Thread.sleep(2000);
 
     restClient.givenUser(PROJECT_USER).get("/importedCodeSets")
         .then().statusCode(200)
