@@ -213,6 +213,31 @@ public class ImportedCodeSetResourceIT extends IntegrationTestBase {
   }
 
   /**
+   * Tests that users can see an imported codeset who is associated with a project that has the importedcodset as a base
+   */
+  @Test
+  public void projectMemberAndAdminShouldSeeImportedCodeSystem() throws Exception {
+
+    long projectId = restClient.createProject("ProjectDemo", "Demo Project", Set.of(DEFAULT_TEST_USER_SUBJECT, PROJECT_USER), Set.of(), Set.of());
+
+    final String codeSetName = "AAA semicolon - defaultuser - projecttest";
+
+    long codesetId = immportCodeSetForUser(DEFAULT_TEST_USER_SUBJECT, codeSetName, "1.0", 0, 2, true, ";", new ClassPathResource("AAA-semi.csv").getFile(), "text/tsv");
+
+    restClient.createMap("Testing Map Version", "http://snomed.info/sct/32506021000036107/version/20210531",
+        "http://map.test.toscope", projectId, codesetId);
+    Thread.sleep(2000);
+
+    restClient.givenUser(PROJECT_USER).get("/importedCodeSets")
+        .then().statusCode(200)
+        .body("content", hasItem(hasEntry("name", codeSetName)));
+
+    restClient.givenUser(DEFAULT_TEST_ADMIN_USER_SUBJECT).get("/importedCodeSets")
+        .then().statusCode(200)
+        .body("content", hasItem(hasEntry("name", codeSetName)));
+  }
+
+  /**
    * Test invalid CSV format file (e.g. messed up delimiters/quotes) to text/csv
    */
   @Test
@@ -427,31 +452,6 @@ public class ImportedCodeSetResourceIT extends IntegrationTestBase {
     restClient.givenDefaultUser().get("/importedCodeSets")
         .then().statusCode(200)
         .body("page.totalElements", greaterThanOrEqualTo(1));
-  }
-
-  /**
-   * Tests that users can see an imported codeset who is associated with a project that has the importedcodset as a base
-   */
-  @Test
-  @Order(1)
-  public void projectMemberAndAdminShouldSeeImportedCodeSystem() throws Exception {
-
-    long projectId = restClient.createProject("ProjectDemo", "Demo Project", Set.of(DEFAULT_TEST_USER_SUBJECT, PROJECT_USER), Set.of(), Set.of());
-
-    final String codeSetName = "AAA semicolon - defaultuser - projecttest";
-
-    long codesetId = immportCodeSetForUser(DEFAULT_TEST_USER_SUBJECT, codeSetName, "1.0", 0, 2, true, ";", new ClassPathResource("AAA-semi.csv").getFile(), "text/tsv");
-
-    restClient.createMap("Testing Map Version", "http://snomed.info/sct/32506021000036107/version/20210531",
-        "http://map.test.toscope", projectId, codesetId);
-
-    restClient.givenUser(PROJECT_USER).get("/importedCodeSets")
-        .then().statusCode(200)
-        .body("content", hasItem(hasEntry("name", codeSetName)));
-
-    restClient.givenUser(DEFAULT_TEST_ADMIN_USER_SUBJECT).get("/importedCodeSets")
-        .then().statusCode(200)
-        .body("content", hasItem(hasEntry("name", codeSetName)));
   }
 
   /**
