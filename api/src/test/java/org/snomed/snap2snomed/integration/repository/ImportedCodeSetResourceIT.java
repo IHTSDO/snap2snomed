@@ -433,6 +433,7 @@ public class ImportedCodeSetResourceIT extends IntegrationTestBase {
    * Tests that users can see an imported codeset who is associated with a project that has the importedcodset as a base
    */
   @Test
+  @Order(1)
   public void projectMemberAndAdminShouldSeeImportedCodeSystem() throws Exception {
 
     long projectId = restClient.createProject("ProjectDemo", "Demo Project", Set.of(DEFAULT_TEST_USER_SUBJECT, PROJECT_USER), Set.of(), Set.of());
