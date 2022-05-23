@@ -29,8 +29,8 @@ import org.junit.jupiter.api.TestInstance.Lifecycle;
 import org.snomed.snap2snomed.integration.IntegrationTestBase;
 import org.springframework.core.io.ClassPathResource;
 
-@TestInstance(Lifecycle.PER_CLASS)
-public class ImportedCodeSetResourceExtraIT extends IntegrationTestBase {
+@TestInstance(Lifecycle.PER_METHOD)
+public class PerMethodResourceTestsIT extends IntegrationTestBase {
 
   private static final String PROJECT_USER = "project-import-user";
 
