@@ -8,7 +8,7 @@ trigger:
 pr: none
 
 pool:
-  vmImage: highmemory-agent-pool
+  vmImage: ubuntu-latest
 
 variables:
   mavenCache: $(Pipeline.Workspace)/.m2/repository
