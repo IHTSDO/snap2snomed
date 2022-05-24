@@ -185,6 +185,7 @@ func (s *Server) handleAuthorization(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) handleConnectorLogin(w http.ResponseWriter, r *http.Request) {
+	s.logger.Debugf("Parse Authorisation request %s", r)
 	authReq, err := s.parseAuthorizationRequest(r)
 	if err != nil {
 		s.logger.Errorf("Failed to parse authorization request: %v", err)
