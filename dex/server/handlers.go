@@ -622,7 +622,7 @@ func (s *Server) sendCodeResponse(w http.ResponseWriter, r *http.Request, authRe
 				ConnectorData: authReq.ConnectorData,
 				PKCE:          authReq.PKCE,
 			}
-			s.logger.Debugf("Creating auth code for %s", code)
+			s.logger.Debugf("Creating auth code for %s with redirect uri %s", code, authReq.RedirectURI)
 			if err := s.storage.CreateAuthCode(code); err != nil {
 				s.logger.Errorf("Failed to create auth code: %v", err)
 				s.renderError(r, w, http.StatusInternalServerError, "Internal server error.")
@@ -643,12 +643,14 @@ func (s *Server) sendCodeResponse(w http.ResponseWriter, r *http.Request, authRe
 			implicitOrHybrid = true
 			var err error
 
+			s.logger.Debugf("Creating tokens")
 			accessToken, err = s.newAccessToken(authReq.ClientID, authReq.Claims, authReq.Scopes, authReq.Nonce, authReq.ConnectorID)
 			if err != nil {
 				s.logger.Errorf("failed to create new access token: %v", err)
 				s.tokenErrHelper(w, errServerError, "", http.StatusInternalServerError)
 				return
 			}
+			s.logger.Debugf("Access token created")
 
 			idToken, idTokenExpiry, err = s.newIDToken(authReq.ClientID, authReq.Claims, authReq.Scopes, authReq.Nonce, accessToken, code.ID, authReq.ConnectorID)
 			if err != nil {
@@ -656,6 +658,7 @@ func (s *Server) sendCodeResponse(w http.ResponseWriter, r *http.Request, authRe
 				s.tokenErrHelper(w, errServerError, "", http.StatusInternalServerError)
 				return
 			}
+			s.logger.Debugf("ID token created")
 		}
 	}
 
@@ -679,6 +682,8 @@ func (s *Server) sendCodeResponse(w http.ResponseWriter, r *http.Request, authRe
 			v.Set("code", code.ID)
 		}
 
+		s.logger.Debugf("Encode access token for redirect %s", v)
+
 		// Implicit and hybrid flows return their values as part of the fragment.
 		//
 		//   HTTP/1.1 303 See Other
@@ -701,9 +706,11 @@ func (s *Server) sendCodeResponse(w http.ResponseWriter, r *http.Request, authRe
 		q := u.Query()
 		q.Set("code", code.ID)
 		q.Set("state", authReq.State)
+		s.logger.Debugf("Encode code for hybrid/implicit flow  %s", q)
 		u.RawQuery = q.Encode()
 	}
 
+	s.logger.Debugf("Redirectimg with parameters %s", u.String())
 	http.Redirect(w, r, u.String(), http.StatusSeeOther)
 }
 
