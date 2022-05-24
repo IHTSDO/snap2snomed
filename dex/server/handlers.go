@@ -694,6 +694,7 @@ func (s *Server) sendCodeResponse(w http.ResponseWriter, r *http.Request, authRe
 		//     &expires_in=3600
 		//     &state=af0ifjsldkj
 		//
+		s.logger.Debugf("Encode fragment for hybrid/implicit flow  %s", v)
 		u.Fragment = v.Encode()
 	} else {
 		// The code flow add values to the URL query.
@@ -706,11 +707,11 @@ func (s *Server) sendCodeResponse(w http.ResponseWriter, r *http.Request, authRe
 		q := u.Query()
 		q.Set("code", code.ID)
 		q.Set("state", authReq.State)
-		s.logger.Debugf("Encode code for hybrid/implicit flow  %s", q)
+		s.logger.Debugf("Encode query for hybrid/implicit flow  %s", q)
 		u.RawQuery = q.Encode()
 	}
 
-	s.logger.Debugf("Redirectimg with parameters %s", u.String())
+	s.logger.Debugf("Redirecting with parameters %s", u.String())
 	http.Redirect(w, r, u.String(), http.StatusSeeOther)
 }
 
