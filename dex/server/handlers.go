@@ -542,6 +542,7 @@ func (s *Server) handleApproval(w http.ResponseWriter, r *http.Request) {
 		s.renderError(r, w, http.StatusInternalServerError, "Login process not yet finalized.")
 		return
 	}
+	s.logger.Debugf("Handling approval for authRequest %s", authReq)
 
 	switch r.Method {
 	case http.MethodGet:
@@ -568,6 +569,7 @@ func (s *Server) handleApproval(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) sendCodeResponse(w http.ResponseWriter, r *http.Request, authReq storage.AuthRequest) {
+	s.logger.Debugf("Sending Code response for request %s authRequest %s", r, authReq)
 	if s.now().After(authReq.Expiry) {
 		s.renderError(r, w, http.StatusBadRequest, "User session has expired.")
 		return
@@ -620,6 +622,7 @@ func (s *Server) sendCodeResponse(w http.ResponseWriter, r *http.Request, authRe
 				ConnectorData: authReq.ConnectorData,
 				PKCE:          authReq.PKCE,
 			}
+			s.logger.Debugf("Creating auth code for %s", code)
 			if err := s.storage.CreateAuthCode(code); err != nil {
 				s.logger.Errorf("Failed to create auth code: %v", err)
 				s.renderError(r, w, http.StatusInternalServerError, "Internal server error.")
