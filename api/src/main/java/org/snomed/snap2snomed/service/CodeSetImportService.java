@@ -278,6 +278,8 @@ public class CodeSetImportService {
     } catch (IllegalStateException|IllegalArgumentException e) {
       throw new CodeSetImportProblem("invalid-file", "Invalid data encountered in source file", e.getLocalizedMessage());
     }
+    entityManager.flush();
+    entityManager.clear();
 
     return importedCodeSet;
   }
