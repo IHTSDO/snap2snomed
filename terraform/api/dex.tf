@@ -29,7 +29,7 @@ resource "aws_ecs_task_definition" "dex" {
       }
     }
   ])
-  execution_role_arn       = aws_iam_role.api.arn
+  execution_role_arn       = aws_iam_role.dex.arn
   requires_compatibilities = ["FARGATE"]
   network_mode             = "awsvpc"
 }
