@@ -359,6 +359,7 @@ func (s *Server) handlePasswordLogin(w http.ResponseWriter, r *http.Request) {
 			}
 			return
 		}
+		s.logger.Debugf("Finalising login for %s", username)
 		redirectURL, err := s.finalizeLogin(identity, authReq, conn.Connector)
 		if err != nil {
 			s.logger.Errorf("Failed to finalize login: %v", err)
@@ -366,6 +367,7 @@ func (s *Server) handlePasswordLogin(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
+		s.logger.Debugf("Redirecting to URL %s", redirectURL)
 		http.Redirect(w, r, redirectURL, http.StatusSeeOther)
 	default:
 		s.renderError(r, w, http.StatusBadRequest, "Unsupported request method.")
