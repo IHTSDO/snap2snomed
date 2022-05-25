@@ -300,7 +300,7 @@
         <artifactId>jib-maven-plugin</artifactId>
         <version>${jib.version}</version>
         <configuration>
-          <from><image>eclipse-temurin:11-alpine</image></from>
+          <from><image>aehrc/jre:openjdk-11</image></from>
           <container>
             <ports>
               <port>8080</port>
