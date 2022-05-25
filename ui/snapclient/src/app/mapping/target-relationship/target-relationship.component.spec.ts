@@ -38,11 +38,14 @@ import {MatCardModule} from '@angular/material/card';
 import {MatListModule} from '@angular/material/list';
 import {DroppableDirective} from 'src/app/_directives/droppable.directive';
 import {DraggableDirective} from 'src/app/_directives/draggable.directive';
+import {FhirService} from "../../_services/fhir.service";
+import {of} from "rxjs";
 
 describe('TargetRelationshipComponent', () => {
   let component: TargetRelationshipComponent;
   let fixture: ComponentFixture<TargetRelationshipComponent>;
   let el: DebugElement;
+  let fhirService: FhirService;
   let translateService: TranslateService;
   let selectionService: SelectionService;
   let store: MockStore<IAppState>;
@@ -56,7 +59,25 @@ describe('TargetRelationshipComponent', () => {
   const relationship = MapRowRelationship.EQUIVALENT;
   const target = new MapView('', '', sourceIndex, sourceCode, sourceDisplay, targetCode, targetDisplay, relationship,
     'DRAFT', false, null, null, null, null, null, false);
-
+  const parameterValue = [
+    {
+      name: 'designation',
+      part: [
+        {
+          name: 'use',
+          valueCoding: {code: '900000000000003001'}
+        },
+        {
+          name: 'language',
+          valueCode: 'en'
+        },
+        {
+          name: 'value',
+          valueString: targetDisplay
+        }
+      ]
+    },
+  ];
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
@@ -82,11 +103,12 @@ describe('TargetRelationshipComponent', () => {
         {provide: APP_CONFIG, useValue: {}},
         provideMockStore({
           initialState: initialAppState,
-        }), TranslateService, SelectionService],
+        }), FhirService, TranslateService, SelectionService],
       declarations: [TargetRelationshipComponent, ErrormessageComponent, DroppableDirective, DraggableDirective]
     })
       .compileComponents();
     store = TestBed.inject(MockStore);
+    fhirService = TestBed.inject(FhirService);
     translateService = TestBed.inject(TranslateService);
     selectionService = TestBed.inject(SelectionService);
     fixture = TestBed.createComponent(TargetRelationshipComponent);
@@ -108,23 +130,41 @@ describe('TargetRelationshipComponent', () => {
 
   it('should add target', () => {
     spyOn(component.newTargetEvent, 'emit');
+    spyOn(fhirService, 'lookupConcept').and.callFake((targetCode, targetSystem, version) => {
+      return of({
+        resourceType: 'Parameters',
+        parameter: parameterValue
+      });
+    });
+
     expect(component.targetRows.length).toEqual(0);
 
     component.addSelection(targetCode, targetDisplay, targetSystem, relationship);
-    fixture.detectChanges();
-    expect(component.newTargetEvent.emit).toHaveBeenCalledOnceWith(target);
+    fixture.whenStable().then(() => {
+      fixture.detectChanges();
+      expect(component.newTargetEvent.emit).toHaveBeenCalledOnceWith(target);
+    });
   });
 
   it('should not add duplicate target', () => {
     component.targetRows.push(target);
+    spyOn(fhirService, 'lookupConcept').and.callFake((targetCode, targetSystem, version) => {
+      return of({
+        resourceType: 'Parameters',
+        parameter: parameterValue
+      });
+    });
+
     fixture.detectChanges();
     expect(component.targetRows.length).toEqual(1);
     expect(component.source).toBeTruthy();
     // Add same targetCode
     component.addSelection(targetCode, targetDisplay, targetSystem, relationship);
-    fixture.detectChanges();
-    expect(component.targetRows.length).toEqual(1);
-    expect(component.error.message).toEqual('ERROR.DUPLICATE_TARGET_ERROR');
+    fixture.whenStable().then(() => {
+      fixture.detectChanges();
+      expect(component.targetRows.length).toEqual(1);
+      expect(component.error.message).toEqual('ERROR.DUPLICATE_TARGET_ERROR');
+    });
   });
 
   it('should remove target', fakeAsync(() => {
@@ -145,13 +185,25 @@ describe('TargetRelationshipComponent', () => {
     const display = 'This is a test selection';
 
     spyOn(component.newTargetEvent, 'emit');
+    spyOn(fhirService, 'lookupConcept').and.callFake((targetCode, targetSystem, version) => {
+      return of({
+        resourceType: 'Parameters',
+        parameter: parameterValue
+      });
+    });
+
     selectionService.select({code, display});
     el = fixture.debugElement.query(By.css('button'));
     expect(el).toBeTruthy();
     el.triggerEventHandler('click', null);
     const calledWith = new MapView('', '', sourceIndex, sourceCode, sourceDisplay, code, display, relationship,
       'DRAFT', false, null, null, null, null, null, false);
-    expect(component.newTargetEvent.emit).toHaveBeenCalledWith(calledWith);
+
+    fixture.whenStable().then(() => {
+      fixture.detectChanges();
+      expect(component.newTargetEvent.emit).toHaveBeenCalledWith(calledWith);
+    });
+
   });
 
   it('button should not add duplicated selection', fakeAsync(() => {
@@ -163,6 +215,13 @@ describe('TargetRelationshipComponent', () => {
     component.targetRows.push(new MapView('', '', sourceIndex, sourceCode, sourceDisplay, code, display, relationship,
       'DRAFT', false, null, null, null, null, null, false));
     selectionService.select({code, display});
+
+    spyOn(fhirService, 'lookupConcept').and.callFake((targetCode, targetSystem, version) => {
+      return of({
+        resourceType: 'Parameters',
+          parameter: parameterValue
+      });
+    });
     fixture.whenStable().then(() => {
       el = fixture.debugElement.query(By.css('button'));
       console.log(el);

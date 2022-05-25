@@ -125,7 +125,7 @@ export class TargetRelationshipComponent implements OnInit {
         });
 
         if (fsns) {
-          // non english fsn is present, use the english fsn
+          // use the english fsn
           displayTerm = fsns.find(fsn => fsn.language == 'en')?.fsn || display;
         }
       }
