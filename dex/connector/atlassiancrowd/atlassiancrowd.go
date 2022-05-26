@@ -54,12 +54,12 @@ type Config struct {
 }
 
 type crowdUser struct {
-	Key        string
-	Name       string
+	Key       string
+	Name      string
 	FirstName string `json:"first-name"`
 	LastName  string `json:"last-name"`
-	Active     bool
-	Email      string
+	Active    bool
+	Email     string
 }
 
 type crowdGroups struct {
@@ -430,6 +430,7 @@ func (c *crowdConnector) crowdUserManagementRequest(ctx context.Context, method 
 	if jsonPayload != nil {
 		req.Header.Set("Content-type", "application/json")
 	}
+	c.logger.Debugf("crowd request: %s", req)
 	return req, nil
 }
 
@@ -439,6 +440,7 @@ func (c *crowdConnector) validateCrowdResponse(resp *http.Response) ([]byte, err
 	if err != nil {
 		return nil, fmt.Errorf("crowd: read user body: %v", err)
 	}
+	c.logger.Debugf("crowd response: %s", string(body))
 
 	if resp.StatusCode == http.StatusForbidden && strings.Contains(string(body), "The server understood the request but refuses to authorize it.") {
 		c.logger.Debugf("crowd response validation failed: %s", string(body))
