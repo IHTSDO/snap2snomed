@@ -110,24 +110,10 @@ export class TargetRelationshipComponent implements OnInit {
   addSelection(code: string, display: string, system: string, relationship: string): void {
     const self = this;
 
-    self.fhirService.lookupConcept(code, system, self.task?.mapping?.toVersion || '').subscribe(parameters => {
+    self.fhirService.getEnglishFsn(code, system, self.task?.mapping?.toVersion || '').subscribe(englishFsn => {
       let displayTerm = display;
-      if (parameters) {
-        let fsns = parameters.parameter?.filter(parameter => {
-          return parameter.name == 'designation' && parameter.part?.some(parameterValue => {
-            return parameterValue.name == 'use' && parameterValue.valueCoding?.code == '900000000000003001';
-          });
-        }).map(parameter => {
-          return {
-            language: parameter.part?.find(e => e.name == 'language')?.valueCode,
-            fsn : parameter.part?.find(e => e.name == 'value')?.valueString
-          };
-        });
-
-        if (fsns) {
-          // use the english fsn
-          displayTerm = fsns.find(fsn => fsn.language == 'en')?.fsn || display;
-        }
+      if (englishFsn !== '') {
+        displayTerm = englishFsn;
       }
 
       if (self.source) {

@@ -298,6 +298,26 @@ export class FhirService {
     return this.http.post<R4.IBundle>(url, body, options);
   }
 
+  getEnglishFsn(code: string, system: string, version: string, properties: string[] = []): Observable<string> {
+    return this.lookupConcept(code, system, version, properties).pipe(
+      map((parameters: R4.IParameters) => {
+        return parameters.parameter?.filter(parameter => {
+          return parameter.name == 'designation' && parameter.part?.some(param => param.name == 'use' && param.valueCoding?.code == '900000000000003001');
+        }).map(fsns => ({
+          language: fsns.part?.find(e => e.name == 'language')?.valueCode,
+          fsn: fsns.part?.find(e => e.name == 'value')?.valueString
+        }));
+      }),
+      map(fsnObjects => {
+        let englishFsn = '';
+        if (fsnObjects) {
+          englishFsn = fsnObjects.find(fsn => fsn.language == 'en')?.fsn || '';
+        }
+        return englishFsn;
+      })
+    );
+  }
+
   lookupConcept(code: string, system: string, version: string, properties: string[] = []): Observable<R4.IParameters> {
     const url = `${this.config.fhirBaseUrl}/CodeSystem/$lookup`;
     const params: any = {
