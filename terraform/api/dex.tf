@@ -22,14 +22,14 @@ resource "aws_ecs_task_definition" "dex" {
       logConfiguration = {
         logDriver = "awslogs"
         options = {
-          awslogs-group         = aws_cloudwatch_log_group.api.name
+          awslogs-group         = aws_cloudwatch_log_group.dex.name
           awslogs-region        = var.aws_region
           awslogs-stream-prefix = "snap2snomed-dex"
         }
       }
     }
   ])
-  execution_role_arn       = aws_iam_role.api.arn
+  execution_role_arn       = aws_iam_role.dex.arn
   requires_compatibilities = ["FARGATE"]
   network_mode             = "awsvpc"
 }
@@ -106,7 +106,7 @@ data "aws_iam_policy_document" "dex" {
     resources = [
       aws_secretsmanager_secret.api.arn,
       aws_kms_key.api.arn,
-      aws_cloudwatch_log_group.api.arn,
+      aws_cloudwatch_log_group.dex.arn,
       "${aws_cloudwatch_log_group.dex.arn}:log-stream:*"
     ]
   }

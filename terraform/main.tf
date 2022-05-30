@@ -2,7 +2,7 @@ terraform {
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = "4.13.0"
+      version = "4.15.1"
     }
   }
   backend "remote" {
@@ -57,6 +57,7 @@ module "api" {
   dex_crowd_url                    = var.dex_crowd_url
   dex_crowd_client_id              = var.dex_crowd_client_id
   dex_crowd_client_secret          = var.dex_crowd_client_secret
+  dex_loglevel                     = var.dex_loglevel
   database_backup_retention_period = var.database_backup_retention_period
   jumpbox_ami_id                   = var.jumpbox_ami_id
 }

@@ -185,6 +185,7 @@ func (s *Server) handleAuthorization(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) handleConnectorLogin(w http.ResponseWriter, r *http.Request) {
+	s.logger.Debugf("Parse Authorisation request %s", r)
 	authReq, err := s.parseAuthorizationRequest(r)
 	if err != nil {
 		s.logger.Errorf("Failed to parse authorization request: %v", err)
@@ -359,6 +360,7 @@ func (s *Server) handlePasswordLogin(w http.ResponseWriter, r *http.Request) {
 			}
 			return
 		}
+		s.logger.Debugf("Finalising login for %s", username)
 		redirectURL, err := s.finalizeLogin(identity, authReq, conn.Connector)
 		if err != nil {
 			s.logger.Errorf("Failed to finalize login: %v", err)
@@ -366,6 +368,7 @@ func (s *Server) handlePasswordLogin(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
+		s.logger.Debugf("Redirecting to URL %s", redirectURL)
 		http.Redirect(w, r, redirectURL, http.StatusSeeOther)
 	default:
 		s.renderError(r, w, http.StatusBadRequest, "Unsupported request method.")
@@ -540,6 +543,7 @@ func (s *Server) handleApproval(w http.ResponseWriter, r *http.Request) {
 		s.renderError(r, w, http.StatusInternalServerError, "Login process not yet finalized.")
 		return
 	}
+	s.logger.Debugf("Handling approval for authRequest %s", authReq)
 
 	switch r.Method {
 	case http.MethodGet:
@@ -566,6 +570,7 @@ func (s *Server) handleApproval(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) sendCodeResponse(w http.ResponseWriter, r *http.Request, authReq storage.AuthRequest) {
+	s.logger.Debugf("Sending Code response for request %s authRequest %s", r, authReq)
 	if s.now().After(authReq.Expiry) {
 		s.renderError(r, w, http.StatusBadRequest, "User session has expired.")
 		return
@@ -618,6 +623,7 @@ func (s *Server) sendCodeResponse(w http.ResponseWriter, r *http.Request, authRe
 				ConnectorData: authReq.ConnectorData,
 				PKCE:          authReq.PKCE,
 			}
+			s.logger.Debugf("Creating auth code for %s with redirect uri %s", code, authReq.RedirectURI)
 			if err := s.storage.CreateAuthCode(code); err != nil {
 				s.logger.Errorf("Failed to create auth code: %v", err)
 				s.renderError(r, w, http.StatusInternalServerError, "Internal server error.")
@@ -638,12 +644,14 @@ func (s *Server) sendCodeResponse(w http.ResponseWriter, r *http.Request, authRe
 			implicitOrHybrid = true
 			var err error
 
+			s.logger.Debugf("Creating tokens")
 			accessToken, err = s.newAccessToken(authReq.ClientID, authReq.Claims, authReq.Scopes, authReq.Nonce, authReq.ConnectorID)
 			if err != nil {
 				s.logger.Errorf("failed to create new access token: %v", err)
 				s.tokenErrHelper(w, errServerError, "", http.StatusInternalServerError)
 				return
 			}
+			s.logger.Debugf("Access token created")
 
 			idToken, idTokenExpiry, err = s.newIDToken(authReq.ClientID, authReq.Claims, authReq.Scopes, authReq.Nonce, accessToken, code.ID, authReq.ConnectorID)
 			if err != nil {
@@ -651,6 +659,7 @@ func (s *Server) sendCodeResponse(w http.ResponseWriter, r *http.Request, authRe
 				s.tokenErrHelper(w, errServerError, "", http.StatusInternalServerError)
 				return
 			}
+			s.logger.Debugf("ID token created")
 		}
 	}
 
@@ -674,6 +683,8 @@ func (s *Server) sendCodeResponse(w http.ResponseWriter, r *http.Request, authRe
 			v.Set("code", code.ID)
 		}
 
+		s.logger.Debugf("Encode access token for redirect %s", v)
+
 		// Implicit and hybrid flows return their values as part of the fragment.
 		//
 		//   HTTP/1.1 303 See Other
@@ -684,6 +695,7 @@ func (s *Server) sendCodeResponse(w http.ResponseWriter, r *http.Request, authRe
 		//     &expires_in=3600
 		//     &state=af0ifjsldkj
 		//
+		s.logger.Debugf("Encode fragment for hybrid/implicit flow  %s", v)
 		u.Fragment = v.Encode()
 	} else {
 		// The code flow add values to the URL query.
@@ -696,9 +708,11 @@ func (s *Server) sendCodeResponse(w http.ResponseWriter, r *http.Request, authRe
 		q := u.Query()
 		q.Set("code", code.ID)
 		q.Set("state", authReq.State)
+		s.logger.Debugf("Encode query for hybrid/implicit flow  %s", q)
 		u.RawQuery = q.Encode()
 	}
 
+	s.logger.Debugf("Redirecting with parameters %s", u.String())
 	http.Redirect(w, r, u.String(), http.StatusSeeOther)
 }
 
