@@ -85,23 +85,6 @@ stages:
               SENTRY_AUTH_TOKEN: $(sentryAuthToken)
           - task: Docker@2
             condition: succeeded()
-            displayName: Build customised Dex Docker image
-            inputs:
-              command: buildAndPush
-              containerRegistry: $(serviceConnection)
-              repository: $(dexRegistryPath)
-              dockerFile: dex/snomed.Dockerfile
-              tags: |
-                $(Build.BuildNumber)
-          - task: CmdLine@2
-            displayName: "Run trivy scan on Dex"
-            inputs:
-              workingDirectory: $(System.DefaultWorkingDirectory)
-              script: |
-                trivy image --exit-code 0 --severity LOW,MEDIUM $(dockerRegistry)/$(dexRegistryPath):$(Build.BuildNumber)
-                trivy image --exit-code 1 --severity HIGH,CRITICAL $(dockerRegistry)/$(dexRegistryPath):$(Build.BuildNumber)
-          - task: Docker@2
-            condition: succeeded()
             displayName: Push image
             inputs:
               containerRegistry: $(serviceConnection)
