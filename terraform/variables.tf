@@ -238,3 +238,9 @@ variable "main_page_text" {
   type        = string
   default     = "Snap2SNOMED is currently not yet in production. For more information on this application, please visit <a href=\"http://snomed.org/mtug\" rel=\"external\">snomed.org/mtug</a> or contact <a href=\"mailto:info@snomed.org\">info@snomed.org</a>"
 }
+
+variable "dex_loglevel" {
+  description = "Log level for DEX"
+  type        = string
+  default     = "info"
+}
