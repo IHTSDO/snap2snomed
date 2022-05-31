@@ -13,7 +13,7 @@ variable "api_image" {
 variable "dex_image" {
   description = "Image repository for dex"
   type        = string
-  default     = "ontoserver.azurecr.io/snap2snomed-dex:latest"
+  default     = "ontoserver.azurecr.io/aehrc/dex:latest"
 }
 
 variable "api_registry_username" {
