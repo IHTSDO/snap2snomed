@@ -191,7 +191,7 @@ public class Snap2snomedRestClient {
             .body("familyName", is(familyName))
             .body("nickname", isValueIfNotNull(nickname))
             .body("id", is(id))
-            .body("email", is(email));
+            .body("email", is(email.trim()));
 
     if (config.getSecurity().getAdminGroup().equals(group)) {
       adminUser.add(id);
