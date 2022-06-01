@@ -45,7 +45,7 @@
     <apache-poi.version>5.2.2</apache-poi.version>
     <rest-assured.version>4.4.0</rest-assured.version>
     <jjwt.version>0.11.5</jjwt.version>
-    <tc-mysql.version>1.17.1</tc-mysql.version>
+    <tc-mysql.version>1.17.2</tc-mysql.version>
     <mockserver.version>5.13.2</mockserver.version>
     <hamcrest-test.version>1.3</hamcrest-test.version>
     <hamcrest-date.version>2.0.8</hamcrest-date.version>
