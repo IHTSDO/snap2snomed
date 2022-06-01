@@ -104,7 +104,8 @@ export class FhirService {
       };
       const options = ServiceUtils.getHTTPHeaders();
       options.headers = options.headers
-        .set('Accept', ['application/fhir+json', 'application/json']);
+        .set('Accept', ['application/fhir+json', 'application/json'])
+        .set('Accept-Language', 'en-US');
       options.params = {...options.params, ...params};
       return this.http.get<R4.IParameters>(url, options).pipe(
         map(parameters => {
