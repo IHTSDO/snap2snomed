@@ -17,9 +17,7 @@
 package org.snomed.snap2snomed.integration.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.greaterThanOrEqualTo;
+import static org.hamcrest.Matchers.*;
 import static org.snomed.snap2snomed.service.CodeSetImportService.TOO_LARGE_FILE_PROBLEM_URI;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -31,6 +29,8 @@ import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
@@ -405,6 +405,19 @@ public class ImportedCodeSetResourceIT extends IntegrationTestBase {
   public void shouldImportCSVFileWithTabDelimiter() throws Exception {
     restClient.expectCreateImportedCodeSetFail("badAAA", "2", 0, 2, true, "\t",
         new ClassPathResource("AAA-semi.csv").getFile(), "text/tsv", 400, DELIMITER_PROBLEM_URI);
+  }
+
+  @Test
+  public void givenAdminUser_whenNotProjectMember_thenShouldNotSeeImportedCodeSystem() throws Exception {
+    long projectId = restClient.createProject("ProjectDemo", "Demo Project", Set.of(DEFAULT_TEST_USER_SUBJECT, PROJECT_USER), Set.of(), Set.of());
+    final String codeSetName = "AAA semicolon - defaultuser - projecttest";
+    long codesetId = immportCodeSetForUser(DEFAULT_TEST_USER_SUBJECT, codeSetName, "1.0", 0, 2, true, ";", new ClassPathResource("AAA-semi.csv").getFile(), "text/tsv");
+
+    restClient.createMap("Testing Map Version", "http://snomed.info/sct/32506021000036107/version/20210531",
+            "http://map.test.toscope", projectId, codesetId);
+
+    restClient.givenUser(DEFAULT_TEST_ADMIN_USER_SUBJECT).get("/importedCodeSets")
+              .then().statusCode(200).body("content", not(hasItem(hasEntry("name", codeSetName))));
   }
 
   /**
