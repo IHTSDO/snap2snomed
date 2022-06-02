@@ -90,7 +90,7 @@ export class FhirService {
     return this.http.get<R4.IBundle>(url, options);
   }
 
-  autoSuggest(text: string, version: string, scope: string, strategy: string, activeOnly: boolean = true, count: number = 5): Observable<Match[]> {
+  autoSuggest(text: string, version: string, scope: string, strategy: string, activeOnly: boolean = true, count: number = 5, forceEnglish: boolean = false): Observable<Match[]> {
     if (this.isOntoserver) {
       const isMatch = (match: Match | null): match is Match => !!match;
       const ecl = activeOnly ? `(${scope}){{C active=true}}` : scope;
@@ -104,8 +104,10 @@ export class FhirService {
       };
       const options = ServiceUtils.getHTTPHeaders();
       options.headers = options.headers
-        .set('Accept', ['application/fhir+json', 'application/json'])
-        .set('Accept-Language', 'en-US');
+        .set('Accept', ['application/fhir+json', 'application/json']);
+      if (forceEnglish) {
+        options.headers = options.headers.append('Accept-Language', 'en-US');
+      }
       options.params = {...options.params, ...params};
       return this.http.get<R4.IParameters>(url, options).pipe(
         map(parameters => {

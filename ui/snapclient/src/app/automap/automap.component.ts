@@ -203,7 +203,7 @@ export class AutomapComponent implements OnInit {
         return of(null);
       }
 
-      return self.fhirService.autoSuggest(row.display, context.version, context.scope, DEFAULT, true, 1).pipe(
+      return self.fhirService.autoSuggest(row.display, context.version, context.scope, DEFAULT, true, 1, true).pipe(
         map(matches => matches[0]),
         mergeMap(match => {
           if (match) {
