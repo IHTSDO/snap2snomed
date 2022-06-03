@@ -18,7 +18,7 @@ import {AfterViewInit, Component, EventEmitter, Input, OnDestroy, OnInit, Output
 import {Store} from '@ngrx/store';
 import {TranslateService} from '@ngx-translate/core';
 import {IAppState} from '../../store/app.state';
-import {selectTaskList, selectTaskLoadError, selectTaskLoading} from '../../store/task-feature/task.selectors';
+import {selectTaskList, selectTaskLoadError, selectTaskLoading, selectTaskPageDetails} from '../../store/task-feature/task.selectors';
 import {Task, TaskType} from '../../_models/task';
 import {User} from '../../_models/user';
 import {Mapping} from '../../_models/mapping';
@@ -26,9 +26,10 @@ import {Subscription} from 'rxjs';
 import {selectCurrentUser} from '../../store/auth-feature/auth.selectors';
 import {MatTabChangeEvent} from '@angular/material/tabs';
 import {ErrorInfo} from 'src/app/errormessage/errormessage.component';
-import { MappedRowDetailsDto } from 'src/app/_models/map_row';
-import { MappingTableSelectorComponent } from 'src/app/mapping/mapping-table-selector/mapping-table-selector.component';
+import {MappingTableSelectorComponent} from 'src/app/mapping/mapping-table-selector/mapping-table-selector.component';
 import {AuthService} from '../../_services/auth.service';
+import { PageEvent } from '@angular/material/paginator';
+import { LoadTasksForMap } from 'src/app/store/task-feature/task.actions';
 
 
 @Component({
@@ -47,6 +48,10 @@ export class AssignedWorkComponent implements OnInit, AfterViewInit, OnDestroy {
   taskAvailable = '';
   taskNotAvailable = '';
   isAdmin = false;
+  pageSize = 10;
+  currentPage = 0;
+  pageSizeOptions: number[] = [10, 25, 50, 100];
+  totalElements = 0;  
   @Input() mapping: Mapping | undefined;
   @Input() mappingTableSelector: MappingTableSelectorComponent | null | undefined;
   @Output() updateTableEvent = new EventEmitter<string>();
@@ -95,12 +100,17 @@ export class AssignedWorkComponent implements OnInit, AfterViewInit, OnDestroy {
     const self = this;
     self.subscription.add(self.store.select(selectCurrentUser).subscribe((res) => self.currentUser = res ?? new User()));
     self.subscription.add(self.store.select(selectTaskLoading).subscribe((res) => self.loading = res));
+    self.subscription.add(self.store.select(selectTaskPageDetails).subscribe((page) => {
+      if(page) {
+        self.totalElements = page?.totalElements;
+      }
+    }));
     self.subscription.add(self.store.select(selectTaskList).subscribe(
       data => {
         self.authorTasks = data.filter(task => task.type === TaskType.AUTHOR)
           .sort((a, b) => AssignedWorkComponent.sortTasks(a, b));
         self.reviewTasks = data.filter(task => task.type === TaskType.REVIEW)
-          .sort((a, b) => AssignedWorkComponent.sortTasks(a, b));
+          .sort((a, b) => AssignedWorkComponent.sortTasks(a, b));        
         self.loading = false;
         self.setTab();
       },
@@ -117,6 +127,13 @@ export class AssignedWorkComponent implements OnInit, AfterViewInit, OnDestroy {
         }
       }
     ));
+  }
+
+  pageChanged(event: PageEvent): void {
+    this.pageSize = event.pageSize;
+    this.currentPage = event.pageIndex;
+    //this.store.dispatch(new LoadProjects({pageSize: this.pageSize, currentPage: this.currentPage}));
+    this.store.dispatch(new LoadTasksForMap({id: this.mapping?.id, pageSize: this.pageSize, currentPage: this.currentPage}));
   }
 
   setTab(): void {
@@ -150,6 +167,7 @@ export class AssignedWorkComponent implements OnInit, AfterViewInit, OnDestroy {
       this.selectedTaskType = $event;
     }
     this.updateTableEvent.emit(this.selectedTaskType);
+    this.loading = true;
   }
 
   setActiveTab($event: MatTabChangeEvent): void {

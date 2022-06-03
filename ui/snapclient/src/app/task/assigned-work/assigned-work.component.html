@@ -22,6 +22,14 @@
           <span matBadge="{{authorTasks?.length}}" matBadgeSize="small"
                 matBadgeOverlap="false">{{'TASK.TAB_AUTHOR' | translate}}</span>
         </ng-template>
+        <mat-paginator #paginator
+          [length]="totalElements || 0"
+          [pageIndex]="currentPage"
+          [pageSize]="pageSize"
+          [pageSizeOptions]="pageSizeOptions"
+          (page)="pageChanged($event)"
+          [showFirstLastButtons]="true">
+        </mat-paginator>
         <div *ngFor="let task of authorTasks">
           <app-task-card [task]="task" [isClickable]="isAssigned(task)"
                          [currentUser]="currentUser" [isOwner]="isOwner()"

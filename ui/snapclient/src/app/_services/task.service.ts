@@ -19,8 +19,8 @@ import {Inject, Injectable} from '@angular/core';
 import {APP_CONFIG, AppConfig} from '../app.config';
 import {Observable} from 'rxjs';
 import {ServiceUtils} from '../_utils/service_utils';
-import {Task} from '../_models/task';
-import {Results} from './map.service';
+import {Task, TaskPageDetails} from '../_models/task';
+import {TaskResults} from './map.service';
 
 
 @Injectable({
@@ -35,14 +35,18 @@ export class TaskService {
   /**
    * Get task for a specific map
    */
-  getTasksByMap(mapping_id: string): Observable<{ _embedded: { tasks: Task[] }, _links: any }> {
+  getTasksByMap(mapping_id: string, pageSize: number, currentPage: number): Observable<{ page: TaskPageDetails, _embedded: { tasks: Task[] }, _links: any }> {
     let url = `${this.config.apiBaseUrl}/tasks`;
     const header = ServiceUtils.getHTTPHeaders();
-    if (mapping_id !== '') {
+    if (mapping_id) {
       url = `${this.config.apiBaseUrl}/tasks/search/findByMapId`;
-      header.params = new HttpParams().set('projection', 'embeddedTaskDetails').set('id', mapping_id);
+      header.params = new HttpParams()
+        .set('projection', 'embeddedTaskDetails')
+        .set('id', mapping_id)
+        .set('page', currentPage.toString())
+        .set('size', pageSize.toString());
     }
-    return this.http.get<Results>(url, header);
+    return this.http.get<TaskResults>(url, header);
   }
 
   /**
@@ -54,7 +58,7 @@ export class TaskService {
     const header = ServiceUtils.getHTTPHeaders();
     let body = JSON.stringify(task, Task.replacer);
     body = body.replace('mapping', 'map');
-    return this.http.post<Results>(url, body, header);
+    return this.http.post<TaskResults>(url, body, header);
   }
 
   /**
@@ -64,7 +68,7 @@ export class TaskService {
   deleteTask(task: Task): Observable<any> {
     const url = `${this.config.apiBaseUrl}/tasks/${task.id}`;
     const header = ServiceUtils.getHTTPHeaders();
-    return this.http.delete<Results>(url, header);
+    return this.http.delete<TaskResults>(url, header);
   }
 
   /**
@@ -74,7 +78,7 @@ export class TaskService {
   completeTask(task: Task): Observable<any> {
     const url = `${this.config.apiBaseUrl}/task/${task.id}/$complete`;
     const header = ServiceUtils.getHTTPHeaders();
-    return this.http.post<Results>(url, header);
+    return this.http.post<TaskResults>(url, header);
   }
 
   /**
@@ -84,6 +88,6 @@ export class TaskService {
   getIncompleteRowSpecification(taskId: string): Observable<any> {
     const url = `${this.config.apiBaseUrl}/task/${taskId}/$countIncompleteRows`;
     const header = ServiceUtils.getHTTPHeaders();
-    return this.http.get<Results>(url, header);
+    return this.http.get<TaskResults>(url, header);
   }
 }

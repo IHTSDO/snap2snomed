@@ -341,7 +341,7 @@ export class MappingViewComponent implements OnInit, AfterViewInit, OnDestroy {
         if (this.mapping_id === mapping?.id) {
           self.mapping = mapping;
           if (self.mapping && self.mapping.id && self.mapping_id === self.mapping.id) {
-            self.store.dispatch(new LoadTasksForMap({id: self.mapping.id}));
+            self.store.dispatch(new LoadTasksForMap({id: self.mapping.id, pageSize: 10, currentPage: 0}));
             self.members = self.mapping.project.owners.concat(self.mapping.project.members).concat(self.mapping.project.guests);
           }
         }

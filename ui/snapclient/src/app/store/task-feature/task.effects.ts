@@ -30,11 +30,13 @@ import {
   TaskActions,
   TaskActionTypes,
 } from './task.actions';
-import {Task} from '../../_models/task';
+import {Task, TaskPage, TaskPageDetails} from '../../_models/task';
 import {ServiceUtils} from 'src/app/_utils/service_utils';
 import {User} from 'src/app/_models/user';
 import {Router} from '@angular/router';
 import {LoadMapping} from '../mapping-feature/mapping.actions';
+import { EMPTY } from 'rxjs';
+import { TaskResults } from 'src/app/_services/map.service';
 
 
 @Injectable()
@@ -46,15 +48,21 @@ export class TaskEffects {
     private router: Router) {
   }
 
+
   loadTasksForMap$ = createEffect(() => this.actions$.pipe(
     ofType(TaskActionTypes.LOAD_TASKS_FOR_MAP),
     map((action) => action.payload),
-    switchMap((payload) => this.taskService.getTasksByMap(payload.id).pipe(
-      map((resp) => resp._embedded.tasks as Task[]),
-      map((tasks: Task[]) => tasks.map(TaskEffects.mapTaskFromPayload)),
-      switchMap((tasks: Task[]) => of(new LoadTasksSuccess(tasks))),
-      catchError((err) => of(new LoadTasksFailure({error: err})))
-    ))), {dispatch: true});
+    switchMap((payload) => payload.id ? 
+      this.taskService.getTasksByMap(payload.id, payload.pageSize, payload.currentPage).pipe(
+        map((resp: TaskResults) => {
+          let tasks_conv: Task[] = resp._embedded.tasks.map((task: any) => TaskEffects.mapTaskFromPayload(task));
+          let taskPage: TaskPageDetails = resp.page;
+          return new TaskPage(taskPage, tasks_conv);
+        }),
+        switchMap((resp: TaskPage) => of(new LoadTasksSuccess(resp))),
+        catchError((err) => of(new LoadTasksFailure({error: err})))
+      ) : EMPTY
+    )), {dispatch: true});
 
   addTask$ = createEffect(() => this.actions$.pipe(
     ofType(TaskActionTypes.ADD_TASK),

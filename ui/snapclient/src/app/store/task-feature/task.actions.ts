@@ -15,7 +15,7 @@
  */
 
 import {Action} from '@ngrx/store';
-import {Task} from '../../_models/task';
+import {Task, TaskPage} from '../../_models/task';
 import {HttpErrorResponse} from '@angular/common/http';
 
 
@@ -35,14 +35,18 @@ export enum TaskActionTypes {
 export class LoadTasksForMap implements Action {
   readonly type = TaskActionTypes.LOAD_TASKS_FOR_MAP;
 
-  constructor(public payload: {id: string}) {
+  constructor(public payload: {
+    id: string | null | undefined,
+    pageSize: number,
+    currentPage: number
+  }) {
   }
 }
 
 export class LoadTasksSuccess implements Action {
   readonly type = TaskActionTypes.LOAD_TASKS_SUCCESS;
 
-  constructor(public payload: Task[]) {
+  constructor(public payload: TaskPage) {
   }
 }
 
