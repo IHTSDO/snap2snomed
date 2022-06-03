@@ -19,6 +19,7 @@ package org.snomed.snap2snomed.integration.repository;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasEntry;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.not;
 
 import java.io.File;
 import java.io.IOException;
@@ -45,7 +46,7 @@ public class PerMethodResourceTestsIT extends IntegrationTestBase {
    * Tests that users can see an imported codeset who is associated with a project that has the importedcodset as a base
    */
   @Test
-  public void projectMemberAndAdminShouldSeeImportedCodeSystem() throws Exception {
+  public void projectMemberShouldSeeImportedCodeSystem() throws Exception {
 
     long projectId = restClient.createProject("ProjectDemo", "Demo Project", Set.of(DEFAULT_TEST_USER_SUBJECT, PROJECT_USER), Set.of(), Set.of());
 
@@ -57,10 +58,6 @@ public class PerMethodResourceTestsIT extends IntegrationTestBase {
         "http://map.test.toscope", projectId, codesetId);
 
     restClient.givenUser(PROJECT_USER).get("/importedCodeSets")
-        .then().statusCode(200)
-        .body("content", hasItem(hasEntry("name", codeSetName)));
-
-    restClient.givenUser(DEFAULT_TEST_ADMIN_USER_SUBJECT).get("/importedCodeSets")
         .then().statusCode(200)
         .body("content", hasItem(hasEntry("name", codeSetName)));
   }

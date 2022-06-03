@@ -104,7 +104,7 @@ public class UserRestController {
     user.setGivenName(token.getClaimAsString("given_name"));
     user.setFamilyName(token.getClaimAsString("family_name"));
     user.setNickname(token.getClaimAsString("nickname"));
-    user.setEmail(token.getClaimAsString("email"));
+    user.setEmail(token.getClaimAsString("email").trim());
 
     User savedUser = repository.save(user);
     return new ResponseEntity<>(savedUser, returnStatus);
