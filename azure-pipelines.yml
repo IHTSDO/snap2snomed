@@ -51,7 +51,7 @@ stages:
               jdkArchitectureOption: 'x64'
               publishJUnitResults: true
               testResultsFiles: '**/*/TEST*-*.xml'
-              goals: 'clean verify -Pazure-devops -DskipUITests=$(skipUITests)'
+              goals: 'clean verify -Pazure-devops -DskipUITests=$(skipUITests) -Dit.test="ImportedCodeSetResourceIT#givenSourceCreator_whenNotProjectMember_thenShouldNotSeeImportedCodeSystem"'
           - task: PublishCodeCoverageResults@1
             displayName: Publish Code Coverage
             inputs:
