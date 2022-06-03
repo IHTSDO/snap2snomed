@@ -2,7 +2,7 @@ terraform {
   required_providers {
     aws = {
       source                = "hashicorp/aws"
-      version               = "4.16.0"
+      version               = "4.17.0"
       configuration_aliases = [aws.us-east-1]
     }
     archive = {
