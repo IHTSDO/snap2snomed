@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-create table if not exists imported_code (id bigint not null auto_increment, code varchar(50), display varchar(2048), _index bigint not null, imported_codeset_id bigint not null, primary key (id)) engine=InnoDB;
+create table if not exists imported_code (id bigint not null auto_increment, code varchar(50), display varchar(512), _index bigint not null, imported_codeset_id bigint not null, primary key (id)) engine=InnoDB;
 create table if not exists imported_codeset (id bigint not null auto_increment, created datetime(6), created_by varchar(255), modified datetime(6), modified_by varchar(255), name varchar(100), version varchar(30), primary key (id)) engine=InnoDB;
 create table if not exists map (id bigint not null auto_increment, created datetime(6), created_by varchar(255), modified datetime(6), modified_by varchar(255), map_version varchar(30), to_scope varchar(1024) not null, to_version varchar(60), project_id bigint not null, source_id bigint not null, primary key (id)) engine=InnoDB;
 create table if not exists map_row (id bigint not null auto_increment, created datetime(6), created_by varchar(255), modified datetime(6), modified_by varchar(255), no_map bit not null, status integer not null, author_task_id bigint, `last_author_id` varchar(255), `last_reviewer_id` varchar(255), map_id bigint not null, review_task_id bigint, source_code_id bigint not null, primary key (id)) engine=InnoDB;
