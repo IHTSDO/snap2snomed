@@ -15,11 +15,12 @@
  */
 
 import {Action} from '@ngrx/store';
-import {Task, TaskPage} from '../../_models/task';
+import {Task, TaskPage, TaskPageForType} from '../../_models/task';
 import {HttpErrorResponse} from '@angular/common/http';
 
 
 export enum TaskActionTypes {
+  LOAD_ALL_TASKS_SUCCESS = '[Task] All Tasks load succeeded',
   LOAD_TASKS_SUCCESS = '[Task] Tasks load succeeded',
   LOAD_TASKS_FAILED = '[Task] Tasks load failed',
   LOAD_TASKS_FOR_MAP = '[Task] Tasks load for map',
@@ -37,8 +38,10 @@ export class LoadTasksForMap implements Action {
 
   constructor(public payload: {
     id: string | null | undefined,
-    pageSize: number,
-    currentPage: number
+    authPageSize: number,
+    authCurrentPage: number
+    reviewPageSize: number,
+    reviewCurrentPage: number
   }) {
   }
 }
@@ -47,6 +50,13 @@ export class LoadTasksSuccess implements Action {
   readonly type = TaskActionTypes.LOAD_TASKS_SUCCESS;
 
   constructor(public payload: TaskPage) {
+  }
+}
+
+export class LoadAllTasksSuccess implements Action {
+  readonly type = TaskActionTypes.LOAD_ALL_TASKS_SUCCESS;
+
+  constructor(public payload: TaskPageForType[]) {
   }
 }
 
@@ -107,7 +117,8 @@ export class CompleteTask implements Action {
 }
 
 
-export type TaskActions = LoadTasksSuccess
+export type TaskActions = LoadAllTasksSuccess
+  | LoadTasksSuccess
   | LoadTasksFailure
   | LoadTasksForMap
   | AddTask

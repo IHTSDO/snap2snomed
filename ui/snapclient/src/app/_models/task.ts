@@ -115,3 +115,13 @@ export class TaskPage {
     this.tasks = tasks;
   }
 }
+
+export class TaskPageForType {
+  type: TaskType;
+  page: TaskPage;
+
+  constructor(type: TaskType, taskPage: TaskPage) {
+    this.type = type;
+    this.page = taskPage;
+  }
+}

@@ -15,12 +15,12 @@
  */
 
 import {TaskActions, TaskActionTypes} from './task.actions';
-import {Task, TaskPageDetails} from '../../_models/task';
+import {Task, TaskPageDetails, TaskPageForType} from '../../_models/task';
 
 
 export interface ITaskState {
   tasks: Task[];
-  pagedetails: TaskPageDetails | null,
+  alltasks: TaskPageForType[];
   saveErrorMessage: any | null;
   loadErrorMessage: any | null;
   deleteErrorMessage: any | null;
@@ -29,7 +29,7 @@ export interface ITaskState {
 
 export const initialTasksState: ITaskState = {
   tasks: [],
-  pagedetails: null,
+  alltasks: [],
   saveErrorMessage: null,
   loadErrorMessage: null,
   deleteErrorMessage: null,
@@ -53,14 +53,23 @@ export function taskReducer(state = initialTasksState, action: TaskActions): ITa
       return {
         ...state,
         tasks: action.payload.tasks,
-        pagedetails: action.payload.page,
         loadErrorMessage: null,
         saveErrorMessage: null,
         deleteErrorMessage: null,
         isLoading: false
       };
 
-    case TaskActionTypes.LOAD_TASKS_FAILED:
+    case TaskActionTypes.LOAD_ALL_TASKS_SUCCESS:
+      return {
+        ...state,
+        alltasks: action.payload,
+        loadErrorMessage: null,
+        saveErrorMessage: null,
+        deleteErrorMessage: null,
+        isLoading: false
+      };
+
+      case TaskActionTypes.LOAD_TASKS_FAILED:
       return {
         ...state,
         tasks: [],

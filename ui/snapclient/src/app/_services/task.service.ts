@@ -19,7 +19,7 @@ import {Inject, Injectable} from '@angular/core';
 import {APP_CONFIG, AppConfig} from '../app.config';
 import {Observable} from 'rxjs';
 import {ServiceUtils} from '../_utils/service_utils';
-import {Task, TaskPageDetails} from '../_models/task';
+import {Task, TaskPageDetails, TaskType} from '../_models/task';
 import {TaskResults} from './map.service';
 
 
@@ -35,14 +35,16 @@ export class TaskService {
   /**
    * Get task for a specific map
    */
-  getTasksByMap(mapping_id: string, pageSize: number, currentPage: number): Observable<{ page: TaskPageDetails, _embedded: { tasks: Task[] }, _links: any }> {
+  getTasksByMapAndType(mapping_id: string, type: TaskType, pageSize: number, currentPage: number):
+        Observable<{ page: TaskPageDetails, _embedded: { tasks: Task[] }, _links: any }> {
     let url = `${this.config.apiBaseUrl}/tasks`;
     const header = ServiceUtils.getHTTPHeaders();
     if (mapping_id) {
-      url = `${this.config.apiBaseUrl}/tasks/search/findByMapId`;
+      url = `${this.config.apiBaseUrl}/tasks/search/findByMapIdAndType`;
       header.params = new HttpParams()
         .set('projection', 'embeddedTaskDetails')
         .set('id', mapping_id)
+        .set('type', type)
         .set('page', currentPage.toString())
         .set('size', pageSize.toString());
     }

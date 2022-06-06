@@ -18,7 +18,7 @@ import {AfterViewInit, Component, EventEmitter, Input, OnDestroy, OnInit, Output
 import {Store} from '@ngrx/store';
 import {TranslateService} from '@ngx-translate/core';
 import {IAppState} from '../../store/app.state';
-import {selectTaskList, selectTaskLoadError, selectTaskLoading, selectTaskPageDetails} from '../../store/task-feature/task.selectors';
+import {selectAllTasks, selectTaskList, selectTaskLoadError, selectTaskLoading} from '../../store/task-feature/task.selectors';
 import {Task, TaskType} from '../../_models/task';
 import {User} from '../../_models/user';
 import {Mapping} from '../../_models/mapping';
@@ -48,10 +48,13 @@ export class AssignedWorkComponent implements OnInit, AfterViewInit, OnDestroy {
   taskAvailable = '';
   taskNotAvailable = '';
   isAdmin = false;
-  pageSize = 10;
-  currentPage = 0;
+  authPageSize = 10;
+  authCurrentPage = 0;
+  reviewPageSize = 10;
+  reviewCurrentPage = 0;
   pageSizeOptions: number[] = [10, 25, 50, 100];
-  totalElements = 0;  
+  authTotalElements = 0;
+  reviewTotalElements = 0;
   @Input() mapping: Mapping | undefined;
   @Input() mappingTableSelector: MappingTableSelectorComponent | null | undefined;
   @Output() updateTableEvent = new EventEmitter<string>();
@@ -100,17 +103,20 @@ export class AssignedWorkComponent implements OnInit, AfterViewInit, OnDestroy {
     const self = this;
     self.subscription.add(self.store.select(selectCurrentUser).subscribe((res) => self.currentUser = res ?? new User()));
     self.subscription.add(self.store.select(selectTaskLoading).subscribe((res) => self.loading = res));
-    self.subscription.add(self.store.select(selectTaskPageDetails).subscribe((page) => {
-      if(page) {
-        self.totalElements = page?.totalElements;
-      }
-    }));
-    self.subscription.add(self.store.select(selectTaskList).subscribe(
+    self.subscription.add(self.store.select(selectAllTasks).subscribe(
       data => {
-        self.authorTasks = data.filter(task => task.type === TaskType.AUTHOR)
+        let authPage = data.find(taskPage => taskPage.type === TaskType.AUTHOR);
+        let reviewPage = data.find(taskPage => taskPage.type === TaskType.REVIEW);
+        self.authorTasks = authPage?.page.tasks
           .sort((a, b) => AssignedWorkComponent.sortTasks(a, b));
-        self.reviewTasks = data.filter(task => task.type === TaskType.REVIEW)
-          .sort((a, b) => AssignedWorkComponent.sortTasks(a, b));        
+        self.reviewTasks = reviewPage?.page.tasks
+          .sort((a, b) => AssignedWorkComponent.sortTasks(a, b));
+        if (authPage?.page) {
+          self.authTotalElements = authPage.page.page.totalElements;
+        }
+        if (reviewPage?.page) {
+          self.reviewTotalElements = reviewPage.page.page.totalElements;
+        }
         self.loading = false;
         self.setTab();
       },
@@ -129,11 +135,18 @@ export class AssignedWorkComponent implements OnInit, AfterViewInit, OnDestroy {
     ));
   }
 
-  pageChanged(event: PageEvent): void {
-    this.pageSize = event.pageSize;
-    this.currentPage = event.pageIndex;
-    //this.store.dispatch(new LoadProjects({pageSize: this.pageSize, currentPage: this.currentPage}));
-    this.store.dispatch(new LoadTasksForMap({id: this.mapping?.id, pageSize: this.pageSize, currentPage: this.currentPage}));
+  authPageChanged(event: PageEvent): void {
+    this.authPageSize = event.pageSize;
+    this.authCurrentPage = event.pageIndex;
+    this.store.dispatch(new LoadTasksForMap({id: this.mapping?.id, authPageSize: this.authPageSize,
+        authCurrentPage: this.authCurrentPage, reviewPageSize: this.reviewPageSize, reviewCurrentPage: this.reviewCurrentPage}));
+  }
+
+  reviewPageChanged(event: PageEvent): void {
+    this.reviewPageSize = event.pageSize;
+    this.reviewCurrentPage = event.pageIndex;
+    this.store.dispatch(new LoadTasksForMap({id: this.mapping?.id, authPageSize: this.authPageSize,
+        authCurrentPage: this.authCurrentPage, reviewPageSize: this.reviewPageSize, reviewCurrentPage: this.reviewCurrentPage}));
   }
 
   setTab(): void {

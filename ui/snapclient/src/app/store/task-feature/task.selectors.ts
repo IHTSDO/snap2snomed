@@ -26,9 +26,9 @@ export const selectTaskList = createSelector(
   (state: ITaskState) => state.tasks
 );
 
-export const selectTaskPageDetails = createSelector(
+export const selectAllTasks = createSelector(
   selectModules,
-  (state: ITaskState) => state.pagedetails
+  (state: ITaskState) => state.alltasks
 );
 
 export const selectTaskLoadError = createSelector(
