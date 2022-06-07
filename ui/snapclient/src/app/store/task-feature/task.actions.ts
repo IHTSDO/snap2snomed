@@ -38,10 +38,10 @@ export class LoadTasksForMap implements Action {
 
   constructor(public payload: {
     id: string | null | undefined,
-    authPageSize: number,
-    authCurrentPage: number
-    reviewPageSize: number,
-    reviewCurrentPage: number
+    authPageSize: number | undefined,
+    authCurrentPage: number | undefined
+    reviewPageSize: number | undefined,
+    reviewCurrentPage: number | undefined
   }) {
   }
 }

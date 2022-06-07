@@ -35,7 +35,7 @@ export class TaskService {
   /**
    * Get task for a specific map
    */
-  getTasksByMapAndType(mapping_id: string, type: TaskType, pageSize: number, currentPage: number):
+  getTasksByMapAndType(mapping_id: string, type: TaskType, pageSize: number | undefined, currentPage: number | undefined):
         Observable<{ page: TaskPageDetails, _embedded: { tasks: Task[] }, _links: any }> {
     let url = `${this.config.apiBaseUrl}/tasks`;
     const header = ServiceUtils.getHTTPHeaders();
@@ -45,8 +45,9 @@ export class TaskService {
         .set('projection', 'embeddedTaskDetails')
         .set('id', mapping_id)
         .set('type', type)
-        .set('page', currentPage.toString())
-        .set('size', pageSize.toString());
+        .set('page', currentPage ? currentPage.toString(): '')
+        .set('size', pageSize? pageSize.toString(): '')
+        .set('sort', "created,desc");
     }
     return this.http.get<TaskResults>(url, header);
   }

@@ -160,6 +160,10 @@ export class MappingViewComponent implements OnInit, AfterViewInit, OnDestroy {
   opened = false;
   private selectedMappingFile: ImportMappingFileParams | null | undefined = undefined;
   isAdmin = false;
+  authPageSize = 10;
+  authCurrentPage = 0;
+  reviewPageSize = 10;
+  reviewCurrentPage = 0;
 
   private timeout: NodeJS.Timeout | null = null;
 
@@ -341,8 +345,8 @@ export class MappingViewComponent implements OnInit, AfterViewInit, OnDestroy {
         if (this.mapping_id === mapping?.id) {
           self.mapping = mapping;
           if (self.mapping && self.mapping.id && self.mapping_id === self.mapping.id) {
-            self.store.dispatch(new LoadTasksForMap({id: self.mapping.id, authPageSize: 10,
-              authCurrentPage: 0, reviewPageSize: 10, reviewCurrentPage: 0}));
+            self.store.dispatch(new LoadTasksForMap({id: self.mapping.id, authPageSize: self.authPageSize,
+              authCurrentPage: self.authCurrentPage, reviewPageSize: self.reviewPageSize, reviewCurrentPage: self.reviewCurrentPage}));
             self.members = self.mapping.project.owners.concat(self.mapping.project.members).concat(self.mapping.project.guests);
           }
         }

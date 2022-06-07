@@ -48,13 +48,17 @@ export class AssignedWorkComponent implements OnInit, AfterViewInit, OnDestroy {
   taskAvailable = '';
   taskNotAvailable = '';
   isAdmin = false;
-  authPageSize = 10;
-  authCurrentPage = 0;
-  reviewPageSize = 10;
-  reviewCurrentPage = 0;
-  pageSizeOptions: number[] = [10, 25, 50, 100];
+  @Input() authPageSize: number | undefined;;
+  @Output() authPageSizeChange = new EventEmitter<number>();
+  @Input() authCurrentPage: number | undefined;
+  @Output() authCurrentPageChange = new EventEmitter<number>();
+  @Input() reviewPageSize: number | undefined;
+  @Output() reviewPageSizeChange = new EventEmitter<number>();
+  @Input() reviewCurrentPage: number | undefined;
+  @Output() reviewCurrentPageChange = new EventEmitter<number>();
   authTotalElements = 0;
   reviewTotalElements = 0;
+  pageSizeOptions: number[] = [10, 25, 50, 100];
   @Input() mapping: Mapping | undefined;
   @Input() mappingTableSelector: MappingTableSelectorComponent | null | undefined;
   @Output() updateTableEvent = new EventEmitter<string>();
@@ -138,6 +142,8 @@ export class AssignedWorkComponent implements OnInit, AfterViewInit, OnDestroy {
   authPageChanged(event: PageEvent): void {
     this.authPageSize = event.pageSize;
     this.authCurrentPage = event.pageIndex;
+    this.authPageSizeChange.emit(this.authPageSize);
+    this.authCurrentPageChange.emit(this.authCurrentPage);
     this.store.dispatch(new LoadTasksForMap({id: this.mapping?.id, authPageSize: this.authPageSize,
         authCurrentPage: this.authCurrentPage, reviewPageSize: this.reviewPageSize, reviewCurrentPage: this.reviewCurrentPage}));
   }
@@ -145,6 +151,8 @@ export class AssignedWorkComponent implements OnInit, AfterViewInit, OnDestroy {
   reviewPageChanged(event: PageEvent): void {
     this.reviewPageSize = event.pageSize;
     this.reviewCurrentPage = event.pageIndex;
+    this.reviewCurrentPageChange.emit(this.reviewCurrentPage);
+    this.reviewPageSizeChange.emit(this.reviewPageSize);
     this.store.dispatch(new LoadTasksForMap({id: this.mapping?.id, authPageSize: this.authPageSize,
         authCurrentPage: this.authCurrentPage, reviewPageSize: this.reviewPageSize, reviewCurrentPage: this.reviewCurrentPage}));
   }

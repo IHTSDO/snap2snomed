@@ -328,6 +328,8 @@
         </p>
         <app-assigned-work
           [mapping]="mapping"
+          [(authPageSize)]="authPageSize" [(authCurrentPage)]="authCurrentPage"
+          [(reviewPageSize)]="reviewPageSize" [(reviewCurrentPage)]="reviewCurrentPage"
           [mappingTableSelector]="mappingTableSelector"
           (updateTableEvent)="refreshTable($event)"></app-assigned-work>
       </mat-sidenav>
