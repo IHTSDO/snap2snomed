@@ -7,6 +7,24 @@
   min-width: 800px;
 }
 
+.warning-message {
+  padding: 20px;
+  width: auto;
+  margin-bottom: 20px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+}
+
+.infotext {
+  white-space: pre-wrap;
+  font-size: 0.9em;
+}
+
+.mat-icon-warning {
+  margin-right: 5px;
+}
+
 .mat-card {
   padding: 25px;
 }
