@@ -181,3 +181,8 @@ variable "main_page_text" {
   description = "Blurb about the instance"
   type        = string
 }
+
+variable "dex_loglevel" {
+  description = "Log level for DEX"
+  type        = string
+}

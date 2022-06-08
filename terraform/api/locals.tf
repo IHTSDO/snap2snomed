@@ -2,7 +2,7 @@ locals {
   api_ecs_environment = [
     {
       name = "spring.datasource.url"
-      value = "jdbc:mariadb:aurora//${aws_rds_cluster_instance.api.endpoint}:${aws_rds_cluster_instance.api.port}/${aws_rds_cluster.api.database_name}?cachePrepStmts=true&useServerPrepStmts=false&rewriteBatchedStatements=true"
+      value = "jdbc:mariadb:aurora//${aws_rds_cluster_instance.api.endpoint}:${aws_rds_cluster_instance.api.port}/${aws_rds_cluster.api.database_name}?cachePrepStmts=true&useServerPrepStmts=false&rewriteBatchedStatements=true&socketTimeout=480000"
     },
     {
       name  = "spring.datasource.driverClassName",
@@ -137,6 +137,10 @@ locals {
         {
           name  = "DEX_DB_CREATE"
           value = "true"
+        },
+        {
+          name  = "DEX_LOG_LEVEL"
+          value = var.dex_loglevel
         }
   ]
 }

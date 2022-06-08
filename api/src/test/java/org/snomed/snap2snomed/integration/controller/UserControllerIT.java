@@ -55,7 +55,8 @@ public class UserControllerIT extends IntegrationTestBase {
 
     Instant later = Instant.now();
 
-    restClient.createOrUpdateUser(DEFAULT_TEST_USER_SUBJECT, "Test", "Bobby", "CHANGED_NAME", "test@user.com");
+    // Add whitespace to user email we should be able to handle this
+    restClient.createOrUpdateUser(DEFAULT_TEST_USER_SUBJECT, "Test", "Bobby", "CHANGED_NAME", " test@user.com");
 
     validateNumberOfRevisions(path, 2);
     validateCreatedAndModifiedAudit(null, later, path, DEFAULT_TEST_USER_SUBJECT, DEFAULT_TEST_USER_SUBJECT);
