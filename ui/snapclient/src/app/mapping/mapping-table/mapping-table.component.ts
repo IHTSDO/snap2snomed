@@ -50,6 +50,7 @@ import {StatusUtils} from '../../_utils/status_utils';
 import {MappingTableSelectorComponent} from '../mapping-table-selector/mapping-table-selector.component';
 import {MatTable} from '@angular/material/table';
 import {WriteDisableUtils} from '../../_utils/write_disable_utils';
+import {FhirService} from "../../_services/fhir.service";
 
 export interface TableParams extends Params {
   pageIndex?: number;
@@ -156,6 +157,7 @@ export class MappingTableComponent implements OnInit, AfterViewInit, OnDestroy {
 
   constructor(private snackBar: MatSnackBar,
               private store: Store<IAppState>,
+              private fhirService: FhirService,
               public translate: TranslateService,
               private selectionService: SelectionService,
               private mapService: MapService,
@@ -361,11 +363,18 @@ export class MappingTableComponent implements OnInit, AfterViewInit, OnDestroy {
         if (targetCodes.includes(event.data?.code)) {
           self.dialog.open(ConfirmDialogComponent, {data: self.getDuplicateTargetDialogData()});
         } else {
-          row.targetCode = event.data?.code;
-          row.targetDisplay = event.data?.display;
-          row.status = MapRowStatus.DRAFT;
-          row.relationship = MapRowRelationship.INEXACT;
-          self.updateMapRowTarget(row, index);
+          self.fhirService.getEnglishFsn(event.data?.code, event.data?.system, self.task?.mapping?.toVersion || '').subscribe(englishFsn => {
+            let displayTerm = event.data?.display;
+            if (englishFsn !== '') {
+              displayTerm = englishFsn;
+            }
+
+            row.targetCode = event.data?.code;
+            row.targetDisplay = displayTerm;
+            row.status = MapRowStatus.DRAFT;
+            row.relationship = MapRowRelationship.INEXACT;
+            self.updateMapRowTarget(row, index);
+          });
         }
       });
     }
