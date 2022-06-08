@@ -40,7 +40,6 @@ import {TaskService} from '../../_services/task.service';
 import {ConfirmDialogComponent, DialogType} from '../../dialog/confirm-dialog/confirm-dialog.component';
 import {MatDialog} from '@angular/material/dialog';
 import {AuthService} from '../../_services/auth.service';
-import {debounceTime} from "rxjs/operators";
 
 export enum TaskAction {
   COMPLETE = 'COMPLETE',
