@@ -369,8 +369,8 @@ export class ServiceUtils {
     return lines.length !== uniqueLines.length;
   }
 
-  public static getEOL(): string {
-    return window.navigator.platform.startsWith('Win') ? '\r\n' : '\n';
+  public static getEOL(): RegExp {
+    return RegExp('\r\n|\r|\n');
   }
 
 }
