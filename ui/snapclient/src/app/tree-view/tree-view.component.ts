@@ -92,7 +92,7 @@ export class TreeViewComponent implements OnInit, OnDestroy {
         if (self.active && selection?.code) {
           const code = selection.code;
           const system = selection.system;
-          const version = selection.version ?? self.task?.mapping?.toVersion;
+          const version = selection.version ?? (self.task ? self.task.mapping?.toVersion : 'http://snomed.info/sct');
           const id = FhirService.conceptNodeId(system, code);
           const prevFocus = self.focus;
 
