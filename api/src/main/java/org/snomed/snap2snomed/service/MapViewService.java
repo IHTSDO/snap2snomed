@@ -387,16 +387,19 @@ public class MapViewService {
   }
 
   protected JPAQuery<MappedRowDetailsDto> getQueryMappedRowDetailsForMap(Long mapId, Task task, MapViewFilter filter) {
-
-    return new JPAQuery<MapView>(entityManager)
-        .select(Projections.constructor(MappedRowDetailsDto.class, mapRow.id, mapRow.sourceCode.index, mapTarget.id))
-        .from(mapRow)
-        .leftJoin(mapTarget).on(mapTarget.row.eq(mapRow))
-        .leftJoin(mapRow.authorTask)
-        .leftJoin(mapRow.reviewTask)
-        .leftJoin(mapRow.lastAuthor)
-        .leftJoin(mapRow.lastReviewer)
-        .where(getWhereClause(mapId, task, filter));
+    JPAQuery<MappedRowDetailsDto> query = new JPAQuery<MapView>(entityManager)
+            .select(Projections.constructor(MappedRowDetailsDto.class, mapRow.id, mapRow.sourceCode.index, mapTarget.id))
+            .from(mapRow)
+            .leftJoin(mapTarget).on(mapTarget.row.eq(mapRow));
+    if (task != null) {
+      query.leftJoin(mapRow.authorTask)
+           .leftJoin(mapRow.reviewTask)
+           .leftJoin(mapRow.lastAuthor)
+           .leftJoin(mapRow.lastReviewer)
+           .where(getWhereClause(mapId, task, filter));
+    }
+    query.where(getWhereClause(mapId, task, filter));
+    return query;
   }
 
   private BooleanExpression getWhereClause(Long mapId, Task task, MapViewFilter filter) {
