@@ -18,7 +18,7 @@ import {AfterViewInit, Component, EventEmitter, Input, OnDestroy, OnInit, Output
 import {Store} from '@ngrx/store';
 import {TranslateService} from '@ngx-translate/core';
 import {IAppState} from '../../store/app.state';
-import {selectAllTasks, selectTaskList, selectTaskLoadError, selectTaskLoading} from '../../store/task-feature/task.selectors';
+import {selectAllTasks, selectTaskLoadError, selectTaskLoading} from '../../store/task-feature/task.selectors';
 import {Task, TaskType} from '../../_models/task';
 import {User} from '../../_models/user';
 import {Mapping} from '../../_models/mapping';
@@ -28,8 +28,8 @@ import {MatTabChangeEvent} from '@angular/material/tabs';
 import {ErrorInfo} from 'src/app/errormessage/errormessage.component';
 import {MappingTableSelectorComponent} from 'src/app/mapping/mapping-table-selector/mapping-table-selector.component';
 import {AuthService} from '../../_services/auth.service';
-import { PageEvent } from '@angular/material/paginator';
-import { LoadTasksForMap } from 'src/app/store/task-feature/task.actions';
+import {PageEvent} from '@angular/material/paginator';
+import {LoadTasksForMap} from 'src/app/store/task-feature/task.actions';
 
 
 @Component({
@@ -62,6 +62,7 @@ export class AssignedWorkComponent implements OnInit, AfterViewInit, OnDestroy {
   @Input() mapping: Mapping | undefined;
   @Input() mappingTableSelector: MappingTableSelectorComponent | null | undefined;
   @Output() updateTableEvent = new EventEmitter<string>();
+  @Output() updateCurrentTaskPage = new EventEmitter<string>();
 
   private selectedTaskType: string | null = null;
 
@@ -187,6 +188,15 @@ export class AssignedWorkComponent implements OnInit, AfterViewInit, OnDestroy {
     if (this.selectedTaskType !== $event) {
       this.selectedTaskType = $event;
     }
+    switch (this.selectedTaskType) {
+      case TaskType.AUTHOR:
+        this.authCurrentPage = 0;
+        break;
+      case TaskType.REVIEW:
+        this.reviewCurrentPage = 0;
+        break;
+    }
+    this.updateCurrentTaskPage.emit(this.selectedTaskType);
     this.updateTableEvent.emit(this.selectedTaskType);
     this.loading = true;
   }

@@ -592,4 +592,15 @@ export class MappingViewComponent implements OnInit, AfterViewInit, OnDestroy {
       this.refreshPage();
     }
   }
+
+  updateCurrentTaskPage($event: string) {
+    switch ($event) {
+      case TaskType.AUTHOR:
+        this.authCurrentPage = 0;
+        break;
+      case TaskType.REVIEW:
+        this.reviewCurrentPage = 0;
+        break;
+    }
+  }
 }

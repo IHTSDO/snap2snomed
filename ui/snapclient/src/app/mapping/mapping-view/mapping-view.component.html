@@ -331,6 +331,7 @@
           [(authPageSize)]="authPageSize" [(authCurrentPage)]="authCurrentPage"
           [(reviewPageSize)]="reviewPageSize" [(reviewCurrentPage)]="reviewCurrentPage"
           [mappingTableSelector]="mappingTableSelector"
+          (updateCurrentTaskPage)="updateCurrentTaskPage($event)"
           (updateTableEvent)="refreshTable($event)"></app-assigned-work>
       </mat-sidenav>
     </mat-sidenav-container>
