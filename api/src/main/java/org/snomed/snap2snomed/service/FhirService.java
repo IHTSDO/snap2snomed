@@ -17,6 +17,7 @@
 package org.snomed.snap2snomed.service;
 
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
 import org.hl7.fhir.r4.model.*;
 import org.ihtsdo.snomed.util.SnomedUtils;
@@ -38,6 +39,7 @@ import java.util.stream.Collectors;
 public class FhirService {
 
     private static final String DEFAULT_CODE_SYSTEM = "http://snomed.info/sct";
+    private static final int THRESHOLD = 50000;
 
     @Autowired
     TerminologyProvider terminologyProvider;
@@ -60,19 +62,27 @@ public class FhirService {
             return new ValidationResult(0, new HashSet<>(), new HashSet<>(), invalid);
         }
       ValueSet valueSetToExpand = new ValueSet();
-      ValueSet.ConceptSetComponent conceptSetComponent = new ValueSet.ConceptSetComponent();
-      conceptSetComponent.setSystem(DEFAULT_CODE_SYSTEM);
-      conceptSetComponent.setVersion(codeSystemVersion);
-      codes.stream().forEach(targetCode -> conceptSetComponent.addConcept(
-              new ValueSet.ConceptReferenceComponent(new CodeType(targetCode))));
+      List<ValueSet.ConceptSetComponent> conceptSetComponents = new ArrayList<>();
+      List<ValueSet.ConceptReferenceComponent> conceptReferenceComponents =
+              codes.stream().map(targetCode -> new ValueSet.ConceptReferenceComponent(new CodeType(targetCode))).collect(Collectors.toList());
+      List<List<ValueSet.ConceptReferenceComponent>> partitionedConceptReferenceComponents =
+              Lists.partition(conceptReferenceComponents, THRESHOLD);
       String reqScope = scope;
       if (reqScope != null) {
         if (!reqScope.matches("^http.*")) {
             reqScope = codeSystemVersion + "?fhir_vs=ecl/" + reqScope;
         }
         reqScope = reqScope.replaceAll("\\|", URLEncoder.encode("|", Charset.defaultCharset()));
-        conceptSetComponent.setValueSet(List.of(new CanonicalType(reqScope)));
-        valueSetToExpand.getCompose().addInclude(conceptSetComponent);
+        String finalReqScope = reqScope;
+        partitionedConceptReferenceComponents.forEach(batch -> {
+          ValueSet.ConceptSetComponent batchedConceptSetComponent = new ValueSet.ConceptSetComponent();
+          batchedConceptSetComponent.setSystem(DEFAULT_CODE_SYSTEM);
+          batchedConceptSetComponent.setVersion(codeSystemVersion);
+          batchedConceptSetComponent.setValueSet(List.of(new CanonicalType(finalReqScope)));
+          batch.forEach(batchedConceptSetComponent::addConcept);
+          conceptSetComponents.add(batchedConceptSetComponent);
+        });
+        valueSetToExpand.getCompose().setInclude(conceptSetComponents);
       }
       int count = 0, offset = 0;
       TerminologyClient terminologyClient = terminologyProvider.getClient();
@@ -91,9 +101,15 @@ public class FhirService {
         if ((offset + count) > expansion.getTotal()) {
           count = expansion.getTotal() - offset;
         }
-        responseVs = terminologyClient.expand(valueSetToExpand, new IntegerType(count), new IntegerType(offset), new BooleanType(false));
-        expansion = responseVs.getExpansion();
-        contains.addAll(expansion.getContains());
+        List<ValueSet> responseVss = new ArrayList<>();
+        int finalCount = count;
+        int finalOffset = offset;
+        conceptSetComponents.forEach(component -> {
+          valueSetToExpand.getCompose().setInclude(List.of(component));
+          responseVss.add(terminologyClient.expand(valueSetToExpand, new IntegerType(finalCount), new IntegerType(finalOffset),
+                  new BooleanType(false)));
+        });
+        responseVss.forEach(item -> contains.addAll(item.getExpansion().getContains()));
       }
 
       Set<String> inactive = contains.stream()

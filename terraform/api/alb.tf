@@ -1,6 +1,7 @@
 resource "aws_lb" "api" {
   name               = replace(var.host_name, "/[.]/", "-")
   internal           = false
+  idle_timeout       = 480
   load_balancer_type = "application"
   subnets = [
     aws_subnet.api_public[0].id,

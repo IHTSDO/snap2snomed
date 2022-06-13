@@ -77,6 +77,10 @@ locals {
       value = var.cors_maxage
     },
     {
+      name = "snap2snomed.maximumImportedCodeSetRows",
+      value = "200000"
+    },
+    {
       name = "snap2snomed.userRegistrationUrl",
       value = var.user_registration_url
     },
