@@ -383,6 +383,7 @@ export class MappingViewComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   exportMapView(type: string): void {
+    this.setLoading();
     let contentType: string;
     let extension: string;
     switch (type) {
@@ -409,7 +410,7 @@ export class MappingViewComponent implements OnInit, AfterViewInit, OnDestroy {
           (error) => {
             console.log(error);
             this.translate.get('ERROR.EXPORT_FAILED').subscribe((msg) => this.error = msg);
-          });
+          }).add(() => this.clearLoading());
     }
   }
 

@@ -76,7 +76,7 @@ public class ImportedMappingRestControllerIT extends IntegrationTestBase {
     restClient.createOrUpdateUser(UNAUTHORISED_TEST_USER_SUBJECT, "Unauthorised", "Bob", "User", "unauthorised@user.com");
     projectId = restClient.createProject("ProjectDemo", "Demo Project", Set.of(DEFAULT_TEST_USER_SUBJECT), Set.of(), Set.of());
     createLargeCSV("target/large.csv", 100000);
-    createLargeCSV("target/too-large.csv", 101000);
+    createLargeCSV("target/too-large.csv", 201000);
     codesetId = restClient.createImportedCodeSet("AAA Tabs", "1.0", 0, 2, true, "\t", new ClassPathResource("AAA.tsv").getFile(), "text/csv");
     Long codesetId2 = restClient.createImportedCodeSet("AAA Large Tabs", "1.0", 0, 1, true, ",", new File("target/large.csv"), "text/csv");
     mapId = restClient.createMap("Testing Map Version", "http://snomed.info/sct/32506021000036107/version/20210531",
@@ -241,7 +241,7 @@ public class ImportedMappingRestControllerIT extends IntegrationTestBase {
   }
 
   /**
-   * Test an input file > 100k rows
+   * Test an input file > 200k rows
    */
   @Test
   public void failCreateEntityFromTooLargeFile() throws Exception {
