@@ -269,7 +269,8 @@ public class MapViewService {
 
     QueryResults<MapView> results = query.fetchResults();
 
-    JPAQuery<MappedRowDetailsDto> mappingRowDetailsQuery = getQueryMappedRowDetailsForMap(mapId, task, filter);
+    JPAQuery<MappedRowDetailsDto> mappingRowDetailsQuery = getQueryMappedRowDetailsForMap(mapId, task, filter,
+            pageable);
     QueryResults<MappedRowDetailsDto> sourceIndexResults = mappingRowDetailsQuery.fetchResults();
 
     Page<MapView> page = new PageImpl<>(results.getResults(), pageable, results.getTotal());
@@ -386,7 +387,8 @@ public class MapViewService {
         .where(getWhereClause(mapId, task, filter));
   }
 
-  protected JPAQuery<MappedRowDetailsDto> getQueryMappedRowDetailsForMap(Long mapId, Task task, MapViewFilter filter) {
+  protected JPAQuery<MappedRowDetailsDto> getQueryMappedRowDetailsForMap(Long mapId, Task task, MapViewFilter filter,
+                                                                         Pageable pageable                                                                      ) {
     JPAQuery<MappedRowDetailsDto> query = new JPAQuery<MapView>(entityManager)
             .select(Projections.constructor(MappedRowDetailsDto.class, mapRow.id, mapRow.sourceCode.index, mapTarget.id))
             .from(mapRow)
@@ -395,10 +397,10 @@ public class MapViewService {
       query.leftJoin(mapRow.authorTask)
            .leftJoin(mapRow.reviewTask)
            .leftJoin(mapRow.lastAuthor)
-           .leftJoin(mapRow.lastReviewer)
-           .where(getWhereClause(mapId, task, filter));
+           .leftJoin(mapRow.lastReviewer);
     }
     query.where(getWhereClause(mapId, task, filter));
+    query.offset(pageable.getOffset()).limit(pageable.getPageSize());
     return query;
   }
 
