@@ -26,6 +26,7 @@ import {Task} from 'src/app/_models/task';
 import {StatusUtils} from '../../_utils/status_utils';
 import {SourceRow} from '../mapping-detail/mapping-detail.component';
 import {WriteDisableUtils} from "../../_utils/write_disable_utils";
+import {FhirService} from "../../_services/fhir.service";
 
 @Component({
   selector: 'app-target-relationship',
@@ -50,6 +51,7 @@ export class TargetRelationshipComponent implements OnInit {
   toMapRowStatus = toMapRowStatus;
 
   constructor(private mapService: MapService,
+              private fhirService: FhirService,
               private router: Router,
               private selectionService: SelectionService,
               private translate: TranslateService) {
@@ -82,7 +84,7 @@ export class TargetRelationshipComponent implements OnInit {
     const self = this;
     if (self.source && event.data && !StatusUtils.inReviewedState(self.source.status as MapRowStatus)) {
       if (!event.data.rowId) {
-        self.addSelection(event.data.code, event.data.display, relationship);
+        self.addSelection(event.data.code, event.data.display, event.data.system, relationship);
       } else {
         const updatedTarget = self.targetRows.map((t) => t)
           .filter((m) => m.targetCode === event.data.targetCode)[0];
@@ -101,26 +103,35 @@ export class TargetRelationshipComponent implements OnInit {
 
   addFocusTarget(relationship: MapRowRelationship): void {
     if (this.selectedSearchItem) {
-      this.addSelection(this.selectedSearchItem.code, this.selectedSearchItem.display, relationship);
+      this.addSelection(this.selectedSearchItem.code, this.selectedSearchItem.display, this.selectedSearchItem.system, relationship);
     }
   }
 
-  addSelection(code: string, display: string, relationship: string): void {
+  addSelection(code: string, display: string, system: string, relationship: string): void {
     const self = this;
-    if (self.source) {
-      const targetRow = new MapView('', '', self.source.index, self.source.code,
-        self.source.display, code, display, relationship, MapRowStatus.DRAFT,
-        false, null, null, null, null, null, false);
-      const duplicate = self.targetRows.find((row: any) => row.targetCode === targetRow.targetCode);
-      if (!duplicate) {
-        self.newTargetEvent.emit(targetRow);
-        self.error = {}; // clear any duplicate errors
-      } else {
-        self.translate.get('ERROR.DUPLICATE_TARGET_ERROR').subscribe((res: any) => {
-          self.error.message = res;
-        });
+
+    self.fhirService.getEnglishFsn(code, system, self.task?.mapping?.toVersion || '').subscribe(englishFsn => {
+      let displayTerm = display;
+      if (englishFsn !== '') {
+        displayTerm = englishFsn;
       }
-    }
+
+      if (self.source) {
+        const targetRow = new MapView('', '', self.source.index, self.source.code,
+          self.source.display, code, displayTerm, relationship, MapRowStatus.DRAFT,
+          false, null, null, null, null, null, false);
+        const duplicate = self.targetRows.find((row: any) => row.targetCode === targetRow.targetCode);
+        if (!duplicate) {
+          self.newTargetEvent.emit(targetRow);
+          self.error = {}; // clear any duplicate errors
+        } else {
+          self.translate.get('ERROR.DUPLICATE_TARGET_ERROR').subscribe((res: any) => {
+            self.error.message = res;
+          });
+        }
+      }
+
+    });
   }
 
   removeTarget(targetRow: MapView): void {

@@ -90,7 +90,7 @@ export class FhirService {
     return this.http.get<R4.IBundle>(url, options);
   }
 
-  autoSuggest(text: string, version: string, scope: string, strategy: string, activeOnly: boolean = true, count: number = 5): Observable<Match[]> {
+  autoSuggest(text: string, version: string, scope: string, strategy: string, activeOnly: boolean = true, count: number = 5, forceEnglish: boolean = false): Observable<Match[]> {
     if (this.isOntoserver) {
       const isMatch = (match: Match | null): match is Match => !!match;
       const ecl = activeOnly ? `(${scope}){{C active=true}}` : scope;
@@ -105,6 +105,9 @@ export class FhirService {
       const options = ServiceUtils.getHTTPHeaders();
       options.headers = options.headers
         .set('Accept', ['application/fhir+json', 'application/json']);
+      if (forceEnglish) {
+        options.headers = options.headers.append('Accept-Language', 'en-US');
+      }
       options.params = {...options.params, ...params};
       return this.http.get<R4.IParameters>(url, options).pipe(
         map(parameters => {
@@ -296,6 +299,26 @@ export class FhirService {
     options.headers = options.headers
       .set('Accept', ['application/fhir+json', 'application/json']);
     return this.http.post<R4.IBundle>(url, body, options);
+  }
+
+  getEnglishFsn(code: string, system: string, version: string, properties: string[] = []): Observable<string> {
+    return this.lookupConcept(code, system, version, properties).pipe(
+      map((parameters: R4.IParameters) => {
+        return parameters.parameter?.filter(parameter => {
+          return parameter.name == 'designation' && parameter.part?.some(param => param.name == 'use' && param.valueCoding?.code == '900000000000003001');
+        }).map(fsns => ({
+          language: fsns.part?.find(e => e.name == 'language')?.valueCode,
+          fsn: fsns.part?.find(e => e.name == 'value')?.valueString
+        }));
+      }),
+      map(fsnObjects => {
+        let englishFsn = '';
+        if (fsnObjects) {
+          englishFsn = fsnObjects.find(fsn => fsn.language == 'en')?.fsn || '';
+        }
+        return englishFsn;
+      })
+    );
   }
 
   lookupConcept(code: string, system: string, version: string, properties: string[] = []): Observable<R4.IParameters> {

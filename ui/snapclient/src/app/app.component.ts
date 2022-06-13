@@ -78,7 +78,7 @@ export class AppComponent implements OnInit {
     // Set up translation service - uses i18n/*.json
     AppComponent.translator = this.translate;
     this.translate.setDefaultLang(this.config.defaultLang);
-    const supportedLangs = ['en', 'fr', 'nl', 'hu'];
+    const supportedLangs = ['en', 'fr', 'nl', 'hu', 'sv'];
     const userLang = this.translate.getBrowserLang(); // TODO - Get from user profile when ready
     const lang = supportedLangs.indexOf(userLang) >= 0 ? userLang : this.config.defaultLang;
     this.translate.addLangs(supportedLangs);

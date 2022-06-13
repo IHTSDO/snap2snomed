@@ -22,6 +22,7 @@ import {SelectionService} from '../_services/selection.service';
 import {ConceptNode} from '@csiro/shrimp-hierarchy-view';
 import {Coding} from '../store/fhir-feature/fhir.reducer';
 import {MatTreeNestedDataSource} from '@angular/material/tree';
+import {Task} from "../_models/task";
 
 export class Node {
   constructor(public concept: ConceptNode<Coding>,
@@ -37,6 +38,7 @@ export class Node {
 export class TreeViewComponent implements OnInit, OnDestroy {
 
   @Input() active: boolean = true;
+  @Input() task: Task | undefined;
 
   private subscription = new Subscription();
   private focus?: Node;
@@ -90,7 +92,7 @@ export class TreeViewComponent implements OnInit, OnDestroy {
         if (self.active && selection?.code) {
           const code = selection.code;
           const system = selection.system;
-          const version = selection.version ?? 'http://snomed.info/sct';
+          const version = selection.version ?? (self.task ? self.task.mapping?.toVersion : 'http://snomed.info/sct');
           const id = FhirService.conceptNodeId(system, code);
           const prevFocus = self.focus;
 
