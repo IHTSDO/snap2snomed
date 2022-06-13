@@ -42,6 +42,7 @@ describe('AuthService', () => {
 
   it('should be created', () => {
     expect(service).toBeTruthy();
+    TestBed.resetTestEnvironment();
   });
 
   // Try to fix:

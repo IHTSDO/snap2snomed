@@ -126,6 +126,7 @@ describe('Snap2SnomedHttpErrorInterceptor', () => {
           expect(error).toBeTruthy();
           expect(errorNotifier.snackBar.open).not.toHaveBeenCalledWith('ERROR.BACKEND_ISSUES', ' ',
                 errorNotifier.snackBarOptions);
+          TestBed.resetTestEnvironment();
         }
       );
     const req = httpMock.expectOne('undefined/oauth2/token');
