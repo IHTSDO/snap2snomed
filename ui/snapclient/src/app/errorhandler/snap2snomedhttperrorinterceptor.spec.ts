@@ -33,6 +33,7 @@ import {TokenMsg} from '../_models/user';
 import {RouterTestingModule} from '@angular/router/testing';
 import {testRoutes} from '../auth.guard.spec';
 import { AuthService } from '../_services/auth.service';
+import { UserService } from '../_services/user.service';
 
 describe('Snap2SnomedHttpErrorInterceptor', () => {
   let service: Snap2SnomedHttpErrorInterceptor;
@@ -81,7 +82,7 @@ describe('Snap2SnomedHttpErrorInterceptor', () => {
         { provide: HTTP_INTERCEPTORS,
           useClass: TokenInterceptor, multi: true
         },
-        TranslateService, ErrorNotifier, Snap2SnomedErrorHandler, Snap2SnomedHttpErrorInterceptor],
+        TranslateService, ErrorNotifier, Snap2SnomedErrorHandler, Snap2SnomedHttpErrorInterceptor, AuthService, UserService],
     });
     httpClient = TestBed.inject(HttpClient);
     httpMock = TestBed.inject(HttpTestingController);
