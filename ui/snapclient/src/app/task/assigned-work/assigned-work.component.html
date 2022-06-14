@@ -13,6 +13,7 @@
         </ng-template>
         <app-task-add [mappingTableSelector]="mappingTableSelector"
                       [mapping]="mapping" [currentUser]="currentUser"
+                      (canceNewTaskEvent)="taskCreateCancelled()"
                       (newTaskEvent)="selectTaskTab($event)"></app-task-add>
       </mat-tab>
 

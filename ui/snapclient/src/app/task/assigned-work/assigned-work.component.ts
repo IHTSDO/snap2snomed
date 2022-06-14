@@ -132,6 +132,7 @@ export class AssignedWorkComponent implements OnInit, AfterViewInit, OnDestroy {
     ));
     self.subscription.add(self.store.select(selectTaskLoadError).subscribe(
       (error) => {
+        self.loading = false;
         if (error) {
           self.translate.get('TASK.FAILED_TO_LOAD_TASKS').subscribe((res) => self.error.message = res);
           self.error.detail = error.error;
@@ -217,5 +218,9 @@ export class AssignedWorkComponent implements OnInit, AfterViewInit, OnDestroy {
 
   isUserInGroup(user: User, group: User[]): boolean {
     return group && group.some((u) => u.id === user.id);
+  }
+
+  taskCreateCancelled(): void {
+    this.loading = false;
   }
 }

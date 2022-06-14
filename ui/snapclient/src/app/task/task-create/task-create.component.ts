@@ -92,7 +92,7 @@ export class TaskCreateComponent implements OnInit {
     const theForm = this.data.form;
     this.data.task.allowAssigneeToBeAuthorAndReviewer = false;
     this.data.task.reassignAlreadyAssignedRows = false;
-    this.dialogRef.close({resetForm: doReset, form: theForm});
+    this.dialogRef.close({resetForm: doReset, isCancelled: true, form: theForm});
   }
 
   handleTaskError(errorDetail: ErrorMessage | undefined): void {
