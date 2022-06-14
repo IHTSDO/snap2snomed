@@ -43,7 +43,7 @@ import org.springframework.data.annotation.ReadOnlyProperty;
     @Index(columnList = "code, imported_codeset_id", unique = true)})
 public class ImportedCode implements Snap2SnomedEntity {
 
-  public static final int DISPLAY_SIZE_LIMIT = 512;
+  public static final int DISPLAY_SIZE_LIMIT = 2048;
   public static final int CODE_SIZE_LIMIT = 50;
 
   @Id

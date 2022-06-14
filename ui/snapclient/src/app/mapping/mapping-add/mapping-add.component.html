@@ -146,6 +146,10 @@
           <app-project-roles (errorEvent)="errorUpdate($event)" [readonly]="mode === 'FORM.VIEW'" [project]="mappingModel.project"></app-project-roles>
         </div>
       </mat-card-content>
+      <div class="alert-warning warning-message">
+        <mat-icon class="mat-icon-warning">info</mat-icon>
+        <div [innerHtml]="'IMPORT.IMPORT_LARGE_MAP' | translate" class="infotext"></div>
+      </div>
       <mat-divider></mat-divider>
       <mat-card-actions>
         <button *ngIf="mode !== 'FORM.VIEW'" mat-raised-button color="primary" type="submit"

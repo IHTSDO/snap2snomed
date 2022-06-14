@@ -239,11 +239,12 @@ public class ImportedCodeSetResourceIT extends IntegrationTestBase {
   }
 
   /**
-   * Test an input file > 100k rows
+   * Test an input file > 200k rows
    */
   @Test
   public void failCreateEntityFromTooLargeFile() throws Exception {
-    restClient.expectCreateImportedCodeSetFail("badAAA", "2", 0, 1, true, ",", new ClassPathResource("too-large.csv").getFile(),
+    restClient.expectCreateImportedCodeSetFail("badAAA", "2", 0, 1, true, ",",
+            new ClassPathResource("too-large-new.csv").getFile(),
         "text/csv", 400, TOO_LARGE_FILE_PROBLEM_URI);
   }
 
