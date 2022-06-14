@@ -572,6 +572,7 @@ public class TaskResourceIT extends IntegrationTestBase {
             .get("/tasks/search/findByMapIdAndType")
             .then().statusCode(200)
             .body("content", hasSize(2))
+            .body("content[0].type", is(TaskType.AUTHOR.toString()))
             .body("page.totalElements", is(3));
     // REVIEW Tasks
     restClient.givenDefaultUser().when().queryParam("projection", "embeddedTaskDetails")
@@ -582,6 +583,7 @@ public class TaskResourceIT extends IntegrationTestBase {
             .get("/tasks/search/findByMapIdAndType")
             .then().statusCode(200)
             .body("content", hasSize(2))
+            .body("content[0].type", is(TaskType.REVIEW.toString()))
             .body("page.totalElements", is(3));
   }
 
