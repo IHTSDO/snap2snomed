@@ -33,7 +33,7 @@
     <java.version>11</java.version>
     <docker.repository>aehrc/snap2snomed</docker.repository>
     <docker.registry.host>quay.io</docker.registry.host>
-    <sentry.version>6.0.0</sentry.version>
+    <sentry.version>6.1.0</sentry.version>
     <jacoco.version>0.8.8</jacoco.version>
     <commons-csv.version>1.9.0</commons-csv.version>
     <mariadb-java-client.version>2.7.4</mariadb-java-client.version>
