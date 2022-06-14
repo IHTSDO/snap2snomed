@@ -19,7 +19,7 @@ import {HttpClient, HttpParams} from '@angular/common/http';
 import {Observable} from 'rxjs';
 import {Mapping} from '../_models/mapping';
 import {Project} from '../_models/project';
-import {Task} from '../_models/task';
+import {Task, TaskType} from '../_models/task';
 import {ServiceUtils} from '../_utils/service_utils';
 import {MappedRowDetailsDto, MapRow, MapRowRelationship, MapRowStatus, MapView} from '../_models/map_row';
 import {JSONTargetRow, TargetRow} from '../_models/target_row';
@@ -29,14 +29,14 @@ import {map} from 'rxjs/operators';
 import {ImportMappingFileParams} from '../store/source-feature/source.actions';
 import {ValidationResult} from "../_models/validation_result";
 
-export interface Results {
+export interface TaskResults {
   _embedded: any;
   _links: any;
   page: {
-    size: number;
+    number: number;
     totalElements: number;
     totalPages: number;
-    count: number;
+    size: number;
   };
 }
 
@@ -152,12 +152,12 @@ export class MapService {
     return this.http.post(url, body, header);
   }
 
-  fetchProjects(pageSize: number, currentPage: number): Observable<Results> {
+  fetchProjects(pageSize: number, currentPage: number): Observable<TaskResults> {
     const size = pageSize ?? 20;
     const page = currentPage ?? 0;
     const url = `${this.config.apiBaseUrl}/projects?sort=modified,desc&projection=listView&page=${page}&size=${size}`;
     const header = ServiceUtils.getHTTPHeaders();
-    return this.http.get<Results>(url, header);
+    return this.http.get<TaskResults>(url, header);
   }
 
   getMapForId(id: string): Observable<Mapping> {

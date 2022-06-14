@@ -24,17 +24,20 @@ import {
   AddTaskSuccess,
   DeleteTaskFailure,
   DeleteTaskSuccess,
+  LoadAllTasksSuccess,
   LoadTasksFailure,
   LoadTasksForMap,
   LoadTasksSuccess,
   TaskActions,
   TaskActionTypes,
 } from './task.actions';
-import {Task} from '../../_models/task';
+import {Task, TaskPage, TaskPageDetails, TaskPageForType, TaskType} from '../../_models/task';
 import {ServiceUtils} from 'src/app/_utils/service_utils';
 import {User} from 'src/app/_models/user';
 import {Router} from '@angular/router';
 import {LoadMapping} from '../mapping-feature/mapping.actions';
+import { EMPTY, forkJoin } from 'rxjs';
+import { TaskResults } from 'src/app/_services/map.service';
 
 
 @Injectable()
@@ -46,15 +49,47 @@ export class TaskEffects {
     private router: Router) {
   }
 
+
   loadTasksForMap$ = createEffect(() => this.actions$.pipe(
     ofType(TaskActionTypes.LOAD_TASKS_FOR_MAP),
     map((action) => action.payload),
-    switchMap((payload) => this.taskService.getTasksByMap(payload.id).pipe(
-      map((resp) => resp._embedded.tasks as Task[]),
-      map((tasks: Task[]) => tasks.map(TaskEffects.mapTaskFromPayload)),
-      switchMap((tasks: Task[]) => of(new LoadTasksSuccess(tasks))),
-      catchError((err) => of(new LoadTasksFailure({error: err})))
-    ))), {dispatch: true});
+    switchMap((payload) => {
+      if (payload.id) {
+        let authTasks = this.taskService.getTasksByMapAndType(payload.id, TaskType.AUTHOR, payload.authPageSize, payload.authCurrentPage).pipe(
+          map((resp: TaskResults) => {
+            let tasks_conv: Task[] = resp._embedded.tasks.map((task: any) => TaskEffects.mapTaskFromPayload(task));
+            let taskPage: TaskPageDetails = resp.page;
+            return new TaskPage(taskPage, tasks_conv);
+          }),
+          switchMap((resp: TaskPage) => of(new LoadTasksSuccess(resp))),
+          catchError((err) => of(new LoadTasksFailure({error: err})))
+        )
+        let reviewTasks = this.taskService.getTasksByMapAndType(payload.id, TaskType.REVIEW, payload.reviewPageSize, payload.reviewCurrentPage).pipe(
+          map((resp: TaskResults) => {
+            let tasks_conv: Task[] = resp._embedded.tasks.map((task: any) => TaskEffects.mapTaskFromPayload(task));
+            let taskPage: TaskPageDetails = resp.page;
+            return new TaskPage(taskPage, tasks_conv);
+          }),
+          switchMap((resp: TaskPage) => of(new LoadTasksSuccess(resp))),
+          catchError((err) => of(new LoadTasksFailure({error: err})))
+        )
+        return forkJoin([authTasks, reviewTasks]).pipe(
+          switchMap(([authTasks, reviewTasks]) => {
+            if (authTasks instanceof LoadTasksSuccess && reviewTasks instanceof LoadTasksSuccess) {
+              let taskPages: TaskPageForType[] = [];
+              taskPages.push({type: TaskType.AUTHOR, page: authTasks.payload});
+              taskPages.push({type: TaskType.REVIEW, page: reviewTasks.payload});
+              return of(new LoadAllTasksSuccess(taskPages));
+            } else {
+              return EMPTY;
+            }
+          }),
+          catchError((err: any) => of(new LoadTasksFailure(err))));
+      } else {
+        return EMPTY;
+      }
+    }
+    )), {dispatch: true});
 
   addTask$ = createEffect(() => this.actions$.pipe(
     ofType(TaskActionTypes.ADD_TASK),

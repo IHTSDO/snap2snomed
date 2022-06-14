@@ -81,7 +81,7 @@ describe('Snap2SnomedHttpErrorInterceptor', () => {
         { provide: HTTP_INTERCEPTORS,
           useClass: TokenInterceptor, multi: true
         },
-        TranslateService, ErrorNotifier, Snap2SnomedErrorHandler, Snap2SnomedHttpErrorInterceptor],
+        TranslateService, ErrorNotifier, Snap2SnomedErrorHandler, Snap2SnomedHttpErrorInterceptor, AuthService],
     });
     httpClient = TestBed.inject(HttpClient);
     httpMock = TestBed.inject(HttpTestingController);
