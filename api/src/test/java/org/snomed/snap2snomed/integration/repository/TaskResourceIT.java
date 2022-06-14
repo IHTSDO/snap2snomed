@@ -549,7 +549,46 @@ public class TaskResourceIT extends IntegrationTestBase {
   }
 
   @Test
-  public void shouldGetTasksForSpecifiedMapWhenUserIsAdmin() throws Exception {
+  public void shouldGetPagedTasksResultsForTaskTypes() throws Exception {
+    restClient.createTask(DEFAULT_TEST_USER_SUBJECT, TaskType.AUTHOR, map2Id, DEFAULT_TEST_USER_SUBJECT,
+            "1-3", true, true, null);
+    restClient.createTask(DEFAULT_TEST_USER_SUBJECT, TaskType.AUTHOR, map2Id, DEFAULT_TEST_USER_SUBJECT,
+            "4-5", true, true, null);
+    restClient.createTask(DEFAULT_TEST_USER_SUBJECT, TaskType.AUTHOR, map2Id, DEFAULT_TEST_USER_SUBJECT,
+            "6-7", true, true, null);
+    restClient.createTask(DEFAULT_TEST_USER_SUBJECT, TaskType.REVIEW, map2Id, DEFAULT_TEST_USER_SUBJECT,
+            "1-3", true, true, null);
+    restClient.createTask(DEFAULT_TEST_USER_SUBJECT, TaskType.REVIEW, map2Id, DEFAULT_TEST_USER_SUBJECT,
+            "4-5", true, true, null);
+    restClient.createTask(DEFAULT_TEST_USER_SUBJECT, TaskType.REVIEW, map2Id, DEFAULT_TEST_USER_SUBJECT,
+            "6-7", true, true, null);
+
+    // AUTHOR Tasks
+    restClient.givenDefaultUser().when().queryParam("projection", "embeddedTaskDetails")
+            .queryParam("id", map2Id)
+            .queryParam("type", TaskType.AUTHOR)
+            .queryParam("page", 0)
+            .queryParam("size", 2)
+            .get("/tasks/search/findByMapIdAndType")
+            .then().statusCode(200)
+            .body("content", hasSize(2))
+            .body("content[0].type", is(TaskType.AUTHOR.toString()))
+            .body("page.totalElements", is(3));
+    // REVIEW Tasks
+    restClient.givenDefaultUser().when().queryParam("projection", "embeddedTaskDetails")
+            .queryParam("id", map2Id)
+            .queryParam("type", TaskType.REVIEW)
+            .queryParam("page", 0)
+            .queryParam("size", 2)
+            .get("/tasks/search/findByMapIdAndType")
+            .then().statusCode(200)
+            .body("content", hasSize(2))
+            .body("content[0].type", is(TaskType.REVIEW.toString()))
+            .body("page.totalElements", is(3));
+  }
+
+  @Test
+  public void shouldGetPagedTasksForSpecifiedMapWhenUserIsAdmin() throws Exception {
     restClient.createTask(DEFAULT_TEST_USER_SUBJECT, TaskType.AUTHOR, mapId, DEFAULT_TEST_USER_SUBJECT,
             "1-3", false, false, null);
     restClient.createTask(DEFAULT_TEST_USER_SUBJECT, TaskType.AUTHOR, map2Id, DEFAULT_TEST_USER_SUBJECT,
@@ -562,7 +601,10 @@ public class TaskResourceIT extends IntegrationTestBase {
 
     adminUser.when().queryParam("projection", "embeddedTaskDetails")
             .queryParam("id", mapId)
-            .get("/tasks/search/findByMapId")
+            .queryParam("type", TaskType.AUTHOR)
+            .queryParam("page", 0)
+            .queryParam("size", 10)
+            .get("/tasks/search/findByMapIdAndType")
             .then().statusCode(200)
             .body("content", hasSize(1));
   }

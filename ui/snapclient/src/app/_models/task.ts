@@ -91,3 +91,37 @@ export class IndexSpecification {
     this.specification = specification;
   }
 }
+
+export class TaskPageDetails {
+  number: number;
+  size: number;
+  totalElements: number;
+  totalPages: number;
+
+  constructor(number: number = 0, size: number = 0, totalElements: number = 0, totalPages: number = 0) {
+    this.number = number;
+    this.size = size;
+    this.totalElements = totalElements;
+    this.totalPages = totalPages;
+  }
+}
+
+export class TaskPage {
+  page: TaskPageDetails;
+  tasks: Task[];
+
+  constructor(page: TaskPageDetails, tasks: Task[]) {
+    this.page = page;
+    this.tasks = tasks;
+  }
+}
+
+export class TaskPageForType {
+  type: TaskType;
+  page: TaskPage;
+
+  constructor(type: TaskType, taskPage: TaskPage) {
+    this.type = type;
+    this.page = taskPage;
+  }
+}

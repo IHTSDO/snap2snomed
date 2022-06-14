@@ -13,15 +13,24 @@
         </ng-template>
         <app-task-add [mappingTableSelector]="mappingTableSelector"
                       [mapping]="mapping" [currentUser]="currentUser"
+                      (canceNewTaskEvent)="taskCreateCancelled()"
                       (newTaskEvent)="selectTaskTab($event)"></app-task-add>
       </mat-tab>
 
       <mat-tab>
         <ng-template mat-tab-label>
           <mat-icon class="tab-icon">edit</mat-icon>
-          <span matBadge="{{authorTasks?.length}}" matBadgeSize="small"
+          <span matBadge="{{authTotalElements}}" matBadgeSize="small"
                 matBadgeOverlap="false">{{'TASK.TAB_AUTHOR' | translate}}</span>
         </ng-template>
+        <mat-paginator #authpaginator
+          [length]="authTotalElements || 0"
+          [pageIndex]="authCurrentPage"
+          [pageSize]="authPageSize"
+          [pageSizeOptions]="pageSizeOptions"
+          (page)="authPageChanged($event)"
+          [showFirstLastButtons]="true">
+        </mat-paginator>
         <div *ngFor="let task of authorTasks">
           <app-task-card [task]="task" [isClickable]="isAssigned(task)"
                          [currentUser]="currentUser" [isOwner]="isOwner()"
@@ -32,9 +41,17 @@
       <mat-tab>
         <ng-template mat-tab-label>
           <mat-icon class="tab-icon">checklist</mat-icon>
-          <span matBadge="{{reviewTasks?.length}}" matBadgeSize="small"
+          <span matBadge="{{reviewTotalElements}}" matBadgeSize="small"
                 matBadgeOverlap="false">{{'TASK.TAB_REVIEW' | translate}}</span>
         </ng-template>
+        <mat-paginator #reviewpaginator
+          [length]="reviewTotalElements || 0"
+          [pageIndex]="reviewCurrentPage"
+          [pageSize]="reviewPageSize"
+          [pageSizeOptions]="pageSizeOptions"
+          (page)="reviewPageChanged($event)"
+          [showFirstLastButtons]="true">
+        </mat-paginator>
         <div *ngFor="let task of reviewTasks">
           <app-task-card [task]="task" [isClickable]="isAssigned(task)"
                          [currentUser]="currentUser" [isOwner]="isOwner()"

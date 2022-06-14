@@ -18,6 +18,7 @@ package org.snomed.snap2snomed.repository;
 
 import java.util.Optional;
 import org.snomed.snap2snomed.model.Task;
+import org.snomed.snap2snomed.model.enumeration.TaskType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -36,8 +37,8 @@ public interface TaskRepository
   // Exported in REST interface
   // ---------------------------------
 
-  @Query("select t from Task t where t.map.id = :id and (true = ?#{@authenticationFacadeImpl.isAdminUser()} or exists (select 1 from User u where u.id = ?#{@authenticationFacadeImpl.principalSubject} and (u member of t.map.project.owners or u member of t.map.project.members or u member of t.map.project.guests))) ")
-  Page<Task> findByMapId(Long id, Pageable pageable);
+  @Query("select t from Task t where t.map.id = :id and t.type = :type and (true = ?#{@authenticationFacadeImpl.isAdminUser()} or exists (select 1 from User u where u.id = ?#{@authenticationFacadeImpl.principalSubject} and (u member of t.map.project.owners or u member of t.map.project.members or u member of t.map.project.guests))) ")
+  Page<Task> findByMapIdAndType(Long id, TaskType type, Pageable pageable);
 
   @Override
   @Query("select t from Task t where true = ?#{@authenticationFacadeImpl.isAdminUser()} or exists (select 1 from User u where u.id = ?#{@authenticationFacadeImpl.principalSubject} and (u member of t.map.project.owners or u member of t.map.project.members or u member of t.map.project.guests)) ")
