@@ -33,7 +33,6 @@ import {TokenMsg} from '../_models/user';
 import {RouterTestingModule} from '@angular/router/testing';
 import {testRoutes} from '../auth.guard.spec';
 import { AuthService } from '../_services/auth.service';
-import { UserService } from '../_services/user.service';
 
 describe('Snap2SnomedHttpErrorInterceptor', () => {
   let service: Snap2SnomedHttpErrorInterceptor;
@@ -82,7 +81,7 @@ describe('Snap2SnomedHttpErrorInterceptor', () => {
         { provide: HTTP_INTERCEPTORS,
           useClass: TokenInterceptor, multi: true
         },
-        TranslateService, ErrorNotifier, Snap2SnomedErrorHandler, Snap2SnomedHttpErrorInterceptor, AuthService, UserService],
+        TranslateService, ErrorNotifier, Snap2SnomedErrorHandler, Snap2SnomedHttpErrorInterceptor, AuthService],
     });
     httpClient = TestBed.inject(HttpClient);
     httpMock = TestBed.inject(HttpTestingController);
@@ -133,13 +132,6 @@ describe('Snap2SnomedHttpErrorInterceptor', () => {
     const expectedResponse = new HttpResponse({status: 401, statusText: 'boom', body: {}});
     req.error(new ErrorEvent('401 error'), expectedResponse);
     expect(authService.refreshAuthSession).toHaveBeenCalledWith(tokenMsg);
-  });
-
-  // Try to fix:
-  // An error was thrown in afterAll
-  // InvalidTokenError: Invalid token specified: Cannot read properties of undefined (reading 'replace')
-  afterAll(() => {
-    TestBed.resetTestingModule();
   });
 
 });

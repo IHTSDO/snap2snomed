@@ -44,11 +44,4 @@ describe('AuthService', () => {
     expect(service).toBeTruthy();
   });
 
-  // Try to fix:
-  // An error was thrown in afterAll
-  // InvalidTokenError: Invalid token specified: Cannot read properties of undefined (reading 'replace')
-  afterAll(() => {
-    TestBed.resetTestingModule();
-  });
-
 });
