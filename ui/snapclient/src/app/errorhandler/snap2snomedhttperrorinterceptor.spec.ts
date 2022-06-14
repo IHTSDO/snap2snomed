@@ -33,6 +33,7 @@ import {TokenMsg} from '../_models/user';
 import {RouterTestingModule} from '@angular/router/testing';
 import {testRoutes} from '../auth.guard.spec';
 import { AuthService } from '../_services/auth.service';
+import { of } from 'rxjs';
 
 describe('Snap2SnomedHttpErrorInterceptor', () => {
   let service: Snap2SnomedHttpErrorInterceptor;
@@ -117,7 +118,7 @@ describe('Snap2SnomedHttpErrorInterceptor', () => {
   it('should intercept errors but should not notify on 401 for api calls and refresh token should be called', () => {
     spyOn(errorNotifier.snackBar, 'open');
     spyOn(store, 'dispatch');
-    spyOn(authService, 'refreshAuthSession').and.callThrough();
+    spyOn(authService, 'refreshAuthSession').and.callFake(() => of(tokenMsg));
     httpClient
       .get<string>(url)
       .subscribe(
@@ -126,12 +127,12 @@ describe('Snap2SnomedHttpErrorInterceptor', () => {
           expect(error).toBeTruthy();
           expect(errorNotifier.snackBar.open).not.toHaveBeenCalledWith('ERROR.BACKEND_ISSUES', ' ',
                 errorNotifier.snackBarOptions);
+          const req = httpMock.expectOne('undefined/oauth2/token');
+          const expectedResponse = new HttpResponse({status: 401, statusText: 'boom', body: {}});
+          req.error(new ErrorEvent('401 error'), expectedResponse);
+          expect(authService.refreshAuthSession).toHaveBeenCalledWith(tokenMsg);
         }
       );
-    const req = httpMock.expectOne('undefined/oauth2/token');
-    const expectedResponse = new HttpResponse({status: 401, statusText: 'boom', body: {}});
-    req.error(new ErrorEvent('401 error'), expectedResponse);
-    expect(authService.refreshAuthSession).toHaveBeenCalledWith(tokenMsg);
   });
 
 });
