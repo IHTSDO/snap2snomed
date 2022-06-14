@@ -35,7 +35,7 @@ describe('AuthService', () => {
       ],
       providers: [
         { provide: APP_CONFIG, useValue: {} },
-        provideMockStore({initialState}), AuthService, UserService],
+        provideMockStore({initialState}), AuthService],
     });
     service = TestBed.inject(AuthService);
   });
