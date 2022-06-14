@@ -67,7 +67,6 @@ public class PreAuthFilter extends GenericFilterBean {
             new FilterRule(HttpMethod.GET, "/mapRowTargets/search/findByMapId", groupValues -> webSecurity.isValidUser()), // result filtered by query
             new FilterRule(HttpMethod.GET, "/mapRowTargets", groupValues -> webSecurity.isValidUser()), //TODO filter
 
-            new FilterRule(HttpMethod.GET, "/tasks/search/findByMapId", groupValues -> webSecurity.isValidUser()),
             new FilterRule(HttpMethod.GET, "/tasks/search/findByMapIdAndType", groupValues -> webSecurity.isValidUser()),
             new FilterRule(HttpMethod.GET, "/tasks/[^\\/]+/revisions", groupValues -> webSecurity.isValidUser()), // this is relaxed because the task may be deleted and therefore can't be used to determine project membership!
             new FilterRule(HttpMethod.GET, "/tasks/([^\\/]+).*", groupValues -> webSecurity.isAdminUser() || webSecurity.hasAnyProjectRoleForTaskId(asLong(groupValues[0]))),
