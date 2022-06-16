@@ -107,7 +107,10 @@ public class TaskEventHandler {
 
   @HandleAfterCreate
   public void handleTaskAfterCreate(Task task) {
+    long startTime = System.currentTimeMillis();
     setMapRows(task);
+    long endTime = System.currentTimeMillis();
+    log.warn("setMapRows took " + (endTime - startTime) + "ms");
   }
 
   @HandleBeforeSave
