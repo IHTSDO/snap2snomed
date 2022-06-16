@@ -78,10 +78,8 @@ export class TaskEffects {
             if (authTasks instanceof LoadTasksSuccess && reviewTasks instanceof LoadTasksSuccess) {
               let taskPages: TaskPageForType[] = [];
               let tasks: Task[] = [];
-              taskPages.push({type: TaskType.AUTHOR, page: authTasks.payload});
-              taskPages.push({type: TaskType.REVIEW, page: reviewTasks.payload});
-              tasks.push(...authTasks.payload.tasks);
-              tasks.push(...reviewTasks.payload.tasks);
+              taskPages = [{type: TaskType.AUTHOR, page: authTasks.payload}, {type: TaskType.REVIEW, page: reviewTasks.payload}];
+              tasks = [...authTasks.payload.tasks, ...reviewTasks.payload.tasks];
               return of(new LoadAllTasksSuccess({ taskPages: taskPages, tasks: tasks }));
             } else {
               return EMPTY;
