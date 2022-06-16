@@ -31,8 +31,7 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import javax.persistence.EntityManager;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.snomed.snap2snomed.model.ImportedCode;
 import org.snomed.snap2snomed.model.Map;
 import org.snomed.snap2snomed.model.Project;
@@ -65,9 +64,9 @@ import org.springframework.data.rest.core.annotation.RepositoryEventHandler;
 import org.zalando.problem.Problem;
 import org.zalando.problem.Status;
 
+@Slf4j
 @RepositoryEventHandler
 public class TaskEventHandler {
-  Logger logger = LoggerFactory.getLogger(TaskEventHandler.class);
 
   @Autowired
   ImportedCodeRepository importedCodeRepository;
@@ -98,7 +97,7 @@ public class TaskEventHandler {
     long startTime = System.currentTimeMillis();
     validateSaveAssignee(task);
     long endTime = System.currentTimeMillis();
-    logger.info("validateSaveAssignee took " + (endTime - startTime) + "ms");
+    log.warn("validateSaveAssignee took " + (endTime - startTime) + "ms");
 
     task.setSourceRowSpecification(SourceRowSpecificationUtils.normalise(
         task.getSourceRowSpecification(), getImportedCodeSetSize(task)));
