@@ -94,23 +94,14 @@ public class TaskEventHandler {
 
   @HandleBeforeCreate
   public void handleTaskBeforeCreate(Task task) {
-    long startTime1 = System.currentTimeMillis();
     validateSaveAssignee(task);
-    long endTime1 = System.currentTimeMillis();
-    log.warn("validateSaveAssignee took " + (endTime1 - startTime1) + "ms");
-    long startTime2 = System.currentTimeMillis();
     task.setSourceRowSpecification(SourceRowSpecificationUtils.normalise(
         task.getSourceRowSpecification(), getImportedCodeSetSize(task)));
-    long endTime2 = System.currentTimeMillis();
-    log.warn("setSourceRowSpecification took " + (endTime2 - startTime2) + "ms");
   }
 
   @HandleAfterCreate
   public void handleTaskAfterCreate(Task task) {
-    long startTime = System.currentTimeMillis();
     setMapRows(task);
-    long endTime = System.currentTimeMillis();
-    log.warn("setMapRows took " + (endTime - startTime) + "ms");
   }
 
   @HandleBeforeSave
@@ -334,14 +325,19 @@ public class TaskEventHandler {
   private void setMapRows(Task task) {
     RangeSet<Long> rangeSet = SourceRowSpecificationUtils.convertSourceRowSpecificationToRangeSet(
         task.getSourceRowSpecification());
-
+    long startTime = System.currentTimeMillis();
     associateMapRows(task, rangeSet);
+    long endTime = System.currentTimeMillis();
+    log.warn("associateMapRows took " + (endTime - startTime) + "ms");
 
     /**
      * By reassigning rows to different tasks, it is possible for a task to become "empty" i.e. have no rows associated with it. This case
      * will be handled by deleting these tasks.
      */
+    long startTime1 = System.currentTimeMillis();
     taskRepository.deleteTasksWithNoMapRows();
+    long endTime1 = System.currentTimeMillis();
+    log.warn("deleteTasksWithNoMapRows took " + (endTime1 - startTime1) + "ms");
   }
 
   private void associateMapRows(Task task, RangeSet<Long> rangeSet) {
@@ -364,7 +360,11 @@ public class TaskEventHandler {
           Status.INTERNAL_SERVER_ERROR).build();
     }
 
+    long startTime = System.currentTimeMillis();
     processRange(rangeSet, addRange, addCollection);
+    long endTime = System.currentTimeMillis();
+    log.warn("processRange took " + (endTime - startTime) + "ms");
+
   }
 
   private void processRange(RangeSet<Long> rangeSet, BiConsumer<Long, Long> processRange,
