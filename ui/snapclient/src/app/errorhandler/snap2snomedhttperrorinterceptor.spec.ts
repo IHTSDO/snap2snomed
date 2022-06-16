@@ -33,7 +33,6 @@ import {TokenMsg} from '../_models/user';
 import {RouterTestingModule} from '@angular/router/testing';
 import {testRoutes} from '../auth.guard.spec';
 import { AuthService } from '../_services/auth.service';
-import { of } from 'rxjs';
 
 describe('Snap2SnomedHttpErrorInterceptor', () => {
   let service: Snap2SnomedHttpErrorInterceptor;
