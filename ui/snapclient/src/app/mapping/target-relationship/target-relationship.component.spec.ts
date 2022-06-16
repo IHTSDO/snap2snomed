@@ -57,6 +57,7 @@ describe('TargetRelationshipComponent', () => {
   const targetDisplay = 'Test target';
   const targetSystem = 'http://snomed.info/sct/900000000000207008/version/20220228'
   const relationship = MapRowRelationship.EQUIVALENT;
+  const relationship2 = MapRowRelationship.BROADER;
   const target = new MapView('', '', sourceIndex, sourceCode, sourceDisplay, targetCode, targetDisplay, relationship,
     'DRAFT', false, null, null, null, null, null, false);
   const parameterValue = [
@@ -113,6 +114,7 @@ describe('TargetRelationshipComponent', () => {
     selectionService = TestBed.inject(SelectionService);
     fixture = TestBed.createComponent(TargetRelationshipComponent);
     component = fixture.componentInstance;
+    component.targetRows =  new Array<MapView>();
     component.source = {
       id: '1',
       index: sourceIndex,
@@ -130,16 +132,11 @@ describe('TargetRelationshipComponent', () => {
 
   it('should add target', () => {
     spyOn(component.newTargetEvent, 'emit');
-    spyOn(fhirService, 'lookupConcept').and.callFake((targetCode, targetSystem, version) => {
-      return of({
-        resourceType: 'Parameters',
-        parameter: parameterValue
-      });
-    });
+    spyOn(fhirService, 'getEnglishFsn').and.returnValue(of('Test English FSN'));
 
     expect(component.targetRows.length).toEqual(0);
 
-    component.addSelection(targetCode, targetDisplay, targetSystem, relationship);
+    component.addSelection(targetCode, targetDisplay, targetSystem, relationship2);
     fixture.whenStable().then(() => {
       fixture.detectChanges();
       expect(component.newTargetEvent.emit).toHaveBeenCalledOnceWith(target);
@@ -148,12 +145,7 @@ describe('TargetRelationshipComponent', () => {
 
   it('should not add duplicate target', () => {
     component.targetRows.push(target);
-    spyOn(fhirService, 'lookupConcept').and.callFake((targetCode, targetSystem, version) => {
-      return of({
-        resourceType: 'Parameters',
-        parameter: parameterValue
-      });
-    });
+    spyOn(fhirService, 'getEnglishFsn').and.returnValue(of('Test English FSN'));
 
     fixture.detectChanges();
     expect(component.targetRows.length).toEqual(1);
@@ -185,12 +177,7 @@ describe('TargetRelationshipComponent', () => {
     const display = 'This is a test selection';
 
     spyOn(component.newTargetEvent, 'emit');
-    spyOn(fhirService, 'lookupConcept').and.callFake((targetCode, targetSystem, version) => {
-      return of({
-        resourceType: 'Parameters',
-        parameter: parameterValue
-      });
-    });
+    spyOn(fhirService, 'getEnglishFsn').and.returnValue(of('Test English FSN'));
 
     selectionService.select({code, display});
     el = fixture.debugElement.query(By.css('button'));
@@ -216,12 +203,7 @@ describe('TargetRelationshipComponent', () => {
       'DRAFT', false, null, null, null, null, null, false));
     selectionService.select({code, display});
 
-    spyOn(fhirService, 'lookupConcept').and.callFake((targetCode, targetSystem, version) => {
-      return of({
-        resourceType: 'Parameters',
-          parameter: parameterValue
-      });
-    });
+    spyOn(fhirService, 'getEnglishFsn').and.returnValue(of('Test English FSN'));
     fixture.whenStable().then(() => {
       el = fixture.debugElement.query(By.css('button'));
       console.log(el);

@@ -116,7 +116,7 @@ describe('Snap2SnomedHttpErrorInterceptor', () => {
   // The token-interceptor should take care of 401s
   it('should intercept errors but should not notify on 401 for api calls and refresh token should be called', () => {
     spyOn(errorNotifier.snackBar, 'open');
-    spyOn(store, 'dispatch');
+    spyOn(authService, 'isTokenExpired').and.returnValue(true);
     spyOn(authService, 'refreshAuthSession').and.callThrough();
     httpClient
       .get<string>(url)
@@ -133,5 +133,4 @@ describe('Snap2SnomedHttpErrorInterceptor', () => {
     req.error(new ErrorEvent('401 error'), expectedResponse);
     expect(authService.refreshAuthSession).toHaveBeenCalledWith(tokenMsg);
   });
-
 });

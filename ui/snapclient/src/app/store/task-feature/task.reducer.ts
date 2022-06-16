@@ -62,7 +62,8 @@ export function taskReducer(state = initialTasksState, action: TaskActions): ITa
     case TaskActionTypes.LOAD_ALL_TASKS_SUCCESS:
       return {
         ...state,
-        alltasks: action.payload,
+        tasks: action.payload.tasks,
+        alltasks: action.payload.taskPages,
         loadErrorMessage: null,
         saveErrorMessage: null,
         deleteErrorMessage: null,
