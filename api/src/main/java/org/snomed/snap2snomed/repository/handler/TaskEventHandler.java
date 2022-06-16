@@ -30,6 +30,9 @@ import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import javax.persistence.EntityManager;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.snomed.snap2snomed.model.ImportedCode;
 import org.snomed.snap2snomed.model.Map;
 import org.snomed.snap2snomed.model.Project;
@@ -64,6 +67,7 @@ import org.zalando.problem.Status;
 
 @RepositoryEventHandler
 public class TaskEventHandler {
+  Logger logger = LoggerFactory.getLogger(TaskEventHandler.class);
 
   @Autowired
   ImportedCodeRepository importedCodeRepository;
@@ -91,7 +95,10 @@ public class TaskEventHandler {
 
   @HandleBeforeCreate
   public void handleTaskBeforeCreate(Task task) {
+    long startTime = System.currentTimeMillis();
     validateSaveAssignee(task);
+    long endTime = System.currentTimeMillis();
+    logger.info("validateSaveAssignee took " + (endTime - startTime) + "ms");
 
     task.setSourceRowSpecification(SourceRowSpecificationUtils.normalise(
         task.getSourceRowSpecification(), getImportedCodeSetSize(task)));
@@ -332,7 +339,7 @@ public class TaskEventHandler {
      */
     taskRepository.deleteTasksWithNoMapRows();
   }
-  
+
   private void associateMapRows(Task task, RangeSet<Long> rangeSet) {
     BiConsumer<Long, Long> addRange;
     Consumer<Set<Long>> addCollection;
