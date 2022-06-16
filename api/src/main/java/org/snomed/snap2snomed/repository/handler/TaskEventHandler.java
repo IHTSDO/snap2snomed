@@ -94,13 +94,15 @@ public class TaskEventHandler {
 
   @HandleBeforeCreate
   public void handleTaskBeforeCreate(Task task) {
-    long startTime = System.currentTimeMillis();
+    long startTime1 = System.currentTimeMillis();
     validateSaveAssignee(task);
-    long endTime = System.currentTimeMillis();
-    log.warn("validateSaveAssignee took " + (endTime - startTime) + "ms");
-
+    long endTime1 = System.currentTimeMillis();
+    log.warn("validateSaveAssignee took " + (endTime1 - startTime1) + "ms");
+    long startTime2 = System.currentTimeMillis();
     task.setSourceRowSpecification(SourceRowSpecificationUtils.normalise(
         task.getSourceRowSpecification(), getImportedCodeSetSize(task)));
+    long endTime2 = System.currentTimeMillis();
+    log.warn("setSourceRowSpecification took " + (endTime2 - startTime2) + "ms");
   }
 
   @HandleAfterCreate
