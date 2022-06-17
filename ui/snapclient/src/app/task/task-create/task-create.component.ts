@@ -88,11 +88,11 @@ export class TaskCreateComponent implements OnInit {
     this.existingAndRoleConflicts = this.getConflictCount('EXISTING_AND_ROLE');
   }
 
-  onCancel(doReset: boolean): void {
+  onCancel(doReset: boolean, isCancelled: boolean): void {
     const theForm = this.data.form;
     this.data.task.allowAssigneeToBeAuthorAndReviewer = false;
     this.data.task.reassignAlreadyAssignedRows = false;
-    this.dialogRef.close({resetForm: doReset, isCancelled: true, form: theForm});
+    this.dialogRef.close({resetForm: doReset, isCancelled: isCancelled, form: theForm});
   }
 
   handleTaskError(errorDetail: ErrorMessage | undefined): void {
@@ -121,7 +121,7 @@ export class TaskCreateComponent implements OnInit {
   onCreateAnyway(): void {
     this.data.task.sourceRowSpecification = this.data.errorMessage.indexSpecificationWithAllConflictsRemoved.specification;
     this.createTaskCall();
-    this.onCancel(true);
+    this.onCancel(true, false);
   }
 
   onCreateWithOverride(): void {
@@ -139,7 +139,7 @@ export class TaskCreateComponent implements OnInit {
       this.data.task.sourceRowSpecification = '*';
     }
     this.createTaskCall();
-    this.onCancel(true);
+    this.onCancel(true, false);
   }
 
   createTaskCall(): void {
