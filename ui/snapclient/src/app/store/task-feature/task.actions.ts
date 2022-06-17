@@ -56,7 +56,7 @@ export class LoadTasksSuccess implements Action {
 export class LoadAllTasksSuccess implements Action {
   readonly type = TaskActionTypes.LOAD_ALL_TASKS_SUCCESS;
 
-  constructor(public payload: TaskPageForType[]) {
+  constructor(public payload: { taskPages: TaskPageForType[], tasks: Task[] }) {
   }
 }
 

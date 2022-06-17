@@ -63,7 +63,7 @@ export class TaskAddComponent implements OnInit, AfterViewInit, OnDestroy {
   @Input() mapping: Mapping | undefined;
   @Input() mappingTableSelector: MappingTableSelectorComponent | null | undefined;
   @Output() newTaskEvent = new EventEmitter<string>();
-  @Output() canceNewTaskEvent = new EventEmitter<void>();
+  @Output() cancelNewTaskEvent = new EventEmitter<void>();
   // @ts-ignore
   @ViewChild('taskform', {static: false}) taskform: NgForm;
   createTaskDialogWidth = '600px';
@@ -217,7 +217,7 @@ export class TaskAddComponent implements OnInit, AfterViewInit, OnDestroy {
     dialogRef.afterClosed().subscribe(
       (result: any) => {
         if (result.isCancelled) {
-          this.canceNewTaskEvent.emit();
+          this.cancelNewTaskEvent.emit();
         } else if (result.resetForm) {
           this.newTaskEvent.emit(this.task?.type);
           this.initTask();
