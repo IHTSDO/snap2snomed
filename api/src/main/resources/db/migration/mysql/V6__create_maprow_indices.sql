@@ -18,7 +18,7 @@ IF (SELECT 1
     FROM INFORMATION_SCHEMA.STATISTICS
     WHERE TABLE_NAME='map_row' AND INDEX_NAME='author_task_id_idx') != 1 THEN
 
- ALTER TABLE map_row ADD INDEX author_task_id_idx (author_task_id);
+    ALTER TABLE map_row ADD INDEX author_task_idx (author_task_id);
 
 END IF;
 
@@ -26,6 +26,6 @@ IF (SELECT 1
     FROM INFORMATION_SCHEMA.STATISTICS
     WHERE TABLE_NAME='map_row' AND INDEX_NAME='review_task_id_idx') != 1 THEN
 
-ALTER TABLE map_row ADD INDEX review_task_id_idx (review_task_id);
+    ALTER TABLE map_row ADD INDEX review_task_idx (review_task_id);
 
 END IF;
