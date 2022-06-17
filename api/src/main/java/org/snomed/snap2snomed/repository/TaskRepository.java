@@ -86,7 +86,8 @@ public interface TaskRepository
 
   @RestResource(exported = false)
   @Modifying
-  @Query("delete from Task t where not exists (select 1 from MapRow mr where mr.authorTask = t or mr.reviewTask = t)")
+  @Query("delete from Task t where t.id not in (select id from (select distinct mr.authorTask.id as id from MapRow mr" +
+          " union select distinct mr.reviewTask.id as id from MapRow mr) as t)")
   void deleteTasksWithNoMapRows();
 
   @RestResource(exported = false)
