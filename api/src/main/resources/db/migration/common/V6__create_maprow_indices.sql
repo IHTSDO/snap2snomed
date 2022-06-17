@@ -14,5 +14,5 @@
  * limitations under the License.
  */
 
-CREATE INDEX IF NOT EXISTS author_task_id_idx ON map_row(author_task_id);
-CREATE INDEX IF NOT EXISTS review_task_id_idx ON map_row(review_task_id);
+CREATE INDEX IF NOT EXISTS author_task_idx ON map_row(author_task_id);
+CREATE INDEX IF NOT EXISTS review_task_idx ON map_row(review_task_id);
