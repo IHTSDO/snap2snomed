@@ -57,7 +57,6 @@ describe('TargetRelationshipComponent', () => {
   const targetDisplay = 'Test target';
   const targetSystem = 'http://snomed.info/sct/900000000000207008/version/20220228'
   const relationship = MapRowRelationship.EQUIVALENT;
-  const relationship2 = MapRowRelationship.BROADER;
   const target = new MapView('', '', sourceIndex, sourceCode, sourceDisplay, targetCode, targetDisplay, relationship,
     'DRAFT', false, null, null, null, null, null, false);
   const parameterValue = [
@@ -130,20 +129,20 @@ describe('TargetRelationshipComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should add target', () => {
+  it('should add target', async() => {
     spyOn(component.newTargetEvent, 'emit');
-    spyOn(fhirService, 'getEnglishFsn').and.returnValue(of('Test English FSN'));
+    spyOn(fhirService, 'getEnglishFsn').and.returnValue(of(targetDisplay));
 
     expect(component.targetRows.length).toEqual(0);
 
-    component.addSelection(targetCode, targetDisplay, targetSystem, relationship2);
+    component.addSelection(targetCode, targetDisplay, targetSystem, relationship);
     fixture.whenStable().then(() => {
       fixture.detectChanges();
       expect(component.newTargetEvent.emit).toHaveBeenCalledOnceWith(target);
     });
   });
 
-  it('should not add duplicate target', () => {
+  it('should not add duplicate target', async() => {
     component.targetRows.push(target);
     spyOn(fhirService, 'getEnglishFsn').and.returnValue(of('Test English FSN'));
 
@@ -170,14 +169,14 @@ describe('TargetRelationshipComponent', () => {
     expect(component.removeTargetEvent.emit).toHaveBeenCalledOnceWith(target);
   }));
 
-  it('button should add selection', () => {
+  it('button should add selection', async() => {
     fixture.detectChanges();
 
     const code = '1234567';
     const display = 'This is a test selection';
 
     spyOn(component.newTargetEvent, 'emit');
-    spyOn(fhirService, 'getEnglishFsn').and.returnValue(of('Test English FSN'));
+    spyOn(fhirService, 'getEnglishFsn').and.returnValue(of(display));
 
     selectionService.select({code, display});
     el = fixture.debugElement.query(By.css('button'));
