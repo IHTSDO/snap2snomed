@@ -30,7 +30,6 @@ import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import javax.persistence.EntityManager;
-
 import org.snomed.snap2snomed.model.ImportedCode;
 import org.snomed.snap2snomed.model.Map;
 import org.snomed.snap2snomed.model.Project;
@@ -93,6 +92,7 @@ public class TaskEventHandler {
   @HandleBeforeCreate
   public void handleTaskBeforeCreate(Task task) {
     validateSaveAssignee(task);
+
     task.setSourceRowSpecification(SourceRowSpecificationUtils.normalise(
         task.getSourceRowSpecification(), getImportedCodeSetSize(task)));
   }
@@ -323,6 +323,7 @@ public class TaskEventHandler {
   private void setMapRows(Task task) {
     RangeSet<Long> rangeSet = SourceRowSpecificationUtils.convertSourceRowSpecificationToRangeSet(
         task.getSourceRowSpecification());
+
     associateMapRows(task, rangeSet);
 
     /**
