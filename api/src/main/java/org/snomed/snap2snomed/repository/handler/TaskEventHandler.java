@@ -31,7 +31,6 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import javax.persistence.EntityManager;
 
-import lombok.extern.slf4j.Slf4j;
 import org.snomed.snap2snomed.model.ImportedCode;
 import org.snomed.snap2snomed.model.Map;
 import org.snomed.snap2snomed.model.Project;
@@ -64,7 +63,6 @@ import org.springframework.data.rest.core.annotation.RepositoryEventHandler;
 import org.zalando.problem.Problem;
 import org.zalando.problem.Status;
 
-@Slf4j
 @RepositoryEventHandler
 public class TaskEventHandler {
 
@@ -325,19 +323,13 @@ public class TaskEventHandler {
   private void setMapRows(Task task) {
     RangeSet<Long> rangeSet = SourceRowSpecificationUtils.convertSourceRowSpecificationToRangeSet(
         task.getSourceRowSpecification());
-    long startTime = System.currentTimeMillis();
     associateMapRows(task, rangeSet);
-    long endTime = System.currentTimeMillis();
-    log.warn("associateMapRows took " + (endTime - startTime) + "ms");
 
     /**
      * By reassigning rows to different tasks, it is possible for a task to become "empty" i.e. have no rows associated with it. This case
      * will be handled by deleting these tasks.
      */
-    long startTime1 = System.currentTimeMillis();
     taskRepository.deleteTasksWithNoMapRows();
-    long endTime1 = System.currentTimeMillis();
-    log.warn("deleteTasksWithNoMapRows took " + (endTime1 - startTime1) + "ms");
   }
 
   private void associateMapRows(Task task, RangeSet<Long> rangeSet) {
@@ -360,11 +352,7 @@ public class TaskEventHandler {
           Status.INTERNAL_SERVER_ERROR).build();
     }
 
-    long startTime = System.currentTimeMillis();
     processRange(rangeSet, addRange, addCollection);
-    long endTime = System.currentTimeMillis();
-    log.warn("processRange took " + (endTime - startTime) + "ms");
-
   }
 
   private void processRange(RangeSet<Long> rangeSet, BiConsumer<Long, Long> processRange,
