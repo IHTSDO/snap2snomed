@@ -332,7 +332,7 @@ public class TaskEventHandler {
      */
     taskRepository.deleteTasksWithNoMapRows();
   }
-  
+
   private void associateMapRows(Task task, RangeSet<Long> rangeSet) {
     BiConsumer<Long, Long> addRange;
     Consumer<Set<Long>> addCollection;

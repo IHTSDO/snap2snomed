@@ -86,7 +86,7 @@ public interface TaskRepository
 
   @RestResource(exported = false)
   @Modifying
-  @Query("delete from Task t where not exists (select 1 from MapRow mr where mr.authorTask = t or mr.reviewTask = t)")
+  @Query("delete from Task t where not exists (select 1 from MapRow mr where mr.authorTask = t) and not exists (select 1 from MapRow mr where mr.reviewTask = t)")
   void deleteTasksWithNoMapRows();
 
   @RestResource(exported = false)
