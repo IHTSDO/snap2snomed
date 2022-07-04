@@ -1,17 +1,10 @@
-<mat-card>
-  <mat-card-header>
-    <mat-card-title>{{'DETAILS.NOTES' | translate}}
-      &nbsp;
-      <mat-chip color="accent" *ngIf="notes.length > 0" selected>{{notes.length}}</mat-chip>
-    </mat-card-title>
-  </mat-card-header>
-  <mat-card-content>
-    <div id="notes">
-      <button mat-mini-fab color="accent" class="pull-right" type="button"
-              (click)="addNewNote()" [disabled]="!isValid()">
-        <mat-icon>add</mat-icon>
-      </button>
-      <mat-form-field id="new-note-input" class="field-full-width" *ngIf="newNote"
+<div id="notes">
+  <mat-card id="note-input">
+    <mat-card-header>
+      <mat-card-title>{{'DETAILS.ADD_NOTE' | translate}}</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <mat-form-field id="new-note-input" *ngIf="newNote"
                       hintLabel="{{'FORM.MAX_CHARS' | translate}} {{MAX_NOTE}}"
                       [appDroppable]="{zone: 'noteZone'}"
                       (onDroppableComplete)="onDrop($event)">
@@ -23,11 +16,25 @@
         <mat-hint align="end">{{text.value?.length || 0}}/{{MAX_NOTE}}</mat-hint>
         <mat-error *ngIf="text.invalid">{{ 'DETAILS.NOTE_TEXT_ERROR' | translate }}</mat-error>
       </mat-form-field>
+      <button color="accent" mat-raised-button type="button"
+              (click)="addNewNote()" [disabled]="!isValid()">
+        <mat-icon>save</mat-icon>Save note
+      </button>
+    </mat-card-content>
+  </mat-card>
+  <mat-card>
+    <mat-card-header>
+      <mat-card-title>{{'DETAILS.NOTES' | translate}}
+        &nbsp;
+        <mat-chip color="accent" *ngIf="notes.length > 0" selected>{{notes.length}}</mat-chip>
+      </mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
       <div id="notes-list">
         <div *ngFor="let note of notes">
           <app-notes-item [note]="note"></app-notes-item>
         </div>
       </div>
-    </div>
-  </mat-card-content>
-</mat-card>
+    </mat-card-content>
+  </mat-card>
+</div>

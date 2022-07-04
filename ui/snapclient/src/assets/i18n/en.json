@@ -15,6 +15,7 @@
     "MAPS": "List"
   },
   "DETAILS": {
+    "ADD_NOTE": "Add note",
     "APPLIED_FILTER": "Applied Filter",
     "NOTES": "Notes",
     "HAS_NOTES": "Source has notes",
