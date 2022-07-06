@@ -1,7 +1,3 @@
-.mat-card {
-  flex: 1;
-}
-
 .mat-form-field {
   width: 100%;
 }
@@ -12,7 +8,15 @@
 
 button {
   margin-top: 24px;
-  float: right;
+  float: left;
+}
+
+#input {
+  flex: 1;
+}
+
+#list {
+  flex: 2;
 }
 
 #notes {
