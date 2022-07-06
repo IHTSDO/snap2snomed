@@ -43,6 +43,7 @@ import {MatChipsModule} from '@angular/material/chips';
 import {APP_CONFIG} from '../../app.config';
 import {MatSnackBarModule} from '@angular/material/snack-bar';
 import {NoopAnimationsModule} from '@angular/platform-browser/animations';
+import {MatTableModule} from "@angular/material/table";
 
 describe('MappingListComponent', () => {
   let component: MappingListComponent;
@@ -63,6 +64,7 @@ describe('MappingListComponent', () => {
         MatDividerModule,
         MatIconModule,
         MatMenuModule,
+        MatTableModule,
         MatToolbarModule,
         MatCardModule,
         MatChipsModule,
@@ -121,10 +123,16 @@ describe('MappingListComponent', () => {
     const project = new Project();
     project.title = 'Test Project';
     component.projects = [project];
+    component.dataSource.data = [project];
     fixture.detectChanges();
-    el = fixture.debugElement.query(By.css('mat-card h2'));
-    expect(el).toBeTruthy();
-    expect(el.nativeElement.textContent).toBe('Test Project');
+    let tableRows = fixture.nativeElement.querySelectorAll('tr');
+    expect(tableRows.length).toBe(2);
+
+    let headerRow = tableRows[0];
+    expect(headerRow.cells[0].textContent).toBe('Title');
+
+    let row = tableRows[1];
+    expect(row.cells[0].textContent).toBe('Test Project');
   });
 
 });
