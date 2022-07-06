@@ -62,6 +62,41 @@ small {
   min-height: 26px;
 }
 
+table {
+  width: 100%;
+}
+
+.mat-cell {
+  padding: 10px;
+}
+
+.mat-cell > button {
+  width: 50px;
+}
+
+.mat-column-title {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 20%;
+}
+
+.mat-column-description {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 30%;
+}
+
+.mat-row {
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
+
+#filter {
+  margin-left: 10px;
+  float: left;
+  z-index: 3;
+}
+
 @media only screen and (max-width: 700px) {
   .mat-grid-tile {
     height: 300px;

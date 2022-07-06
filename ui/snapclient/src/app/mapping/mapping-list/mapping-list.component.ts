@@ -42,6 +42,8 @@ export class MappingListComponent implements OnInit, AfterViewInit, OnDestroy {
   error: ErrorInfo = {};
   projects: Project[] = [];
 
+  columnsToDisplay = ['title', 'description', 'modified', 'users', 'version', 'actions'];
+
   selectedMapping: { [key: string]: Mapping | null } = {};
   newMapping!: Mapping;
   mode = 'FORM.CREATE';
@@ -77,6 +79,20 @@ export class MappingListComponent implements OnInit, AfterViewInit, OnDestroy {
 
   ngOnInit(): void {
     this.store.dispatch(new LoadProjects({pageSize: this.pageSize, currentPage: this.currentPage}));
+
+
+    this.dataSource.filterPredicate = function (record, filter) {
+      let titlematch = false;
+      let descmatch = false;
+      if (record.title) {
+        titlematch = record.title.toLocaleLowerCase().includes(filter.toLocaleString());
+      }
+      if (record.description) {
+        descmatch = record.description.toLocaleLowerCase().includes(filter.toLocaleString());
+      }
+      console.log(titlematch || descmatch);
+      return titlematch || descmatch;
+    };
   }
 
   ngAfterViewInit(): void {
@@ -91,6 +107,11 @@ export class MappingListComponent implements OnInit, AfterViewInit, OnDestroy {
     if (this.subscription) {
       this.subscription.unsubscribe();
     }
+  }
+
+  applyFilter(event: Event) {
+    const filterValue = (event.target as HTMLInputElement).value;
+    this.dataSource.filter = filterValue.trim().toLowerCase();
   }
 
   private getProjects(): void {
