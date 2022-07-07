@@ -31,6 +31,9 @@ import {Source} from 'src/app/_models/source';
 import {AuthService} from '../../_services/auth.service';
 import {MatPaginator, PageEvent} from '@angular/material/paginator';
 import {MatTableDataSource} from '@angular/material/table';
+import {MatSelectChange} from "@angular/material/select";
+import {MatSort} from '@angular/material/sort';
+import {debounce} from "lodash";
 
 
 @Component({
@@ -43,6 +46,16 @@ export class MappingListComponent implements OnInit, AfterViewInit, OnDestroy {
   projects: Project[] = [];
 
   columnsToDisplay = ['title', 'description', 'modified', 'users', 'version', 'actions'];
+  roles = {
+    name: 'roles',
+    options: ['all', 'owner', 'member', 'guest'],
+    defaultValue: 'all'
+  };
+
+  filterDictionary = new Map<string, string>();
+
+  sort: MatSort | null | undefined;
+  componentLoaded = false;
 
   selectedMapping: { [key: string]: Mapping | null } = {};
   newMapping!: Mapping;
@@ -56,7 +69,14 @@ export class MappingListComponent implements OnInit, AfterViewInit, OnDestroy {
 
   dataSource: MatTableDataSource<Project> = new MatTableDataSource();
   @ViewChild(MatPaginator, {static: false}) paginator!: MatPaginator;
-  pageSize = 5;
+  @ViewChild(MatSort, {static: false}) set content(sort: MatSort) {
+    if (!this.componentLoaded && sort) {
+      this.sort = sort;
+      this.ngAfterViewInit();
+      this.componentLoaded = true;
+    }
+  }
+  pageSize = 25;
   currentPage = 0;
   pageSizeOptions: number[] = [5, 10, 25, 100];
   totalElements = 0;
@@ -78,26 +98,68 @@ export class MappingListComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    this.store.dispatch(new LoadProjects({pageSize: this.pageSize, currentPage: this.currentPage}));
+    const self = this;
+    self.store.dispatch(new LoadProjects({pageSize: this.pageSize, currentPage: this.currentPage}));
+    self.dataSource.filterPredicate = function (record, filter) {
+      const filters: Map<string, string> = new Map(JSON.parse(filter));
+      const matches: boolean[] = [];
+      let isMatch = false;
 
+      /**
+       * filter priority: text, role
+       */
 
-    this.dataSource.filterPredicate = function (record, filter) {
-      let titlematch = false;
-      let descmatch = false;
-      if (record.title) {
-        titlematch = record.title.toLocaleLowerCase().includes(filter.toLocaleString());
-      }
-      if (record.description) {
-        descmatch = record.description.toLocaleLowerCase().includes(filter.toLocaleString());
-      }
-      console.log(titlematch || descmatch);
-      return titlematch || descmatch;
+      filters.forEach((value, key) => {
+        if (key === 'text') {
+          if (value.trim().length > 0) {
+            matches.push(!!(record.title?.toLocaleLowerCase().includes(value) || record.description?.toLocaleLowerCase().includes(value)));
+          }
+        }
+        else if (key === 'role' && self.currentUser) {
+          switch (value) {
+            case 'owner':
+              matches.push(record.owners.filter(user => user.id == self.currentUser?.id).length > 0);
+              break;
+            case 'member':
+              matches.push(record.members.filter(user => user.id == self.currentUser?.id).length > 0);
+              break;
+            case 'guest':
+              matches.push(record.guests.filter(user => user.id == self.currentUser?.id).length > 0);
+              break;
+            default:
+              matches.push(true);
+          }
+        }
+      });
+
+      return matches.every(e => e);
     };
   }
 
   ngAfterViewInit(): void {
     this.getProjects();
     this.dataSource.paginator = this.paginator;
+    // if (this.sort) {
+    //   if (this.paging.sortCol) {
+    //     this.sort.active = this.paging.sortCol;
+    //   }
+    //   switch (this.paging.sortDirection) {
+    //     case 'asc':
+    //     case 'desc':
+    //       this.sort.direction = this.paging.sortDirection;
+    //   }
+      // this.sort.sortChange.emit();  // Work-around to initialise view
+
+      // merge(this.sort.sortChange, this.paginator.page)
+      //   .pipe(tap(() => {
+      //       this.paging.pageIndex = this.paginator.pageIndex;
+      //       this.paging.pageSize = this.paginator.pageSize;
+      //       this.paging.sortCol = this.sort?.active;
+      //       this.paging.sortDirection = this.sort?.direction;
+      //       this.filterRows();
+      //     })
+      //   ).subscribe();
+    // }
   }
 
   ngOnDestroy(): void {
@@ -109,10 +171,18 @@ export class MappingListComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
-  applyFilter(event: Event) {
+  applyFilter: ReturnType<typeof debounce> = debounce((event: Event) => {
     const filterValue = (event.target as HTMLInputElement).value;
-    this.dataSource.filter = filterValue.trim().toLowerCase();
-  }
+    this.filterDictionary.set('text', filterValue.trim().toLowerCase());
+    const json = JSON.stringify(Array.from(this.filterDictionary.entries()));
+    this.dataSource.filter = json;
+  }, 200);
+
+  applyRoleFilter: ReturnType<typeof debounce> = debounce((event: MatSelectChange) => {
+    this.filterDictionary.set('role', event.value);
+    const json = JSON.stringify(Array.from(this.filterDictionary.entries()));
+    this.dataSource.filter = json;
+  }, 200);
 
   private getProjects(): void {
     const self = this;
