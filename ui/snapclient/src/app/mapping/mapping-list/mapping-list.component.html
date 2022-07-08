@@ -9,7 +9,7 @@
   <app-errormessage [error]="error"></app-errormessage>
 
   <div class="container-scroll-list">
-    <ng-container *ngIf="projects.length > 0; else noResults">
+    <ng-container>
       <ng-container>
         <mat-form-field id='filter' appearance="standard">
           <mat-label>Filter</mat-label>
@@ -76,16 +76,14 @@
         <tr mat-row *matRowDef="let row; columns: columnsToDisplay"></tr>
       </table>
     </ng-container>
-    <ng-template #noResults>
-      <div class="project-card">
-        <mat-card>
-          <mat-card-header>
-            <mat-card-title>
-              <mat-icon>info</mat-icon>
-              {{'MAP.NO_MAPS_FOUND' | translate}}</mat-card-title>
-          </mat-card-header>
-        </mat-card>
-      </div>
-    </ng-template>
+    <div *ngIf="projects.length === 0">
+      <mat-card>
+        <mat-card-header>
+          <mat-card-title>
+            <mat-icon>info</mat-icon>
+            {{'MAP.NO_MAPS_FOUND' | translate}}</mat-card-title>
+        </mat-card-header>
+      </mat-card>
+    </div>
   </div>
 </mat-drawer-container>
