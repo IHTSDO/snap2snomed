@@ -18,12 +18,15 @@ package org.snomed.snap2snomed.repository;
 
 import java.util.Optional;
 import org.snomed.snap2snomed.model.Project;
+import org.snomed.snap2snomed.model.Task;
+import org.snomed.snap2snomed.model.enumeration.TaskType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.history.RevisionRepository;
+import org.springframework.data.repository.query.Param;
 import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 import org.springframework.data.rest.core.annotation.RestResource;
 
@@ -38,6 +41,30 @@ public interface ProjectRepository
   @Override
   @Query("select p from Project p where true = ?#{@authenticationFacadeImpl.isAdminUser()} or exists (select 1 from User u where u.id = ?#{@authenticationFacadeImpl.principalSubject} and (u member of p.owners or u member of p.members or u member of p.guests)) ")
   Page<Project> findAll(Pageable pageable);
+
+  @Query("select p from Project p where (p.title like %:text% or p.description like %:text%)" +
+      " and (true = ?#{@authenticationFacadeImpl.isAdminUser()}" +
+      " or exists (select 1 from User u where u.id = ?#{@authenticationFacadeImpl.principalSubject}" +
+      " and (u member of p.owners or u member of p.members or u member of p.guests)))")
+  Page<Project> findProjectsMatchingTextForAllUsers(@Param("text") String text, Pageable pageable);
+
+  @Query("select p from Project p where (p.title like %:text% or p.description like %:text%)" +
+      " and (true = ?#{@authenticationFacadeImpl.isAdminUser()}" +
+      " and exists (select 1 from User u where u.id = ?#{@authenticationFacadeImpl.principalSubject}" +
+      " and u member of p.owners))")
+  Page<Project> findProjectsMatchingTextForOwners(@Param("text") String text, Pageable pageable);
+
+  @Query("select p from Project p where (p.title like %:text% or p.description like %:text%)" +
+      " and (true = ?#{@authenticationFacadeImpl.isAdminUser()}" +
+      " and exists (select 1 from User u where u.id = ?#{@authenticationFacadeImpl.principalSubject}" +
+      " and u member of p.members))")
+  Page<Project> findProjectsMatchingTextForMembers(@Param("text") String text, Pageable pageable);
+
+  @Query("select p from Project p where (p.title like %:text% or p.description like %:text%)" +
+      " and (true = ?#{@authenticationFacadeImpl.isAdminUser()}" +
+      " and exists (select 1 from User u where u.id = ?#{@authenticationFacadeImpl.principalSubject}" +
+      " and u member of p.guests))")
+  Page<Project> findProjectsMatchingTextForGuests(@Param("text") String text, Pageable pageable);
 
   // authorisation in PreAuthFilter
   @Override

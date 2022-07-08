@@ -152,10 +152,32 @@ export class MapService {
     return this.http.post(url, body, header);
   }
 
-  fetchProjects(pageSize: number, currentPage: number): Observable<TaskResults> {
+  fetchProjects(pageSize: number, currentPage: number, currentSort: string, currentText: string, currentRole: string): Observable<TaskResults> {
     const size = pageSize ?? 20;
     const page = currentPage ?? 0;
-    const url = `${this.config.apiBaseUrl}/projects?sort=modified,desc&projection=listView&page=${page}&size=${size}`;
+    let url = `${this.config.apiBaseUrl}/projects`;
+    if (currentText) {
+      url += '/search/findProjectsMatchingText';
+      switch(currentRole) {
+        case "owner":
+          url += 'ForOwners';
+          break;
+        case "member":
+          url += 'ForMembers';
+          break;
+        case "guest":
+          url += 'ForGuests';
+          break;
+        default:
+          url += 'ForAllUsers';
+      }
+      url += `?text=${currentText}&sort=${currentSort}`;
+    }
+    else {
+      url += `?sort=${currentSort}`
+    }
+
+    url += `&projection=listView&page=${page}&size=${size}`;
     const header = ServiceUtils.getHTTPHeaders();
     return this.http.get<TaskResults>(url, header);
   }

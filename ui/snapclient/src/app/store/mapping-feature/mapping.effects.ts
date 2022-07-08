@@ -164,7 +164,7 @@ export class MappingEffects {
     return this.actions$.pipe(
       ofType(MappingActionTypes.LOAD_PROJECTS),
       map((action) => action.payload),
-      switchMap((payload) => this.mapService.fetchProjects(payload.pageSize, payload.currentPage).pipe(
+      switchMap((payload) => this.mapService.fetchProjects(payload.pageSize, payload.currentPage, payload.currentSort, payload.currentText, payload.currentRole).pipe(
         map((resp) => {
           const projects = resp._embedded.projects.map(toProject);
           return [resp.page, projects.map((proj: Project) => {

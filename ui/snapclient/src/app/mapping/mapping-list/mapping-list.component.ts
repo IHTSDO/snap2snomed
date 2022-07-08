@@ -81,6 +81,10 @@ export class MappingListComponent implements OnInit, AfterViewInit, OnDestroy {
   pageSizeOptions: number[] = [5, 10, 25, 100];
   totalElements = 0;
 
+  currentSort = 'created,desc';
+  currentText = '';
+  currentRole = 'all';
+
   constructor(private mapService: MapService,
               private authService: AuthService,
               private router: Router,
@@ -92,48 +96,48 @@ export class MappingListComponent implements OnInit, AfterViewInit, OnDestroy {
      */
     this.navigationSubscription = this.router.events.subscribe((e: any) => {
       if (e instanceof NavigationEnd) {
-        this.store.dispatch(new LoadProjects({pageSize: this.pageSize, currentPage: this.currentPage}));
+        this.store.dispatch(new LoadProjects({pageSize: this.pageSize, currentPage: this.currentPage, currentSort: this.currentSort, currentText: this.currentText, currentRole: this.currentRole}));
       }
     });
   }
 
   ngOnInit(): void {
     const self = this;
-    self.store.dispatch(new LoadProjects({pageSize: this.pageSize, currentPage: this.currentPage}));
-    self.dataSource.filterPredicate = function (record, filter) {
-      const filters: Map<string, string> = new Map(JSON.parse(filter));
-      const matches: boolean[] = [];
-      let isMatch = false;
-
-      /**
-       * filter priority: text, role
-       */
-
-      filters.forEach((value, key) => {
-        if (key === 'text') {
-          if (value.trim().length > 0) {
-            matches.push(!!(record.title?.toLocaleLowerCase().includes(value) || record.description?.toLocaleLowerCase().includes(value)));
-          }
-        }
-        else if (key === 'role' && self.currentUser) {
-          switch (value) {
-            case 'owner':
-              matches.push(record.owners.filter(user => user.id == self.currentUser?.id).length > 0);
-              break;
-            case 'member':
-              matches.push(record.members.filter(user => user.id == self.currentUser?.id).length > 0);
-              break;
-            case 'guest':
-              matches.push(record.guests.filter(user => user.id == self.currentUser?.id).length > 0);
-              break;
-            default:
-              matches.push(true);
-          }
-        }
-      });
-
-      return matches.every(e => e);
-    };
+    self.store.dispatch(new LoadProjects({pageSize: this.pageSize, currentPage: this.currentPage, currentSort: this.currentSort, currentText: this.currentText, currentRole: this.currentRole}));
+    // self.dataSource.filterPredicate = function (record, filter) {
+    //   const filters: Map<string, string> = new Map(JSON.parse(filter));
+    //   const matches: boolean[] = [];
+    //   let isMatch = false;
+    //
+    //   /**
+    //    * filter priority: text, role
+    //    */
+    //
+    //   filters.forEach((value, key) => {
+    //     if (key === 'text') {
+    //       if (value.trim().length > 0) {
+    //         matches.push(!!(record.title?.toLocaleLowerCase().includes(value) || record.description?.toLocaleLowerCase().includes(value)));
+    //       }
+    //     }
+    //     else if (key === 'role' && self.currentUser) {
+    //       switch (value) {
+    //         case 'owner':
+    //           matches.push(record.owners.filter(user => user.id == self.currentUser?.id).length > 0);
+    //           break;
+    //         case 'member':
+    //           matches.push(record.members.filter(user => user.id == self.currentUser?.id).length > 0);
+    //           break;
+    //         case 'guest':
+    //           matches.push(record.guests.filter(user => user.id == self.currentUser?.id).length > 0);
+    //           break;
+    //         default:
+    //           matches.push(true);
+    //       }
+    //     }
+    //   });
+    //
+    //   return matches.every(e => e);
+    // };
   }
 
   ngAfterViewInit(): void {
@@ -172,16 +176,20 @@ export class MappingListComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   applyFilter: ReturnType<typeof debounce> = debounce((event: Event) => {
-    const filterValue = (event.target as HTMLInputElement).value;
-    this.filterDictionary.set('text', filterValue.trim().toLowerCase());
-    const json = JSON.stringify(Array.from(this.filterDictionary.entries()));
-    this.dataSource.filter = json;
+    this.currentText = (event.target as HTMLInputElement).value.trim();
+    // this.filterDictionary.set('text', filterValue.trim().toLowerCase());
+    // const json = JSON.stringify(Array.from(this.filterDictionary.entries()));
+    // this.dataSource.filter = json;
+
+    this.store.dispatch(new LoadProjects({pageSize: this.pageSize, currentPage: this.currentPage, currentSort: this.currentSort, currentText: this.currentText, currentRole: this.currentRole}));
   }, 200);
 
   applyRoleFilter: ReturnType<typeof debounce> = debounce((event: MatSelectChange) => {
-    this.filterDictionary.set('role', event.value);
-    const json = JSON.stringify(Array.from(this.filterDictionary.entries()));
-    this.dataSource.filter = json;
+    this.currentRole = event.value;
+    // this.filterDictionary.set('role', event.value);
+    // const json = JSON.stringify(Array.from(this.filterDictionary.entries()));
+    // this.dataSource.filter = json;
+    this.store.dispatch(new LoadProjects({pageSize: this.pageSize, currentPage: this.currentPage, currentSort: this.currentSort, currentText: this.currentText, currentRole: this.currentRole}));
   }, 200);
 
   private getProjects(): void {
@@ -189,8 +197,9 @@ export class MappingListComponent implements OnInit, AfterViewInit, OnDestroy {
     self.subscription.add(self.store.select(selectProjects).subscribe(
       data => {
         if (data) {
-          const sortData = Object.assign([], data);
-          self.projects = sortData.sort((a, b) => self.sortProjects(a, b));
+          self.projects = data;
+          // const sortData = Object.assign([], data);
+          // self.projects = sortData.sort((a, b) => self.sortProjects(a, b));
           self.projects.forEach(p => {
             if (p.id && p.mapcount) {
               self.selectedMapping[p.id] = p.maps[p.mapcount - 1];
@@ -214,7 +223,7 @@ export class MappingListComponent implements OnInit, AfterViewInit, OnDestroy {
   pageChanged(event: PageEvent): void {
     this.pageSize = event.pageSize;
     this.currentPage = event.pageIndex;
-    this.store.dispatch(new LoadProjects({pageSize: this.pageSize, currentPage: this.currentPage}));
+    this.store.dispatch(new LoadProjects({pageSize: this.pageSize, currentPage: this.currentPage, currentSort: this.currentSort, currentText: this.currentText, currentRole: this.currentRole}));
   }
 
   createMap(): void {
@@ -278,16 +287,16 @@ export class MappingListComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
 // Sort by created desc
-  sortProjects(a: Project, b: Project): number {
-    if (a.created && b.created) {
-      if (a.created > b.created) {
-        return -1;
-      }
-      if (a.created < b.created) {
-        return 1;
-      }
-    }
-    return 0;
-  }
+//   sortProjects(a: Project, b: Project): number {
+//     if (a.created && b.created) {
+//       if (a.created > b.created) {
+//         return -1;
+//       }
+//       if (a.created < b.created) {
+//         return 1;
+//       }
+//     }
+//     return 0;
+//   }
 
 }

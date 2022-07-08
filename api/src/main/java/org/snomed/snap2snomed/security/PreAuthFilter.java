@@ -47,6 +47,7 @@ public class PreAuthFilter extends GenericFilterBean {
         rules = Arrays.asList(
 
             // REST repository GET operations
+            new FilterRule(HttpMethod.GET, "/projects/search/.*", groupValues -> webSecurity.isValidUser()),
             new FilterRule(HttpMethod.GET, "/projects/([^\\/]+).*", groupValues -> webSecurity.hasAnyProjectRole(asLong(groupValues[0])) || webSecurity.isAdminUser()),
             new FilterRule(HttpMethod.GET, "/projects", groupValues -> webSecurity.isValidUser()), // result filtered by query
 
