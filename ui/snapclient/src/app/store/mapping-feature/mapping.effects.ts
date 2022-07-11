@@ -164,10 +164,10 @@ export class MappingEffects {
     return this.actions$.pipe(
       ofType(MappingActionTypes.LOAD_PROJECTS),
       map((action) => action.payload),
-      switchMap((payload) => this.mapService.fetchProjects(payload.pageSize, payload.currentPage, payload.currentSort, payload.currentText, payload.currentRole).pipe(
+      switchMap((payload) => this.mapService.fetchProjects(payload.pageSize, payload.currentPage, payload.sort, payload.text, payload.role).pipe(
         map((resp) => {
-          const projects = resp._embedded.projects.map(toProject);
-          return [resp.page, projects.map((proj: Project) => {
+          const projects = resp.content.map(toProject);//resp._embedded.projects.map(toProject);
+          return [resp.page as any, projects.map((proj: Project) => {
             let theProj = new Project();
             theProj = cloneDeep(proj);
             this.userService.getUsersForProject(proj).subscribe(

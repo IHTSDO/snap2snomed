@@ -53,7 +53,7 @@ export class MappingListComponent implements OnInit, AfterViewInit, OnDestroy {
 
   filterDictionary = new Map<string, string>();
 
-  sort: MatSort | null | undefined;
+  matSort: MatSort | null | undefined;
   componentLoaded = false;
 
   selectedMapping: { [key: string]: Mapping | null } = {};
@@ -70,7 +70,7 @@ export class MappingListComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild(MatPaginator, {static: false}) paginator!: MatPaginator;
   @ViewChild(MatSort, {static: false}) set content(sort: MatSort) {
     if (!this.componentLoaded && sort) {
-      this.sort = sort;
+      this.matSort = sort;
       this.ngAfterViewInit();
       this.componentLoaded = true;
     }
@@ -80,9 +80,9 @@ export class MappingListComponent implements OnInit, AfterViewInit, OnDestroy {
   pageSizeOptions: number[] = [5, 10, 25, 100];
   totalElements = 0;
 
-  currentSort = 'created,desc';
-  currentText = '';
-  currentRole = 'all';
+  sort = 'created,desc';
+  filterText = '';
+  filterRole = 'all';
 
   constructor(private mapService: MapService,
               private authService: AuthService,
@@ -95,14 +95,14 @@ export class MappingListComponent implements OnInit, AfterViewInit, OnDestroy {
      */
     this.navigationSubscription = this.router.events.subscribe((e: any) => {
       if (e instanceof NavigationEnd) {
-        this.store.dispatch(new LoadProjects({pageSize: this.pageSize, currentPage: this.currentPage, currentSort: this.currentSort, currentText: this.currentText, currentRole: this.currentRole}));
+        this.store.dispatch(new LoadProjects({pageSize: this.pageSize, currentPage: this.currentPage, sort: this.sort, text: this.filterText, role: this.filterRole}));
       }
     });
   }
 
   ngOnInit(): void {
     const self = this;
-    self.store.dispatch(new LoadProjects({pageSize: this.pageSize, currentPage: this.currentPage, currentSort: this.currentSort, currentText: this.currentText, currentRole: this.currentRole}));
+    self.store.dispatch(new LoadProjects({pageSize: this.pageSize, currentPage: this.currentPage, sort: this.sort, text: this.filterText, role: this.filterRole}));
   }
 
   ngAfterViewInit(): void {
@@ -120,23 +120,23 @@ export class MappingListComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   applyFilter: ReturnType<typeof debounce> = debounce((event: Event) => {
-    this.currentText = (event.target as HTMLInputElement).value.trim();
+    this.filterText = (event.target as HTMLInputElement).value.trim();
     this.store.dispatch(new LoadProjects({
       pageSize: this.pageSize,
       currentPage: this.currentPage,
-      currentSort: this.currentSort,
-      currentText: this.currentText,
-      currentRole: this.currentRole
+      sort: this.sort,
+      text: this.filterText,
+      role: this.filterRole
     }))}, 200);
 
   applyRoleFilter: ReturnType<typeof debounce> = debounce((event: MatSelectChange) => {
-    this.currentRole = event.value;
+    this.filterRole = event.value;
     this.store.dispatch(new LoadProjects({
       pageSize: this.pageSize,
       currentPage: this.currentPage,
-      currentSort: this.currentSort,
-      currentText: this.currentText,
-      currentRole: this.currentRole
+      sort: this.sort,
+      text: this.filterText,
+      role: this.filterRole
     }))}, 200);
 
   private getProjects(): void {
@@ -170,7 +170,7 @@ export class MappingListComponent implements OnInit, AfterViewInit, OnDestroy {
   pageChanged(event: PageEvent): void {
     this.pageSize = event.pageSize;
     this.currentPage = event.pageIndex;
-    this.store.dispatch(new LoadProjects({pageSize: this.pageSize, currentPage: this.currentPage, currentSort: this.currentSort, currentText: this.currentText, currentRole: this.currentRole}));
+    this.store.dispatch(new LoadProjects({pageSize: this.pageSize, currentPage: this.currentPage, sort: this.sort, text: this.filterText, role: this.filterRole}));
   }
 
   createMap(): void {

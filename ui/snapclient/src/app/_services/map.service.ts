@@ -85,6 +85,17 @@ export interface NoteResults {
   };
 }
 
+export interface ProjectResults {
+  content: any;
+  links: any;
+  page: {
+    number: number;
+    totalElements: number;
+    totalPages: number;
+    size: number;
+  };
+}
+
 export interface AutomapRow {
   id: number;
   display: string;
@@ -152,34 +163,17 @@ export class MapService {
     return this.http.post(url, body, header);
   }
 
-  fetchProjects(pageSize: number, currentPage: number, currentSort: string, currentText: string, currentRole: string): Observable<TaskResults> {
-    const size = pageSize ?? 20;
+  fetchProjects(pageSize: number, currentPage: number, sort: string, text: string, role: string): Observable<ProjectResults> {
+    const size = pageSize ?? 25;
     const page = currentPage ?? 0;
-    let url = `${this.config.apiBaseUrl}/projects`;
-    if (currentText) {
-      url += '/filter';
-      // switch(currentRole) {
-      //   case "owner":
-      //     url += 'ForOwners';
-      //     break;
-      //   case "member":
-      //     url += 'ForMembers';
-      //     break;
-      //   case "guest":
-      //     url += 'ForGuests';
-      //     break;
-      //   default:
-      //     url += 'ForAllUsers';
-      // }
-      url += `?text=${currentText}&sort=${currentSort}`;
-    }
-    else {
-      url += `?sort=${currentSort}`
+    let url = `${this.config.apiBaseUrl}/projects/fetch?sort=${sort}&role=${role}&projection=listView&page=${page}&size=${size}`;
+
+    if (text) {
+      url += `&text=${text}`;
     }
 
-    url += `&projection=listView&page=${page}&size=${size}`;
     const header = ServiceUtils.getHTTPHeaders();
-    return this.http.get<TaskResults>(url, header);
+    return this.http.get<ProjectResults>(url, header);
   }
 
   private buildFetchUrl(currentSort: string, currentText: string, currentRole: string): string {
