@@ -47,14 +47,14 @@ public class ProjectService {
     for (Sort.Order order : pageable.getSort()) {
       ComparableExpressionBase<?> field;
       switch (order.getProperty()) {
-        case "title":
-          field = project.title;
-          break;
         case "modified":
           field = project.modified;
           break;
+        case "title":
+          field = project.title;
+          break;
         default:
-          field = null;
+          field = project.created;
       }
 
       if (field != null) {
