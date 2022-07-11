@@ -42,30 +42,6 @@ public interface ProjectRepository
   @Query("select p from Project p where true = ?#{@authenticationFacadeImpl.isAdminUser()} or exists (select 1 from User u where u.id = ?#{@authenticationFacadeImpl.principalSubject} and (u member of p.owners or u member of p.members or u member of p.guests)) ")
   Page<Project> findAll(Pageable pageable);
 
-  @Query("select p from Project p where (p.title like %:text% or p.description like %:text%)" +
-      " and (true = ?#{@authenticationFacadeImpl.isAdminUser()}" +
-      " or exists (select 1 from User u where u.id = ?#{@authenticationFacadeImpl.principalSubject}" +
-      " and (u member of p.owners or u member of p.members or u member of p.guests)))")
-  Page<Project> findProjectsMatchingTextForAllUsers(@Param("text") String text, Pageable pageable);
-
-  @Query("select p from Project p where (p.title like %:text% or p.description like %:text%)" +
-      " and (true = ?#{@authenticationFacadeImpl.isAdminUser()}" +
-      " and exists (select 1 from User u where u.id = ?#{@authenticationFacadeImpl.principalSubject}" +
-      " and u member of p.owners))")
-  Page<Project> findProjectsMatchingTextForOwners(@Param("text") String text, Pageable pageable);
-
-  @Query("select p from Project p where (p.title like %:text% or p.description like %:text%)" +
-      " and (true = ?#{@authenticationFacadeImpl.isAdminUser()}" +
-      " and exists (select 1 from User u where u.id = ?#{@authenticationFacadeImpl.principalSubject}" +
-      " and u member of p.members))")
-  Page<Project> findProjectsMatchingTextForMembers(@Param("text") String text, Pageable pageable);
-
-  @Query("select p from Project p where (p.title like %:text% or p.description like %:text%)" +
-      " and (true = ?#{@authenticationFacadeImpl.isAdminUser()}" +
-      " and exists (select 1 from User u where u.id = ?#{@authenticationFacadeImpl.principalSubject}" +
-      " and u member of p.guests))")
-  Page<Project> findProjectsMatchingTextForGuests(@Param("text") String text, Pageable pageable);
-
   // authorisation in PreAuthFilter
   @Override
   Optional<Project> findById(Long project);

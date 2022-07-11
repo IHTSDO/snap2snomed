@@ -86,7 +86,7 @@ export interface NoteResults {
 }
 
 export interface ProjectResults {
-  content: any;
+  content: Project[];
   links: any;
   page: {
     number: number;
@@ -166,7 +166,7 @@ export class MapService {
   fetchProjects(pageSize: number, currentPage: number, sort: string, text: string, role: string): Observable<ProjectResults> {
     const size = pageSize ?? 25;
     const page = currentPage ?? 0;
-    let url = `${this.config.apiBaseUrl}/projects/fetch?sort=${sort}&role=${role}&projection=listView&page=${page}&size=${size}`;
+    let url = `${this.config.apiBaseUrl}/projects/fetch?sort=${sort}&role=${role}&page=${page}&size=${size}`;
 
     if (text) {
       url += `&text=${text}`;
@@ -174,16 +174,6 @@ export class MapService {
 
     const header = ServiceUtils.getHTTPHeaders();
     return this.http.get<ProjectResults>(url, header);
-  }
-
-  private buildFetchUrl(currentSort: string, currentText: string, currentRole: string): string {
-    let url = `${this.config.apiBaseUrl}/projects`;
-
-    if (currentText) {
-      url += '/search/findProjectsMatchingText';
-    }
-
-    return url;
   }
 
   getMapForId(id: string): Observable<Mapping> {

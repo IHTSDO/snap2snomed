@@ -166,7 +166,7 @@ export class MappingEffects {
       map((action) => action.payload),
       switchMap((payload) => this.mapService.fetchProjects(payload.pageSize, payload.currentPage, payload.sort, payload.text, payload.role).pipe(
         map((resp) => {
-          const projects = resp.content.map(toProject);//resp._embedded.projects.map(toProject);
+          const projects = resp.content.map(toProject);
           return [resp.page as any, projects.map((proj: Project) => {
             let theProj = new Project();
             theProj = cloneDeep(proj);

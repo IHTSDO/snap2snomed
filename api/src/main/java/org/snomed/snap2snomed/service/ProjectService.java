@@ -40,11 +40,7 @@ public class ProjectService {
 
     JPAQuery<ProjectDto> query = new JPAQuery<ProjectDto>(entityManager)
         .select(Projections.constructor(ProjectDto.class, project))
-        .from(project)
-        .leftJoin(project.maps)
-        .leftJoin(project.owners)
-        .leftJoin(project.members)
-        .leftJoin(project.guests);
+        .from(project);
     addWhereClause(query, filter);
     query.offset(pageable.getOffset()).limit(pageable.getPageSize());
 
@@ -98,7 +94,6 @@ public class ProjectService {
             whereClause = project.owners.contains(currentUser).or(project.members.contains(currentUser))
                                         .or(project.guests.contains(currentUser));
           }
-
           break;
       }
     }
