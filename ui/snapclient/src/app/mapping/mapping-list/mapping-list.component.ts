@@ -121,13 +121,23 @@ export class MappingListComponent implements OnInit, AfterViewInit, OnDestroy {
 
   applyFilter: ReturnType<typeof debounce> = debounce((event: Event) => {
     this.currentText = (event.target as HTMLInputElement).value.trim();
-    this.store.dispatch(new LoadProjects({pageSize: this.pageSize, currentPage: this.currentPage, currentSort: this.currentSort, currentText: this.currentText, currentRole: this.currentRole}));
-  }, 200);
+    this.store.dispatch(new LoadProjects({
+      pageSize: this.pageSize,
+      currentPage: this.currentPage,
+      currentSort: this.currentSort,
+      currentText: this.currentText,
+      currentRole: this.currentRole
+    }))}, 200);
 
   applyRoleFilter: ReturnType<typeof debounce> = debounce((event: MatSelectChange) => {
     this.currentRole = event.value;
-    this.store.dispatch(new LoadProjects({pageSize: this.pageSize, currentPage: this.currentPage, currentSort: this.currentSort, currentText: this.currentText, currentRole: this.currentRole}));
-  }, 200);
+    this.store.dispatch(new LoadProjects({
+      pageSize: this.pageSize,
+      currentPage: this.currentPage,
+      currentSort: this.currentSort,
+      currentText: this.currentText,
+      currentRole: this.currentRole
+    }))}, 200);
 
   private getProjects(): void {
     const self = this;

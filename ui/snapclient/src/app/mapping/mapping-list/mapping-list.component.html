@@ -67,22 +67,22 @@
             <button mat-stroked-button color="primary" title="{{'MAP.NEW_VERSION' | translate}}"
                     [disabled]="!isOwner(project)" (click)="newVersion(project)">{{'MAP.NEW_VERSION' | translate}}</button>
             <span class="space-fill">&nbsp;</span>
-            <button mat-stroked-button color="primary" title="{{'FORM.VIEW' | translate}}"
+            <button mat-stroked-button color="primary" title="{{'MAP.MAP_VIEW_DETAILS' | translate}}"
                     [disabled]="!hasProjectRole(project)" (click)="viewMapping(project)"><mat-icon>visibility</mat-icon></button>
           </td>
         </ng-container>
         <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
         <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
       </table>
-    </div>
-    <div *ngIf="projects.length === 0">
-      <mat-card>
-        <mat-card-header>
-          <mat-card-title>
-            <mat-icon>info</mat-icon>
-            {{'MAP.NO_MAPS_FOUND' | translate}}</mat-card-title>
-        </mat-card-header>
-      </mat-card>
+      <div *ngIf="projects.length === 0">
+        <mat-card>
+          <mat-card-header>
+            <mat-card-title>
+              <mat-icon>info</mat-icon>
+              {{'MAP.NO_MAPS_FOUND' | translate}}</mat-card-title>
+          </mat-card-header>
+        </mat-card>
+      </div>
     </div>
   </div>
 </mat-drawer-container>

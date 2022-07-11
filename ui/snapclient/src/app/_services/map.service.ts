@@ -157,20 +157,20 @@ export class MapService {
     const page = currentPage ?? 0;
     let url = `${this.config.apiBaseUrl}/projects`;
     if (currentText) {
-      url += '/search/findProjectsMatchingText';
-      switch(currentRole) {
-        case "owner":
-          url += 'ForOwners';
-          break;
-        case "member":
-          url += 'ForMembers';
-          break;
-        case "guest":
-          url += 'ForGuests';
-          break;
-        default:
-          url += 'ForAllUsers';
-      }
+      url += '/filter';
+      // switch(currentRole) {
+      //   case "owner":
+      //     url += 'ForOwners';
+      //     break;
+      //   case "member":
+      //     url += 'ForMembers';
+      //     break;
+      //   case "guest":
+      //     url += 'ForGuests';
+      //     break;
+      //   default:
+      //     url += 'ForAllUsers';
+      // }
       url += `?text=${currentText}&sort=${currentSort}`;
     }
     else {
@@ -180,6 +180,16 @@ export class MapService {
     url += `&projection=listView&page=${page}&size=${size}`;
     const header = ServiceUtils.getHTTPHeaders();
     return this.http.get<TaskResults>(url, header);
+  }
+
+  private buildFetchUrl(currentSort: string, currentText: string, currentRole: string): string {
+    let url = `${this.config.apiBaseUrl}/projects`;
+
+    if (currentText) {
+      url += '/search/findProjectsMatchingText';
+    }
+
+    return url;
   }
 
   getMapForId(id: string): Observable<Mapping> {
