@@ -8,33 +8,32 @@
   </mat-toolbar>
   <app-errormessage [error]="error"></app-errormessage>
 
-  <div class="container-scroll-list">
-    <ng-container>
-      <ng-container>
-        <mat-form-field id='filter' appearance="standard">
-          <mat-label>Filter</mat-label>
-          <input matInput (keyup)="applyFilter($event)" placeholder="Search columns" #input>
-        </mat-form-field>
+  <div class="container">
+    <div class="header">
+      <mat-form-field class='filter' appearance="standard">
+        <mat-label>Filter</mat-label>
+        <input matInput (keyup)="applyFilter($event)" placeholder="Search columns" #input>
+      </mat-form-field>
 
-        <mat-form-field appearance="fill">
-          <mat-label>Roles</mat-label>
-          <mat-select [(value)]="roles.defaultValue" (selectionChange)="applyRoleFilter($event)">
-            <mat-option *ngFor="let op of roles.options" [value]="op">
-              {{op |titlecase}}
-            </mat-option>
-          </mat-select>
-        </mat-form-field>
+      <mat-form-field appearance="fill">
+        <mat-label>Roles</mat-label>
+        <mat-select [(value)]="roles.defaultValue" (selectionChange)="applyRoleFilter($event)">
+          <mat-option *ngFor="let op of roles.options" [value]="op">
+            {{op |titlecase}}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
 
-        <mat-paginator #paginator
-                       [length]="totalElements || 0"
-                       [pageIndex]="currentPage"
-                       [pageSize]="pageSize"
-                       [pageSizeOptions]="pageSizeOptions"
-                       (page)="pageChanged($event)"
-                       [showFirstLastButtons]="true">
-        </mat-paginator>
-      </ng-container>
-
+      <mat-paginator #paginator
+                     [length]="totalElements || 0"
+                     [pageIndex]="currentPage"
+                     [pageSize]="pageSize"
+                     [pageSizeOptions]="pageSizeOptions"
+                     (page)="pageChanged($event)"
+                     [showFirstLastButtons]="true">
+      </mat-paginator>
+    </div>
+    <div class="container-scroll-list">
       <table mat-table [dataSource]="dataSource" matSort>
         <ng-container matColumnDef="title">
           <th mat-header-cell *matHeaderCellDef mat-sort-header sortActionDescription="Sort by title">Title</th>
@@ -72,10 +71,10 @@
                     [disabled]="!hasProjectRole(project)" (click)="viewMapping(project)"><mat-icon>visibility</mat-icon></button>
           </td>
         </ng-container>
-        <tr mat-header-row *matHeaderRowDef="columnsToDisplay"></tr>
-        <tr mat-row *matRowDef="let row; columns: columnsToDisplay"></tr>
+        <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
       </table>
-    </ng-container>
+    </div>
     <div *ngIf="projects.length === 0">
       <mat-card>
         <mat-card-header>

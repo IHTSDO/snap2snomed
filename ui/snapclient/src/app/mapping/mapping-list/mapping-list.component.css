@@ -1,69 +1,28 @@
+.container {
+  height: calc(100vh - 249px);
+  margin: 10px;
+}
 
 .container-scroll-list {
+  height: calc(100vh - 306px);
   overflow-y: auto;
-  margin: 10px;
-  height: calc(100vh - 249px);
+  width: 100%;
+}
+
+.filter {
+  width: 300px;
+}
+
+.header {
+  display: block;
+  position: sticky;
+  width: 100%;
+  top: 0;
+  z-index: 2;
 }
 
 .mapping-add {
   background-color: #e6e6e6;
-}
-
-h2 {
-  margin: 2px 0 5px 0;
-  color: #434a55;
-}
-
-small {
-  color: #434a55;
-}
-
-.project-card {
-  width: calc(100% - 5vw);
-}
-
-.project-card:hover {
-  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
-  transform: scale(1.01);
-}
-
-.card-column-flex {
-  float: left;
-  margin: 0 5px;
-  height: 100%;
-}
-
-.col-main {
-  width: calc(80% - 2em);
-}
-
-.col-side {
-  width: 20%;
-  align-items: flex-end;
-}
-
-.button-row {
-  display: flex;
-  align-items: flex-end;
-  width: 200px;
-}
-
-.description {
-  font-size: 0.9em;
-  color: #434a55;
-  -webkit-line-clamp: 4;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  display: -webkit-box;
-}
-
-.column-fill {
-  min-height: 26px;
-}
-
-table {
-  width: 100%;
 }
 
 .mat-cell {
@@ -74,25 +33,24 @@ table {
   min-width: 50px;
 }
 
-.mat-column-title {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  width: 20%;
-}
-
 .mat-column-description {
   overflow: hidden;
   text-overflow: ellipsis;
   width: 30%;
 }
 
-.mat-column-version {
-  width: 10%;
+.mat-column-title {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 20%;
 }
 
-.mat-row {
-  padding-top: 10px;
-  padding-bottom: 10px;
+.mat-column-users {
+  min-width: 20%;
+}
+
+.mat-column-version {
+  width: 10%;
 }
 
 .mat-form-field {
@@ -103,8 +61,13 @@ table {
   z-index: 3;
 }
 
-#filter {
-  width: 300px;
+.mat-row {
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
+
+table {
+  width: 100%;
 }
 
 @media only screen and (max-width: 700px) {
