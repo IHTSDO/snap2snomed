@@ -52,8 +52,6 @@ export class MappingListComponent implements OnInit, AfterViewInit, OnDestroy {
     defaultValue: 'all'
   };
 
-  filterDictionary = new Map<string, string>();
-
   sort: MatSort | null | undefined;
   componentLoaded = false;
 
@@ -103,8 +101,7 @@ export class MappingListComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    const self = this;
-    self.store.dispatch(new LoadProjects({pageSize: this.pageSize, currentPage: this.currentPage, sort: `${this.sortCol},${this.sortDir}`, text: this.filterText, role: this.filterRole}));
+    this.store.dispatch(new LoadProjects({pageSize: this.pageSize, currentPage: this.currentPage, sort: `${this.sortCol},${this.sortDir}`, text: this.filterText, role: this.filterRole}));
   }
 
   ngAfterViewInit(): void {

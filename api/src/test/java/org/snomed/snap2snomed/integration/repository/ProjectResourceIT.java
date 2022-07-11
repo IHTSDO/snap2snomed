@@ -349,21 +349,40 @@ public class ProjectResourceIT extends IntegrationTestBase {
   }
 
   @Test
-  public void shouldGetPagedProjectsResultsForLikeText() throws Exception {
-    long id2 = restClient.createProject("ProjectDemoMatch", "Demo Project", Set.of(DEFAULT_TEST_USER_SUBJECT), Set.of(),
+  public void shouldGetProjectsResultsForFilter() throws Exception {
+    restClient.createOrUpdateAdminUser(DEFAULT_TEST_ADMIN_USER_SUBJECT, "TestAdmin", "BobbyAdmin", "UserAdmin", "admin@admin.com");
+    long id = restClient.createProject("ProjectDemoMatch", "Demo Project", Set.of(DEFAULT_TEST_USER_SUBJECT), Set.of(),
         Set.of());
 
     restClient.givenUser(DEFAULT_TEST_USER_SUBJECT)
               .queryParam("text", "Match")
-              .queryParam("projection", "listView")
-              .get("/projects/search/findProjectsMatchingTextForAllUsers")
+              .get("/projects/fetch")
               .then().statusCode(200)
               .body("page.totalElements", equalTo(1));
 
     restClient.givenUser(DEFAULT_TEST_USER_SUBJECT)
               .queryParam("text", "Match")
-              .queryParam("projection", "listView")
-              .get("/projects/search/findProjectsMatchingTextForGuests")
+              .queryParam("role", "guest")
+              .get("/projects/fetch")
+              .then().statusCode(200)
+              .body("page.totalElements", equalTo(0));
+
+    restClient.givenUser(DEFAULT_TEST_ADMIN_USER_SUBJECT)
+              .queryParam("text", "")
+              .get("/projects/fetch")
+              .then().statusCode(200)
+              .body("page.totalElements", greaterThan(1));
+
+    restClient.givenUser(DEFAULT_TEST_ADMIN_USER_SUBJECT)
+              .queryParam("text", "Match")
+              .get("/projects/fetch")
+              .then().statusCode(200)
+              .body("page.totalElements", equalTo(1));
+
+    restClient.givenUser(DEFAULT_TEST_ADMIN_USER_SUBJECT)
+              .queryParam("text", "Match")
+              .queryParam("role", "guest")
+              .get("/projects/fetch")
               .then().statusCode(200)
               .body("page.totalElements", equalTo(0));
   }
