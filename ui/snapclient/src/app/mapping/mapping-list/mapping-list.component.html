@@ -8,11 +8,11 @@
   </mat-toolbar>
   <app-errormessage [error]="error"></app-errormessage>
 
-  <div class="container">
+  <div class="container" [ngClass]="{'has-error': error.message}">
     <div class="header">
       <mat-form-field class='filter' appearance="standard">
         <mat-label>Filter</mat-label>
-        <input matInput (keyup)="applyFilter($event)" placeholder="Search columns" #input>
+        <input matInput (keyup)="applyFilter($event)" placeholder="Search title and description" #input>
       </mat-form-field>
 
       <mat-form-field appearance="fill">
@@ -33,7 +33,7 @@
                      [showFirstLastButtons]="true">
       </mat-paginator>
     </div>
-    <div class="container-scroll-list">
+    <div class="container-scroll-list" [ngClass]="{'has-error': error.message}">
       <table mat-table [dataSource]="dataSource" matSort>
         <ng-container matColumnDef="title">
           <th mat-header-cell *matHeaderCellDef mat-sort-header sortActionDescription="Sort by title">Title</th>

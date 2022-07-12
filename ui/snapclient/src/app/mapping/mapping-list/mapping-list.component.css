@@ -3,10 +3,18 @@
   margin: 10px;
 }
 
+.container.has-error {
+  height: calc(100vh - 327px);
+}
+
 .container-scroll-list {
   height: calc(100vh - 306px);
   overflow-y: auto;
   width: 100%;
+}
+
+.container-scroll-list.has-error {
+  height: calc(100vh - 385px);
 }
 
 .filter {
