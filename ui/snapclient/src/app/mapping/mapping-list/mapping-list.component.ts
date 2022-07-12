@@ -25,11 +25,11 @@ import {Project} from '../../_models/project';
 import {TranslateService} from '@ngx-translate/core';
 import {ErrorInfo} from '../../errormessage/errormessage.component';
 import {User} from '../../_models/user';
-import {merge, Subscription} from 'rxjs';
+import {Subscription} from 'rxjs';
 import {Mapping} from 'src/app/_models/mapping';
 import {Source} from 'src/app/_models/source';
 import {AuthService} from '../../_services/auth.service';
-import {MatPaginator, PageEvent} from '@angular/material/paginator';
+import {PageEvent} from '@angular/material/paginator';
 import {MatTableDataSource} from '@angular/material/table';
 import {MatSelectChange} from "@angular/material/select";
 import {MatSort} from '@angular/material/sort';
@@ -66,7 +66,6 @@ export class MappingListComponent implements OnInit, AfterViewInit, OnDestroy {
   private subscription = new Subscription();
 
   dataSource: MatTableDataSource<Project> = new MatTableDataSource();
-  @ViewChild(MatPaginator, {static: false}) paginator!: MatPaginator;
   @ViewChild(MatSort, {static: false}) set content(sort: MatSort) {
     if (!this.componentLoaded && sort) {
       this.sort = sort;
@@ -106,30 +105,25 @@ export class MappingListComponent implements OnInit, AfterViewInit, OnDestroy {
 
   ngAfterViewInit(): void {
     this.getProjects();
-    this.dataSource.paginator = this.paginator;
 
     if (this.sort) {
-      merge(this.sort.sortChange, this.paginator.page)
-        .pipe(tap(() => {
-            this.currentPage = this.paginator.pageIndex;
-            this.pageSize = this.paginator.pageSize;
-            if (this.sort?.direction) {
-              this.sortCol = this.sort.active;
-              this.sortDir = this.sort.direction;
-            }
-            else {
-              this.sortCol = 'created';
-              this.sortDir = 'desc';
-            }
-            this.store.dispatch(new LoadProjects({
-              pageSize: this.pageSize,
-              currentPage: this.currentPage,
-              sort: `${this.sortCol},${this.sortDir}`,
-              text: this.filterText,
-              role: this.filterRole
-            }))
-          })
-        ).subscribe();
+      this.sort.sortChange.pipe(tap(() => {
+        if (this.sort?.direction) {
+          this.sortCol = this.sort.active;
+          this.sortDir = this.sort.direction;
+        }
+        else {
+          this.sortCol = 'created';
+          this.sortDir = 'desc';
+        }
+        this.store.dispatch(new LoadProjects({
+          pageSize: this.pageSize,
+          currentPage: this.currentPage,
+          sort: `${this.sortCol},${this.sortDir}`,
+          text: this.filterText,
+          role: this.filterRole
+        }));
+      })).subscribe();
     }
   }
 
