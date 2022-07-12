@@ -168,8 +168,6 @@ export class MappingListComponent implements OnInit, AfterViewInit, OnDestroy {
       data => {
         if (data) {
           self.projects = data;
-          // const sortData = Object.assign([], data);
-          // self.projects = sortData.sort((a, b) => self.sortProjects(a, b));
           self.projects.forEach(p => {
             if (p.id && p.mapcount) {
               self.selectedMapping[p.id] = p.maps[p.mapcount - 1];

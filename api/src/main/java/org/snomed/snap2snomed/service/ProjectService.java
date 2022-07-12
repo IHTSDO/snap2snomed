@@ -67,7 +67,7 @@ public class ProjectService {
     }
 
     List<ProjectDto> results = query.fetch();
-    Page<ProjectDto> page = new PageImpl<>(results, pageable, results.size());
+    Page<ProjectDto> page = new PageImpl<>(results, pageable, query.fetchCount());
     return assembler.toModel(page);
   }
 
