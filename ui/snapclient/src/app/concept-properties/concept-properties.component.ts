@@ -101,7 +101,20 @@ export class ConceptPropertiesComponent implements OnInit, OnDestroy {
               if (p === 'Fully specified name') {
                 self.display = v[0];
               }
-              this.propertiesView.push({ key: p, value: v });
+              
+              switch ( p ) {
+                case "display":
+                  this.propertiesView.push({ key: "preferred term", value: v });
+                  break;
+                case "inactive":
+                  console.log("type", typeof v[0]);
+                  this.propertiesView.push({ key: "active", value: [!v[0]]})
+                  break;
+                default: 
+                  this.propertiesView.push({ key: p, value: v });
+                  break;
+              }
+
             });
           });
         }
