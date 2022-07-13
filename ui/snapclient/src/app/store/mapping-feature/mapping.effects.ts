@@ -159,25 +159,14 @@ export class MappingEffects {
     })
   ), {dispatch: false});
 
-
   loadProjects$ = createEffect(() => {
     return this.actions$.pipe(
       ofType(MappingActionTypes.LOAD_PROJECTS),
       map((action) => action.payload),
       switchMap((payload) => this.mapService.fetchProjects(payload.pageSize, payload.currentPage, payload.sort, payload.text, payload.role).pipe(
         map((resp) => {
-          const projects = resp.content.map(toProject);
-          return [resp.page as any, projects.map((proj: Project) => {
-            let theProj = new Project();
-            theProj = cloneDeep(proj);
-            this.userService.getUsersForProject(proj).subscribe(
-              (res) => {
-                theProj.owners = [...res.owners];
-                theProj.members = [...res.members];
-                theProj.guests = [...res.guests];
-              });
-            return theProj;
-          })];
+          const projects = resp.content.map(item => toProject(item, true));
+          return [resp.page as any, projects.map((proj: Project) => cloneDeep(proj))];
         }),
         mergeMap(([page, projects]) => of(new LoadProjectsSuccess({items: projects, page}))),
         catchError((err: any) => of(new LoadProjectsFailure(err)))
@@ -266,13 +255,24 @@ function mapUsers(res: any): User[] {
   });
 }
 
-function toProject(project: any): Project {
+function toProject(project: any, loadProject?: boolean): Project {
   const proj = new Project();
   proj.title = project.title;
   proj.description = project.description;
   proj.id = project.id;
   proj.maps = (project.maps ?? []).map((m: any) => toMapping(m, project));
   proj.mapcount = project.mapCount;
+
+  if (loadProject) {
+    const allOwners = Array.from(new Set(project.maps.flatMap((map: any) => map?.project?.owners).concat(project.owners)));
+    const allMembers = Array.from(new Set(project.maps.flatMap((map: any) => map?.project?.members).concat(project.members)));
+    const allGuests = Array.from(new Set(project.maps.flatMap((map: any) => map?.project?.guests).concat(project.guests)));
+
+    proj.owners = allOwners.filter(e => e).map(toUser);
+    proj.members = allMembers?.filter(e => e).map(toUser) || [];
+    proj.guests = allGuests?.filter(e => e).map(toUser) || [];
+  }
+
   proj.created = new Date(project.created);
   proj.modified = new Date(project.modified);
   return proj;
