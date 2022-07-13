@@ -156,31 +156,16 @@ export class MappingListComponent implements OnInit, AfterViewInit, OnDestroy {
       role: this.filterRole
     }))}, 200);
 
-  private getProjects(): void {
-    const self = this;
-    self.subscription.add(self.store.select(selectProjects).subscribe(
-      data => {
-        if (data) {
-          self.projects = data;
-          self.projects.forEach(p => {
-            if (p.id && p.mapcount) {
-              self.selectedMapping[p.id] = p.maps[p.mapcount - 1];
-            }
-          });
-          self.dataSource.data = self.projects;
-        }
-      },
-      error => self.translate.get('ERROR.LOAD_MAPS').subscribe((res) => self.error.message = res)
-    ));
-    self.subscription.add(self.store.select(selectProjectPage).subscribe(
-      data => {
-        if (data) {
-          self.totalElements = data.totalElements;
-          self.pageSize = data.size;
-          self.currentPage = data.number;
-        }
-      }));
-  }
+  clearInput: ReturnType<typeof debounce> = debounce((input: HTMLInputElement) => {
+    input.value = "";
+    this.filterText = "";
+    this.store.dispatch(new LoadProjects({
+      pageSize: this.pageSize,
+      currentPage: this.currentPage,
+      sort: `${this.sortCol},${this.sortDir}`,
+      text: this.filterText,
+      role: this.filterRole
+    }))}, 200);
 
   pageChanged(event: PageEvent): void {
     this.pageSize = event.pageSize;
@@ -246,5 +231,31 @@ export class MappingListComponent implements OnInit, AfterViewInit, OnDestroy {
 
   private isInRole(list: User[]): boolean {
     return this.currentUser !== null && list && (list.map(u => u.id).includes(this.currentUser.id) ?? false);
+  }
+
+  private getProjects(): void {
+    const self = this;
+    self.subscription.add(self.store.select(selectProjects).subscribe(
+      data => {
+        if (data) {
+          self.projects = data;
+          self.projects.forEach(p => {
+            if (p.id && p.mapcount) {
+              self.selectedMapping[p.id] = p.maps[p.mapcount - 1];
+            }
+          });
+          self.dataSource.data = self.projects;
+        }
+      },
+      error => self.translate.get('ERROR.LOAD_MAPS').subscribe((res) => self.error.message = res)
+    ));
+    self.subscription.add(self.store.select(selectProjectPage).subscribe(
+      data => {
+        if (data) {
+          self.totalElements = data.totalElements;
+          self.pageSize = data.size;
+          self.currentPage = data.number;
+        }
+      }));
   }
 }

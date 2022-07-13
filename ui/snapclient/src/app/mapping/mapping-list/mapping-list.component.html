@@ -13,6 +13,7 @@
       <mat-form-field class='filter' appearance="standard">
         <mat-label>Filter</mat-label>
         <input matInput (keyup)="applyFilter($event)" placeholder="Search title and description" #input>
+        <button class="cancel" [disabled]="input.value == ''" (click)="clearInput(input)"><mat-icon>cancel</mat-icon></button>
       </mat-form-field>
 
       <mat-form-field appearance="fill">
@@ -67,7 +68,7 @@
             <button mat-stroked-button color="primary" title="{{'MAP.NEW_VERSION' | translate}}"
                     [disabled]="!isOwner(project)" (click)="newVersion(project)">{{'MAP.NEW_VERSION' | translate}}</button>
             <span class="space-fill">&nbsp;</span>
-            <button mat-stroked-button color="primary" title="{{'MAP.MAP_VIEW_DETAILS' | translate}}"
+            <button mat-stroked-button color="primary" title="{{'MAP.OPEN' | translate}}"
                     [disabled]="!hasProjectRole(project)" (click)="viewMapping(project)"><mat-icon>visibility</mat-icon></button>
           </td>
         </ng-container>
