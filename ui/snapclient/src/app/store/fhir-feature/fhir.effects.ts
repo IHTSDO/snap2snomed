@@ -32,13 +32,16 @@ import {
   AutoSuggestSuccess,
   AutoSuggestFailure,
   ConceptHierarchySuccess,
-  ConceptHierarchyFailure
+  ConceptHierarchyFailure,
+  LookupModuleSuccess,
+  LookupModuleFailure
 } from './fhir.actions';
 
 import { Version } from '../../_services/fhir.service';
 import {Match} from './fhir.reducer';
 import {TranslateService} from '@ngx-translate/core';
 import {SnomedUtils} from 'src/app/_utils/snomed_utils';
+import { ObservableInput } from 'rxjs';
 
 export interface Properties {
   [key: string]: any[]
@@ -109,47 +112,58 @@ export class FhirEffects {
       catchError((err) => of(new AutoSuggestFailure({error: err})))
     ))), {dispatch: true});
 
+  mapParameters = (parameters: R4.IParameters, action: { code: any; system: any; version?: any; }) => {
+    let props: Properties = {
+      code: [[action.code]],
+      system: [[action.system]],
+    };
+
+    parameters.parameter?.map((p) => {
+      const key = p.name ?? '';
+      const part: any = p.part;
+      switch (key) {
+        case 'property': {
+          if (part) {
+            const partKey = part.find((sub: any) => sub?.name === 'code').valueCode;
+            const partValue = FhirEffects.getValue(part.find((sub: any) => sub.name?.startsWith('value')));
+            FhirEffects.updateProps(props, partKey, [partValue]);
+          }
+          break;
+        }
+        case 'designation': {
+          if (part) {
+            const partUse = part.find((sub: any) => sub.name === 'use')?.valueCoding?.display;
+            if (partUse) {
+              const partLang = part.find((sub: any) => sub.name === 'language')?.valueCode;
+              const partValue = FhirEffects.getValue(part.find((part: any) => part.name === 'value'));
+              FhirEffects.updateProps(props, partUse, [partValue, partLang]);
+            }
+          }
+          break;
+        }
+        default: {
+          const value = FhirEffects.getValue(p);
+          FhirEffects.updateProps(props, key, [value]);
+        }
+      }
+    })
+    return props;
+  }
+
+  lookupModule$ = createEffect(() => this.actions$.pipe(
+    ofType(FhirActionTypes.LOOKUP_MODULE),
+    map(action => action.payload),
+    switchMap((action) => this.fhirService.lookupConcept(action.code, action.system, action.version).pipe(
+      map(parameters => this.mapParameters(parameters, action)),
+      switchMap((props) => of(new LookupModuleSuccess(props))),
+      catchError((err) => of(new LookupModuleFailure({ error: err })))
+    ))), { dispatch: true });
+
   lookupConcept$ = createEffect(() => this.actions$.pipe(
     ofType(FhirActionTypes.LOOKUP_CONCEPT),
     map(action => action.payload),
     switchMap((action) => this.fhirService.lookupConcept(action.code, action.system, action.version).pipe(
-      map(parameters => {
-        let props: Properties = {
-          code: [[action.code]],
-          system: [[action.system]],
-        };
-
-        parameters.parameter?.map((p) => {
-          const key = p.name ?? '';
-          const part: any = p.part;
-          switch (key) {
-            case 'property': {
-              if (part) {
-                const partKey = part.find((sub: any) => sub?.name === 'code').valueCode;
-                const partValue = FhirEffects.getValue(part.find((sub: any) => sub.name?.startsWith('value')));
-                FhirEffects.updateProps(props, partKey, [partValue]);
-              }
-              break;
-            }
-            case 'designation': {
-              if (part) {
-                const partUse = part.find((sub: any) => sub.name === 'use')?.valueCoding?.display;
-                if (partUse) {
-                  const partLang = part.find((sub: any) => sub.name === 'language')?.valueCode;
-                  const partValue = FhirEffects.getValue(part.find((part: any) => part.name === 'value'));
-                  FhirEffects.updateProps(props, partUse, [partValue, partLang]);
-                }
-              }
-              break;
-            }
-            default: {
-              const value = FhirEffects.getValue(p);
-              FhirEffects.updateProps(props, key, [value]);
-            }
-          }
-        })
-        return props;
-      }),
+      map(parameters => this.mapParameters(parameters, action)),
       switchMap((props) => of(new LookupConceptSuccess(props))),
       catchError((err) => of(new LookupConceptFailure({ error: err })))
     ))), { dispatch: true });
