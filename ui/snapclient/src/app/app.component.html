@@ -23,6 +23,9 @@
         <div class="banner__login">
           <button mat-raised-button color="primary" (click)="showLogin()">Login</button>
         </div>
+        <div>
+          <button mat-raised-button color="primary" (click)="openUserGuide()">Snap2SNOMED User Guide</button>
+        </div>
         <div *ngIf="hasError" class="login__error">
           <p>{{errorMsg}}</p>
         </div>

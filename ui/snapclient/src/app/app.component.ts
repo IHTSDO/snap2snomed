@@ -94,4 +94,8 @@ export class AppComponent implements OnInit {
     }
 
   }
+
+  openUserGuide(): void {
+    window.open(this.config.userGuideUrl, '_blank');
+  }
 }
