@@ -45,6 +45,11 @@ export const selectConceptProperties = createSelector(
     (state: IFhirState) => state.properties
 );
 
+export const selectModuleProperties = createSelector(
+    selectModules,
+    (state: IFhirState) => state.moduleProperties
+);
+
 export const selectFhirError = createSelector(
     selectModules,
     (state: IFhirState) => state.errorMessage

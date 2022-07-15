@@ -43,6 +43,7 @@ export interface IFhirState {
   nodes: ConceptNode<Coding>[];
   suggests?: Match[];
   properties?: Properties;
+  moduleProperties?: Properties;
   errorMessage: any | null;
 }
 
@@ -108,6 +109,20 @@ export function fhirReducer(state = initialFhirState, action: FhirActions): IFhi
       return {
         ...state,
         properties: undefined,
+        errorMessage: action.payload.error
+      };
+
+    case FhirActionTypes.LOOKUP_MODULE_SUCCESS:
+      return {
+        ...state,
+        moduleProperties: action.payload,
+        errorMessage: null
+      };
+
+    case FhirActionTypes.LOOKUP_MODULE_FAILED:
+      return {
+        ...state,
+        moduleProperties: undefined,
         errorMessage: action.payload.error
       };
 
