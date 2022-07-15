@@ -113,10 +113,7 @@ export class FhirEffects {
     ))), {dispatch: true});
 
   mapParameters = (parameters: R4.IParameters, action: { code: any; system: any; version?: any; }) => {
-    let props: Properties = {
-      code: [[action.code]],
-      system: [[action.system]],
-    };
+    let props: Properties = {};
 
     parameters.parameter?.map((p) => {
       const key = p.name ?? '';
@@ -147,6 +144,17 @@ export class FhirEffects {
         }
       }
     })
+    
+    // SNOMED-465
+    // there is no guarantee that code and system are supplied by $lookup, but they
+    // may be, so now they are added at the end if they aren't already present
+    if (!props.code) {
+      FhirEffects.updateProps(props, 'code', [action.code]);
+    }
+    else if (!props.system) {
+      FhirEffects.updateProps(props, 'system', [action.system]);
+    }
+
     return props;
   }
 
