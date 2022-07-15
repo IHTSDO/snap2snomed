@@ -1,18 +1,30 @@
 .mat-form-field {
-  width: 90%;
+  width: 100%;
+}
+
+.mat-icon {
+  margin-right: 8px;
 }
 
 button {
   margin-top: 24px;
+  float: right;
+}
+
+#input {
+  flex: 1;
+}
+
+#list {
+  flex: 2;
+}
+
+#notes {
+  display: flex;
+  gap: 20px;
 }
 
 #notes-list {
   max-height: 305px;
   overflow-y: auto;
-}
-
-@media only screen and (max-width: 1400px) {
-  .mat-form-field {
-    width: 80%;
-  }
 }
