@@ -50,7 +50,7 @@ export class LoadVersions implements Action {
 export class LoadVersionsSuccess implements Action {
   readonly type = FhirActionTypes.LOAD_VERSIONS_SUCCESS;
 
-  constructor(public payload: Version[]) {
+  constructor(public payload: Map<string, Version[]>) {
   }
 }
 

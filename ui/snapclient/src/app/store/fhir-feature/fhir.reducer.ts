@@ -38,7 +38,7 @@ export interface Match {
 }
 
 export interface IFhirState {
-  versions: Version[];
+  versions: Map<string, Version[]> | undefined;
   matches?: R4.IValueSet_Expansion;
   nodes: ConceptNode<Coding>[];
   suggests?: Match[];
@@ -48,7 +48,7 @@ export interface IFhirState {
 }
 
 export const initialFhirState: IFhirState = {
-  versions: [],
+  versions: new Map(),
   nodes: [],
   errorMessage: null
 };
@@ -66,7 +66,7 @@ export function fhirReducer(state = initialFhirState, action: FhirActions): IFhi
     case FhirActionTypes.LOAD_VERSIONS_FAILED:
       return {
         ...state,
-        versions: [],
+        versions: undefined,
         errorMessage: action.payload.error
       };
 

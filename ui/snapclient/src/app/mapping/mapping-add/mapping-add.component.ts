@@ -38,6 +38,7 @@ import {MappingImportComponent} from '../mapping-import/mapping-import.component
 import {MappingImportSource} from 'src/app/_models/mapping_import_source';
 import {selectAuthorizedProjects} from '../../store/app.selectors';
 import {Project} from '../../_models/project';
+import { MatSelectChange } from '@angular/material/select';
 
 @Component({
   selector: 'app-mapping-add',
@@ -48,10 +49,12 @@ export class MappingAddComponent implements OnInit {
   private width = '600px';
   error: ErrorInfo = {};
   sources: Source[] = [];
-  versions: Version[] = [];
+  versions: Map<string, Version[]> | undefined; // dates of versions indexed by country
   versionsLoaded = false;
+  versionVersions: Version[] = []; // versions of the selected country
   existingMapVersions: string[] | null = null;
   loading = false;
+  selectedCountry : string = "";
   @ViewChild('myForm') form: NgForm | undefined;
   mappingFile: ImportMappingFileParams | undefined | null;
 
@@ -70,6 +73,19 @@ export class MappingAddComponent implements OnInit {
       if (!this.hasAvailableTargetVersion(this.mappingModel.toVersion) && this.versionsLoaded) {
         this.mappingModel.toVersion = '';
         this.mappingModel.toScope = '';
+      }
+      else if (this.versionsLoaded && this.versions) {
+        // initialize to version (country and date)
+        for (let [key, value] of this.versions) {
+          var result = value.filter(obj => {
+            return obj.uri === this.mappingModel.toVersion
+          })
+          if (result.length > 0) {
+            this.selectedCountry = key;
+            this.versionVersions = value;
+            break;
+          }
+        }
       }
       // get other map versions
       this.store.select(selectAuthorizedProjects).subscribe((projects) => {
@@ -251,6 +267,17 @@ export class MappingAddComponent implements OnInit {
     }
   }
 
+  changeCountry($event: MatSelectChange) {
+    this.mappingModel.toVersion = ""; // reset date
+    let versions = this.versions?.get($event.value);
+    if (versions) {
+      this.versionVersions = versions;
+      if (versions.length == 1) {
+        this.mappingModel.toVersion = versions[0].uri;
+      }
+    }
+  } 
+
   private createOrAppendError(err: string): void {
     const self = this;
     if (!self.error.messages) {
@@ -262,8 +289,16 @@ export class MappingAddComponent implements OnInit {
   }
 
   private hasAvailableTargetVersion(toVersion: string | null): boolean {
-    if (toVersion && this.versions.length > 0) {
-      return this.versions.map((v) => v.uri).indexOf(toVersion) >= 0;
+    if (toVersion && this.versions && this.versions.size > 0) {
+      // returns array of uris
+      for (let [key, value] of this.versions) {
+        var result = value.filter(obj => {
+          return obj.uri === toVersion
+        })
+        if (result.length > 0) {
+          return true;
+        }
+      }
     }
     return false;
   }

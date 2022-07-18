@@ -64,22 +64,25 @@ export class FhirEffects {
             let label = res.title;
             this.translate.get(`EDITION.${edition}`).subscribe(msg => { label = msg; });
             return {
-              title: label + ', ' + ver?.replace(/.*\//, ''),
+              title: label,
+              edition: ver?.replace(/.*\//, ''),
               uri: ver,
             } as Version;
           });
       }),
       switchMap((versions: Version[]) => {
-        versions.sort((v1, v2) => {
-          if (v1.title > v2.title) {
-            return 1;
+        let groupedVersions = new Map<string, Version[]>();
+        versions.forEach(version => {
+
+          if (groupedVersions.has(version.title)) {
+            let versionList = groupedVersions.get(version.title);
+            versionList?.push(version);
           }
-          else if (v1.title < v2.title) {
-            return -1;
+          else {
+            groupedVersions.set(version.title, [version]);
           }
-          return 0;
         });
-        return of(new LoadVersionsSuccess(versions));
+        return of(new LoadVersionsSuccess(groupedVersions));
       }),
       catchError((err) => of(new LoadVersionsFailure({ error: err })))
     ))), { dispatch: true });
