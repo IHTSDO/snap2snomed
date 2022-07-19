@@ -48,7 +48,7 @@ describe('Fhir Reducer', () => {
       const action = new LoadReleasesFailure({error: 'Load failed'});
       const result = fhirReducer(initialFhirState, action);
       expect(result.errorMessage).toBeTruthy();
-      expect(result.editionToVersionsMap!.size).toBe(0);
+      expect(result.editionToVersionsMap).toBeUndefined();
     });
   });
 });

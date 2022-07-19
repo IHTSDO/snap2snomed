@@ -59,7 +59,7 @@
           <div class="source-field">
             <mat-form-field class="field-withbutton-width multi-field-row-field">
               <mat-label>{{ 'MAP.TARGET_EDITION' | translate }}</mat-label>
-              <mat-select id="toCountry" [(ngModel)]="selectedEdition"
+              <mat-select id="toEdition" name="toEdition" [(ngModel)]="selectedEdition"
                           (selectionChange)="changeEdition($event)" required>
                 <mat-option *ngFor="let elem of editionToVersionsMap | keyvalue" [value]="elem.key">
                   {{elem.key}}
