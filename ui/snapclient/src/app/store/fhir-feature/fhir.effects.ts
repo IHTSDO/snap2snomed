@@ -21,8 +21,8 @@ import { of } from 'rxjs/internal/observable/of';
 import { FhirService } from '../../_services/fhir.service';
 import { R4 } from '@ahryman40k/ts-fhir-types';
 import {
-  LoadVersionsSuccess,
-  LoadVersionsFailure,
+  LoadReleasesSuccess,
+  LoadReleasesFailure,
   FhirActions,
   FhirActionTypes,
   FindConceptsSuccess,
@@ -37,7 +37,7 @@ import {
   LookupModuleFailure
 } from './fhir.actions';
 
-import { Version } from '../../_services/fhir.service';
+import { Release } from '../../_services/fhir.service';
 import {Match} from './fhir.reducer';
 import {TranslateService} from '@ngx-translate/core';
 import {SnomedUtils} from 'src/app/_utils/snomed_utils';
@@ -50,8 +50,8 @@ export interface Properties {
 @Injectable()
 export class FhirEffects {
 
-  loadVersions$ = createEffect(() => this.actions$.pipe(
-    ofType(FhirActionTypes.LOAD_VERSIONS),
+  loadReleases$ = createEffect(() => this.actions$.pipe(
+    ofType(FhirActionTypes.LOAD_RELEASES),
     switchMap((action) => this.fhirService.fetchVersions().pipe(
       map(bundle => (bundle.entry ?? [])),
       map(entries => {
@@ -64,27 +64,27 @@ export class FhirEffects {
             let label = res.title;
             this.translate.get(`EDITION.${edition}`).subscribe(msg => { label = msg; });
             return {
-              title: label,
-              edition: ver?.replace(/.*\//, ''),
+              edition: label,
+              version: ver?.replace(/.*\//, ''),
               uri: ver,
-            } as Version;
+            } as Release;
           });
       }),
-      switchMap((versions: Version[]) => {
-        let groupedVersions = new Map<string, Version[]>();
+      switchMap((versions: Release[]) => {
+        let groupedVersions = new Map<string, Release[]>();
         versions.forEach(version => {
 
-          if (groupedVersions.has(version.title)) {
-            let versionList = groupedVersions.get(version.title);
+          if (groupedVersions.has(version.edition)) {
+            let versionList = groupedVersions.get(version.edition);
             versionList?.push(version);
           }
           else {
-            groupedVersions.set(version.title, [version]);
+            groupedVersions.set(version.edition, [version]);
           }
         });
-        return of(new LoadVersionsSuccess(groupedVersions));
+        return of(new LoadReleasesSuccess(groupedVersions));
       }),
-      catchError((err) => of(new LoadVersionsFailure({ error: err })))
+      catchError((err) => of(new LoadReleasesFailure({ error: err })))
     ))), { dispatch: true });
 
   findConcepts$ = createEffect(() => this.actions$.pipe(

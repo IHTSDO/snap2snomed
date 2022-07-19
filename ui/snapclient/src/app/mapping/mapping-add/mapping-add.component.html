@@ -58,28 +58,28 @@
           </div>
           <div class="source-field">
             <mat-form-field class="field-withbutton-width multi-field-row-field">
-              <mat-label>{{ 'MAP.TARGET_VERSION' | translate }}</mat-label>
-              <mat-select id="toCountry" [(ngModel)]="selectedCountry"
-                          (selectionChange)="changeCountry($event)" required>
-                <mat-option *ngFor="let vers of versions | keyvalue" [value]="vers.key">
-                  {{vers.key}}
+              <mat-label>{{ 'MAP.TARGET_EDITION' | translate }}</mat-label>
+              <mat-select id="toCountry" [(ngModel)]="selectedEdition"
+                          (selectionChange)="changeEdition($event)" required>
+                <mat-option *ngFor="let elem of editionToVersionsMap | keyvalue" [value]="elem.key">
+                  {{elem.key}}
                 </mat-option>
               </mat-select>
-              <mat-error *ngIf="!selectedCountry">{{ 'MAP.TARGET_VERSION_ERROR' | translate }}</mat-error>
+              <mat-error *ngIf="!selectedEdition">{{ 'MAP.TARGET_EDITION_ERROR' | translate }}</mat-error>
             </mat-form-field> 
             <mat-form-field class="field-withbutton-width multi-field-row-field">
-              <mat-label>{{ 'MAP.TARGET_VERSION_VERSION' | translate }}</mat-label>
+              <mat-label>{{ 'MAP.TARGET_VERSION' | translate }}</mat-label>
               <mat-select [(ngModel)]="mappingModel.toVersion"
                           id="toVersion" name="toVersion" #toVersion="ngModel"
                           required>
-                <mat-option *ngFor="let vers of versionVersions" [value]="vers.uri">
-                  {{vers.edition}}
+                <mat-option *ngFor="let vers of editionVersions" [value]="vers.uri">
+                  {{vers.version}}
                 </mat-option>
               </mat-select>
-              <mat-error *ngIf="toVersion.invalid">{{ 'MAP.TARGET_VERSION_VERSION_ERROR' | translate }}</mat-error>
+              <mat-error *ngIf="toVersion.invalid">{{ 'MAP.TARGET_VERSION_ERROR' | translate }}</mat-error>
             </mat-form-field>
             <button mat-mini-fab color="accent" type="button" title="{{ 'MAP.REFRESH_TARGET_VERSIONS' | translate }}"
-                    (click)="loadVersions()">
+                    (click)="loadReleases()">
               <mat-icon>sync</mat-icon>
             </button>
           </div>

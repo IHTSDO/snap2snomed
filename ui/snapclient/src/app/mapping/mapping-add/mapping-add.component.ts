@@ -27,9 +27,9 @@ import {MatDialog} from '@angular/material/dialog';
 import {selectMappingFile, selectSourceList, selectSourceState} from '../../store/source-feature/source.selectors';
 import {ImportMappingFileParams, InitSelectedSource, LoadSources} from 'src/app/store/source-feature/source.actions';
 import {Source} from 'src/app/_models/source';
-import {FhirService, Version} from 'src/app/_services/fhir.service';
-import {LoadVersions} from 'src/app/store/fhir-feature/fhir.actions';
-import {selectFhirError, selectVersionList} from 'src/app/store/fhir-feature/fhir.selectors';
+import {FhirService, Release} from 'src/app/_services/fhir.service';
+import {LoadReleases} from 'src/app/store/fhir-feature/fhir.actions';
+import {selectFhirError, selectReleaseList} from 'src/app/store/fhir-feature/fhir.selectors';
 import {NgForm} from '@angular/forms';
 import {cloneDeep} from 'lodash';
 import {ErrorInfo} from 'src/app/errormessage/errormessage.component';
@@ -49,12 +49,12 @@ export class MappingAddComponent implements OnInit {
   private width = '600px';
   error: ErrorInfo = {};
   sources: Source[] = [];
-  versions: Map<string, Version[]> | undefined; // dates of versions indexed by country
-  versionsLoaded = false;
-  versionVersions: Version[] = []; // versions of the selected country
+  editionToVersionsMap: Map<string, Release[]> | undefined; // versions (often dates) indexed by edition (often a country)
+  editionToVersionsMapLoaded = false;
+  editionVersions: Release[] = []; // versions of the selected edition (often a country)
   existingMapVersions: string[] | null = null;
   loading = false;
-  selectedCountry : string = "";
+  selectedEdition : string = "";
   @ViewChild('myForm') form: NgForm | undefined;
   mappingFile: ImportMappingFileParams | undefined | null;
 
@@ -70,19 +70,19 @@ export class MappingAddComponent implements OnInit {
     if (value) {
       this.mappingModel = cloneDeep(value);
       // if target version no longer available - need to clear model
-      if (!this.hasAvailableTargetVersion(this.mappingModel.toVersion) && this.versionsLoaded) {
+      if (!this.hasAvailableTargetVersion(this.mappingModel.toVersion) && this.editionToVersionsMapLoaded) {
         this.mappingModel.toVersion = '';
         this.mappingModel.toScope = '';
       }
-      else if (this.versionsLoaded && this.versions) {
+      else if (this.editionToVersionsMapLoaded && this.editionToVersionsMap) {
         // initialize to version (country and date)
-        for (let [key, value] of this.versions) {
+        for (let [key, value] of this.editionToVersionsMap) {
           var result = value.filter(obj => {
             return obj.uri === this.mappingModel.toVersion
           })
           if (result.length > 0) {
-            this.selectedCountry = key;
-            this.versionVersions = value;
+            this.selectedEdition = key;
+            this.editionVersions = value;
             break;
           }
         }
@@ -113,7 +113,7 @@ export class MappingAddComponent implements OnInit {
   ngOnInit(): void {
     const self = this;
     self.error = {};
-    self.loadVersions();
+    self.loadReleases();
     self.store.dispatch(new LoadSources());
     self.load();
   }
@@ -144,10 +144,10 @@ export class MappingAddComponent implements OnInit {
       data => this.sources = data,
       error => this.translate.get('ERROR.LOAD_SOURCES').subscribe((res) => self.createOrAppendError(res))
     );
-    self.store.select(selectVersionList).subscribe(
+    self.store.select(selectReleaseList).subscribe(
       data => {
-        this.versions = data;
-        this.versionsLoaded = true;
+        this.editionToVersionsMap = data;
+        this.editionToVersionsMapLoaded = true;
       },
       error => this.translate.get('ERROR.LOAD_VERSIONS').subscribe((res) => self.createOrAppendError(res))
     );
@@ -218,8 +218,8 @@ export class MappingAddComponent implements OnInit {
       });
   }
 
-  loadVersions(): void {
-    this.store.dispatch(new LoadVersions());
+  loadReleases(): void {
+    this.store.dispatch(new LoadReleases());
   }
 
   getFormModeTextForTranslation(): string {
@@ -267,13 +267,13 @@ export class MappingAddComponent implements OnInit {
     }
   }
 
-  changeCountry($event: MatSelectChange) {
-    this.mappingModel.toVersion = ""; // reset date
-    let versions = this.versions?.get($event.value);
+  changeEdition($event: MatSelectChange) {
+    this.mappingModel.toVersion = ""; // reset
+    let versions = this.editionToVersionsMap?.get($event.value);
     if (versions) {
-      this.versionVersions = versions;
-      if (versions.length == 1) {
-        this.mappingModel.toVersion = versions[0].uri;
+      this.editionVersions = versions;
+      if (this.editionVersions.length == 1) {
+        this.mappingModel.toVersion = this.editionVersions[0].uri;
       }
     }
   } 
@@ -289,9 +289,9 @@ export class MappingAddComponent implements OnInit {
   }
 
   private hasAvailableTargetVersion(toVersion: string | null): boolean {
-    if (toVersion && this.versions && this.versions.size > 0) {
+    if (toVersion && this.editionToVersionsMap && this.editionToVersionsMap.size > 0) {
       // returns array of uris
-      for (let [key, value] of this.versions) {
+      for (let [key, value] of this.editionToVersionsMap) {
         var result = value.filter(obj => {
           return obj.uri === toVersion
         })

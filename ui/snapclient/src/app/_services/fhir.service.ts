@@ -30,9 +30,9 @@ export const SEQUENCE = 'http://ontoserver.csiro.au/fhir/ConceptMap/automapstrat
 export const DEFAULT = 'http://ontoserver.csiro.au/fhir/ConceptMap/automapstrategy-default';
 export const MML = 'http://ontoserver.csiro.au/fhir/ConceptMap/automapstrategy-MML';
 
-export interface Version {
-  title: string; // this will store the country
-  edition: string; // this will store the date
+export interface Release {
+  edition: string; // edition is often a country
+  version: string; // version is often a date
   uri: string;
 }
 

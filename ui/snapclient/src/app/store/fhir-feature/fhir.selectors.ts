@@ -20,9 +20,9 @@ import {IFhirState} from './fhir.reducer';
 
 const selectModules = (state: IAppState) => state.fhir;
 
-export const selectVersionList = createSelector(
+export const selectReleaseList = createSelector(
     selectModules,
-    (state: IFhirState) => state.versions
+    (state: IFhirState) => state.editionToVersionsMap
 );
 
 export const selectConceptSearchList = createSelector(
