@@ -61,7 +61,7 @@ export enum MappingActionTypes {
 
 
 export class LoadProjects implements Action {
-  constructor(public payload: { pageSize: number; currentPage: number }) {
+  constructor(public payload: { pageSize: number; currentPage: number; sort: string; text: string; role: string; }) {
   }
 
   readonly type = MappingActionTypes.LOAD_PROJECTS;

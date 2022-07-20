@@ -111,6 +111,7 @@
     "MAP_EDIT": "Edit Map",
     "MAP_VIEW_DETAILS": "View Map Details",
     "MAP_DETAILS": "View Source Details",
+    "OPEN": "Open map",
     "MEMBERS": "Members",
     "OWNERS": "Owners",
     "GUESTS": "Guests",
@@ -392,7 +393,14 @@
     "PROJECT_ROLES": "Project roles",
     "CANNOT_OPEN_PROJECT_NO_ROLE": "Request a role from a project owner to open this project"
     },
-
+  "PROJECT_TABLE": {
+    "ACTIONS": "Actions",
+    "DESCRIPTION": "Description",
+    "LAST_UPDATED": "Last updated",
+    "TITLE": "Title",
+    "USERS": "Users",
+    "VERSION": "Version"
+  },
   "BULKCHANGEDIALOG": {
     "OWNER_WARNING": "This bulk change operation will overwrite any existing data.",
     "SELECTED" : "Bulk change selected rows",

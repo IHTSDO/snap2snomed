@@ -16,14 +16,6 @@
 
 package org.snomed.snap2snomed.integration.repository;
 
-import static org.hamcrest.Matchers.greaterThan;
-import static org.hamcrest.Matchers.hasEntry;
-import static org.hamcrest.Matchers.hasItem;
-import static org.hamcrest.Matchers.hasItems;
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.nullValue;
-
 import io.restassured.filter.log.LogDetail;
 import io.restassured.http.ContentType;
 import java.io.IOException;
@@ -34,7 +26,10 @@ import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.TestInstance.Lifecycle;
 import org.snomed.snap2snomed.config.Snap2snomedConfiguration;
 import org.snomed.snap2snomed.integration.IntegrationTestBase;
+import org.snomed.snap2snomed.model.enumeration.TaskType;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import static org.hamcrest.Matchers.*;
 
 @TestInstance(Lifecycle.PER_CLASS)
 public class ProjectResourceIT extends IntegrationTestBase {
@@ -351,5 +346,44 @@ public class ProjectResourceIT extends IntegrationTestBase {
         .get("/projects")
         .then().log().ifValidationFails(LogDetail.ALL).statusCode(200)
         .body("page.totalElements", greaterThan(2));
+  }
+
+  @Test
+  public void shouldGetProjectsResultsForFilter() throws Exception {
+    restClient.createOrUpdateAdminUser(DEFAULT_TEST_ADMIN_USER_SUBJECT, "TestAdmin", "BobbyAdmin", "UserAdmin", "admin@admin.com");
+    long id = restClient.createProject("ProjectDemoMatch", "Demo Project", Set.of(DEFAULT_TEST_USER_SUBJECT), Set.of(),
+        Set.of());
+
+    restClient.givenUser(DEFAULT_TEST_USER_SUBJECT)
+              .queryParam("text", "Match")
+              .get("/projects/fetch")
+              .then().statusCode(200)
+              .body("page.totalElements", equalTo(1));
+
+    restClient.givenUser(DEFAULT_TEST_USER_SUBJECT)
+              .queryParam("text", "Match")
+              .queryParam("role", "guest")
+              .get("/projects/fetch")
+              .then().statusCode(200)
+              .body("page.totalElements", equalTo(0));
+
+    restClient.givenUser(DEFAULT_TEST_ADMIN_USER_SUBJECT)
+              .queryParam("text", "")
+              .get("/projects/fetch")
+              .then().statusCode(200)
+              .body("page.totalElements", greaterThan(1));
+
+    restClient.givenUser(DEFAULT_TEST_ADMIN_USER_SUBJECT)
+              .queryParam("text", "Match")
+              .get("/projects/fetch")
+              .then().statusCode(200)
+              .body("page.totalElements", equalTo(1));
+
+    restClient.givenUser(DEFAULT_TEST_ADMIN_USER_SUBJECT)
+              .queryParam("text", "Match")
+              .queryParam("role", "guest")
+              .get("/projects/fetch")
+              .then().statusCode(200)
+              .body("page.totalElements", equalTo(0));
   }
 }

@@ -29,9 +29,12 @@ import {Subscription} from 'rxjs';
 import {Mapping} from 'src/app/_models/mapping';
 import {Source} from 'src/app/_models/source';
 import {AuthService} from '../../_services/auth.service';
-import {MatPaginator, PageEvent} from '@angular/material/paginator';
+import {PageEvent} from '@angular/material/paginator';
 import {MatTableDataSource} from '@angular/material/table';
-
+import {MatSelectChange} from "@angular/material/select";
+import {MatSort} from '@angular/material/sort';
+import {debounce} from "lodash";
+import {tap} from "rxjs/operators";
 
 @Component({
   selector: 'app-mapping-list',
@@ -41,6 +44,16 @@ import {MatTableDataSource} from '@angular/material/table';
 export class MappingListComponent implements OnInit, AfterViewInit, OnDestroy {
   error: ErrorInfo = {};
   projects: Project[] = [];
+
+  displayedColumns = ['title', 'description', 'modified', 'users', 'version', 'actions'];
+  roles = {
+    name: 'roles',
+    options: ['all', 'owner', 'member', 'guest'],
+    defaultValue: 'all'
+  };
+
+  sort: MatSort | null | undefined;
+  componentLoaded = false;
 
   selectedMapping: { [key: string]: Mapping | null } = {};
   newMapping!: Mapping;
@@ -53,11 +66,22 @@ export class MappingListComponent implements OnInit, AfterViewInit, OnDestroy {
   private subscription = new Subscription();
 
   dataSource: MatTableDataSource<Project> = new MatTableDataSource();
-  @ViewChild(MatPaginator, {static: false}) paginator!: MatPaginator;
-  pageSize = 5;
+  @ViewChild(MatSort, {static: false}) set content(sort: MatSort) {
+    if (!this.componentLoaded && sort) {
+      this.sort = sort;
+      this.ngAfterViewInit();
+      this.componentLoaded = true;
+    }
+  }
+  pageSize = 25;
   currentPage = 0;
   pageSizeOptions: number[] = [5, 10, 25, 100];
   totalElements = 0;
+
+  sortCol? = 'created';
+  sortDir? = 'desc';
+  filterText = '';
+  filterRole = 'all';
 
   constructor(private mapService: MapService,
               private authService: AuthService,
@@ -70,18 +94,37 @@ export class MappingListComponent implements OnInit, AfterViewInit, OnDestroy {
      */
     this.navigationSubscription = this.router.events.subscribe((e: any) => {
       if (e instanceof NavigationEnd) {
-        this.store.dispatch(new LoadProjects({pageSize: this.pageSize, currentPage: this.currentPage}));
+        this.store.dispatch(new LoadProjects({pageSize: this.pageSize, currentPage: this.currentPage, sort: `${this.sortCol},${this.sortDir}`, text: this.filterText, role: this.filterRole}));
       }
     });
   }
 
   ngOnInit(): void {
-    this.store.dispatch(new LoadProjects({pageSize: this.pageSize, currentPage: this.currentPage}));
+    this.store.dispatch(new LoadProjects({pageSize: this.pageSize, currentPage: this.currentPage, sort: `${this.sortCol},${this.sortDir}`, text: this.filterText, role: this.filterRole}));
   }
 
   ngAfterViewInit(): void {
     this.getProjects();
-    this.dataSource.paginator = this.paginator;
+
+    if (this.sort) {
+      this.sort.sortChange.pipe(tap(() => {
+        if (this.sort?.direction) {
+          this.sortCol = this.sort.active;
+          this.sortDir = this.sort.direction;
+        }
+        else {
+          this.sortCol = 'created';
+          this.sortDir = 'desc';
+        }
+        this.store.dispatch(new LoadProjects({
+          pageSize: this.pageSize,
+          currentPage: this.currentPage,
+          sort: `${this.sortCol},${this.sortDir}`,
+          text: this.filterText,
+          role: this.filterRole
+        }));
+      })).subscribe();
+    }
   }
 
   ngOnDestroy(): void {
@@ -93,37 +136,41 @@ export class MappingListComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
-  private getProjects(): void {
-    const self = this;
-    self.subscription.add(self.store.select(selectProjects).subscribe(
-      data => {
-        if (data) {
-          const sortData = Object.assign([], data);
-          self.projects = sortData.sort((a, b) => self.sortProjects(a, b));
-          self.projects.forEach(p => {
-            if (p.id && p.mapcount) {
-              self.selectedMapping[p.id] = p.maps[p.mapcount - 1];
-            }
-          });
-          self.dataSource.data = self.projects;
-        }
-      },
-      error => self.translate.get('ERROR.LOAD_MAPS').subscribe((res) => self.error.message = res)
-    ));
-    self.subscription.add(self.store.select(selectProjectPage).subscribe(
-      data => {
-        if (data) {
-          self.totalElements = data.totalElements;
-          self.pageSize = data.size;
-          self.currentPage = data.number;
-        }
-      }));
-  }
+  applyFilter: ReturnType<typeof debounce> = debounce((event: Event) => {
+    this.filterText = (event.target as HTMLInputElement).value.trim();
+    this.store.dispatch(new LoadProjects({
+      pageSize: this.pageSize,
+      currentPage: this.currentPage,
+      sort: `${this.sortCol},${this.sortDir}`,
+      text: this.filterText,
+      role: this.filterRole
+    }))}, 200);
+
+  applyRoleFilter: ReturnType<typeof debounce> = debounce((event: MatSelectChange) => {
+    this.filterRole = event.value;
+    this.store.dispatch(new LoadProjects({
+      pageSize: this.pageSize,
+      currentPage: this.currentPage,
+      sort: `${this.sortCol},${this.sortDir}`,
+      text: this.filterText,
+      role: this.filterRole
+    }))}, 200);
+
+  clearInput: ReturnType<typeof debounce> = debounce((input: HTMLInputElement) => {
+    input.value = "";
+    this.filterText = "";
+    this.store.dispatch(new LoadProjects({
+      pageSize: this.pageSize,
+      currentPage: this.currentPage,
+      sort: `${this.sortCol},${this.sortDir}`,
+      text: this.filterText,
+      role: this.filterRole
+    }))}, 200);
 
   pageChanged(event: PageEvent): void {
     this.pageSize = event.pageSize;
     this.currentPage = event.pageIndex;
-    this.store.dispatch(new LoadProjects({pageSize: this.pageSize, currentPage: this.currentPage}));
+    this.store.dispatch(new LoadProjects({pageSize: this.pageSize, currentPage: this.currentPage, sort: `${this.sortCol},${this.sortDir}`, text: this.filterText, role: this.filterRole}));
   }
 
   createMap(): void {
@@ -186,17 +233,29 @@ export class MappingListComponent implements OnInit, AfterViewInit, OnDestroy {
     return this.currentUser !== null && list && (list.map(u => u.id).includes(this.currentUser.id) ?? false);
   }
 
-// Sort by created desc
-  sortProjects(a: Project, b: Project): number {
-    if (a.created && b.created) {
-      if (a.created > b.created) {
-        return -1;
-      }
-      if (a.created < b.created) {
-        return 1;
-      }
-    }
-    return 0;
+  private getProjects(): void {
+    const self = this;
+    self.subscription.add(self.store.select(selectProjects).subscribe(
+      data => {
+        if (data) {
+          self.projects = data;
+          self.projects.forEach(p => {
+            if (p.id && p.mapcount) {
+              self.selectedMapping[p.id] = p.maps[p.mapcount - 1];
+            }
+          });
+          self.dataSource.data = self.projects;
+        }
+      },
+      error => self.translate.get('ERROR.LOAD_MAPS').subscribe((res) => self.error.message = res)
+    ));
+    self.subscription.add(self.store.select(selectProjectPage).subscribe(
+      data => {
+        if (data) {
+          self.totalElements = data.totalElements;
+          self.pageSize = data.size;
+          self.currentPage = data.number;
+        }
+      }));
   }
-
 }
