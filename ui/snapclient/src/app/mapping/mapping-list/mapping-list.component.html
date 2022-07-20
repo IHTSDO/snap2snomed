@@ -8,51 +8,74 @@
   </mat-toolbar>
   <app-errormessage [error]="error"></app-errormessage>
 
-  <div class="container-scroll-list">
-    <ng-container *ngIf="projects.length > 0; else noResults">
+  <div class="container" [ngClass]="{'has-error': error.message}">
+    <div class="header">
+      <mat-form-field class='filter' appearance="standard">
+        <mat-label>Filter</mat-label>
+        <input matInput (keyup)="applyFilter($event)" placeholder="Search title and description" #input>
+        <button class="cancel" [disabled]="input.value == ''" (click)="clearInput(input)"><mat-icon>cancel</mat-icon></button>
+      </mat-form-field>
+
+      <mat-form-field appearance="fill">
+        <mat-label>Roles</mat-label>
+        <mat-select [(value)]="roles.defaultValue" (selectionChange)="applyRoleFilter($event)">
+          <mat-option *ngFor="let op of roles.options" [value]="op">
+            {{op |titlecase}}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+
       <mat-paginator #paginator
-                     [length]="totalElements || 0"
+                     [length]="totalElements"
                      [pageIndex]="currentPage"
                      [pageSize]="pageSize"
                      [pageSizeOptions]="pageSizeOptions"
                      (page)="pageChanged($event)"
                      [showFirstLastButtons]="true">
       </mat-paginator>
-      <mat-grid-list [cols]="1" rowHeight="200px" gutterSize="0">
-        <mat-grid-tile *ngFor="let project of projects;">
-          <mat-card class="project-card">
-            <mat-card-content>
-              <div class="card-column-flex col-main">
-                <h2 class="one-line-ellipse">{{project.title}}</h2>
-                <small><i>{{'MAP.LAST_UPDATED' | translate}}: {{selectedMapping[project.id]?.modified | lastupdated}}</i></small>
-                <p class="description">{{project.description}}</p>
-                <app-project-badges [project]="project"></app-project-badges>
-              </div>
-              <div class="card-column-flex col-side">
-                <mat-form-field>
-                  <mat-label>Version</mat-label>
-                  <mat-select [(value)]="selectedMapping[project.id]">
-                    <mat-option *ngFor="let m of project.maps" [value]="m">
-                      {{m.mapVersion}}
-                    </mat-option>
-                  </mat-select>
-                </mat-form-field>
-                <div class="column-fill"></div>
-                <div class="button-row">
-                  <button mat-stroked-button color="primary"
-                          [disabled]="!isOwner(project)" (click)="newVersion(project)">{{'MAP.NEW_VERSION' | translate}}</button>
-                  <span class="space-fill">&nbsp;</span>
-                  <button mat-stroked-button color="primary"
-                          [disabled]="!hasProjectRole(project)" (click)="viewMapping(project)">{{'FORM.VIEW' | translate}}</button>
-                </div>
-              </div>
-            </mat-card-content>
-          </mat-card>
-        </mat-grid-tile>
-      </mat-grid-list>
-    </ng-container>
-    <ng-template #noResults>
-      <div class="project-card">
+    </div>
+    <div class="container-scroll-list" [ngClass]="{'has-error': error.message}">
+      <table mat-table [dataSource]="dataSource" matSort>
+        <ng-container matColumnDef="title">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header sortActionDescription="Sort by title">{{'PROJECT_TABLE.TITLE' | translate}}</th>
+          <td mat-cell *matCellDef="let project">{{project.title}}</td>
+        </ng-container>
+        <ng-container matColumnDef="description">
+          <th mat-header-cell *matHeaderCellDef>{{'PROJECT_TABLE.DESCRIPTION' | translate}}</th>
+          <td mat-cell *matCellDef="let project">{{project.description}}</td>
+        </ng-container>
+        <ng-container matColumnDef="modified">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header sortActionDescription="Sort by last updated">{{'PROJECT_TABLE.LAST_UPDATED' | translate}}</th>
+          <td mat-cell *matCellDef="let project">{{selectedMapping[project.id]?.modified | date }}</td>
+        </ng-container>
+        <ng-container matColumnDef="users">
+          <th mat-header-cell *matHeaderCellDef>{{'PROJECT_TABLE.USERS' | translate}}</th>
+          <td mat-cell *matCellDef="let project"><app-project-badges [project]="project"></app-project-badges></td>
+        </ng-container>
+        <ng-container matColumnDef="version">
+          <th mat-header-cell *matHeaderCellDef>{{'PROJECT_TABLE.VERSION' | translate}}</th>
+          <td mat-cell *matCellDef="let project">
+            <mat-select [(value)]="selectedMapping[project.id]">
+              <mat-option *ngFor="let m of project.maps" [value]="m">
+                {{m.mapVersion}}
+              </mat-option>
+            </mat-select>
+          </td>
+        </ng-container>
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef>{{'PROJECT_TABLE.ACTIONS' | translate}}</th>
+          <td mat-cell *matCellDef="let project">
+            <button mat-stroked-button color="primary" title="{{'MAP.NEW_VERSION' | translate}}"
+                    [disabled]="!isOwner(project)" (click)="newVersion(project)">{{'MAP.NEW_VERSION' | translate}}</button>
+            <span class="space-fill">&nbsp;</span>
+            <button mat-stroked-button color="primary" title="{{'MAP.OPEN' | translate}}"
+                    [disabled]="!hasProjectRole(project)" (click)="viewMapping(project)"><mat-icon>visibility</mat-icon></button>
+          </td>
+        </ng-container>
+        <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+      </table>
+      <div *ngIf="projects.length === 0">
         <mat-card>
           <mat-card-header>
             <mat-card-title>
@@ -61,6 +84,6 @@
           </mat-card-header>
         </mat-card>
       </div>
-    </ng-template>
+    </div>
   </div>
 </mat-drawer-container>
