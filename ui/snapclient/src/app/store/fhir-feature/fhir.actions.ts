@@ -35,6 +35,9 @@ export enum FhirActionTypes {
   LOOKUP_CONCEPT = "[Fhir] Lookup Concept",
   LOOKUP_CONCEPT_SUCCESS = "[Fhir] Lookup Concept Succeeded",
   LOOKUP_CONCEPT_FAILED = "[Fhir] Lookup Concept Failed",
+  LOOKUP_MODULE = "[Fhir] Lookup Module",
+  LOOKUP_MODULE_SUCCESS = "[Fhir] Lookup Module Succeeded",
+  LOOKUP_MODULE_FAILED = "[Fhir] Lookup Module Failed",
   CONCEPT_HIERARCHY = "[Fhir] Concept Hierarchy",
   CONCEPT_HIERARCHY_SUCCESS = "Concept Hierarchy Succeeded",
   CONCEPT_HIERARCHY_FAILED = "Concept Hierarchy Failed"
@@ -121,6 +124,27 @@ export class LookupConceptFailure implements Action {
   }
 }
 
+export class LookupModule implements Action {
+  readonly type = FhirActionTypes.LOOKUP_MODULE;
+
+  constructor(public payload: {code: string, system: string, version: string}) {
+  }
+}
+
+export class LookupModuleSuccess implements Action {
+  readonly type = FhirActionTypes.LOOKUP_MODULE_SUCCESS;
+
+  constructor(public payload: Properties) {
+  }
+}
+
+export class LookupModuleFailure implements Action {
+  readonly type = FhirActionTypes.LOOKUP_MODULE_FAILED;
+
+  constructor(public payload: { error: any }) {
+  }
+}
+
 export class ConceptHierarchy implements Action {
   readonly type = FhirActionTypes.CONCEPT_HIERARCHY;
 
@@ -154,6 +178,9 @@ export type FhirActions = LoadVersions
   | LookupConcept
   | LookupConceptSuccess
   | LookupConceptFailure
+  | LookupModule
+  | LookupModuleSuccess
+  | LookupModuleFailure
   | ConceptHierarchy
   | ConceptHierarchySuccess
   | ConceptHierarchyFailure
