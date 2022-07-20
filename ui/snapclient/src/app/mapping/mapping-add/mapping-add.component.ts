@@ -272,9 +272,8 @@ export class MappingAddComponent implements OnInit {
     let versions = this.editionToVersionsMap?.get($event.value);
     if (versions) {
       this.editionVersions = versions;
-      if (this.editionVersions.length == 1) {
-        this.mappingModel.toVersion = this.editionVersions[0].uri;
-      }
+      // select the most recent (or only, if just 1) version
+      this.mappingModel.toVersion = this.editionVersions[0].uri;
     }
   } 
 
