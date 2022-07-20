@@ -129,7 +129,7 @@ describe('MappingListComponent', () => {
     expect(tableRows.length).toBe(2);
 
     let headerRow = tableRows[0];
-    expect(headerRow.cells[0].textContent).toBe('Title');
+    expect(headerRow.cells[0].textContent).toBe('PROJECT_TABLE.TITLE');
 
     let row = tableRows[1];
     expect(row.cells[0].textContent).toBe('Test Project');

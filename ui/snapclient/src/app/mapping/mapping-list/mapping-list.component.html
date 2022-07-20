@@ -37,23 +37,23 @@
     <div class="container-scroll-list" [ngClass]="{'has-error': error.message}">
       <table mat-table [dataSource]="dataSource" matSort>
         <ng-container matColumnDef="title">
-          <th mat-header-cell *matHeaderCellDef mat-sort-header sortActionDescription="Sort by title">Title</th>
+          <th mat-header-cell *matHeaderCellDef mat-sort-header sortActionDescription="Sort by title">{{'PROJECT_TABLE.TITLE' | translate}}</th>
           <td mat-cell *matCellDef="let project">{{project.title}}</td>
         </ng-container>
         <ng-container matColumnDef="description">
-          <th mat-header-cell *matHeaderCellDef>Description</th>
+          <th mat-header-cell *matHeaderCellDef>{{'PROJECT_TABLE.DESCRIPTION' | translate}}</th>
           <td mat-cell *matCellDef="let project">{{project.description}}</td>
         </ng-container>
         <ng-container matColumnDef="modified">
-          <th mat-header-cell *matHeaderCellDef mat-sort-header sortActionDescription="Sort by last updated">Last updated</th>
+          <th mat-header-cell *matHeaderCellDef mat-sort-header sortActionDescription="Sort by last updated">{{'PROJECT_TABLE.LAST_UPDATED' | translate}}</th>
           <td mat-cell *matCellDef="let project">{{selectedMapping[project.id]?.modified | date }}</td>
         </ng-container>
         <ng-container matColumnDef="users">
-          <th mat-header-cell *matHeaderCellDef>Users</th>
+          <th mat-header-cell *matHeaderCellDef>{{'PROJECT_TABLE.USERS' | translate}}</th>
           <td mat-cell *matCellDef="let project"><app-project-badges [project]="project"></app-project-badges></td>
         </ng-container>
         <ng-container matColumnDef="version">
-          <th mat-header-cell *matHeaderCellDef>Version</th>
+          <th mat-header-cell *matHeaderCellDef>{{'PROJECT_TABLE.VERSION' | translate}}</th>
           <td mat-cell *matCellDef="let project">
             <mat-select [(value)]="selectedMapping[project.id]">
               <mat-option *ngFor="let m of project.maps" [value]="m">
@@ -63,7 +63,7 @@
           </td>
         </ng-container>
         <ng-container matColumnDef="actions">
-          <th mat-header-cell *matHeaderCellDef>Actions</th>
+          <th mat-header-cell *matHeaderCellDef>{{'PROJECT_TABLE.ACTIONS' | translate}}</th>
           <td mat-cell *matCellDef="let project">
             <button mat-stroked-button color="primary" title="{{'MAP.NEW_VERSION' | translate}}"
                     [disabled]="!isOwner(project)" (click)="newVersion(project)">{{'MAP.NEW_VERSION' | translate}}</button>
