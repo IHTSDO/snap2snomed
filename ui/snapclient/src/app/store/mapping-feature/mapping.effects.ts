@@ -16,7 +16,7 @@
 
 import {Injectable} from '@angular/core';
 import {Actions, createEffect, ofType} from '@ngrx/effects';
-import {catchError, concatMap, map, mapTo, mergeMap, switchMap, tap} from 'rxjs/operators';
+import {catchError, concatMap, map, mergeMap, switchMap, tap} from 'rxjs/operators';
 import {
   AddMappingFailure,
   AddMappingSuccess,
@@ -46,7 +46,7 @@ import {User} from '../../_models/user';
 import {Source} from '../../_models/source';
 import {UserService} from 'src/app/_services/user.service';
 import {SourceService} from 'src/app/_services/source.service';
-import {ImportMappingFileFailure, ImportMappingFileResult, ImportMappingFileSuccess} from '../source-feature/source.actions';
+import {ImportMappingFileFailure, ImportMappingFileResult, ImportMappingFileSuccess, LoadSources} from '../source-feature/source.actions';
 import {cloneDeep} from 'lodash';
 
 
@@ -166,7 +166,10 @@ export class MappingEffects {
       ofType(MappingActionTypes.DELETE_PROJECT),
         map(action => action.payload),
         switchMap(payload => this.mapService.deleteProject(payload.id).pipe(
-          mapTo(new LoadProjects({pageSize: payload.pageSize, currentPage: payload.currentPage, sort: payload.sort, text: payload.text, role: payload.role})),
+          concatMap(() => [
+            new LoadProjects({pageSize: payload.pageSize, currentPage: payload.currentPage, sort: payload.sort, text: payload.text, role: payload.role}),
+            new LoadSources()
+          ]),
           catchError(err => of(new DeleteProjectFailure(err)))
       )));
   }, {dispatch: true});
