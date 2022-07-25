@@ -33,17 +33,21 @@
   background-color: #e6e6e6;
 }
 
-.mat-cell {
+.mat-cell, .mat-header-cell {
   padding: 10px;
 }
 
 .mat-cell > button {
-  min-width: 50px;
-  margin: 0 3px;
+  margin: 2px 3px;
+}
+
+.mat-cell > .mat-icon-button {
+  border-radius: 4px;
+  width: 62px;
 }
 
 .mat-column-actions {
-  text-align: end;
+  width: 8%;
 }
 
 .mat-column-description {
@@ -80,8 +84,6 @@
 
 .mat-row {
   height: 61px;
-  padding-top: 10px;
-  padding-bottom: 10px;
 }
 
 button.cancel {
