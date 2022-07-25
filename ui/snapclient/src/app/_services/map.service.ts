@@ -85,6 +85,17 @@ export interface NoteResults {
   };
 }
 
+export interface ProjectResults {
+  content: Project[];
+  links: any;
+  page: {
+    number: number;
+    totalElements: number;
+    totalPages: number;
+    size: number;
+  };
+}
+
 export interface AutomapRow {
   id: number;
   display: string;
@@ -152,12 +163,17 @@ export class MapService {
     return this.http.post(url, body, header);
   }
 
-  fetchProjects(pageSize: number, currentPage: number): Observable<TaskResults> {
-    const size = pageSize ?? 20;
+  fetchProjects(pageSize: number, currentPage: number, sort: string, text: string, role: string): Observable<ProjectResults> {
+    const size = pageSize ?? 25;
     const page = currentPage ?? 0;
-    const url = `${this.config.apiBaseUrl}/projects?sort=modified,desc&projection=listView&page=${page}&size=${size}`;
+    let url = `${this.config.apiBaseUrl}/projects/fetch?sort=${sort}&role=${role}&page=${page}&size=${size}`;
+
+    if (text) {
+      url += `&text=${text}`;
+    }
+
     const header = ServiceUtils.getHTTPHeaders();
-    return this.http.get<TaskResults>(url, header);
+    return this.http.get<ProjectResults>(url, header);
   }
 
   getMapForId(id: string): Observable<Mapping> {

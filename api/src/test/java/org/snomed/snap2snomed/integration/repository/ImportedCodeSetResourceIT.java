@@ -424,7 +424,7 @@ public class ImportedCodeSetResourceIT extends IntegrationTestBase {
   @Test
   public void givenSourceCreator_whenNotProjectMember_thenShouldNotSeeImportedCodeSystem() throws Exception {
     long projectId = restClient.createProject("ProjectDemo", "Demo Project", Set.of(DEFAULT_TEST_USER_SUBJECT, PROJECT_USER), Set.of(), Set.of());
-    final String codeSetName = "AAA semicolon - defaultuser - projecttest";
+    final String codeSetName = "AAA semicolon - defaultuser - projecttest2";
     long codesetId = verifyCreatedImportedCodeSet(codeSetName, "1.0", 0, 2, true, ";", new ClassPathResource("AAA-semi.csv").getFile(), "text/tsv");
 
     restClient.createMap("Testing Map Version", "http://snomed.info/sct/32506021000036107/version/20210531",

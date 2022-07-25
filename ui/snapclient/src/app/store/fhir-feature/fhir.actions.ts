@@ -16,16 +16,16 @@
 
 import {Action} from '@ngrx/store';
 import {R4} from '@ahryman40k/ts-fhir-types';
-import {Version} from '../../_services/fhir.service';
+import {Release} from '../../_services/fhir.service';
 import { Properties } from './fhir.effects';
 import {Coding, Match} from './fhir.reducer';
 import {ConceptNode} from '@csiro/shrimp-hierarchy-view';
 
 
 export enum FhirActionTypes {
-  LOAD_VERSIONS = '[Fhir] Load Versions',
-  LOAD_VERSIONS_SUCCESS = '[Fhir] Load Versions Succeeded',
-  LOAD_VERSIONS_FAILED = '[Fhir] Load Versions Failed',
+  LOAD_RELEASES = '[Fhir] Load Releases',
+  LOAD_RELEASES_SUCCESS = '[Fhir] Load Releases Succeeded',
+  LOAD_RELEASES_FAILED = '[Fhir] Load Releases Failed',
   FIND_CONCEPTS = '[Fhir] Find Concepts',
   FIND_CONCEPTS_SUCCESS = '[Fhir] Find Concepts Succeeded',
   FIND_CONCEPTS_FAILED = '[Fhir] Find Concepts Failed',
@@ -35,24 +35,27 @@ export enum FhirActionTypes {
   LOOKUP_CONCEPT = "[Fhir] Lookup Concept",
   LOOKUP_CONCEPT_SUCCESS = "[Fhir] Lookup Concept Succeeded",
   LOOKUP_CONCEPT_FAILED = "[Fhir] Lookup Concept Failed",
+  LOOKUP_MODULE = "[Fhir] Lookup Module",
+  LOOKUP_MODULE_SUCCESS = "[Fhir] Lookup Module Succeeded",
+  LOOKUP_MODULE_FAILED = "[Fhir] Lookup Module Failed",
   CONCEPT_HIERARCHY = "[Fhir] Concept Hierarchy",
   CONCEPT_HIERARCHY_SUCCESS = "Concept Hierarchy Succeeded",
   CONCEPT_HIERARCHY_FAILED = "Concept Hierarchy Failed"
 }
 
-export class LoadVersions implements Action {
-  readonly type = FhirActionTypes.LOAD_VERSIONS;
+export class LoadReleases implements Action {
+  readonly type = FhirActionTypes.LOAD_RELEASES;
 }
 
-export class LoadVersionsSuccess implements Action {
-  readonly type = FhirActionTypes.LOAD_VERSIONS_SUCCESS;
+export class LoadReleasesSuccess implements Action {
+  readonly type = FhirActionTypes.LOAD_RELEASES_SUCCESS;
 
-  constructor(public payload: Version[]) {
+  constructor(public payload: Map<string, Release[]>) {
   }
 }
 
-export class LoadVersionsFailure implements Action {
-  readonly type = FhirActionTypes.LOAD_VERSIONS_FAILED;
+export class LoadReleasesFailure implements Action {
+  readonly type = FhirActionTypes.LOAD_RELEASES_FAILED;
 
   constructor(public payload: { error: any }) {
   }
@@ -121,6 +124,27 @@ export class LookupConceptFailure implements Action {
   }
 }
 
+export class LookupModule implements Action {
+  readonly type = FhirActionTypes.LOOKUP_MODULE;
+
+  constructor(public payload: {code: string, system: string, version: string}) {
+  }
+}
+
+export class LookupModuleSuccess implements Action {
+  readonly type = FhirActionTypes.LOOKUP_MODULE_SUCCESS;
+
+  constructor(public payload: Properties) {
+  }
+}
+
+export class LookupModuleFailure implements Action {
+  readonly type = FhirActionTypes.LOOKUP_MODULE_FAILED;
+
+  constructor(public payload: { error: any }) {
+  }
+}
+
 export class ConceptHierarchy implements Action {
   readonly type = FhirActionTypes.CONCEPT_HIERARCHY;
 
@@ -142,9 +166,9 @@ export class ConceptHierarchyFailure implements Action {
   }
 }
 
-export type FhirActions = LoadVersions
-  | LoadVersionsSuccess
-  | LoadVersionsFailure
+export type FhirActions = LoadReleases
+  | LoadReleasesSuccess
+  | LoadReleasesFailure
   | FindConcepts
   | FindConceptsSuccess
   | FindConceptsFailure
@@ -154,6 +178,9 @@ export type FhirActions = LoadVersions
   | LookupConcept
   | LookupConceptSuccess
   | LookupConceptFailure
+  | LookupModule
+  | LookupModuleSuccess
+  | LookupModuleFailure
   | ConceptHierarchy
   | ConceptHierarchySuccess
   | ConceptHierarchyFailure

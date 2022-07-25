@@ -15,7 +15,8 @@
  */
 
 import {initialFhirState, fhirReducer} from './fhir.reducer';
-import { LoadVersionsFailure, LoadVersionsSuccess } from './fhir.actions';
+import { LoadReleasesFailure, LoadReleasesSuccess } from './fhir.actions';
+import { Release } from 'src/app/_services/fhir.service';
 
 describe('Fhir Reducer', () => {
   describe('an unknown action', () => {
@@ -28,19 +29,26 @@ describe('Fhir Reducer', () => {
 
   describe('a successful load action', () => {
     it('should return source', () => {
-      const action = new LoadVersionsSuccess([{title: '', uri: ''}]);
+      let releases = new Map<string, Release[]>();
+      let release : Release[] = [{
+        edition: '',
+        version: '',
+        uri: ''
+      }];
+      releases.set('', release)
+      const action = new LoadReleasesSuccess(releases);
       const result = fhirReducer(initialFhirState, action);
-      expect(result.versions.length).toBe(1);
+      expect(result.editionToVersionsMap!.size).toBe(1);
       expect(result.errorMessage).toBeFalsy();
     });
   });
 
   describe('a failed load action', () => {
     it('should return error msg', () => {
-      const action = new LoadVersionsFailure({error: 'Load failed'});
+      const action = new LoadReleasesFailure({error: 'Load failed'});
       const result = fhirReducer(initialFhirState, action);
       expect(result.errorMessage).toBeTruthy();
-      expect(result.versions.length).toBe(0);
+      expect(result.editionToVersionsMap).toBeUndefined();
     });
   });
 });

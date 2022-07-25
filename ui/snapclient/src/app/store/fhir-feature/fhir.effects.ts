@@ -21,8 +21,8 @@ import { of } from 'rxjs/internal/observable/of';
 import { FhirService } from '../../_services/fhir.service';
 import { R4 } from '@ahryman40k/ts-fhir-types';
 import {
-  LoadVersionsSuccess,
-  LoadVersionsFailure,
+  LoadReleasesSuccess,
+  LoadReleasesFailure,
   FhirActions,
   FhirActionTypes,
   FindConceptsSuccess,
@@ -32,13 +32,16 @@ import {
   AutoSuggestSuccess,
   AutoSuggestFailure,
   ConceptHierarchySuccess,
-  ConceptHierarchyFailure
+  ConceptHierarchyFailure,
+  LookupModuleSuccess,
+  LookupModuleFailure
 } from './fhir.actions';
 
-import { Version } from '../../_services/fhir.service';
+import { Release } from '../../_services/fhir.service';
 import {Match} from './fhir.reducer';
 import {TranslateService} from '@ngx-translate/core';
 import {SnomedUtils} from 'src/app/_utils/snomed_utils';
+import { ObservableInput } from 'rxjs';
 
 export interface Properties {
   [key: string]: any[]
@@ -47,8 +50,8 @@ export interface Properties {
 @Injectable()
 export class FhirEffects {
 
-  loadVersions$ = createEffect(() => this.actions$.pipe(
-    ofType(FhirActionTypes.LOAD_VERSIONS),
+  loadReleases$ = createEffect(() => this.actions$.pipe(
+    ofType(FhirActionTypes.LOAD_RELEASES),
     switchMap((action) => this.fhirService.fetchVersions().pipe(
       map(bundle => (bundle.entry ?? [])),
       map(entries => {
@@ -61,24 +64,27 @@ export class FhirEffects {
             let label = res.title;
             this.translate.get(`EDITION.${edition}`).subscribe(msg => { label = msg; });
             return {
-              title: label + ', ' + ver?.replace(/.*\//, ''),
+              edition: label,
+              version: ver?.replace(/.*\//, ''),
               uri: ver,
-            } as Version;
+            } as Release;
           });
       }),
-      switchMap((versions: Version[]) => {
-        versions.sort((v1, v2) => {
-          if (v1.title > v2.title) {
-            return 1;
+      switchMap((versions: Release[]) => {
+        let groupedVersions = new Map<string, Release[]>();
+        versions.forEach(version => {
+
+          if (groupedVersions.has(version.edition)) {
+            let versionList = groupedVersions.get(version.edition);
+            versionList?.push(version);
           }
-          else if (v1.title < v2.title) {
-            return -1;
+          else {
+            groupedVersions.set(version.edition, [version]);
           }
-          return 0;
         });
-        return of(new LoadVersionsSuccess(versions));
+        return of(new LoadReleasesSuccess(groupedVersions));
       }),
-      catchError((err) => of(new LoadVersionsFailure({ error: err })))
+      catchError((err) => of(new LoadReleasesFailure({ error: err })))
     ))), { dispatch: true });
 
   findConcepts$ = createEffect(() => this.actions$.pipe(
@@ -109,55 +115,66 @@ export class FhirEffects {
       catchError((err) => of(new AutoSuggestFailure({error: err})))
     ))), {dispatch: true});
 
+  mapParameters = (parameters: R4.IParameters, action: { code: any; system: any; version?: any; }) => {
+    let props: Properties = {};
+
+    parameters.parameter?.map((p) => {
+      const key = p.name ?? '';
+      const part: any = p.part;
+      switch (key) {
+        case 'property': {
+          if (part) {
+            const partKey = part.find((sub: any) => sub?.name === 'code').valueCode;
+            const partValue = FhirEffects.getValue(part.find((sub: any) => sub.name?.startsWith('value')));
+            FhirEffects.updateProps(props, partKey, [partValue]);
+          }
+          break;
+        }
+        case 'designation': {
+          if (part) {
+            const partUse = part.find((sub: any) => sub.name === 'use')?.valueCoding?.display;
+            if (partUse) {
+              const partLang = part.find((sub: any) => sub.name === 'language')?.valueCode;
+              const partValue = FhirEffects.getValue(part.find((part: any) => part.name === 'value'));
+              FhirEffects.updateProps(props, partUse, [partValue, partLang]);
+            }
+          }
+          break;
+        }
+        default: {
+          const value = FhirEffects.getValue(p);
+          FhirEffects.updateProps(props, key, [value]);
+        }
+      }
+    })
+    
+    // SNOMED-465
+    // there is no guarantee that code and system are supplied by $lookup, but they
+    // may be, so now they are added at the end if they aren't already present
+    if (!props.code) {
+      FhirEffects.updateProps(props, 'code', [action.code]);
+    }
+    else if (!props.system) {
+      FhirEffects.updateProps(props, 'system', [action.system]);
+    }
+
+    return props;
+  }
+
+  lookupModule$ = createEffect(() => this.actions$.pipe(
+    ofType(FhirActionTypes.LOOKUP_MODULE),
+    map(action => action.payload),
+    switchMap((action) => this.fhirService.lookupConcept(action.code, action.system, action.version).pipe(
+      map(parameters => this.mapParameters(parameters, action)),
+      switchMap((props) => of(new LookupModuleSuccess(props))),
+      catchError((err) => of(new LookupModuleFailure({ error: err })))
+    ))), { dispatch: true });
+
   lookupConcept$ = createEffect(() => this.actions$.pipe(
     ofType(FhirActionTypes.LOOKUP_CONCEPT),
     map(action => action.payload),
     switchMap((action) => this.fhirService.lookupConcept(action.code, action.system, action.version).pipe(
-      map(parameters => {
-        let props: Properties = {};
-
-        parameters.parameter?.map((p) => {
-          const key = p.name ?? '';
-          const part: any = p.part;
-          switch (key) {
-            case 'property': {
-              if (part) {
-                const partKey = part.find((sub: any) => sub?.name === 'code').valueCode;
-                const partValue = FhirEffects.getValue(part.find((sub: any) => sub.name?.startsWith('value')));
-                FhirEffects.updateProps(props, partKey, [partValue]);
-              }
-              break;
-            }
-            case 'designation': {
-              if (part) {
-                const partUse = part.find((sub: any) => sub.name === 'use')?.valueCoding?.display;
-                if (partUse) {
-                  const partLang = part.find((sub: any) => sub.name === 'language')?.valueCode;
-                  const partValue = FhirEffects.getValue(part.find((part: any) => part.name === 'value'));
-                  FhirEffects.updateProps(props, partUse, [partValue, partLang]);
-                }
-              }
-              break;
-            }
-            default: {
-              const value = FhirEffects.getValue(p);
-              FhirEffects.updateProps(props, key, [value]);
-            }
-          }
-        })
-
-        // SNOMED-465
-        // there is no guarantee that code and system are supplied by $lookup, but they
-        // may be, so now they are added at the end if they aren't already present
-        if (!props.code) {
-          FhirEffects.updateProps(props, 'code', [action.code]);
-        }
-        else if (!props.system) {
-          FhirEffects.updateProps(props, 'system', [action.system]);
-        }
-
-        return props;
-      }),
+      map(parameters => this.mapParameters(parameters, action)),
       switchMap((props) => of(new LookupConceptSuccess(props))),
       catchError((err) => of(new LookupConceptFailure({ error: err })))
     ))), { dispatch: true });

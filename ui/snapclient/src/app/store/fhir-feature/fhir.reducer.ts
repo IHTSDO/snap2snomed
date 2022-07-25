@@ -15,7 +15,7 @@
  */
 
 import {FhirActions, FhirActionTypes} from './fhir.actions';
-import {Version} from '../../_services/fhir.service';
+import {Release} from '../../_services/fhir.service';
 import {R4} from '@ahryman40k/ts-fhir-types';
 import {Properties} from './fhir.effects';
 import {ConceptNode} from '@csiro/shrimp-hierarchy-view';
@@ -38,16 +38,17 @@ export interface Match {
 }
 
 export interface IFhirState {
-  versions: Version[];
+  editionToVersionsMap : Map<string, Release[]> | undefined;
   matches?: R4.IValueSet_Expansion;
   nodes: ConceptNode<Coding>[];
   suggests?: Match[];
   properties?: Properties;
+  moduleProperties?: Properties;
   errorMessage: any | null;
 }
 
 export const initialFhirState: IFhirState = {
-  versions: [],
+  editionToVersionsMap: new Map(),
   nodes: [],
   errorMessage: null
 };
@@ -55,17 +56,17 @@ export const initialFhirState: IFhirState = {
 export function fhirReducer(state = initialFhirState, action: FhirActions): IFhirState {
   switch (action.type) {
 
-    case FhirActionTypes.LOAD_VERSIONS_SUCCESS:
+    case FhirActionTypes.LOAD_RELEASES_SUCCESS:
       return {
         ...state,
-        versions: action.payload,
+        editionToVersionsMap: action.payload,
         errorMessage: null
       };
 
-    case FhirActionTypes.LOAD_VERSIONS_FAILED:
+    case FhirActionTypes.LOAD_RELEASES_FAILED:
       return {
         ...state,
-        versions: [],
+        editionToVersionsMap: undefined,
         errorMessage: action.payload.error
       };
 
@@ -108,6 +109,20 @@ export function fhirReducer(state = initialFhirState, action: FhirActions): IFhi
       return {
         ...state,
         properties: undefined,
+        errorMessage: action.payload.error
+      };
+
+    case FhirActionTypes.LOOKUP_MODULE_SUCCESS:
+      return {
+        ...state,
+        moduleProperties: action.payload,
+        errorMessage: null
+      };
+
+    case FhirActionTypes.LOOKUP_MODULE_FAILED:
+      return {
+        ...state,
+        moduleProperties: undefined,
         errorMessage: action.payload.error
       };
 
