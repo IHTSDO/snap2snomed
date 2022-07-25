@@ -18,7 +18,7 @@ import {MappingActions, MappingActionTypes} from './mapping.actions';
 import {Project, ProjectPage} from '../../_models/project';
 import {Mapping} from '../../_models/mapping';
 import {MappedRowDetailsDto, MapView, Page} from 'src/app/_models/map_row';
-import { deepCopy } from '@angular-devkit/core/src/utils/object';
+import {deepCopy} from '@angular-devkit/core/src/utils/object';
 
 
 export interface IMappingState {
@@ -43,7 +43,7 @@ export const initialMappingState: IMappingState = {
 
 export function mappingReducer(state = initialMappingState, action: MappingActions): IMappingState {
   switch (action.type) {
-
+    case MappingActionTypes.DELETE_PROJECT:
     case MappingActionTypes.LOAD_PROJECTS:
     case MappingActionTypes.ADD_MAPPING:
     case MappingActionTypes.COPY_MAPPING:
@@ -140,6 +140,13 @@ export function mappingReducer(state = initialMappingState, action: MappingActio
         errorMessage: null
       };
     }
+
+    case MappingActionTypes.DELETE_PROJECT_FAILED:
+      return {
+        ...state,
+        isLoading: false,
+        errorMessage: action.payload.error
+      }
 
     case MappingActionTypes.LOAD_PROJECTS_FAILED:
       return {

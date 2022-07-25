@@ -125,10 +125,9 @@ public class MapRow implements Snap2SnomedEntity {
   @ManyToOne
   private User lastReviewer;
 
-  @OneToMany(mappedBy = "row", fetch = FetchType.EAGER)
+  @OneToMany(mappedBy = "row", fetch = FetchType.EAGER, cascade = CascadeType.REMOVE)
   @Exclude
   List<MapRowTarget> mapRowTargets;
-
 
   @Projection(name = "withLatestNote", types = {MapRow.class})
   public interface MapRowWithLatestNote {

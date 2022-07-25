@@ -39,22 +39,31 @@
 
 .mat-cell > button {
   min-width: 50px;
+  margin: 0 3px;
+}
+
+.mat-column-actions {
+  text-align: end;
 }
 
 .mat-column-description {
   overflow: hidden;
   text-overflow: ellipsis;
-  width: 30%;
+  width: 25%;
+}
+
+.mat-column-modified {
+  width: 6%
 }
 
 .mat-column-title {
   overflow: hidden;
   text-overflow: ellipsis;
-  width: 20%;
+  width: 15%;
 }
 
 .mat-column-users {
-  min-width: 20%;
+  min-width: 25%;
 }
 
 .mat-column-version {

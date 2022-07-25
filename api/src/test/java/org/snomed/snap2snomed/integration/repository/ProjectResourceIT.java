@@ -26,7 +26,6 @@ import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.TestInstance.Lifecycle;
 import org.snomed.snap2snomed.config.Snap2snomedConfiguration;
 import org.snomed.snap2snomed.integration.IntegrationTestBase;
-import org.snomed.snap2snomed.model.enumeration.TaskType;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import static org.hamcrest.Matchers.*;
@@ -383,6 +382,45 @@ public class ProjectResourceIT extends IntegrationTestBase {
               .queryParam("text", "Match")
               .queryParam("role", "guest")
               .get("/projects/fetch")
+              .then().statusCode(200)
+              .body("page.totalElements", equalTo(0));
+  }
+
+  @Test
+  public void shouldDeleteProject() throws Exception {
+    restClient.createOrUpdateAdminUser(DEFAULT_TEST_ADMIN_USER_SUBJECT, "TestAdmin", "BobbyAdmin", "UserAdmin", "admin@admin.com");
+    long id = restClient.createProject("ToDelete", "Delete Project", Set.of(DEFAULT_TEST_ADMIN_USER_SUBJECT),
+        Set.of(), Set.of());
+
+    long codesetId = restClient.createImportedCodeSet("delete code set", "1.2.3", 34);
+
+    long mapId = restClient.createMap("Delete Map Version", "http://snomed.info/sct/32506021000036107/version/20210531",
+        "http://map.test.toscope", id, codesetId);
+
+    long mapRowId = restClient.getMapRowId(mapId, "");
+    long noteId = restClient.createNote(DEFAULT_TEST_USER_SUBJECT, mapRowId, "This is a test note");
+
+    restClient.givenUser(DEFAULT_TEST_ADMIN_USER_SUBJECT)
+              .get("/maps")
+              .then().statusCode(200)
+              .body("page.totalElements", equalTo(1));
+
+    restClient.givenUser(DEFAULT_TEST_ADMIN_USER_SUBJECT)
+              .get("/notes")
+              .then().statusCode(200)
+              .body("page.totalElements", equalTo(1));
+
+    restClient.givenUser(DEFAULT_TEST_ADMIN_USER_SUBJECT)
+              .delete("/projects/" + id)
+              .then().statusCode(204);
+
+    restClient.givenUser(DEFAULT_TEST_ADMIN_USER_SUBJECT)
+              .get("/maps")
+              .then().statusCode(200)
+              .body("page.totalElements", equalTo(0));
+
+    restClient.givenUser(DEFAULT_TEST_ADMIN_USER_SUBJECT)
+              .get("/notes")
               .then().statusCode(200)
               .body("page.totalElements", equalTo(0));
   }

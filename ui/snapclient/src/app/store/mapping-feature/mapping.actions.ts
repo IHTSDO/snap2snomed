@@ -16,7 +16,7 @@
 
 import {HttpParams} from '@angular/common/http';
 import {Action} from '@ngrx/store';
-import {MappedRowDetailsDto, Page} from 'src/app/_models/map_row';
+import {MappedRowDetailsDto} from 'src/app/_models/map_row';
 import {CreateMappingParams, MapViewResults} from 'src/app/_services/map.service';
 import {Mapping} from '../../_models/mapping';
 import {Project, ProjectPage} from '../../_models/project';
@@ -30,6 +30,8 @@ export type ViewContext = {
 };
 
 export enum MappingActionTypes {
+  DELETE_PROJECT = '[Map] Delete Project',
+  DELETE_PROJECT_FAILED = '[Map] Delete Project Failed',
   LOAD_PROJECTS = '[Map] Load Projects',
   LOAD_PROJECTS_SUCCESS = '[Map] Load Projects Succeeded',
   LOAD_PROJECTS_FAILED = '[Map] Load Projects Failed',
@@ -59,6 +61,19 @@ export enum MappingActionTypes {
   NEW_MAPPING = '[Map] New Map'
 }
 
+export class DeleteProject implements Action {
+  constructor (public payload: {id: string; pageSize: number; currentPage: number; sort: string; text: string; role: string;}) {
+
+  }
+  readonly type = MappingActionTypes.DELETE_PROJECT;
+}
+
+export class DeleteProjectFailure implements Action {
+  readonly type = MappingActionTypes.DELETE_PROJECT_FAILED;
+
+  constructor(public payload: { error: any }) {
+  }
+}
 
 export class LoadProjects implements Action {
   constructor(public payload: { pageSize: number; currentPage: number; sort: string; text: string; role: string; }) {
@@ -232,4 +247,6 @@ export type MappingActions = LoadProjects
   | LoadMapViewFailure
   | SelectMapRow
   | NewMapping
+  | DeleteProject
+  | DeleteProjectFailure
   ;

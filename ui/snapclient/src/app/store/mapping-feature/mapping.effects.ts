@@ -16,16 +16,18 @@
 
 import {Injectable} from '@angular/core';
 import {Actions, createEffect, ofType} from '@ngrx/effects';
-import {catchError, concatMap, map, mergeMap, switchMap, tap} from 'rxjs/operators';
+import {catchError, concatMap, map, mapTo, mergeMap, switchMap, tap} from 'rxjs/operators';
 import {
   AddMappingFailure,
   AddMappingSuccess,
   CopyMappingFailure,
   CopyMappingSuccess,
+  DeleteProjectFailure,
   LoadMappingFailure,
   LoadMappingSuccess,
   LoadMapViewFailure,
   LoadMapViewSuccess,
+  LoadProjects,
   LoadProjectsFailure,
   LoadProjectsSuccess,
   MappingActions,
@@ -158,6 +160,16 @@ export class MappingEffects {
       this.router.navigate(['map-view', action.payload.id], {replaceUrl: true});
     })
   ), {dispatch: false});
+
+  deleteProject$ = createEffect(() => {
+    return this.actions$.pipe(
+      ofType(MappingActionTypes.DELETE_PROJECT),
+        map(action => action.payload),
+        switchMap(payload => this.mapService.deleteProject(payload.id).pipe(
+          mapTo(new LoadProjects({pageSize: payload.pageSize, currentPage: payload.currentPage, sort: payload.sort, text: payload.text, role: payload.role})),
+          catchError(err => of(new DeleteProjectFailure(err)))
+      )));
+  }, {dispatch: true});
 
   loadProjects$ = createEffect(() => {
     return this.actions$.pipe(

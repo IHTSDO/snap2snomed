@@ -20,7 +20,7 @@ import {NavigationEnd, Router} from '@angular/router';
 import {Store} from '@ngrx/store';
 import {IAppState} from '../../store/app.state';
 import {selectProjectPage, selectProjects} from '../../store/mapping-feature/mapping.selectors';
-import {LoadProjects} from '../../store/mapping-feature/mapping.actions';
+import {DeleteProject, LoadProjects} from '../../store/mapping-feature/mapping.actions';
 import {Project} from '../../_models/project';
 import {TranslateService} from '@ngx-translate/core';
 import {ErrorInfo} from '../../errormessage/errormessage.component';
@@ -35,6 +35,8 @@ import {MatSelectChange} from "@angular/material/select";
 import {MatSort} from '@angular/material/sort';
 import {debounce} from "lodash";
 import {tap} from "rxjs/operators";
+import {ConfirmDialogComponent, DialogType} from "../../dialog/confirm-dialog/confirm-dialog.component";
+import {MatDialog} from "@angular/material/dialog";
 
 @Component({
   selector: 'app-mapping-list',
@@ -83,11 +85,18 @@ export class MappingListComponent implements OnInit, AfterViewInit, OnDestroy {
   filterText = '';
   filterRole = 'all';
 
+  // dialog
+  confirm = '';
+  cancel = '';
+  confirmTitle = '';
+  confirmMessage = '';
+
   constructor(private mapService: MapService,
               private authService: AuthService,
               private router: Router,
               private translate: TranslateService,
-              private store: Store<IAppState>) {
+              private store: Store<IAppState>,
+              public dialog: MatDialog) {
     /**
      * NavigationSubscription is required for router onSameUrlNavigation: 'reload'
      * to reload any data for the page component
@@ -97,6 +106,12 @@ export class MappingListComponent implements OnInit, AfterViewInit, OnDestroy {
         this.store.dispatch(new LoadProjects({pageSize: this.pageSize, currentPage: this.currentPage, sort: `${this.sortCol},${this.sortDir}`, text: this.filterText, role: this.filterRole}));
       }
     });
+
+    //TODO: fix translations
+    this.translate.get('PROJECT.DELETE').subscribe((msg) => this.confirm = msg);
+    this.translate.get('PROJECT.CANCEL').subscribe((msg) => this.cancel = msg);
+    this.translate.get('PROJECT.TITLE_CONFIRM').subscribe((msg) => this.confirmTitle = msg);
+    this.translate.get('PROJECT.CONFIRM_DELETE').subscribe((msg) => this.confirmMessage = msg);
   }
 
   ngOnInit(): void {
@@ -205,6 +220,25 @@ export class MappingListComponent implements OnInit, AfterViewInit, OnDestroy {
         });
       }
     }
+  }
+
+  deleteProject(project: Project): void {
+    const self = this;
+    const confirmDialogRef = self.dialog.open(ConfirmDialogComponent, {
+      data: {
+        title: self.confirmTitle,
+        message: self.confirmMessage,
+        button: self.confirm,
+        cancel: self.cancel,
+        type: DialogType.CONFIRM
+      }
+    });
+    confirmDialogRef.afterClosed().subscribe(
+      (ok) => {
+        if (ok) {
+          this.store.dispatch(new DeleteProject({id: project.id, pageSize: this.pageSize, currentPage: this.currentPage, sort: `${this.sortCol},${this.sortDir}`, text: this.filterText, role: this.filterRole}));
+        }
+      });
   }
 
   viewMapping(project: Project): void {

@@ -39,6 +39,12 @@ public interface ProjectRepository
   // ---------------------------------
 
   @Override
+  void delete(Project entity);
+
+  @Override
+  void deleteById(Long id);
+
+  @Override
   @Query("select p from Project p where true = ?#{@authenticationFacadeImpl.isAdminUser()} or exists (select 1 from User u where u.id = ?#{@authenticationFacadeImpl.principalSubject} and (u member of p.owners or u member of p.members or u member of p.guests)) ")
   Page<Project> findAll(Pageable pageable);
 
@@ -65,14 +71,6 @@ public interface ProjectRepository
   @Override
   @RestResource(exported = false)
   <S extends Project> Iterable<S> saveAll(Iterable<S> entities);
-
-  @Override
-  @RestResource(exported = false)
-  void delete(Project entity);
-
-  @Override
-  @RestResource(exported = false)
-  void deleteById(Long id);
 
   @Override
   @RestResource(exported = false)

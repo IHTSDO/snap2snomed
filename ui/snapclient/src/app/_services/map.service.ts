@@ -19,7 +19,7 @@ import {HttpClient, HttpParams} from '@angular/common/http';
 import {Observable} from 'rxjs';
 import {Mapping} from '../_models/mapping';
 import {Project} from '../_models/project';
-import {Task, TaskType} from '../_models/task';
+import {Task} from '../_models/task';
 import {ServiceUtils} from '../_utils/service_utils';
 import {MappedRowDetailsDto, MapRow, MapRowRelationship, MapRowStatus, MapView} from '../_models/map_row';
 import {JSONTargetRow, TargetRow} from '../_models/target_row';
@@ -161,6 +161,12 @@ export class MapService {
       toScope: mapping.toScope
     });
     return this.http.post(url, body, header);
+  }
+
+  deleteProject(id: string): Observable<ProjectResults> {
+    let url = `${this.config.apiBaseUrl}/projects/${id}`;
+    const header = ServiceUtils.getHTTPHeaders();
+    return this.http.delete<ProjectResults>(url, header);
   }
 
   fetchProjects(pageSize: number, currentPage: number, sort: string, text: string, role: string): Observable<ProjectResults> {

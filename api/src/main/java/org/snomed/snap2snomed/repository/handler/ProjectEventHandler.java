@@ -34,7 +34,6 @@ import org.snomed.snap2snomed.security.AuthenticationFacade;
 import org.snomed.snap2snomed.security.WebSecurity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.rest.core.annotation.*;
-import org.springframework.security.access.prepost.PreAuthorize;
 
 @RepositoryEventHandler
 public class ProjectEventHandler {
@@ -101,6 +100,18 @@ public class ProjectEventHandler {
     checkUsersAssignedToTasks(project);
     if (!webSecurity.isAdminUser() && !webSecurity.isProjectOwner(project)) {
       throw new NotAuthorisedProblem("Only a project owner can update a project");
+    }
+  }
+
+  @HandleBeforeDelete
+  public void handleBeforeDelete(Project project) {
+    String principalSubject = authenticationFacade.getPrincipalSubject();
+    if (principalSubject == null || principalSubject.isBlank()) {
+      throw new NotAuthorisedProblem("No valid user is not logged in");
+    }
+
+    if (!webSecurity.isAdminUser() && !webSecurity.isProjectOwner(project)) {
+      throw new NotAuthorisedProblem("Only a project owner can delete a project");
     }
   }
 
