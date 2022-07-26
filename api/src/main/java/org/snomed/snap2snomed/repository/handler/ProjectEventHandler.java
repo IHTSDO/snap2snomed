@@ -103,18 +103,6 @@ public class ProjectEventHandler {
     }
   }
 
-  @HandleBeforeDelete
-  public void handleBeforeDelete(Project project) {
-    String principalSubject = authenticationFacade.getPrincipalSubject();
-    if (principalSubject == null || principalSubject.isBlank()) {
-      throw new NotAuthorisedProblem("No valid user is not logged in");
-    }
-
-    if (!webSecurity.isAdminUser() && !webSecurity.isProjectOwner(project)) {
-      throw new NotAuthorisedProblem("Only a project owner can delete a project");
-    }
-  }
-
   private void checkUsersAssignedToTasks(Project project) {
     Set<User> assignedUsers = userRepository.findUsersAssignedToTasks(project.getId());
     ProjectEventHandler.checkAssignedUsersStillHaveRole(assignedUsers, project.getOwners(),

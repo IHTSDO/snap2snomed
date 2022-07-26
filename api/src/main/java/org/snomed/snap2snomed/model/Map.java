@@ -88,11 +88,6 @@ public class Map implements Snap2SnomedEntity {
   @ManyToOne
   private ImportedCodeSet source;
 
-  @OneToMany(mappedBy = "map", cascade = CascadeType.REMOVE, orphanRemoval = true)
-  @ToString.Exclude
-  @EqualsAndHashCode.Exclude
-  private List<MapRow> mapRows;
-
   @Projection(name = "listView", types = {Map.class})
   public interface ListViewWithSource {
 

@@ -414,7 +414,7 @@ public class ProjectResourceIT extends IntegrationTestBase {
               .body("page.totalElements", equalTo(1));
 
     restClient.givenUser(DEFAULT_TEST_ADMIN_USER_SUBJECT)
-              .delete("/projects/" + id)
+              .delete("/projects/delete/" + id)
               .then().statusCode(204);
 
     restClient.givenUser(DEFAULT_TEST_ADMIN_USER_SUBJECT)

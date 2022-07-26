@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.snomed.snap2snomed.controller.dto.ProjectDto;
 import org.snomed.snap2snomed.model.*;
+import org.snomed.snap2snomed.repository.*;
 import org.snomed.snap2snomed.security.AuthenticationFacade;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -20,19 +21,58 @@ import org.springframework.hateoas.PagedModel;
 import org.springframework.stereotype.Component;
 
 import javax.persistence.EntityManager;
+import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Component
 public class ProjectService {
 
+  public static class ProjectFilter {
+    private final String text;
+    private final String role;
+
+    public ProjectFilter(String text, String role) {
+      this.text = text;
+      this.role = role;
+    }
+  }
+
   @Autowired private AuthenticationFacade authenticationFacade;
   @Autowired private EntityManager entityManager;
+  @Autowired private MapRepository mapRepository;
+  @Autowired private MapRowRepository mapRowRepository;
+  @Autowired private MapRowTargetRepository mapRowTargetRepository;
+  @Autowired private NoteRepository noteRepository;
+  @Autowired private ProjectRepository projectRepository;
+  @Autowired private TaskRepository taskRepository;
 
-  QMap map = QMap.map;
   QProject project = QProject.project;
-  QUser user = QUser.user;
+
+  /**
+   * Delete a project and all its related entities.
+   * First: Note, Tasks, MapRowTarget, MapRow
+   * Then: Map
+   * Then: Project
+   * @param projectId the id of the project to be deleted
+   */
+  @Transactional
+  public void deleteProject(Long projectId) {
+    Optional<Project> optional = projectRepository.findById(projectId);
+    if (optional.isPresent()) {
+      Project project = optional.get();
+      List<Map> maps = project.getMaps();
+
+      maps.forEach(this::deleteMapRelatives);
+      List<Long> mapIds = maps.stream().map(Map::getId).collect(Collectors.toList());
+      mapRepository.deleteAllById(mapIds);
+      projectRepository.delete(project);
+    }
+  }
 
   public PagedModel<EntityModel<ProjectDto>> getFilteredProjects(Pageable pageable,
                                                               PagedResourcesAssembler<ProjectDto> assembler,
@@ -113,13 +153,18 @@ public class ProjectService {
     }
   }
 
-  public static class ProjectFilter {
-    private final String text;
-    private final String role;
+  private void deleteMapRelatives(Map map) {
+    Long mapId = map.getId();
+    List<MapRow> mapRows = mapRowRepository.findMapRowsByMapId(mapId);
 
-    public ProjectFilter(String text, String role) {
-      this.text = text;
-      this.role = role;
-    }
+    mapRows.forEach(mapRow -> {
+      Set<Note> notes = mapRow.getNotes();
+      noteRepository.deleteAll(notes);
+      List<MapRowTarget> mapRowTargets = mapRow.getMapRowTargets();
+      mapRowTargetRepository.deleteAll(mapRowTargets);
+    });
+
+    mapRowRepository.deleteAll(mapRows);
+    taskRepository.deleteAllByMapId(mapId);
   }
 }

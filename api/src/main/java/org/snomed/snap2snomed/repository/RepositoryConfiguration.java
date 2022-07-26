@@ -87,9 +87,9 @@ public class RepositoryConfiguration implements RepositoryRestConfigurer {
     // Project
     exposureConfiguration.forDomainType(Project.class)
         .withCollectionExposure(
-            (metadata, httpMethods) -> httpMethods.disable(HttpMethod.PATCH))
+            (metadata, httpMethods) -> httpMethods.disable(HttpMethod.PATCH, HttpMethod.DELETE))
         .withItemExposure(
-            (metadata, httpMethods) -> httpMethods.disable(HttpMethod.PATCH));
+            (metadata, httpMethods) -> httpMethods.disable(HttpMethod.PATCH, HttpMethod.DELETE));
 
     // Map
     exposureConfiguration.forDomainType(Map.class)

@@ -72,6 +72,9 @@ public interface TaskRepository
   @RestResource(exported = false)
   void deleteAllById(Iterable<? extends Long> iterable);
 
+  @RestResource(exported = false)
+  void deleteAllByMapId(Long mapId);
+
   @Override
   @RestResource(exported = false)
   void deleteAll();

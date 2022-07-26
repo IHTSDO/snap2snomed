@@ -164,7 +164,7 @@ export class MapService {
   }
 
   deleteProject(id: string): Observable<ProjectResults> {
-    let url = `${this.config.apiBaseUrl}/projects/${id}`;
+    let url = `${this.config.apiBaseUrl}/projects/delete/${id}`;
     const header = ServiceUtils.getHTTPHeaders();
     return this.http.delete<ProjectResults>(url, header);
   }

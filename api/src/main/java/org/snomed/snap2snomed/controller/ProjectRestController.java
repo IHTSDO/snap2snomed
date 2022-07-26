@@ -5,8 +5,8 @@ import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Schema;
 import org.snomed.snap2snomed.controller.dto.ProjectDto;
-import org.snomed.snap2snomed.model.Project;
 import org.snomed.snap2snomed.problem.auth.NoSuchUserProblem;
+import org.snomed.snap2snomed.problem.auth.NotAuthorisedProblem;
 import org.snomed.snap2snomed.security.WebSecurity;
 import org.snomed.snap2snomed.service.ProjectService;
 import org.snomed.snap2snomed.service.ProjectService.ProjectFilter;
@@ -15,12 +15,11 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.PagedModel;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @Validated
 @RestController
@@ -54,5 +53,20 @@ public class ProjectRestController {
     ProjectFilter filter = new ProjectFilter(text, role);
 
     return ResponseEntity.ok(projectService.getFilteredProjects(pageable, assembler, filter));
+  }
+
+  @ResponseStatus(value= HttpStatus.NO_CONTENT)
+  @DeleteMapping(path="/projects/delete/{projectId}")
+  public void deleteProject(@PathVariable Long projectId) {
+    if (!webSecurity.isValidUser()) {
+      throw new NoSuchUserProblem();
+    }
+
+    if (!webSecurity.isAdminUser() && !webSecurity.isProjectOwnerForId(projectId)) {
+      throw new NotAuthorisedProblem("Only a project owner can delete a project");
+    }
+
+    projectService.deleteProject(projectId);
+
   }
 }
