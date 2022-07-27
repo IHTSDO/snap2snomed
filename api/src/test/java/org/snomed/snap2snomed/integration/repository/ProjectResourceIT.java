@@ -403,28 +403,25 @@ public class ProjectResourceIT extends IntegrationTestBase {
     long mapId = restClient.createMap("Delete Map Version", "http://snomed.info/sct/32506021000036107/version/20210531",
         "http://map.test.toscope", id, codesetId);
 
-    restClient.createTask(TaskType.AUTHOR, mapId, DEFAULT_TEST_ADMIN_USER_SUBJECT, "1");
+    long taskId = restClient.createTask(TaskType.AUTHOR, mapId, DEFAULT_TEST_ADMIN_USER_SUBJECT, "1");
 
-    restClient.createTarget(DEFAULT_TEST_ADMIN_USER_SUBJECT, mapId, "map row code 1.", "target",
+    long mapRowTargetId = restClient.createTarget(DEFAULT_TEST_ADMIN_USER_SUBJECT, mapId, "map row code 1.", "target",
         "display", MappingRelationship.TARGET_EQUIVALENT, false);
 
     long mapRowId = restClient.getMapRowId(mapId, "");
-    restClient.createNote(DEFAULT_TEST_USER_SUBJECT, mapRowId, "This is a test note");
+    long noteId = restClient.createNote(DEFAULT_TEST_USER_SUBJECT, mapRowId, "This is a test note");
 
     restClient.givenUser(DEFAULT_TEST_ADMIN_USER_SUBJECT)
-              .get("/maps")
-              .then().statusCode(200)
-              .body("page.totalElements", equalTo(1));
+              .get("/maps/" + mapId)
+              .then().statusCode(200);
 
     restClient.givenUser(DEFAULT_TEST_ADMIN_USER_SUBJECT)
-              .get("/notes")
-              .then().statusCode(200)
-              .body("page.totalElements", equalTo(1));
+              .get("/notes/" + noteId)
+              .then().statusCode(200);
 
     restClient.givenUser(DEFAULT_TEST_ADMIN_USER_SUBJECT)
-              .get("/tasks")
-              .then().statusCode(200)
-              .body("page.totalElements", equalTo(1));
+              .get("/tasks/" + taskId)
+              .then().statusCode(200);
 
     restClient.givenUser(DEFAULT_TEST_ADMIN_USER_SUBJECT)
               .queryParam("projection", "targetView")
@@ -439,14 +436,12 @@ public class ProjectResourceIT extends IntegrationTestBase {
               .then().statusCode(204);
 
     restClient.givenUser(DEFAULT_TEST_ADMIN_USER_SUBJECT)
-              .get("/maps")
-              .then().statusCode(200)
-              .body("page.totalElements", equalTo(0));
+              .get("/maps/" + mapId)
+              .then().statusCode(404);
 
     restClient.givenUser(DEFAULT_TEST_ADMIN_USER_SUBJECT)
-              .get("/tasks")
-              .then().statusCode(200)
-              .body("page.totalElements", equalTo(0));
+              .get("/tasks/" + taskId)
+              .then().statusCode(404);
 
     restClient.givenUser(DEFAULT_TEST_ADMIN_USER_SUBJECT)
               .queryParam("projection", "targetView")
@@ -457,8 +452,7 @@ public class ProjectResourceIT extends IntegrationTestBase {
               .body("page.totalElements", equalTo(0));
 
     restClient.givenUser(DEFAULT_TEST_ADMIN_USER_SUBJECT)
-              .get("/notes")
-              .then().statusCode(200)
-              .body("page.totalElements", equalTo(0));
+              .get("/notes/" + noteId)
+              .then().statusCode(404);
   }
 }
