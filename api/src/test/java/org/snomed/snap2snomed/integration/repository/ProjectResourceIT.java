@@ -26,6 +26,8 @@ import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.TestInstance.Lifecycle;
 import org.snomed.snap2snomed.config.Snap2snomedConfiguration;
 import org.snomed.snap2snomed.integration.IntegrationTestBase;
+import org.snomed.snap2snomed.model.enumeration.MappingRelationship;
+import org.snomed.snap2snomed.model.enumeration.TaskType;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import static org.hamcrest.Matchers.*;
@@ -390,7 +392,7 @@ public class ProjectResourceIT extends IntegrationTestBase {
   }
 
   @Test
-  public void shouldDeleteProject() throws Exception {
+  public void shouldDeleteProjectAndRelatedEntities() throws Exception {
     restClient.createOrUpdateAdminUser(DEFAULT_TEST_ADMIN_USER_SUBJECT, "TestAdmin", "BobbyAdmin", "UserAdmin", "admin@admin.com");
     long id = restClient.createProject("ToDelete", "Delete Project", Set.of(DEFAULT_TEST_ADMIN_USER_SUBJECT),
         Set.of(), Set.of());
@@ -400,8 +402,13 @@ public class ProjectResourceIT extends IntegrationTestBase {
     long mapId = restClient.createMap("Delete Map Version", "http://snomed.info/sct/32506021000036107/version/20210531",
         "http://map.test.toscope", id, codesetId);
 
+    restClient.createTask(TaskType.AUTHOR, mapId, DEFAULT_TEST_ADMIN_USER_SUBJECT, "1");
+
+    restClient.createTarget(DEFAULT_TEST_ADMIN_USER_SUBJECT, mapId, "map row code 1.", "target",
+        "display", MappingRelationship.TARGET_EQUIVALENT, false);
+
     long mapRowId = restClient.getMapRowId(mapId, "");
-    long noteId = restClient.createNote(DEFAULT_TEST_USER_SUBJECT, mapRowId, "This is a test note");
+    restClient.createNote(DEFAULT_TEST_USER_SUBJECT, mapRowId, "This is a test note");
 
     restClient.givenUser(DEFAULT_TEST_ADMIN_USER_SUBJECT)
               .get("/maps")
@@ -414,11 +421,37 @@ public class ProjectResourceIT extends IntegrationTestBase {
               .body("page.totalElements", equalTo(1));
 
     restClient.givenUser(DEFAULT_TEST_ADMIN_USER_SUBJECT)
+              .get("/tasks")
+              .then().statusCode(200)
+              .body("page.totalElements", equalTo(1));
+
+    restClient.givenUser(DEFAULT_TEST_ADMIN_USER_SUBJECT)
+              .queryParam("projection", "targetView")
+              .queryParam("row.sourceCode.index", "1")
+              .queryParam("row.map.id", mapId)
+              .get("/mapRowTargets")
+              .then().statusCode(200)
+              .body("page.totalElements", equalTo(1));
+
+    restClient.givenUser(DEFAULT_TEST_ADMIN_USER_SUBJECT)
               .delete("/projects/delete/" + id)
               .then().statusCode(204);
 
     restClient.givenUser(DEFAULT_TEST_ADMIN_USER_SUBJECT)
               .get("/maps")
+              .then().statusCode(200)
+              .body("page.totalElements", equalTo(0));
+
+    restClient.givenUser(DEFAULT_TEST_ADMIN_USER_SUBJECT)
+              .get("/tasks")
+              .then().statusCode(200)
+              .body("page.totalElements", equalTo(0));
+
+    restClient.givenUser(DEFAULT_TEST_ADMIN_USER_SUBJECT)
+              .queryParam("projection", "targetView")
+              .queryParam("row.sourceCode.index", "1")
+              .queryParam("row.map.id", mapId)
+              .get("/mapRowTargets")
               .then().statusCode(200)
               .body("page.totalElements", equalTo(0));
 
