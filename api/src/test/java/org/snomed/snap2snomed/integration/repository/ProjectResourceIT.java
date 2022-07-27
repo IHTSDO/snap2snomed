@@ -281,7 +281,8 @@ public class ProjectResourceIT extends IntegrationTestBase {
   public void failDeleteEntity() throws Exception {
     long projectId = restClient.createProject("ProjectDemo", "Demo Project", Set.of(), Set.of(EXTRA_USER), Set.of(ANOTHER_EXTRA_USER));
 
-    restClient.givenUser(EXTRA_USER).delete("/projects/" + projectId).then().statusCode(403);
+    restClient.givenDefaultUser().delete("/projects/" + projectId).then().statusCode(405);
+    restClient.givenUser(EXTRA_USER).delete("/projects/delete/" + projectId).then().statusCode(403);
   }
 
   @Test
