@@ -58,20 +58,15 @@ public class ProjectService {
    * First: Note, Tasks, MapRowTarget, MapRow
    * Then: Map
    * Then: Project
-   * @param projectId the id of the project to be deleted
+   * @param project the project to be deleted
    */
   @Transactional
-  public void deleteProject(Long projectId) {
-    Optional<Project> optional = projectRepository.findById(projectId);
-    if (optional.isPresent()) {
-      Project project = optional.get();
-      List<Map> maps = project.getMaps();
-
-      maps.forEach(this::deleteMapRelatives);
-      List<Long> mapIds = maps.stream().map(Map::getId).collect(Collectors.toList());
-      mapRepository.deleteAllById(mapIds);
-      projectRepository.delete(project);
-    }
+  public void deleteProject(Project project) {
+    List<Map> maps = project.getMaps();
+    maps.forEach(this::deleteMapRelatives);
+    List<Long> mapIds = maps.stream().map(Map::getId).collect(Collectors.toList());
+    mapRepository.deleteAllById(mapIds);
+    projectRepository.delete(project);
   }
 
   public PagedModel<EntityModel<ProjectDto>> getFilteredProjects(Pageable pageable,
@@ -109,6 +104,16 @@ public class ProjectService {
     List<ProjectDto> results = query.fetch();
     Page<ProjectDto> page = new PageImpl<>(results, pageable, query.fetchCount());
     return assembler.toModel(page);
+  }
+
+  public Project getProject(Long projectId) {
+    Project project = null;
+    Optional<Project> optional = projectRepository.findById(projectId);
+    if (optional.isPresent()) {
+      project = optional.get();
+    }
+
+    return project;
   }
 
   private void addWhereClause(JPAQuery<ProjectDto> query, ProjectFilter filter) {

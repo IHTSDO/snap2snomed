@@ -5,15 +5,15 @@ import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Schema;
 import org.snomed.snap2snomed.controller.dto.ProjectDto;
+import org.snomed.snap2snomed.model.Project;
 import org.snomed.snap2snomed.problem.auth.NoSuchUserProblem;
-import org.snomed.snap2snomed.problem.auth.NotAuthorisedProblem;
 import org.snomed.snap2snomed.problem.project.DeleteProblem;
-import org.snomed.snap2snomed.problem.task.TaskDeletProblem;
 import org.snomed.snap2snomed.security.WebSecurity;
 import org.snomed.snap2snomed.service.ProjectService;
 import org.snomed.snap2snomed.service.ProjectService.ProjectFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.PagedModel;
@@ -65,12 +65,17 @@ public class ProjectRestController {
       throw new NoSuchUserProblem();
     }
 
+    Project project = projectService.getProject(projectId);
+
+    if (project == null) {
+      throw new ResourceNotFoundException("No Project exists with id " + projectId);
+    }
+
     if (!webSecurity.isAdminUser() && !webSecurity.isProjectOwnerForId(projectId)) {
       throw new DeleteProblem("only-owners", "Only a project owner can delete a project",
           Status.METHOD_NOT_ALLOWED);
     }
 
-    projectService.deleteProject(projectId);
-
+    projectService.deleteProject(project);
   }
 }

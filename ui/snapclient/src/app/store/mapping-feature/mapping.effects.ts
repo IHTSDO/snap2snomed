@@ -164,14 +164,19 @@ export class MappingEffects {
   deleteProject$ = createEffect(() => {
     return this.actions$.pipe(
       ofType(MappingActionTypes.DELETE_PROJECT),
-        map(action => action.payload),
-        switchMap(payload => this.mapService.deleteProject(payload.id).pipe(
-          concatMap(() => [
-            new LoadProjects({pageSize: payload.pageSize, currentPage: payload.currentPage, sort: payload.sort, text: payload.text, role: payload.role}),
-            new LoadSources()
-          ]),
-          catchError(err => of(new DeleteProjectFailure(err)))
-      )));
+      map(action => action.payload),
+      switchMap(payload => this.mapService.deleteProject(payload.id).pipe(
+        concatMap(() => [
+          new LoadProjects({pageSize: payload.pageSize, currentPage: payload.currentPage, sort: payload.sort, text: payload.text, role: payload.role}),
+          new LoadSources()
+        ]),
+        catchError(err => of(
+          new DeleteProjectFailure(err),
+          new LoadProjects({pageSize: payload.pageSize, currentPage: payload.currentPage, sort: payload.sort, text: payload.text, role: payload.role}),
+          new LoadSources())
+        )
+      ))
+    );
   }, {dispatch: true});
 
   loadProjects$ = createEffect(() => {
