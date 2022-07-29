@@ -137,7 +137,8 @@ export class TokenInterceptor implements HttpInterceptor {
               })).subscribe().unsubscribe();
           }
         }
-        if (response instanceof HttpErrorResponse && (response.status === 401 || response.status === 403)) {
+        if (response instanceof HttpErrorResponse && (response.status === 401 || response.status === 403) &&
+          (!request.url.includes(this.config.apiBaseUrl + "/map"))) {
           return new Observable<never>(subscriber => subscriber.unsubscribe());
         } else {
           return throwError(response);

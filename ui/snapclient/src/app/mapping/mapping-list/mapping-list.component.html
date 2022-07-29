@@ -7,7 +7,9 @@
     <button mat-raised-button color="accent" (click)="createMap()">{{'MAP.MAP_ADD' | translate}}</button>
   </mat-toolbar>
   <app-errormessage [error]="error"></app-errormessage>
-
+  <div *ngIf="loading">
+    <app-loading-spinner></app-loading-spinner>
+  </div>
   <div class="container" [ngClass]="{'has-error': error.message}">
     <div class="header">
       <mat-form-field class='filter' appearance="standard">

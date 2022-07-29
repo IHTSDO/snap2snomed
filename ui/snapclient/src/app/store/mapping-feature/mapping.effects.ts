@@ -200,6 +200,13 @@ export class MappingEffects {
     )),
   ), {dispatch: true});
 
+  loadMappingFailure$ = createEffect(() => this.actions$.pipe(
+    ofType(MappingActionTypes.LOAD_MAPPING_FAILED),
+    map((action) => {
+      this.router.navigate([''], {replaceUrl: true, state: {error: action.payload.error}});
+    })
+  ), {dispatch: false});
+
   loadMapView$ = createEffect(() => this.actions$.pipe(
     ofType(MappingActionTypes.LOAD_MAP_VIEW),
     map((action) => action.payload),

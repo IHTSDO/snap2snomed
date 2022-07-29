@@ -7,6 +7,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import org.snomed.snap2snomed.controller.dto.ProjectDto;
 import org.snomed.snap2snomed.problem.auth.NoSuchUserProblem;
 import org.snomed.snap2snomed.problem.auth.NotAuthorisedProblem;
+import org.snomed.snap2snomed.problem.project.DeleteProblem;
+import org.snomed.snap2snomed.problem.task.TaskDeletProblem;
 import org.snomed.snap2snomed.security.WebSecurity;
 import org.snomed.snap2snomed.service.ProjectService;
 import org.snomed.snap2snomed.service.ProjectService.ProjectFilter;
@@ -20,6 +22,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.zalando.problem.Status;
 
 @Validated
 @RestController
@@ -63,7 +66,8 @@ public class ProjectRestController {
     }
 
     if (!webSecurity.isAdminUser() && !webSecurity.isProjectOwnerForId(projectId)) {
-      throw new NotAuthorisedProblem("Only a project owner can delete a project");
+      throw new DeleteProblem("only-owners", "Only a project owner can delete a project",
+          Status.METHOD_NOT_ALLOWED);
     }
 
     projectService.deleteProject(projectId);

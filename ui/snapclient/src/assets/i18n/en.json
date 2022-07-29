@@ -31,6 +31,7 @@
   "ERROR": {
     "LOGIN": "Incorrect username and/or password.",
     "ADD_MAPPING": "Unable to create Map - check required fields",
+    "DELETE_PROJECT": "Unable to delete project",
     "FILE_EXCEEDS_MAX_SIZE": "File size is too large",
     "FILE_TYPE_NOT_SUPPORTED": "File type is not supported",
     "FILE_CONTENTS_INVALID": "File contents are invalid",
@@ -44,8 +45,10 @@
     "LOAD_MAP_TASK": "Unable to load Map Task",
     "LOAD_MAPS": "Error loading Maps",
     "LOAD_TASKS": "Error loading tasks",
+    "NO_ACCESS_DETAIL": "The map you are attempting to view could not be found. This could be because the project no longer exists, or you do not have permission to access it.",
     "NO_CURRENT_USER": "Current user is not found",
     "NO_USER_LIST": "Unable to get list of users",
+    "GENERIC_TITLE": "An error has occurred",
     "UNABLE_TO_GET_ASSIGNED_USERS": "Unable to get list of users currently assigned to tasks in project '{{name}}'",
     "SERVER": "Server Error: Unable to connect with backend",
     "VIOLATION_FIELD": "Element",
