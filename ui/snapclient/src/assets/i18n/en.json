@@ -45,6 +45,8 @@
     "LOAD_MAP_TASK": "Unable to load Map Task",
     "LOAD_MAPS": "Error loading Maps",
     "LOAD_TASKS": "Error loading tasks",
+    "NEW_MAP": "Error creating new version",
+    "NEW_MAP_DETAIL": "The map on which you are trying to create a version could not be found. This could be because the project no longer exists, or you do not have permission to access it.",
     "NO_ACCESS_DETAIL": "The map you are attempting to view could not be found. This could be because the project no longer exists, or you do not have permission to access it.",
     "NO_CURRENT_USER": "Current user is not found",
     "NO_USER_LIST": "Unable to get list of users",

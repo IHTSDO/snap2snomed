@@ -130,7 +130,6 @@ export class MappingListComponent implements OnInit, AfterViewInit, OnDestroy {
         self.translate.get('ERROR.GENERIC_TITLE').subscribe((res: string) => self.error.message = res);
         if (typeof error === 'string' || !error.detail) {
           const errorDetail = new ErrorDetail();
-          errorDetail.status = 404;
           self.translate.get('ERROR.LOAD_MAP').subscribe((res: string) => errorDetail.title = res);
           self.translate.get('ERROR.NO_ACCESS_DETAIL').subscribe((res: string) => errorDetail.detail = res);
           self.error.detail = errorDetail;
@@ -241,6 +240,14 @@ export class MappingListComponent implements OnInit, AfterViewInit, OnDestroy {
           this.newMapping.project = project;
           this.mode = 'FORM.COPY';
           this.opened = true;
+        },
+          err => {
+            this.translate.get('ERROR.GENERIC_TITLE').subscribe((res: string) => this.error.message = res);
+            const errorDetail = new ErrorDetail();
+            this.translate.get('ERROR.NEW_MAP').subscribe((res: string) => errorDetail.title = res);
+            this.translate.get('ERROR.NEW_MAP_DETAIL').subscribe((res: string) => errorDetail.detail = res);
+            this.error.detail = errorDetail;
+            this.store.dispatch(new LoadProjects({pageSize: this.pageSize, currentPage: this.currentPage, sort: `${this.sortCol},${this.sortDir}`, text: this.filterText, role: this.filterRole}));
         }); //TODO: handling
       }
     }
