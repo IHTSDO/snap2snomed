@@ -29,6 +29,7 @@ import {Subscription} from 'rxjs';
 import {FormUtils} from '../../_utils/form_utils';
 import {FormControl} from '@angular/forms';
 import {DroppableEventObject} from "../../_directives/droppable.directive";
+import {Router} from "@angular/router";
 
 @Component({
   selector: 'app-notes-list',
@@ -49,6 +50,7 @@ export class NotesListComponent implements OnInit, OnDestroy {
 
   constructor(private store: Store<IAppState>,
               private translate: TranslateService,
+              private router: Router,
               private mapService: MapService,
               private sourceNavigation: SourceNavigationService) {
     this.newNote = null;
@@ -109,6 +111,10 @@ export class NotesListComponent implements OnInit, OnDestroy {
     if (self.newNote && self.isValid()) {
       self.mapService.createNote(self.newNote).subscribe((result) => {
         self.loadNotes();
+      },
+      error => {
+        // error will occur when user's permissions have changed, or attempting to save note to project that has been deleted.
+        this.router.navigate([''], {replaceUrl: true, state: {error: error.error}});
       });
     }
   }

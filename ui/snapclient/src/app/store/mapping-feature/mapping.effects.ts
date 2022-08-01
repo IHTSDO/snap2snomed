@@ -220,10 +220,17 @@ export class MappingEffects {
       return this.mapService.getMapView(payload.mapping, context.pageIndex,
         context.pageSize, context.sortColumn, context.sortDir, context.filter).pipe(
         switchMap((mapView: MapViewResults) => of(new LoadMapViewSuccess(mapView))),
-        catchError((error: any) => of(new LoadMapViewFailure({error}))),
+        catchError((error: any) => of(new LoadMapViewFailure(error))),
       );
     }),
   ), {dispatch: true});
+
+  loadMapViewFailure$ = createEffect(() => this.actions$.pipe(
+    ofType(MappingActionTypes.LOAD_MAP_VIEW_FAILED),
+    map((action) => {
+      this.router.navigate([''], {replaceUrl: true, state: {error: action.payload.error}});
+    })
+  ), {dispatch: false});
 
   loadTaskView$ = createEffect(() => this.actions$.pipe(
     ofType(MappingActionTypes.LOAD_TASK_VIEW),

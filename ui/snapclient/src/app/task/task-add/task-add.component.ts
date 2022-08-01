@@ -33,8 +33,6 @@ import {Subscription, throwError} from 'rxjs';
 import {selectTaskSaveError} from 'src/app/store/task-feature/task.selectors';
 import {
   selectCurrentMapping,
-  selectMappingLoading,
-  selectMappingState,
   selectSelectedRows
 } from '../../store/mapping-feature/mapping.selectors';
 import {MappingTableSelectorComponent} from 'src/app/mapping/mapping-table-selector/mapping-table-selector.component';
@@ -96,7 +94,9 @@ export class TaskAddComponent implements OnInit, AfterViewInit, OnDestroy {
     self.subscription.add(self.store.select(selectTaskSaveError).subscribe(
       (error) => {
         if (error) {
-          if ([400, 403].indexOf(error.error.status) >= 0 && error.error?.error?.type.indexOf('problem') > 0) {
+          if ([400, 403].indexOf(error.error.status) >= 0 &&
+              error.error?.error?.type.search('problem\/.*([task])+') > 0 &&
+              error.error?.error?.detail) {
             self.handleTaskError(error.error.error);
           } else {
             throw error;

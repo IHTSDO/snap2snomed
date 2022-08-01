@@ -248,7 +248,7 @@ export class MappingListComponent implements OnInit, AfterViewInit, OnDestroy {
             this.translate.get('ERROR.NEW_MAP_DETAIL').subscribe((res: string) => errorDetail.detail = res);
             this.error.detail = errorDetail;
             this.store.dispatch(new LoadProjects({pageSize: this.pageSize, currentPage: this.currentPage, sort: `${this.sortCol},${this.sortDir}`, text: this.filterText, role: this.filterRole}));
-        }); //TODO: handling
+        });
       }
     }
   }
@@ -277,12 +277,7 @@ export class MappingListComponent implements OnInit, AfterViewInit, OnDestroy {
       this.translate.get('MAP.NO_MAPS_FOUND').subscribe((res) => this.error.message = `${project.title}: ${res}`);
     } else if (this.currentUser && this.hasProjectRole(project)) {
       const mappingid = this.selectedMapping[project.id]?.id;
-      this.router.navigate(['map-view', mappingid], {replaceUrl: false})
-        .then(onfulfilled => console.log(onfulfilled))
-                 .catch(result => {
-                   debugger;
-                   console.log(result)
-                 });
+      this.router.navigate(['map-view', mappingid], {replaceUrl: false});
     }
   }
 
