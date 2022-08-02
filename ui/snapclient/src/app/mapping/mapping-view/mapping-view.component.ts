@@ -77,7 +77,7 @@ export class MappingViewComponent implements OnInit, AfterViewInit, OnDestroy {
 
   private mapping_id: string | null = null;
 
-  private import_dialog_width = '650px';
+  private import_dialog_width = '1000px';
 
   mapping: Mapping | null | undefined;
   error: ErrorInfo = {};
@@ -324,7 +324,21 @@ export class MappingViewComponent implements OnInit, AfterViewInit, OnDestroy {
         let details = JSON.stringify(res);
         if (res.error) {
           if (res.error.detail) {
-            details = res.error.detail;
+            if (res.error.detail.startsWith("No enum constant org.snomed.snap2snomed.model.enumeration.MappingRelationship")) {
+              const val = res.error.detail.substr(res.error.detail.lastIndexOf('.') + 1);
+              this.translate.get('ERROR.FILE_CONTENTS_INVALID_RELATIONSHIP', {val: val}).subscribe((msg) => {
+                details = msg;
+              })
+            }
+            else if (res.error.detail.startsWith("No enum constant org.snomed.snap2snomed.model.enumeration.MapStatus")) {
+              const val = res.error.detail.substr(res.error.detail.lastIndexOf('.') + 1);
+              this.translate.get('ERROR.FILE_CONTENTS_INVALID_MAP_STATUS', {val: val}).subscribe((msg) => {
+                details = msg;
+              })
+            }
+            else {
+              details = res.error.detail;
+            }
           } else if (res.error.title) {
             details = res.error.title;
           }

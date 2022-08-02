@@ -15,3 +15,22 @@
 mat-icon {
   margin-right: 5px;
 }
+
+.table-container {
+  max-width: 100%;
+  overflow: auto;
+}
+
+.mat-form-field {
+  margin-right: 10px;
+}
+
+.row {
+  display: flex;
+}
+
+/* Create two equal columns that sits next to each other */
+.column {
+  flex: 50%;
+  padding: 10px;
+}

@@ -22,6 +22,8 @@ export class MappingImportSource {
   targetCodeColumnIndex: number | null;
   targetDisplayColumnIndex: number | null;
   relationshipColumnIndex: number | null;
+  noMapFlagColumnIndex: number | null;
+  statusColumnIndex: number | null;
   source_file?: File | null;
   delimiter?: string | null;
   mapId: string | null;
@@ -34,6 +36,8 @@ export class MappingImportSource {
     this.targetCodeColumnIndex = null;
     this.targetDisplayColumnIndex = null;
     this.relationshipColumnIndex = null;
+    this.noMapFlagColumnIndex = null;
+    this.statusColumnIndex = null;
     this.source_file = null;
     this.delimiter = null;
     this.mapId = null;
