@@ -44,6 +44,7 @@ import {APP_CONFIG} from '../../app.config';
 import {MatSnackBarModule} from '@angular/material/snack-bar';
 import {NoopAnimationsModule} from '@angular/platform-browser/animations';
 import {MatTableModule} from "@angular/material/table";
+import {MAT_DIALOG_DATA, MatDialogModule, MatDialogRef} from '@angular/material/dialog';
 
 describe('MappingListComponent', () => {
   let component: MappingListComponent;
@@ -61,6 +62,7 @@ describe('MappingListComponent', () => {
         RouterTestingModule,
         HttpClientTestingModule,
         MatButtonModule,
+        MatDialogModule,
         MatDividerModule,
         MatIconModule,
         MatMenuModule,
@@ -80,6 +82,8 @@ describe('MappingListComponent', () => {
       ],
       providers: [
         { provide: APP_CONFIG, useValue: {} },
+        {provide: MatDialogRef, useValue: {}},
+        {provide: MAT_DIALOG_DATA, useValue: {}},
         provideMockStore({
         initialState: initialAppState,
         selectors: [

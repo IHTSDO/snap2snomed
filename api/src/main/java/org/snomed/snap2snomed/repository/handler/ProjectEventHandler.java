@@ -34,7 +34,6 @@ import org.snomed.snap2snomed.security.AuthenticationFacade;
 import org.snomed.snap2snomed.security.WebSecurity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.rest.core.annotation.*;
-import org.springframework.security.access.prepost.PreAuthorize;
 
 @RepositoryEventHandler
 public class ProjectEventHandler {

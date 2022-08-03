@@ -19,8 +19,13 @@ import {MapService} from '../../_services/map.service';
 import {NavigationEnd, Router} from '@angular/router';
 import {Store} from '@ngrx/store';
 import {IAppState} from '../../store/app.state';
-import {selectProjectPage, selectProjects} from '../../store/mapping-feature/mapping.selectors';
-import {LoadProjects} from '../../store/mapping-feature/mapping.actions';
+import {
+  selectMappingError,
+  selectMappingLoading,
+  selectProjectPage,
+  selectProjects
+} from '../../store/mapping-feature/mapping.selectors';
+import {DeleteProject, LoadProjects} from '../../store/mapping-feature/mapping.actions';
 import {Project} from '../../_models/project';
 import {TranslateService} from '@ngx-translate/core';
 import {ErrorInfo} from '../../errormessage/errormessage.component';
@@ -35,6 +40,9 @@ import {MatSelectChange} from "@angular/material/select";
 import {MatSort} from '@angular/material/sort';
 import {debounce} from "lodash";
 import {tap} from "rxjs/operators";
+import {ConfirmDialogComponent, DialogType} from "../../dialog/confirm-dialog/confirm-dialog.component";
+import {MatDialog} from "@angular/material/dialog";
+import {ErrorDetail} from "../../_models/error_detail";
 
 @Component({
   selector: 'app-mapping-list',
@@ -83,11 +91,20 @@ export class MappingListComponent implements OnInit, AfterViewInit, OnDestroy {
   filterText = '';
   filterRole = 'all';
 
+  // dialog
+  confirm = '';
+  cancel = '';
+  confirmTitle = '';
+  confirmMessage = '';
+
+  loading = false;
+
   constructor(private mapService: MapService,
               private authService: AuthService,
               private router: Router,
               private translate: TranslateService,
-              private store: Store<IAppState>) {
+              private store: Store<IAppState>,
+              public dialog: MatDialog) {
     /**
      * NavigationSubscription is required for router onSameUrlNavigation: 'reload'
      * to reload any data for the page component
@@ -97,10 +114,26 @@ export class MappingListComponent implements OnInit, AfterViewInit, OnDestroy {
         this.store.dispatch(new LoadProjects({pageSize: this.pageSize, currentPage: this.currentPage, sort: `${this.sortCol},${this.sortDir}`, text: this.filterText, role: this.filterRole}));
       }
     });
+
+    this.translate.get('PROJECT.DELETE').subscribe((msg) => this.confirm = msg);
+    this.translate.get('PROJECT.CANCEL').subscribe((msg) => this.cancel = msg);
+    this.translate.get('PROJECT.TITLE_CONFIRM').subscribe((msg) => this.confirmTitle = msg);
+    this.translate.get('PROJECT.CONFIRM_DELETE').subscribe((msg) => this.confirmMessage = msg);
   }
 
   ngOnInit(): void {
-    this.store.dispatch(new LoadProjects({pageSize: this.pageSize, currentPage: this.currentPage, sort: `${this.sortCol},${this.sortDir}`, text: this.filterText, role: this.filterRole}));
+    const self = this;
+    self.store.dispatch(new LoadProjects({pageSize: this.pageSize, currentPage: this.currentPage, sort: `${this.sortCol},${this.sortDir}`, text: this.filterText, role: this.filterRole}));
+    self.store.select(selectMappingLoading).subscribe((res) => this.loading = res);
+    self.store.select(selectMappingError).subscribe((error) => {
+      if (error !== null) {
+        this.setError(error);
+      }
+    });
+
+    if (window.history.state?.error) {
+      this.setError(window.history.state.error);
+    }
   }
 
   ngAfterViewInit(): void {
@@ -202,9 +235,36 @@ export class MappingListComponent implements OnInit, AfterViewInit, OnDestroy {
           this.newMapping.project = project;
           this.mode = 'FORM.COPY';
           this.opened = true;
+        },
+          err => {
+            this.translate.get('ERROR.GENERIC_TITLE').subscribe((res: string) => this.error.message = res);
+            const errorDetail = new ErrorDetail();
+            this.translate.get('ERROR.NEW_MAP').subscribe((res: string) => errorDetail.title = res);
+            this.translate.get('ERROR.NEW_MAP_DETAIL').subscribe((res: string) => errorDetail.detail = res);
+            this.error.detail = errorDetail;
+            this.store.dispatch(new LoadProjects({pageSize: this.pageSize, currentPage: this.currentPage, sort: `${this.sortCol},${this.sortDir}`, text: this.filterText, role: this.filterRole}));
         });
       }
     }
+  }
+
+  deleteProject(project: Project): void {
+    const self = this;
+    const confirmDialogRef = self.dialog.open(ConfirmDialogComponent, {
+      data: {
+        title: self.confirmTitle,
+        message: self.confirmMessage,
+        button: self.confirm,
+        cancel: self.cancel,
+        type: DialogType.CONFIRM
+      }
+    });
+    confirmDialogRef.afterClosed().subscribe(
+      (ok) => {
+        if (ok) {
+          this.store.dispatch(new DeleteProject({id: project.id, pageSize: this.pageSize, currentPage: this.currentPage, sort: `${this.sortCol},${this.sortDir}`, text: this.filterText, role: this.filterRole}));
+        }
+      });
   }
 
   viewMapping(project: Project): void {
@@ -257,5 +317,18 @@ export class MappingListComponent implements OnInit, AfterViewInit, OnDestroy {
           self.currentPage = data.number;
         }
       }));
+  }
+
+  private setError(error: any): void {
+    this.translate.get('ERROR.GENERIC_TITLE').subscribe((res: string) => this.error.message = res);
+    if (typeof error === 'string' || !error.detail) {
+      const errorDetail = new ErrorDetail();
+      this.translate.get('ERROR.LOAD_MAP').subscribe((res: string) => errorDetail.title = res);
+      this.translate.get('ERROR.NO_ACCESS_DETAIL').subscribe((res: string) => errorDetail.detail = res);
+      this.error.detail = errorDetail;
+    }
+    else {
+      this.error.detail = error;
+    }
   }
 }
