@@ -131,7 +131,7 @@ export class MappingListComponent implements OnInit, AfterViewInit, OnDestroy {
       }
     });
 
-    if (window.history.state.error) {
+    if (window.history.state?.error) {
       this.setError(window.history.state.error);
     }
   }
