@@ -99,7 +99,7 @@ export class ConceptPropertiesComponent implements OnInit, OnDestroy {
           // replace module id with preferred term
           var foundIndex = this.propertiesView.findIndex(x => x.key == 'module');
           if (foundIndex > -1) {
-            this.propertiesView[foundIndex] = { key: 'module', value: [props['Preferred For Language'][0][0]] };
+            this.propertiesView[foundIndex] = { key: 'module', value: [props['display'][0][0]] };
             // trigger angular change detection
             this.propertiesView =  [...this.propertiesView];
           }
