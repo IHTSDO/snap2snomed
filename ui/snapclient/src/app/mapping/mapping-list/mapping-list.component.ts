@@ -127,18 +127,13 @@ export class MappingListComponent implements OnInit, AfterViewInit, OnDestroy {
     self.store.select(selectMappingLoading).subscribe((res) => this.loading = res);
     self.store.select(selectMappingError).subscribe((error) => {
       if (error !== null) {
-        self.translate.get('ERROR.GENERIC_TITLE').subscribe((res: string) => self.error.message = res);
-        if (typeof error === 'string' || !error.detail) {
-          const errorDetail = new ErrorDetail();
-          self.translate.get('ERROR.LOAD_MAP').subscribe((res: string) => errorDetail.title = res);
-          self.translate.get('ERROR.NO_ACCESS_DETAIL').subscribe((res: string) => errorDetail.detail = res);
-          self.error.detail = errorDetail;
-        }
-        else {
-          self.error.detail = error;
-        }
+        this.setError(error);
       }
     });
+
+    if (window.history.state.error) {
+      this.setError(window.history.state.error);
+    }
   }
 
   ngAfterViewInit(): void {
@@ -322,5 +317,18 @@ export class MappingListComponent implements OnInit, AfterViewInit, OnDestroy {
           self.currentPage = data.number;
         }
       }));
+  }
+
+  private setError(error: any): void {
+    this.translate.get('ERROR.GENERIC_TITLE').subscribe((res: string) => this.error.message = res);
+    if (typeof error === 'string' || !error.detail) {
+      const errorDetail = new ErrorDetail();
+      this.translate.get('ERROR.LOAD_MAP').subscribe((res: string) => errorDetail.title = res);
+      this.translate.get('ERROR.NO_ACCESS_DETAIL').subscribe((res: string) => errorDetail.detail = res);
+      this.error.detail = errorDetail;
+    }
+    else {
+      this.error.detail = error;
+    }
   }
 }
