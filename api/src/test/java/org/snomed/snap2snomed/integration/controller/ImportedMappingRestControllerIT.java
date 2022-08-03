@@ -106,7 +106,7 @@ public class ImportedMappingRestControllerIT extends IntegrationTestBase {
    */
   @Test
   public void shouldCreateEntity() throws Exception {
-    verifyImportedMap(0, 2, 3, 4, true, "\t", new ClassPathResource("AAA-mapimport.tsv").getFile(), "text/tsv", AAA_TSV_COLUMN_2_LIST, mapId);
+    verifyImportedMap(0, 2, 3, 4, -1, -1, true, "\t", new ClassPathResource("AAA-mapimport.tsv").getFile(), "text/tsv", AAA_TSV_COLUMN_2_LIST, mapId);
   }
 
   /**
@@ -114,7 +114,7 @@ public class ImportedMappingRestControllerIT extends IntegrationTestBase {
    */
   @Test
   public void shouldCreateEntityCSV() throws Exception {
-    verifyImportedMap(0, 2, 3, 4, true, ",", new ClassPathResource("AAA-mapimport.csv").getFile(), "text/csv", AAA_TSV_COLUMN_2_LIST, mapId);
+    verifyImportedMap(0, 2, 3, 4, -1, -1, true, ",", new ClassPathResource("AAA-mapimport.csv").getFile(), "text/csv", AAA_TSV_COLUMN_2_LIST, mapId);
   }
 
   /**
@@ -122,7 +122,7 @@ public class ImportedMappingRestControllerIT extends IntegrationTestBase {
    */
   @Test
   public void failCreateEntityInvalidMapId() throws Exception {
-    restClient.expectCreateImportedMapFail( 0, 2, 3, 4, true, "\t", new ClassPathResource("AAA-mapimport.tsv").getFile(),
+    restClient.expectCreateImportedMapFail( 0, 2, 3, 4, -1, -1, true, "\t", new ClassPathResource("AAA-mapimport.tsv").getFile(),
         "text/tsv", mapId + 1000, 400, INVALID_MAP_ID_URI, DEFAULT_TEST_USER_SUBJECT);
   }
 
@@ -131,7 +131,7 @@ public class ImportedMappingRestControllerIT extends IntegrationTestBase {
    */
   @Test
   public void failCreateEntityUnauthorisedUser() throws Exception {
-    restClient.expectCreateImportedMapFail( 0, 2, 3, 4, true, "\t", new ClassPathResource("AAA-mapimport.tsv").getFile(),
+    restClient.expectCreateImportedMapFail( 0, 2, 3, 4, -1, -1, true, "\t", new ClassPathResource("AAA-mapimport.tsv").getFile(),
         "text/tsv", mapId, 403, UNAUTHORISED_USER_PROBLEM_URI, UNAUTHORISED_TEST_USER_SUBJECT);
   }
 
@@ -140,7 +140,7 @@ public class ImportedMappingRestControllerIT extends IntegrationTestBase {
    */
   @Test
   public void failCreateEntityIllegalContentType() throws Exception {
-    restClient.expectCreateImportedMapFail( 0, 2, 3, 4, true, "\t", new ClassPathResource("AAA-mapimport.tsv").getFile(),
+    restClient.expectCreateImportedMapFail( 0, 2, 3, 4, -1, -1, true, "\t", new ClassPathResource("AAA-mapimport.tsv").getFile(),
         "application/json", mapId, 406, null, DEFAULT_TEST_USER_SUBJECT);
   }
 
@@ -149,7 +149,7 @@ public class ImportedMappingRestControllerIT extends IntegrationTestBase {
    */
   @Test
   public void failCreateEntityEmptyFileTextPlain() throws Exception {
-    restClient.expectCreateImportedMapFail( 0, 2, 3, 4, true, "\t", new ClassPathResource("empty.txt").getFile(),
+    restClient.expectCreateImportedMapFail( 0, 2, 3, 4, -1, -1, true, "\t", new ClassPathResource("empty.txt").getFile(),
         "text/plain", mapId, 400, null, DEFAULT_TEST_USER_SUBJECT);
   }
 
@@ -159,7 +159,7 @@ public class ImportedMappingRestControllerIT extends IntegrationTestBase {
    */
   @Test
   public void failCreateEntityEmptyFileTextCsv() throws Exception {
-    restClient.expectCreateImportedMapFail( 0, 2, 3, 4, true, "\t", new ClassPathResource("empty.txt").getFile(),
+    restClient.expectCreateImportedMapFail( 0, 2, 3, 4, -1, -1, true, "\t", new ClassPathResource("empty.txt").getFile(),
         "text/csv", mapId, 400, null, DEFAULT_TEST_USER_SUBJECT);
   }
 
@@ -168,7 +168,7 @@ public class ImportedMappingRestControllerIT extends IntegrationTestBase {
    */
   @Test
   public void failCreateEntityEmptyFileTextTsv() throws Exception {
-    restClient.expectCreateImportedMapFail( 0, 2, 3, 4, true, "\t", new ClassPathResource("empty.txt").getFile(),
+    restClient.expectCreateImportedMapFail( 0, 2, 3, 4, -1, -1, true, "\t", new ClassPathResource("empty.txt").getFile(),
         "text/tsv", mapId, 400, null, DEFAULT_TEST_USER_SUBJECT);
   }
 
@@ -177,7 +177,7 @@ public class ImportedMappingRestControllerIT extends IntegrationTestBase {
    */
   @Test
   public void failCreateEntityRubbishFileTextPlain() throws Exception {
-    restClient.expectCreateImportedMapFail( 0, 2, 3, 4, true, "\t", new ClassPathResource("rubbish.tsv").getFile(),
+    restClient.expectCreateImportedMapFail( 0, 2, 3, 4, -1, -1, true, "\t", new ClassPathResource("rubbish.tsv").getFile(),
         "text/plain", mapId, 400, null, DEFAULT_TEST_USER_SUBJECT);
   }
 
@@ -186,7 +186,7 @@ public class ImportedMappingRestControllerIT extends IntegrationTestBase {
    */
   @Test
   public void failCreateEntityRubbishFileTsv() throws Exception {
-    restClient.expectCreateImportedMapFail( 0, 2, 3, 4, true, "\t", new ClassPathResource("rubbish.tsv").getFile(),
+    restClient.expectCreateImportedMapFail( 0, 2, 3, 4, -1, -1, true, "\t", new ClassPathResource("rubbish.tsv").getFile(),
         "text/tsv", mapId, 400, null, DEFAULT_TEST_USER_SUBJECT);
   }
 
@@ -195,7 +195,7 @@ public class ImportedMappingRestControllerIT extends IntegrationTestBase {
    */
   @Test
   public void failCreateEntityRubbishFileCsv() throws Exception {
-    restClient.expectCreateImportedMapFail( 0, 2, 3, 4, true, "\t", new ClassPathResource("rubbish.tsv").getFile(),
+    restClient.expectCreateImportedMapFail( 0, 2, 3, 4, -1, -1, true, "\t", new ClassPathResource("rubbish.tsv").getFile(),
         "text/csv", mapId, 400, null, DEFAULT_TEST_USER_SUBJECT);
   }
 
@@ -204,7 +204,7 @@ public class ImportedMappingRestControllerIT extends IntegrationTestBase {
    */
   @Test
   public void failCreateEntityBadRelationshipColumn() throws Exception {
-    restClient.expectCreateImportedMapFail( 0, 2, 3, 1, true, "\t", new ClassPathResource("AAA-mapimport.tsv").getFile(),
+    restClient.expectCreateImportedMapFail( 0, 2, 3, 1, -1, -1, true, "\t", new ClassPathResource("AAA-mapimport.tsv").getFile(),
         "text/tsv", mapId, 400, null, DEFAULT_TEST_USER_SUBJECT);
   }
 
@@ -213,10 +213,10 @@ public class ImportedMappingRestControllerIT extends IntegrationTestBase {
    */
   @Test
   public void failCreateEntityInvalidCsv() throws Exception {
-    restClient.expectCreateImportedMapFail(0, 2, 3, 4, true, ",",
+    restClient.expectCreateImportedMapFail(0, 2, 3, 4, -1, -1, true, ",",
         new ClassPathResource("AAA_invalid_csv_mixeddelimiters.csv").getFile(), "text/csv", mapId,
         400, null, DEFAULT_TEST_USER_SUBJECT);
-    restClient.expectCreateImportedMapFail(0, 2, 3, 4, true, ",",
+    restClient.expectCreateImportedMapFail(0, 2, 3, 4, -1, -1, true, ",",
         new ClassPathResource("AAA_invalid_csv_doublequotes.csv").getFile(), "text/csv", mapId,
         400, null, DEFAULT_TEST_USER_SUBJECT);
   }
@@ -237,7 +237,7 @@ public class ImportedMappingRestControllerIT extends IntegrationTestBase {
    */
   @Test
   public void shouldCreateEntityFromLargeFile() throws Exception {
-    verifyImportedMapRowTargerts(0, 2, 3, 4, true, ",", new File("target/large.csv"), "text/csv", mapId2);
+    verifyImportedMapRowTargerts(0, 2, 3, 4, -1, -1, true, ",", new File("target/large.csv"), "text/csv", mapId2);
   }
 
   /**
@@ -245,7 +245,7 @@ public class ImportedMappingRestControllerIT extends IntegrationTestBase {
    */
   @Test
   public void failCreateEntityFromTooLargeFile() throws Exception {
-    restClient.expectCreateImportedMapFail( 0, 2, 3, 4, true, ",", new File("target/too-large.csv"),
+    restClient.expectCreateImportedMapFail( 0, 2, 3, 4, -1, -1, true, ",", new File("target/too-large.csv"),
         "text/csv", mapId, 400, TOO_LARGE_FILE_PROBLEM_URI, DEFAULT_TEST_USER_SUBJECT);
   }
 
@@ -254,7 +254,7 @@ public class ImportedMappingRestControllerIT extends IntegrationTestBase {
    */
   @Test
   public void failCreateEntityTargetCodeTooLong() throws Exception {
-    restClient.expectCreateImportedMapFail( 0, 2, 3, 4, true, "\t",
+    restClient.expectCreateImportedMapFail( 0, 2, 3, 4, -1, -1, true, "\t",
       new ClassPathResource("AAA-mapimport-too-long-targetcode.tsv").getFile(), "text/tsv",
       mapId, 400, CODE_SIZE_PROBLEM_URI, DEFAULT_TEST_USER_SUBJECT);
   }
@@ -264,7 +264,7 @@ public class ImportedMappingRestControllerIT extends IntegrationTestBase {
    */
   @Test
   public void failCreateEntityTargetDisplayTooLong() throws Exception {
-    restClient.expectCreateImportedMapFail( 0, 2, 3, 4, true, "\t",
+    restClient.expectCreateImportedMapFail( 0, 2, 3, 4, -1, -1, true, "\t",
       new ClassPathResource("AAA-mapimport-too-long-targetdisplay.tsv").getFile(), "text/tsv",
       mapId, 400, DISPLAY_SIZE_PROBLEM_URI, DEFAULT_TEST_USER_SUBJECT);
   }
@@ -274,7 +274,7 @@ public class ImportedMappingRestControllerIT extends IntegrationTestBase {
    */
   @Test
   public void failCreateEntityTargetDisplayIndex() throws Exception {
-    restClient.expectCreateImportedMapFail( 0, 2, 9, 4, true, "\t",
+    restClient.expectCreateImportedMapFail( 0, 2, 9, 4, -1, -1, true, "\t",
       new ClassPathResource("AAA-mapimport.tsv").getFile(), "text/tsv",
       mapId, 400, TAGET_DISPLAY_INDEX_PROBLEM_URI, DEFAULT_TEST_USER_SUBJECT);
   }
@@ -284,7 +284,7 @@ public class ImportedMappingRestControllerIT extends IntegrationTestBase {
    */
   @Test
   public void failCreateEntityCodeIndex() throws Exception {
-    restClient.expectCreateImportedMapFail( 9, 2, 3, 4, true, "\t",
+    restClient.expectCreateImportedMapFail( 9, 2, 3, 4, -1, -1, true, "\t",
       new ClassPathResource("AAA-mapimport.tsv").getFile(), "text/tsv",
       mapId, 400, CODE_INDEX_PROBLEM_URI, DEFAULT_TEST_USER_SUBJECT);
   }
@@ -294,7 +294,7 @@ public class ImportedMappingRestControllerIT extends IntegrationTestBase {
    */
   @Test
   public void failCreateEntityTargetCodeIndex() throws Exception {
-    restClient.expectCreateImportedMapFail( 0, 9, 3, 4, true, "\t",
+    restClient.expectCreateImportedMapFail( 0, 9, 3, 4, -1, -1, true, "\t",
       new ClassPathResource("AAA-mapimport.tsv").getFile(), "text/tsv",
       mapId, 400, TARGET_CODE_INDEX_PROBLEM_URI, DEFAULT_TEST_USER_SUBJECT);
   }
@@ -304,7 +304,7 @@ public class ImportedMappingRestControllerIT extends IntegrationTestBase {
    */
   @Test
   public void failCreateEntityRelationshipIndex() throws Exception {
-    restClient.expectCreateImportedMapFail( 0, 2, 3, 9, true, "\t",
+    restClient.expectCreateImportedMapFail( 0, 2, 3, 9, -1, -1, true, "\t",
       new ClassPathResource("AAA-mapimport.tsv").getFile(), "text/tsv",
       mapId, 400, RELATIONSHIP_INDEX_PROBLEM_URI, DEFAULT_TEST_USER_SUBJECT);
   }
@@ -314,7 +314,7 @@ public class ImportedMappingRestControllerIT extends IntegrationTestBase {
    */
   @Test
   public void failCreateEntityDuplicateCode() throws Exception {
-    restClient.expectCreateImportedMapFail( 0, 2, 3, 4, true, "\t",
+    restClient.expectCreateImportedMapFail( 0, 2, 3, 4, -1, -1, true, "\t",
       new ClassPathResource("AAA-mapimport-duplicate.tsv").getFile(), "text/tsv",
       mapId, 400, DUPLICATE_CODE_PROBLEM_URI, DEFAULT_TEST_USER_SUBJECT);
   }
@@ -325,7 +325,7 @@ public class ImportedMappingRestControllerIT extends IntegrationTestBase {
    */
   @Test
   public void failCreateEntityBlankCode() throws Exception {
-    restClient.expectCreateImportedMapFail( 0, 2, 3, 4, true, "\t",
+    restClient.expectCreateImportedMapFail( 0, 2, 3, 4, -1, -1, true, "\t",
       new ClassPathResource("AAA-mapimport-blankcode.tsv").getFile(), "text/tsv",
       mapId, 400, CODE_BLANK_PROBLEM_URI, DEFAULT_TEST_USER_SUBJECT);
   }
@@ -335,7 +335,7 @@ public class ImportedMappingRestControllerIT extends IntegrationTestBase {
    */
   @Test
   public void shouldNotFailCreateEntityBlankTargetCode() throws Exception {
-    restClient.expectCreateImportedMapFail( 0, 2, 3, 4, true, "\t",
+    restClient.expectCreateImportedMapFail( 0, 2, 3, 4, -1, -1, true, "\t",
       new ClassPathResource("AAA-mapimport-blanktargetcode.tsv").getFile(), "text/tsv",
       mapId, 200, null, DEFAULT_TEST_USER_SUBJECT);
   }
@@ -345,7 +345,7 @@ public class ImportedMappingRestControllerIT extends IntegrationTestBase {
    */
   @Test
   public void failCreateEntityBlankDisplay() throws Exception {
-    restClient.expectCreateImportedMapFail( 0, 2, 3, 4, true, "\t",
+    restClient.expectCreateImportedMapFail( 0, 2, 3, 4, -1, -1, true, "\t",
       new ClassPathResource("AAA-mapimport-blanktargetdisplay.tsv").getFile(), "text/tsv",
       mapId, 400, DISPLAY_BLANK_PROBLEM_URI, DEFAULT_TEST_USER_SUBJECT);    
   }
@@ -355,7 +355,7 @@ public class ImportedMappingRestControllerIT extends IntegrationTestBase {
    */
   @Test
   public void failCreateEntityInvalidCode() throws Exception {
-    restClient.expectCreateImportedMapFail( 0, 2, 3, 4, true, "\t",
+    restClient.expectCreateImportedMapFail( 0, 2, 3, 4, -1, -1, true, "\t",
       new ClassPathResource("AAA-mapimport-invalidcode.tsv").getFile(), "text/tsv",
       mapId, 400, INVALID_DATA_PROBLEM_URI, DEFAULT_TEST_USER_SUBJECT);    
   }
@@ -365,7 +365,7 @@ public class ImportedMappingRestControllerIT extends IntegrationTestBase {
    */
   @Test
   public void failCreateEntityWithoutHeader() throws Exception {
-    restClient.expectCreateImportedMapFail( 0, 2, 3, 4, false, "\t",
+    restClient.expectCreateImportedMapFail( 0, 2, 3, 4, -1, -1, false, "\t",
       new ClassPathResource("AAA-mapimport-noheader.tsv").getFile(), "text/tsv",
       mapId, 400, NO_HEADER_PROBLEM_URI, DEFAULT_TEST_USER_SUBJECT);
   }
@@ -375,7 +375,7 @@ public class ImportedMappingRestControllerIT extends IntegrationTestBase {
    */
   @Test
   public void shouldImportfileWithSemicolonDelimiter() throws Exception {
-    verifyImportedMap(0, 2, 3, 4, true, ";", new ClassPathResource("AAA-mapimport-semicolon.csv")
+    verifyImportedMap(0, 2, 3, 4, -1, -1, true, ";", new ClassPathResource("AAA-mapimport-semicolon.csv")
       .getFile(), "text/tsv", AAA_TSV_COLUMN_2_LIST, mapId);
   }
 
@@ -384,17 +384,17 @@ public class ImportedMappingRestControllerIT extends IntegrationTestBase {
    */
   @Test
   public void shouldImportCSVFileWithTabDelimiter() throws Exception {
-    restClient.expectCreateImportedMapFail( 0, 2, 3, 4, true, "\t",
+    restClient.expectCreateImportedMapFail( 0, 2, 3, 4, -1, -1, true, "\t",
     new ClassPathResource("AAA-mapimport.csv").getFile(), "text/tsv",
       mapId, 400, DELIMITER_PROBLEM_URI, DEFAULT_TEST_USER_SUBJECT);
   }
 
   private void verifyImportedMap(int codeColumnIndex, int targetColumnIndex, int targetDisplayColumnIndex,
-  int relationshipColumnIndex, boolean hasHeader, String delimiter, File file, String fileType, String[] targetCodes, Long theMapId)
+  int relationshipColumnIndex, int noMapFlagColumnIndex, int statusColumnIndex, boolean hasHeader, String delimiter, File file, String fileType, String[] targetCodes, Long theMapId)
       throws JsonProcessingException, JsonMappingException, UnsupportedEncodingException, Exception {
 
     verifyImportedMapRowTargerts(codeColumnIndex, targetColumnIndex, targetDisplayColumnIndex, relationshipColumnIndex,
-        hasHeader, delimiter, file, fileType, theMapId);
+        noMapFlagColumnIndex, statusColumnIndex, hasHeader, delimiter, file, fileType, theMapId);
 
     List<MapRowTarget> mapRowTargets = restClient.givenDefaultUser().queryParam("mapId", theMapId)
         .get("/mapRowTargets/search/findByMapId")
@@ -408,9 +408,9 @@ public class ImportedMappingRestControllerIT extends IntegrationTestBase {
   }
 
   private void verifyImportedMapRowTargerts(int codeColumnIndex, int targetColumnIndex, int targetDisplayColumnIndex,
-      int relationshipColumnIndex, boolean hasHeader, String delimiter, File file, String fileType, Long theMapId) throws Exception {
+      int relationshipColumnIndex, int noMapFlagColumnIndex, int statusColumnIndex, boolean hasHeader, String delimiter, File file, String fileType, Long theMapId) throws Exception {
     MappingImportResponse response = restClient.createImportedMap(codeColumnIndex, targetColumnIndex,
-              targetDisplayColumnIndex, relationshipColumnIndex, hasHeader, delimiter, file, fileType, theMapId);
+              targetDisplayColumnIndex, relationshipColumnIndex, noMapFlagColumnIndex, statusColumnIndex, hasHeader, delimiter, file, fileType, theMapId);
 
     assertThat(response.getInsertCount()).isGreaterThan(0);
     assertThat(response.getRecordCount()).isGreaterThanOrEqualTo(response.getInsertCount());
