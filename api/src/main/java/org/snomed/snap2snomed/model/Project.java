@@ -88,7 +88,7 @@ public class Project implements Snap2SnomedEntity {
   @Size(min = 1, max = 200, message = "Description must be between 1 and 200 characters")
   private String description;
 
-  @OneToMany(mappedBy = "project", cascade = CascadeType.PERSIST)
+  @OneToMany(mappedBy = "project", cascade = {CascadeType.PERSIST, CascadeType.REMOVE}, orphanRemoval = true)
   @ToString.Exclude
   @EqualsAndHashCode.Exclude
   private List<@NotNull Map> maps;
