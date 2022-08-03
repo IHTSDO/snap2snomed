@@ -427,8 +427,12 @@ public class Snap2snomedRestClient {
     return mappingImportResponse;
   }
 
+  /**
+   * @param noMapFlagColumnIndex supply -1 for no selection
+   * @param statusColumnIndex supply -1 for no selection
+   */
   public void expectCreateImportedMapFail(int codeColumnIndex, int targetColumnIndex, int targetDisplayColumnIndex,
-      int relationshipColumnIndex, int noMapFlagColumnIndex, int statusColumnIndex,boolean hasHeader, String delimiter, 
+      int relationshipColumnIndex, int noMapFlagColumnIndex, int statusColumnIndex, boolean hasHeader, String delimiter, 
       File file, String fileType, Long mapId, int status, String errorUri, String subject)
       throws JsonProcessingException {
     java.util.Map<String, Object> map = new HashMap<>();
@@ -437,8 +441,18 @@ public class Snap2snomedRestClient {
     map.put("targetCodeColumnIndex", targetColumnIndex);
     map.put("targetDisplayColumnIndex", targetDisplayColumnIndex);
     map.put("relationshipColumnIndex", relationshipColumnIndex);
-    map.put("noMapFlagColumnIndex", noMapFlagColumnIndex);
-    map.put("statusColumnIndex", statusColumnIndex);
+    if (Integer.valueOf(noMapFlagColumnIndex) == Integer.valueOf(-1)) {
+      map.put("noMapFlagColumnIndex", null); 
+    }
+    else {
+      map.put("noMapFlagColumnIndex", noMapFlagColumnIndex);
+    }
+    if (Integer.valueOf(statusColumnIndex) == Integer.valueOf(-1)) {
+      map.put("statusColumnIndex", null);
+    }
+    else {
+      map.put("statusColumnIndex", statusColumnIndex);
+    }
     map.put("hasHeader", hasHeader);
     map.put("delimiter", delimiter);
     map.put("mapId", mapId);
