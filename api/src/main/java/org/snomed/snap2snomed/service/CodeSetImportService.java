@@ -230,9 +230,9 @@ public class CodeSetImportService {
 
       // update the status and no_map flag for all rows with a target or a no_map
       statement = connection.prepareStatement(
-        "UPDATE map_row SET status = ?, no_map = ? modified = ? WHERE id = ?");
+        "UPDATE map_row SET status = ?, no_map = ?, modified = ? WHERE id = ?");
       for (MapRowTargetParams mapRowTargetParam : mapRowTargetParams) {
-        statement.setInt(1, mapRowTargetParam.getStatus()); //|| MapStatus.DRAFT.ordinal()
+        statement.setInt(1, mapRowTargetParam.getStatus());
         statement.setInt(2, mapRowTargetParam.getNoMapFlag().intValue());
         statement.setTimestamp(3, new Timestamp(System.currentTimeMillis()));
         statement.setLong(4, mapRowTargetParam.getMapRowTarget().getRow().getId());
