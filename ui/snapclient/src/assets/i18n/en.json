@@ -399,11 +399,11 @@
   "PROJECT": {
     "PROJECT_ROLES": "Project roles",
     "CANNOT_OPEN_PROJECT_NO_ROLE": "Request a role from a project owner to open this project",
-    "DELETE": "DELETE",
-    "DELETE_TOOLTIP": "Delete this project",
-    "TITLE_CONFIRM": "Delete Project",
+    "DELETE": "DELETE MAP",
+    "DELETE_TOOLTIP": "Delete this map",
+    "TITLE_CONFIRM": "Delete Map",
     "CANCEL": "CANCEL",
-    "CONFIRM_DELETE": "Are you sure you wish to delete this project? This will delete all associated maps. Any mapping that has been performed will be removed and this cannot be undone."
+    "CONFIRM_DELETE": "Are you sure you wish to delete this map? This will delete all versions of the map. Any mapping that has been performed will be removed and this cannot be undone."
   },
   "PROJECT_TABLE": {
     "ACTIONS": "Actions",
