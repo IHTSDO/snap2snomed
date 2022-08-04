@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import {AfterViewInit, Component, EventEmitter, Input, OnInit, Output, ViewChild} from '@angular/core';
+import {Component, EventEmitter, Input, OnInit, Output, ViewChild} from '@angular/core';
 import {Store} from '@ngrx/store';
 import {IAppState} from '../../store/app.state';
-import {AddMapping, CopyMapping, UpdateMapping} from '../../store/mapping-feature/mapping.actions';
+import {AddMapping, CopyMapping, DeleteMapping, UpdateMapping} from '../../store/mapping-feature/mapping.actions';
 import {TranslateService} from '@ngx-translate/core';
 import {selectMappingError, selectMappingLoading} from '../../store/mapping-feature/mapping.selectors';
 import {selectCurrentUser} from '../../store/auth-feature/auth.selectors';
@@ -65,6 +65,7 @@ export class MappingAddComponent implements OnInit {
   VALID_STRING_PATTERN = FormUtils.VALID_STRING_PATTERN;
 
   mappingModel!: Mapping;
+  warnDelete = false;
 
   @Input() set mapping(value: Mapping) {
     if (value) {
@@ -136,7 +137,12 @@ export class MappingAddComponent implements OnInit {
     self.store.select(selectMappingFile).subscribe((res) => this.mappingFile = res);
     self.store.select(selectMappingError).subscribe((error) => {
       if (error !== null) {
-        self.translate.get('ERROR.ADD_MAPPING').subscribe((res: string) => self.createOrAppendError(res));
+        if (error.type && error.type.includes("mapping-delete/last-map")) {
+          self.translate.get('ERROR.DELETE_MAPPING').subscribe((res: string) => self.createOrAppendError(res));
+        }
+        else {
+          self.translate.get('ERROR.ADD_MAPPING').subscribe((res: string) => self.createOrAppendError(res));
+        }
         self.error.detail = error;
       }
     });
@@ -198,6 +204,7 @@ export class MappingAddComponent implements OnInit {
 
   onCancel($event: Event, form: NgForm): void {
     $event.preventDefault();
+    this.warnDelete = false;
     this.closed.emit();
     this.error = {};
   }
@@ -275,7 +282,16 @@ export class MappingAddComponent implements OnInit {
       // select the most recent (or only, if just 1) version
       this.mappingModel.toVersion = this.editionVersions[0].uri;
     }
-  } 
+  }
+
+  deleteMap(): void {
+    if (!this.warnDelete) {
+      this.warnDelete = true;
+    }
+    else {
+      this.store.dispatch(new DeleteMapping(this.mappingModel));
+    }
+  }
 
   private createOrAppendError(err: string): void {
     const self = this;

@@ -22,6 +22,8 @@ import {
   AddMappingSuccess,
   CopyMappingFailure,
   CopyMappingSuccess,
+  DeleteMappingFailure,
+  DeleteMappingSuccess,
   DeleteProjectFailure,
   LoadMappingFailure,
   LoadMappingSuccess,
@@ -161,23 +163,35 @@ export class MappingEffects {
     })
   ), {dispatch: false});
 
-  deleteProject$ = createEffect(() => {
-    return this.actions$.pipe(
-      ofType(MappingActionTypes.DELETE_PROJECT),
-      map(action => action.payload),
-      switchMap(payload => this.mapService.deleteProject(payload.id).pipe(
-        concatMap(() => [
-          new LoadProjects({pageSize: payload.pageSize, currentPage: payload.currentPage, sort: payload.sort, text: payload.text, role: payload.role}),
-          new LoadSources()
-        ]),
-        catchError(err => of(
-          new DeleteProjectFailure(err),
-          new LoadProjects({pageSize: payload.pageSize, currentPage: payload.currentPage, sort: payload.sort, text: payload.text, role: payload.role}),
-          new LoadSources())
-        )
-      ))
-    );
-  }, {dispatch: true});
+  deleteMapping$ = createEffect(() => this.actions$.pipe(
+    ofType(MappingActionTypes.DELETE_MAPPING),
+    map(action => action.payload),
+    switchMap((mapping: Mapping) => this.mapService.deleteMapping(mapping).pipe(
+      switchMap(val => of(new DeleteMappingSuccess(mapping))),
+      catchError(err => of(new DeleteMappingFailure(err)))
+    ))
+  ), {dispatch: true});
+
+  deleteMappingSuccess$ = createEffect(() => this.actions$.pipe(
+    ofType(MappingActionTypes.DELETE_MAPPING_SUCCESS),
+    map(action => this.router.navigate([''], {replaceUrl: true}))
+  ), {dispatch: false})
+
+  deleteProject$ = createEffect(() => this.actions$.pipe(
+    ofType(MappingActionTypes.DELETE_PROJECT),
+    map(action => action.payload),
+    switchMap(payload => this.mapService.deleteProject(payload.id).pipe(
+      concatMap(() => [
+        new LoadProjects({pageSize: payload.pageSize, currentPage: payload.currentPage, sort: payload.sort, text: payload.text, role: payload.role}),
+        new LoadSources()
+      ]),
+      catchError(err => of(
+        new DeleteProjectFailure(err),
+        new LoadProjects({pageSize: payload.pageSize, currentPage: payload.currentPage, sort: payload.sort, text: payload.text, role: payload.role}),
+        new LoadSources())
+      )
+    ))
+  ), {dispatch: true});
 
   loadProjects$ = createEffect(() => {
     return this.actions$.pipe(

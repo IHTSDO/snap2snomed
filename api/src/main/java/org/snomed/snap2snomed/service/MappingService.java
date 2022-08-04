@@ -24,6 +24,7 @@ import org.snomed.snap2snomed.model.enumeration.MapStatus;
 import org.snomed.snap2snomed.model.enumeration.TaskType;
 import org.snomed.snap2snomed.problem.Snap2SnomedProblem;
 import org.snomed.snap2snomed.problem.auth.NotAuthorisedProblem;
+import org.snomed.snap2snomed.problem.mapping.DeleteMapProblem;
 import org.snomed.snap2snomed.problem.mapping.InvalidBulkChangeProblem;
 import org.snomed.snap2snomed.problem.mapping.InvalidMappingProblem;
 import org.snomed.snap2snomed.problem.mapping.UnauthorisedMappingProblem;
@@ -57,41 +58,51 @@ public class MappingService {
   @PersistenceContext
   private EntityManager em;
 
-  @Autowired
-  MapRepository mapRepository;
+  @Autowired private AuthenticationFacade authenticationFacade;
+  @Autowired private FhirService fhirService;
+  @Autowired private ImportedCodeSetRepository importedCodeSetRepository;
+  @Autowired private MapRepository mapRepository;
+  @Autowired private MapRowEventHandler mapRowEventHandler;
+  @Autowired private MapRowRepository mapRowRepository;
+  @Autowired private MapRowTargetEventHandler mapRowTargetEventHandler;
+  @Autowired private MapRowTargetRepository mapRowTargetRepository;
+  @Autowired private NoteRepository noteRepository;
+  @Autowired private TaskRepository taskRepository;
+  @Autowired private WebSecurity webSecurity;
 
-  @Autowired
-  MapRowRepository mapRowRepository;
-
-  @Autowired
-  MapRowTargetRepository mapRowTargetRepository;
-
-  @Autowired
-  TaskRepository taskRepository;
-
-  @Autowired
-  MapRowEventHandler mapRowEventHandler;
-
-  @Autowired
-  MapViewService mapViewService;
-
-  @Autowired
-  FhirService fhirService;
-
-  @Autowired
-  MapRowTargetEventHandler mapRowTargetEventHandler;
-
-  @Autowired
-  AuthenticationFacade authenticationFacade;
-
-  @Autowired
-  ImportedCodeSetRepository importedCodeSetRepository;
-
-  @Autowired
-  WebSecurity webSecurity;
-
-  private static enum RowChange {
+  private enum RowChange {
     STATUS_CHANGED, ROW_CHANGED, NO_CHANGE
+  }
+
+  /**
+   * Delete map. Only delete if map is not the last map in a project
+   * @param projectId The id of the project the map belongs to
+   * @param mapId The id of the map to be deleted
+   */
+  @Transactional
+  public void deleteMap(Long projectId, Long mapId) {
+    Set<Map> maps = mapRepository.findAllByProjectId(projectId);
+    if (maps.size() > 1) {
+      deleteMapRelatedEntities(mapId);
+      mapRepository.deleteById(mapId);
+    }
+    else {
+      throw new DeleteMapProblem("last-map", "Map is the only map in the project and cannot be deleted",
+          Status.METHOD_NOT_ALLOWED);
+    }
+  }
+
+  @Transactional
+  public void deleteMapRelatedEntities(Long mapId) {
+    List<MapRow> mapRows = mapRowRepository.findMapRowsByMapId(mapId);
+    mapRows.forEach(mapRow -> {
+      Set<Note> notes = mapRow.getNotes();
+      noteRepository.deleteAll(notes);
+      List<MapRowTarget> mapRowTargets = mapRow.getMapRowTargets();
+      mapRowTargetRepository.deleteAll(mapRowTargets);
+    });
+    mapRowRepository.deleteAll(mapRows);
+    taskRepository.deleteAllByMapId(mapId);
   }
 
   @Transactional

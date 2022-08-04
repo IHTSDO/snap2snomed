@@ -31,6 +31,7 @@
   "ERROR": {
     "LOGIN": "Incorrect username and/or password.",
     "ADD_MAPPING": "Unable to create Map - check required fields",
+    "DELETE_MAPPING": "Unable to delete map version",
     "DELETE_PROJECT": "Unable to delete project",
     "FILE_EXCEEDS_MAX_SIZE": "File size is too large",
     "FILE_TYPE_NOT_SUPPORTED": "File type is not supported",
@@ -87,6 +88,9 @@
   "FORM": {
     "CANCEL": "Cancel",
     "CREATE": "Create",
+    "DELETE": "Delete Version",
+    "DELETE_CONFIRM": "Confirm Delete Version",
+    "DELETE_WARN": "Are you sure you wish to delete this map version? This cannot be undone.",
     "EDIT": "Edit",
     "SAVE": "Save",
     "CLEAR": "Clear",

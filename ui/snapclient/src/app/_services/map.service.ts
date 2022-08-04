@@ -163,10 +163,16 @@ export class MapService {
     return this.http.post(url, body, header);
   }
 
-  deleteProject(id: string): Observable<ProjectResults> {
-    let url = `${this.config.apiBaseUrl}/projects/delete/${id}`;
+  deleteMapping(mapping: Mapping): Observable<any> {
+    const url = `${this.config.apiBaseUrl}/map/delete/${mapping.id}?projectId=${mapping.project.id}`;
     const header = ServiceUtils.getHTTPHeaders();
-    return this.http.delete<ProjectResults>(url, header);
+    return this.http.delete(url, header);
+  }
+
+  deleteProject(id: string): Observable<any> {
+    const url = `${this.config.apiBaseUrl}/projects/delete/${id}`;
+    const header = ServiceUtils.getHTTPHeaders();
+    return this.http.delete(url, header);
   }
 
   fetchProjects(pageSize: number, currentPage: number, sort: string, text: string, role: string): Observable<ProjectResults> {
