@@ -449,7 +449,7 @@
   "IMPORT" : {
     "IMPORT_INFO": "The mapping import file must include a header row. \n\n Large maps can take long to import, please do not refresh your browser while the import is running.",
     "IMPORT_LARGE_MAP": "Large maps can take long to import, please do not refresh your browser while the import is running.",
-    "IMPORT_WARNING": "Warning! This operation will clear and override all existing mapping!",
+    "IMPORT_WARNING": "Warning! This operation will clear and override all existing mappings!",
     "IMPORT_RESULT": "Successfully imported {{insertCount}} lines from {{recordCount}} lines.",
     "IMPORT_SELECT_COLUMNS": "We have selected columns for import where possible. Please check these are correct as they cannot be changed later."
   }

@@ -33,7 +33,7 @@ interface RowColumn {
 }
 
 const SOURCE_CODE_OPTION_LABEL = 'Source Code';
-const SOURCE_DISPLAY_OPTION_LABEL = 'Source Display';
+//const SOURCE_DISPLAY_OPTION_LABEL = 'Source Display';
 const TARGET_CODE_OPTION_LABEL = 'Target Code';
 const TARGET_DISPLAY_OPTION_LABEL = 'Target Display';
 const RELATIONSHIP_TYPE_CODE_OPTION_LABEL = 'Relationship Type Code';
@@ -67,7 +67,7 @@ export class MappingImportComponent implements OnInit, OnDestroy, AfterViewCheck
 
   columns: RowColumn[] = [
     {value: SOURCE_CODE_OPTION_VALUE, viewValue: SOURCE_CODE_OPTION_LABEL},
-    {value: SOURCE_DISPLAY_OPTION_VALUE, viewValue: SOURCE_DISPLAY_OPTION_LABEL},
+//    {value: SOURCE_DISPLAY_OPTION_VALUE, viewValue: SOURCE_DISPLAY_OPTION_LABEL},
     {value: TARGET_CODE_OPTION_VALUE, viewValue: TARGET_CODE_OPTION_LABEL},
     {value: TARGET_DISPLAY_OPTION_VALUE, viewValue: TARGET_DISPLAY_OPTION_LABEL},
     {value: RELATIONSHIP_TYPE_CODE_OPTION_VALUE, viewValue: RELATIONSHIP_TYPE_CODE_OPTION_LABEL},
@@ -243,9 +243,9 @@ export class MappingImportComponent implements OnInit, OnDestroy, AfterViewCheck
         case (SOURCE_CODE_OPTION_LABEL.toLowerCase() || ALT_SOURCE_CODE_OPTION_LABEL): { 
           return SOURCE_CODE_OPTION_VALUE; 
         } 
-        case SOURCE_DISPLAY_OPTION_LABEL.toLowerCase(): { 
-           return SOURCE_DISPLAY_OPTION_VALUE;
-        } 
+        // case SOURCE_DISPLAY_OPTION_LABEL.toLowerCase(): { 
+        //    return SOURCE_DISPLAY_OPTION_VALUE;
+        // } 
         case (TARGET_CODE_OPTION_LABEL.toLowerCase() || ALT_TARGET_CODE_OPTION_LABEL): { 
           return TARGET_CODE_OPTION_VALUE;
         } 
@@ -273,6 +273,32 @@ export class MappingImportComponent implements OnInit, OnDestroy, AfterViewCheck
   updateSelection2(newValue : string, index : number): void {
     
     this.error.message = "";
+
+    // remove previous selection
+    if (this.codeColumnIndexArray.includes(index)) { 
+      const arrayIndex = this.codeColumnIndexArray.indexOf(index);
+      this.codeColumnIndexArray.splice(arrayIndex, 1);
+    } 
+    else if (this.targetCodeColumnIndexArray.includes(index)) {
+      const arrayIndex = this.targetCodeColumnIndexArray.indexOf(index);         
+      this.targetCodeColumnIndexArray.splice(arrayIndex, 1);
+    }
+    else if (this.targetDisplayColumnIndexArray.includes(index)) {
+      const arrayIndex = this.targetDisplayColumnIndexArray.indexOf(index);
+      this.targetDisplayColumnIndexArray.splice(arrayIndex, 1);
+    }
+    else if (this.relationshipColumnIndexArray.includes(index)) { 
+      const arrayIndex = this.relationshipColumnIndexArray.indexOf(index);
+      this.relationshipColumnIndexArray.splice(arrayIndex, 1);
+    }
+    else if (this.noMapFlagColumnIndexArray.includes(index)) {
+      const arrayIndex = this.noMapFlagColumnIndexArray.indexOf(index);
+      this.noMapFlagColumnIndexArray.splice(arrayIndex, 1);
+    }
+    else if (this.statusColumnIndexArray.includes(index)) {
+      const arrayIndex = this.statusColumnIndexArray.indexOf(index);
+      this.statusColumnIndexArray.splice(arrayIndex, 1);
+    }
 
     switch(newValue) { 
       case SOURCE_CODE_OPTION_VALUE: { 
@@ -303,37 +329,8 @@ export class MappingImportComponent implements OnInit, OnDestroy, AfterViewCheck
         this.statusColumnIndexArray.push(index);
         break;
       }
-      case undefined: {
-
-        // user has selected the empty option
-
-        if (this.codeColumnIndexArray.includes(index)) { 
-          const arrayIndex = this.codeColumnIndexArray.indexOf(index);
-          this.codeColumnIndexArray.splice(arrayIndex, 1);
-        } 
-        else if (this.targetCodeColumnIndexArray.includes(index)) {
-          const arrayIndex = this.targetCodeColumnIndexArray.indexOf(index);         
-          this.targetCodeColumnIndexArray.splice(arrayIndex, 1);
-        }
-        else if (this.targetDisplayColumnIndexArray.includes(index)) {
-          const arrayIndex = this.targetDisplayColumnIndexArray.indexOf(index);
-          this.targetDisplayColumnIndexArray.splice(arrayIndex, 1);
-        }
-        else if (this.relationshipColumnIndexArray.includes(index)) { 
-          const arrayIndex = this.relationshipColumnIndexArray.indexOf(index);
-          this.relationshipColumnIndexArray.splice(arrayIndex, 1);
-        }
-        else if (this.noMapFlagColumnIndexArray.includes(index)) {
-          const arrayIndex = this.noMapFlagColumnIndexArray.indexOf(index);
-          this.noMapFlagColumnIndexArray.splice(arrayIndex, 1);
-        }
-        else if (this.statusColumnIndexArray.includes(index)) {
-          const arrayIndex = this.statusColumnIndexArray.indexOf(index);
-          this.statusColumnIndexArray.splice(arrayIndex, 1);
-        }
-        break;
-      }
       default: { 
+        // undefined = empty selection
          break; 
       } 
 

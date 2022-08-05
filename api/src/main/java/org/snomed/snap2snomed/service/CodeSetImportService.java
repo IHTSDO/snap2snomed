@@ -356,11 +356,13 @@ public class CodeSetImportService {
     }
   }
   private void validateRecord(Set<String> importedCodes, String code, String targetCode,
-                              String targetDisplay, long recordNumber) {
+                              String targetDisplay, long recordNumber, Integer noMapFlag, MapStatus status) {
     checkCode(code, recordNumber);
     checkCode(targetCode, recordNumber);
     checkDuplicateCodes(importedCodes, code + targetCode);
     checkDisplay(targetDisplay, recordNumber);
+    checkNoMapFlag(targetCode, noMapFlag);
+    checkStatus(targetCode, status);
   }
 
   private void validateRecord(Set<String> importedCodes, String code, String display, long recordNumber) {
@@ -395,6 +397,25 @@ public class CodeSetImportService {
       throw new CodeSetImportProblem("display-size", "Display in the import file is too large",
           "The display value for record " + recordNumber + " is " + display.length() + " which is longer than the allowed limit of "
               + ImportedCode.DISPLAY_SIZE_LIMIT);
+    }
+  }
+  
+  private void checkNoMapFlag(String targetCode, Integer noMapFlag) {
+
+    // cannot have a row with a target and the noMap flag ticked
+    if ((noMapFlag != null) && (noMapFlag == Integer.valueOf(1)) && (targetCode != null && !(targetCode.isBlank()))) {
+      throw new CodeSetImportProblem("no-map-with-target", "The import file contains no map rows with a target",
+          "A row with target code " + targetCode + " has no map specified. Rows cannot have both a target and be a no map.");
+    }
+
+  }
+
+  private void checkStatus(String targetCode, MapStatus status) {
+    
+    // cannot have a row with a target and be in the "unmapped" state
+    if ((status != null) && (status.equals(MapStatus.UNMAPPED) == true) && (targetCode != null && !(targetCode.isBlank()))) {
+      throw new CodeSetImportProblem("map-with-unmapped-status", "The import file contains rows with a target and an unmapped status",
+          "A row with target code " + targetCode + " has a status of UNMAPPED specified. Rows with a target must have a status of MAPPED or DRAFT.");
     }
   }
 
@@ -506,7 +527,7 @@ public class CodeSetImportService {
           }
           long recordNumber = csvRecord.getRecordNumber();
           if (targetCode != null && !targetCode.isEmpty()) {
-            validateRecord(importedCodes, code, targetCode, targetDisplay, recordNumber);
+            validateRecord(importedCodes, code, targetCode, targetDisplay, recordNumber, noMap, status);
             MapRowTarget mapRowTarget = MapRowTarget.builder()
                     .targetCode(targetCode)
                     .targetDisplay(targetDisplay)
