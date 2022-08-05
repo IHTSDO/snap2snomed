@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Component, EventEmitter, Input, OnInit, Output, ViewChild} from '@angular/core';
+import {Component, ElementRef, EventEmitter, Input, OnInit, Output, ViewChild} from '@angular/core';
 import {Store} from '@ngrx/store';
 import {IAppState} from '../../store/app.state';
 import {AddMapping, CopyMapping, DeleteMapping, UpdateMapping} from '../../store/mapping-feature/mapping.actions';
@@ -105,6 +105,7 @@ export class MappingAddComponent implements OnInit {
   @Output() closed = new EventEmitter();
 
   constructor(
+    private elRef: ElementRef,
     private store: Store<IAppState>,
     private translate: TranslateService,
     private fhirService: FhirService,
@@ -289,12 +290,14 @@ export class MappingAddComponent implements OnInit {
       this.warnDelete = true;
     }
     else {
+      this.warnDelete = false;
       this.store.dispatch(new DeleteMapping(this.mappingModel));
     }
   }
 
   private createOrAppendError(err: string): void {
     const self = this;
+    self.elRef.nativeElement.parentElement.scrollTop = 0;
     if (!self.error.messages) {
       self.error.messages = [];
     }
