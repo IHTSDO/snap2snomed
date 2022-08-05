@@ -30,6 +30,7 @@ export type ViewContext = {
 };
 
 export enum MappingActionTypes {
+  CLEAR_ERRORS = '[Map] Clear Errors',
   DELETE_MAPPING = '[Map] Delete Map',
   DELETE_MAPPING_FAILED = '[Map] Delete Mapping Failed',
   DELETE_MAPPING_SUCCESS = '[Map] Delete Mapping Succeeded',
@@ -62,6 +63,11 @@ export enum MappingActionTypes {
   FETCH_MAP_TASK_FAILED = '[Map] Fetch Map Task Failed',
   SELECT_MAP_ROW = '[Map] Select Map Row',
   NEW_MAPPING = '[Map] New Map'
+}
+
+export class ClearErrors implements Action {
+  readonly type = MappingActionTypes.CLEAR_ERRORS;
+  constructor() {}
 }
 
 export class DeleteMapping implements Action {
@@ -265,6 +271,7 @@ export type MappingActions = LoadProjects
   | LoadMapViewFailure
   | SelectMapRow
   | NewMapping
+  | ClearErrors
   | DeleteMapping
   | DeleteMappingFailure
   | DeleteMappingSuccess

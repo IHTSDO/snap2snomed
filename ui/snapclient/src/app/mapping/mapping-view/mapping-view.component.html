@@ -5,7 +5,7 @@
   <app-errormessage [error]="error"></app-errormessage>
   <mat-drawer-container *ngIf="mapping">
     <mat-drawer class="mapping-edit" mode="over" position="end" [(opened)]="opened">
-      <app-mapping-add [mapping]="mapping" (closed)="closeEdit()" [mode]="isOwner() || isAdmin ? 'FORM.EDIT' : 'FORM.VIEW'"></app-mapping-add>
+      <app-mapping-add [drawerOpen]="opened" [mapping]="mapping" (closed)="closeEdit()" [mode]="isOwner() || isAdmin ? 'FORM.EDIT' : 'FORM.VIEW'"></app-mapping-add>
     </mat-drawer>
     <div class="top-row">
       <div class="mapping-details">

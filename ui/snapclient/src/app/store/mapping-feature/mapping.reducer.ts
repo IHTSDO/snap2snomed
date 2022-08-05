@@ -207,6 +207,12 @@ export function mappingReducer(state = initialMappingState, action: MappingActio
         selectedRows: deepCopy(action.payload.selectedrows)
       };
 
+    case MappingActionTypes.CLEAR_ERRORS:
+      return {
+        ...state,
+        errorMessage: null
+      };
+
     default:
       return state;
   }
