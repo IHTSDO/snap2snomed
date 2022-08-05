@@ -87,7 +87,7 @@ public class MappingService {
       mapRepository.deleteById(mapId);
     }
     else {
-      throw new DeleteMapProblem("last-map", "Map is the only map in the project and cannot be deleted",
+      throw new DeleteMapProblem("last-map", "This is the only version of this Map and cannot be deleted",
           Status.METHOD_NOT_ALLOWED);
     }
   }
