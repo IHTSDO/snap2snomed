@@ -95,8 +95,7 @@ export class TaskAddComponent implements OnInit, AfterViewInit, OnDestroy {
       (error) => {
         if (error) {
           if ([400, 403].indexOf(error.error.status) >= 0 &&
-              error.error?.error?.type.search('problem\/.*([task])+') > 0 &&
-              error.error?.error?.detail) {
+              error.error?.error?.type.search('problem\/.*([task])+') > 0) {
             self.handleTaskError(error.error.error);
           } else {
             throw error;
