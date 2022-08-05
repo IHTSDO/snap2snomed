@@ -59,7 +59,7 @@
         </ng-container>
       
         <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+        <tr mat-row [ngClass]="{'header-row': i === 0}" *matRowDef="let row; columns: displayedColumns; let i = index"></tr>
       </table>
     </section>
   </div>
