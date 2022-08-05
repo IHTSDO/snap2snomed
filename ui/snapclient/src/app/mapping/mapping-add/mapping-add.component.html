@@ -111,7 +111,7 @@
               {{toscope.value?.length || 0}}/{{MAX_TARGETSCOPE}}
             </mat-hint>
           </mat-form-field>
-          <div *ngIf="mode === 'FORM.CREATE' && !sourceId.invalid" class="import-existing-map">
+          <div *ngIf="mode === 'FORM.CREATE'" class="import-existing-map">
             <button mat-raised-button color="primary"  title="{{ 'FORM.IMPORT_EXISTING_MAP' | translate }}"
                 type="button" (click)="onImportMapping($event, myForm)">
                 {{ 'FORM.IMPORT_EXISTING_MAP' | translate }}

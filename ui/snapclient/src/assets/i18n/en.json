@@ -35,9 +35,14 @@
     "DELETE_PROJECT": "Unable to delete project",
     "FILE_EXCEEDS_MAX_SIZE": "File size is too large",
     "FILE_TYPE_NOT_SUPPORTED": "File type is not supported",
+    "FILE_EMPTY": "File contains no data or only a header row",
     "FILE_CONTENTS_INVALID": "File contents are invalid",
     "FILE_CONTENTS_DUPLICATES": "File contains duplicate source codes",
     "FILE_CONTENTS_DUPLICATES_SOURCE_AND_TARGET": "File contains duplicate source and target code pairs",
+    "FILE_CONTENTS_INVALID_MAP_STATUS": "Unexpected status '{{val}}' encountered in import file. Expecting DRAFT | MAPPED | UNMAPPED",
+    "FILE_CONTENTS_INVALID_RELATIONSHIP": "Unexpected relationship '{{val}}' encountered in import file. Expecting TARGET_EQUIVALENT | TARGET_INEXACT |TARGET_BROADER | TARGET_NARROWER only",
+    "IMPORT_COLUMN_MISSING": "No '{{col}}' column specified.",
+    "IMPORT_COLUMN_DUPLICATED": "More than 1 '{{col}}' columns specified",
     "FORM_INVALID": "Form is invalid - cannot save",
     "IMPORT_SOURCE": "Unable to import Source",
     "LOAD_SOURCES": "Unable to load Sources",
@@ -403,11 +408,11 @@
   "PROJECT": {
     "PROJECT_ROLES": "Project roles",
     "CANNOT_OPEN_PROJECT_NO_ROLE": "Request a role from a project owner to open this project",
-    "DELETE": "DELETE",
-    "DELETE_TOOLTIP": "Delete this project",
-    "TITLE_CONFIRM": "Delete Project",
+    "DELETE": "DELETE MAP",
+    "DELETE_TOOLTIP": "Delete this map",
+    "TITLE_CONFIRM": "Delete Map",
     "CANCEL": "CANCEL",
-    "CONFIRM_DELETE": "Are you sure you wish to delete this project? This will delete all associated maps. Any mapping that has been performed will be removed and this cannot be undone."
+    "CONFIRM_DELETE": "Are you sure you wish to delete this map? This will delete all versions of the map. Any mapping that has been performed will be removed and this cannot be undone."
   },
   "PROJECT_TABLE": {
     "ACTIONS": "Actions",
@@ -442,9 +447,10 @@
   },
 
   "IMPORT" : {
-    "IMPORT_INFO": "The mapping import file must include a header row and it must be in one of the following formats:\n\n- source_code,target_code,target_display,relationship\n- Source code,Source display,Target code,Target display,Relationship type code\n\nLarge maps can take long to import, please do not refresh your browser while the import is running.",
+    "IMPORT_INFO": "The mapping import file must include a header row. \n\n Large maps can take long to import, please do not refresh your browser while the import is running.",
     "IMPORT_LARGE_MAP": "Large maps can take long to import, please do not refresh your browser while the import is running.",
     "IMPORT_WARNING": "Warning! This operation will clear and override all existing mapping!",
-    "IMPORT_RESULT": "Successfully imported {{insertCount}} lines from {{recordCount}} lines."
+    "IMPORT_RESULT": "Successfully imported {{insertCount}} lines from {{recordCount}} lines.",
+    "IMPORT_SELECT_COLUMNS": "We have selected columns for import where possible. Please check these are correct as they cannot be changed later."
   }
 }

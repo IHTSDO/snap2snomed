@@ -46,7 +46,7 @@ import { MatSelectChange } from '@angular/material/select';
   styleUrls: ['./mapping-add.component.css']
 })
 export class MappingAddComponent implements OnInit {
-  private width = '600px';
+  private width = '1000px';
   error: ErrorInfo = {};
   sources: Source[] = [];
   editionToVersionsMap: Map<string, Release[]> | undefined; // versions (often dates) indexed by edition (often a country)

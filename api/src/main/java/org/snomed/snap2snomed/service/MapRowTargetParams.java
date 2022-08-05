@@ -28,5 +28,7 @@ public class MapRowTargetParams {
 
   private MapRowTarget mapRowTarget;
   private String sourceCode;
+  private Integer noMapFlag;
+  private Integer status;
   
 }

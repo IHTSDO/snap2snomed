@@ -25,13 +25,35 @@ import {IAppState} from '../../store/app.state';
 import {APP_CONFIG, AppConfig} from '../../app.config';
 import {ErrorInfo} from '../../errormessage/errormessage.component';
 import {MappingImportSource} from 'src/app/_models/mapping_import_source';
+import { MatSelectChange } from '@angular/material/select';
 
-export interface HeaderDetails {
-  source_code_col_index: number;
-  target_code_col__index: number;
-  target_display_col__index: number;
-  relationship_col__index: number;
+interface RowColumn {
+  value: string;
+  viewValue: string;
 }
+
+const SOURCE_CODE_OPTION_LABEL = 'Source Code';
+const SOURCE_DISPLAY_OPTION_LABEL = 'Source Display';
+const TARGET_CODE_OPTION_LABEL = 'Target Code';
+const TARGET_DISPLAY_OPTION_LABEL = 'Target Display';
+const RELATIONSHIP_TYPE_CODE_OPTION_LABEL = 'Relationship Type Code';
+const NO_MAP_FLAG_OPTION_LABEL = "No Map Flag";
+const STATUS_OPTION_LABEL = "Status";
+
+const ALT_SOURCE_CODE_OPTION_LABEL = 'source_code';
+const ALT_TARGET_CODE_OPTION_LABEL = 'target_code';
+const ALT_TARGET_DISPLAY_OPTION_LABEL = 'target_display';
+const ALT_RELATIONSHIP_TYPE_CODE_OPTION_LABEL = 'relationship';
+
+const SOURCE_CODE_OPTION_VALUE = 'sourceCode';
+const SOURCE_DISPLAY_OPTION_VALUE = 'sourceDisplay';
+const TARGET_CODE_OPTION_VALUE = 'targetCode';
+const TARGET_DISPLAY_OPTION_VALUE = 'targetDisplay';
+const RELATIONSHIP_TYPE_CODE_OPTION_VALUE = 'relationshipTypeCode';
+const NO_MAP_FLAG_OPTION_VALUE = 'noMapFlag';
+const STATUS_OPTION_VALUE = "status";
+
+const NUM_SAMPLE_LINES = 3;
 
 @Component({
   selector: 'app-mapping-import',
@@ -39,6 +61,19 @@ export interface HeaderDetails {
   styleUrls: ['./mapping-import.component.css', '../../source/source-import/source-import.component.css'],
 })
 export class MappingImportComponent implements OnInit, OnDestroy, AfterViewChecked {
+
+  displayedColumns: string[] = [];
+  dataSource : {[key: string]: string}[] = [];
+
+  columns: RowColumn[] = [
+    {value: SOURCE_CODE_OPTION_VALUE, viewValue: SOURCE_CODE_OPTION_LABEL},
+    {value: SOURCE_DISPLAY_OPTION_VALUE, viewValue: SOURCE_DISPLAY_OPTION_LABEL},
+    {value: TARGET_CODE_OPTION_VALUE, viewValue: TARGET_CODE_OPTION_LABEL},
+    {value: TARGET_DISPLAY_OPTION_VALUE, viewValue: TARGET_DISPLAY_OPTION_LABEL},
+    {value: RELATIONSHIP_TYPE_CODE_OPTION_VALUE, viewValue: RELATIONSHIP_TYPE_CODE_OPTION_LABEL},
+    {value: NO_MAP_FLAG_OPTION_VALUE, viewValue: NO_MAP_FLAG_OPTION_LABEL},
+    {value: STATUS_OPTION_VALUE, viewValue: STATUS_OPTION_LABEL},
+  ];
 
   private readonly MAXFILESIZE: number;
   readonly MAX_NAME = 100;
@@ -56,6 +91,15 @@ export class MappingImportComponent implements OnInit, OnDestroy, AfterViewCheck
   uploading = false;
   validFile = false;
   createMode = false;
+
+  // local copy of selected column types to allow users to temporarily select the same
+  // column type more than once
+  codeColumnIndexArray : number[] = [];
+  targetCodeColumnIndexArray : number[] = [];
+  targetDisplayColumnIndexArray : number[] = [];
+  relationshipColumnIndexArray : number[] = [];
+  noMapFlagColumnIndexArray : number[] = [];
+  statusColumnIndexArray : number[] = [];
 
   constructor(@Inject(APP_CONFIG) private config: AppConfig,
               public dialogRef: MatDialogRef<MappingImportComponent>,
@@ -90,6 +134,9 @@ export class MappingImportComponent implements OnInit, OnDestroy, AfterViewCheck
   }
 
   onFileSelected(event: any): void {
+
+    this.clearFields(); // incase user selects a subsequent file before importing
+
     const fileUpload = document.getElementById('fileUpload') as HTMLInputElement;
     this.csvHeaders = undefined;
     this.lines = undefined;
@@ -120,7 +167,7 @@ export class MappingImportComponent implements OnInit, OnDestroy, AfterViewCheck
             this.contents = fileReader.result?.slice(0, 1024 * 4) as string;
             const lines = this.contents.split(ServiceUtils.getEOL());
             this.lines = lines;
-            const firstLine = lines.shift();
+            const firstLine = lines.slice(0,1)[0]; //lines.shift(); .. show header line in preview
             if (!this.data.source.delimiter && event.type === 'change') {
               this.data.source.delimiter = firstLine && firstLine.indexOf('\t') > 0 ? '\t'
                   : firstLine && firstLine.indexOf(',') > 0 ? ','
@@ -129,23 +176,48 @@ export class MappingImportComponent implements OnInit, OnDestroy, AfterViewCheck
             }
             if (lines.length > 1 && firstLine && this.data.source.delimiter) {
               this.csvHeadersLine =  firstLine;
-              this.csvHeaders = firstLine.split(this.data.source.delimiter).map(header => header.trim());
-              // The file must be with headers and in the format of
-              // source_code, target_code, target_display, relationship or
-              // Source code, Source display, Target code, Target display, Relationship type code
-              const headerDetails: HeaderDetails | undefined = this.getHeaderDetails(this.csvHeaders);
-              if (headerDetails) {
-                this.data.source.hasHeader = true;
-                this.data.source.codeColumnIndex = headerDetails.source_code_col_index;
-                this.data.source.targetCodeColumnIndex = headerDetails.target_code_col__index;
-                this.data.source.targetDisplayColumnIndex = headerDetails.target_display_col__index;
-                this.data.source.relationshipColumnIndex = headerDetails.relationship_col__index;
-                this.validFile = true;
-              } else {
-                this.translate.get('ERROR.FILE_CONTENTS_INVALID').subscribe((msg) => this.error.message = msg);
-                this.clearFields(false);
+              let headersFound : string[] = []; 
+              this.csvHeaders = firstLine.split(this.data.source.delimiter).map(header => {
+                let trimmedHeader = header.trim();
+                
+                // deal with files with no headers and duplicated values
+                let timesFound = headersFound.filter(header => header === trimmedHeader).length
+                if (timesFound > 0) { 
+                  trimmedHeader = trimmedHeader + "_" + (timesFound+1);
+                }
+                headersFound.push(trimmedHeader);
+
+                return trimmedHeader
+              });
+
+              this.data.source.hasHeader = true;
+              this.validFile = true;
+              this.displayedColumns = this.csvHeaders;
+
+              // pre-select dropdowns at top of each column if possible
+              for (let j= 0; j<this.displayedColumns.length; j++) {
+                this.updateSelection2(this.getDropdownDefault(j), j);
               }
-            } else {
+
+              for (let i=0; i<NUM_SAMPLE_LINES; i++) {
+                let line = lines.shift();
+                if (line) {
+                  const splitLine = line.split(this.data.source.delimiter).map(header => header.trim());
+                  let rowObject: {[key: string]: string} = {};
+                  let index = 0;
+                  splitLine.forEach( column => {
+                    rowObject[index.toString()] = column;
+                    index++;
+                  });
+                  this.dataSource.push(rowObject);
+                }
+              }
+            } 
+            else if (lines.length <= 1) {
+              this.translate.get('ERROR.FILE_EMPTY').subscribe((msg) => this.error.message = msg);
+              this.clearFields();
+            }
+            else {
               this.translate.get('ERROR.FILE_CONTENTS_INVALID').subscribe((msg) => this.error.message = msg);
               this.clearFields();
             }
@@ -161,31 +233,196 @@ export class MappingImportComponent implements OnInit, OnDestroy, AfterViewCheck
     }
   }
 
-  getHeaderDetails(headers: string[]): HeaderDetails | undefined{
-    if (headers.length === 4 && headers[0] === 'source_code'
-      && headers[1] === 'target_code' && headers[2] === 'target_display'
-      && headers[3] === 'relationship') {
-        return {
-          source_code_col_index: 0,
-          target_code_col__index: 1,
-          target_display_col__index: 2,
-          relationship_col__index: 3,
-        };
-    } else if (
-    headers[0] === 'Source code'
-    && headers[2] === 'Target code' && headers[3] === 'Target display'
-    && headers[4] === 'Relationship type code') {
-      return {
-        source_code_col_index: 0,
-        target_code_col__index: 2,
-        target_display_col__index: 3,
-        relationship_col__index: 4,
-      };
+  getDropdownDefault(i: number) : string {
+
+    if (this.csvHeaders) {
+    
+      let fileColHeader = this.csvHeaders[i];
+      
+      switch(fileColHeader.toLowerCase()) { 
+        case (SOURCE_CODE_OPTION_LABEL.toLowerCase() || ALT_SOURCE_CODE_OPTION_LABEL): { 
+          return SOURCE_CODE_OPTION_VALUE; 
+        } 
+        case SOURCE_DISPLAY_OPTION_LABEL.toLowerCase(): { 
+           return SOURCE_DISPLAY_OPTION_VALUE;
+        } 
+        case (TARGET_CODE_OPTION_LABEL.toLowerCase() || ALT_TARGET_CODE_OPTION_LABEL): { 
+          return TARGET_CODE_OPTION_VALUE;
+        } 
+        case (TARGET_DISPLAY_OPTION_LABEL.toLowerCase() || ALT_TARGET_DISPLAY_OPTION_LABEL): {
+          return TARGET_DISPLAY_OPTION_VALUE;
+        } 
+        case (RELATIONSHIP_TYPE_CODE_OPTION_LABEL.toLowerCase() || ALT_RELATIONSHIP_TYPE_CODE_OPTION_LABEL): { 
+          return RELATIONSHIP_TYPE_CODE_OPTION_VALUE;
+        } 
+        case NO_MAP_FLAG_OPTION_LABEL.toLowerCase(): {
+          return NO_MAP_FLAG_OPTION_VALUE;
+        }
+        case STATUS_OPTION_LABEL.toLowerCase(): {
+          return STATUS_OPTION_VALUE;
+        }
+        default: { 
+           break; 
+        } 
+      } 
     }
-    return undefined;
+
+    return '';
+  }
+
+  updateSelection2(newValue : string, index : number): void {
+    
+    this.error.message = "";
+
+    switch(newValue) { 
+      case SOURCE_CODE_OPTION_VALUE: { 
+        this.codeColumnIndexArray.push(index);
+        break;
+      } 
+      // this field is currently not used
+      // case SOURCE_DISPLAY_OPTION_VALUE: { 
+      //   break;
+      // } 
+      case TARGET_CODE_OPTION_VALUE: { 
+        this.targetCodeColumnIndexArray.push(index);
+        break;
+      } 
+      case TARGET_DISPLAY_OPTION_VALUE: {
+        this.targetDisplayColumnIndexArray.push(index);
+        break;
+      } 
+      case RELATIONSHIP_TYPE_CODE_OPTION_VALUE: { 
+        this.relationshipColumnIndexArray.push(index);
+        break;
+      } 
+      case NO_MAP_FLAG_OPTION_VALUE: {
+        this.noMapFlagColumnIndexArray.push(index);
+        break;
+      }
+      case STATUS_OPTION_VALUE: {
+        this.statusColumnIndexArray.push(index);
+        break;
+      }
+      case undefined: {
+
+        // user has selected the empty option
+
+        if (this.codeColumnIndexArray.includes(index)) { 
+          const arrayIndex = this.codeColumnIndexArray.indexOf(index);
+          this.codeColumnIndexArray.splice(arrayIndex, 1);
+        } 
+        else if (this.targetCodeColumnIndexArray.includes(index)) {
+          const arrayIndex = this.targetCodeColumnIndexArray.indexOf(index);         
+          this.targetCodeColumnIndexArray.splice(arrayIndex, 1);
+        }
+        else if (this.targetDisplayColumnIndexArray.includes(index)) {
+          const arrayIndex = this.targetDisplayColumnIndexArray.indexOf(index);
+          this.targetDisplayColumnIndexArray.splice(arrayIndex, 1);
+        }
+        else if (this.relationshipColumnIndexArray.includes(index)) { 
+          const arrayIndex = this.relationshipColumnIndexArray.indexOf(index);
+          this.relationshipColumnIndexArray.splice(arrayIndex, 1);
+        }
+        else if (this.noMapFlagColumnIndexArray.includes(index)) {
+          const arrayIndex = this.noMapFlagColumnIndexArray.indexOf(index);
+          this.noMapFlagColumnIndexArray.splice(arrayIndex, 1);
+        }
+        else if (this.statusColumnIndexArray.includes(index)) {
+          const arrayIndex = this.statusColumnIndexArray.indexOf(index);
+          this.statusColumnIndexArray.splice(arrayIndex, 1);
+        }
+        break;
+      }
+      default: { 
+         break; 
+      } 
+
+    }
+
+    // inform user of multiple assignment of column type and prevent file upload
+    if (this.codeColumnIndexArray.length > 1) {
+      this.translate.get('ERROR.IMPORT_COLUMN_DUPLICATED', {col: SOURCE_CODE_OPTION_LABEL}).subscribe((msg) => {
+        this.error.message = msg;
+      })
+    }
+    else if (this.targetCodeColumnIndexArray.length > 1) {
+      this.translate.get('ERROR.IMPORT_COLUMN_DUPLICATED', {col: TARGET_CODE_OPTION_LABEL}).subscribe((msg) => {
+        this.error.message = msg;
+      })
+    }
+    else if (this.targetDisplayColumnIndexArray.length > 1) {
+      this.translate.get('ERROR.IMPORT_COLUMN_DUPLICATED', {col: TARGET_DISPLAY_OPTION_LABEL}).subscribe((msg) => {
+        this.error.message = msg;
+      })
+    }
+    else if (this.relationshipColumnIndexArray.length > 1) {
+      this.translate.get('ERROR.IMPORT_COLUMN_DUPLICATED', {col: RELATIONSHIP_TYPE_CODE_OPTION_LABEL}).subscribe((msg) => {
+        this.error.message = msg;
+      })
+    }
+    else if (this.noMapFlagColumnIndexArray.length > 1) {
+      this.translate.get('ERROR.IMPORT_COLUMN_DUPLICATED', {col: NO_MAP_FLAG_OPTION_LABEL}).subscribe((msg) => {
+        this.error.message = msg;
+      })
+    }
+    else if (this.statusColumnIndexArray.length > 1) {
+      this.translate.get('ERROR.IMPORT_COLUMN_DUPLICATED', {col: STATUS_OPTION_LABEL}).subscribe((msg) => {
+        this.error.message = msg;
+      })
+    }
+
+    if (this.error.message === "") {
+      // inform user of missing required columns and prevent file upload
+      if (this.codeColumnIndexArray.length < 1) {
+        this.translate.get('ERROR.IMPORT_COLUMN_MISSING', {col: SOURCE_CODE_OPTION_LABEL}).subscribe((msg) => {
+          this.error.message = msg;
+        })
+      }
+      else if (this.targetCodeColumnIndexArray.length < 1) {
+        this.translate.get('ERROR.IMPORT_COLUMN_MISSING', {col: TARGET_CODE_OPTION_LABEL}).subscribe((msg) => {
+          this.error.message = msg;
+        })
+      }
+      else if (this.targetDisplayColumnIndexArray.length < 1) {
+        this.translate.get('ERROR.IMPORT_COLUMN_MISSING', {col: TARGET_DISPLAY_OPTION_LABEL}).subscribe((msg) => {
+          this.error.message = msg;
+        })
+      }
+      else if (this.relationshipColumnIndexArray.length < 1) {TARGET_DISPLAY_OPTION_LABEL
+        this.translate.get('ERROR.IMPORT_COLUMN_MISSING', {col: RELATIONSHIP_TYPE_CODE_OPTION_LABEL}).subscribe((msg) => {
+          this.error.message = msg;
+        })
+      }
+    }
+    
+  }
+
+  updateSelection($event : MatSelectChange, index : number): void {
+    this.updateSelection2($event.value, index);
   }
 
   onSubmit(): void {
+
+    // copy from local version (arrays) into the MappingImportSource
+    this.data.source.codeColumnIndex = this.codeColumnIndexArray[0];
+    this.data.source.targetCodeColumnIndex = this.targetCodeColumnIndexArray[0];
+    this.data.source.targetDisplayColumnIndex = this.targetDisplayColumnIndexArray[0];
+    this.data.source.relationshipColumnIndex = this.relationshipColumnIndexArray[0];
+
+    // copy over optional columns if they are present
+    if (this.noMapFlagColumnIndexArray.length > 0) {
+      this.data.source.noMapFlagColumnIndex = this.noMapFlagColumnIndexArray[0];
+    }
+    else {
+      this.data.source.noMapFlagColumnIndex = null;
+    }
+    if (this.statusColumnIndexArray.length > 0) {
+      this.data.source.statusColumnIndex = this.statusColumnIndexArray[0];
+    }
+    else {
+      this.data.source.statusColumnIndex = null;
+    }
+
     if (this.data.source.source_file == null) {
       this.translate.get('SOURCE.FILE_REQUIRED').subscribe((msg) => this.error.message = msg);
     } else if (ServiceUtils.hasDuplicateCodes(this.contents, this.data.source, this.sourceType)) {
@@ -216,7 +453,7 @@ export class MappingImportComponent implements OnInit, OnDestroy, AfterViewCheck
   }
 
   disableSubmit(): boolean {
-    return !this.validFile;
+    return !this.validFile || (typeof this.error.message !== "undefined" && this.error.message !== "");
   }
 
   clearFields(clearFileName?: boolean): void {
@@ -230,6 +467,14 @@ export class MappingImportComponent implements OnInit, OnDestroy, AfterViewCheck
     this.getInstructions();
     this.lines = [];
     this.data.source.delimiter = null;
+
+    this.codeColumnIndexArray = [];
+    this.targetCodeColumnIndexArray = [];
+    this.targetDisplayColumnIndexArray = [];
+    this.relationshipColumnIndexArray = [];
+    this.noMapFlagColumnIndexArray = [];
+    this.statusColumnIndexArray = [];
+    this.dataSource = [];
   }
 
   ngAfterViewChecked(): void {
