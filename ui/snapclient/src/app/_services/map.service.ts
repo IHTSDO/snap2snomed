@@ -440,6 +440,12 @@ export class MapService {
     return this.http.post<Note>(url, body, header);
   }
 
+  deleteNote(note: Note): Observable<any> {
+    const url = `${this.config.apiBaseUrl}/notes/delete/${note.id}`;
+    const header = ServiceUtils.getHTTPHeaders();
+    return this.http.delete(url, header);
+  }
+
   /**
    * Bulk Uodate Update mapping
    * @param mappingUpdate

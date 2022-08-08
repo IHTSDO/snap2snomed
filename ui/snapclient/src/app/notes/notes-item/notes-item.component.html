@@ -3,4 +3,7 @@
     <app-user-chip [user]="note.noteBy"></app-user-chip>
     <p>{{note.noteText}}</p>
   </mat-card-content>
+  <mat-card-actions align="end">
+    <ng-content></ng-content>
+  </mat-card-actions>
 </mat-card>

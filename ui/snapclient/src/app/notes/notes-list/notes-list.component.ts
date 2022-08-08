@@ -30,6 +30,11 @@ import {FormUtils} from '../../_utils/form_utils';
 import {FormControl} from '@angular/forms';
 import {DroppableEventObject} from "../../_directives/droppable.directive";
 import {Router} from "@angular/router";
+import {AuthService} from "../../_services/auth.service";
+import {MatDialog} from "@angular/material/dialog";
+import {ConfirmDialogComponent, DialogType} from "../../dialog/confirm-dialog/confirm-dialog.component";
+import {MatSnackBar} from "@angular/material/snack-bar";
+import {ErrorNotifier} from "../../errorhandler/errornotifier";
 
 @Component({
   selector: 'app-notes-list',
@@ -38,6 +43,7 @@ import {Router} from "@angular/router";
 })
 export class NotesListComponent implements OnInit, OnDestroy {
   private subscription: Subscription = new Subscription();
+  @Input() currentUser: User | null = null;
   @Input() task: Task | null = null;
   @ViewChild('text') formControl: FormControl | undefined;
 
@@ -48,25 +54,22 @@ export class NotesListComponent implements OnInit, OnDestroy {
   MAX_NOTE = FormUtils.MAX_NOTE;
   VALID_STRING_PATTERN = FormUtils.VALID_STRING_PATTERN;
 
-  constructor(private store: Store<IAppState>,
+  // dialog
+  confirm = '';
+  cancel = '';
+  confirmTitle = '';
+  confirmMessage = '';
+
+  constructor(private authService: AuthService,
+              private errorNotifier: ErrorNotifier,
+              private store: Store<IAppState>,
               private translate: TranslateService,
               private router: Router,
               private mapService: MapService,
-              private sourceNavigation: SourceNavigationService) {
+              private sourceNavigation: SourceNavigationService,
+              public dialog: MatDialog,
+              public snackBar: MatSnackBar) {
     this.newNote = null;
-  }
-
-  // Sort by modified desc
-  sortNotes(a: Note, b: Note): number {
-    if (a.modified && b.modified) {
-      if (a.modified > b.modified) {
-        return -1;
-      }
-      if (a.modified < b.modified) {
-        return 1;
-      }
-    }
-    return 0;
   }
 
   ngOnInit(): void {
@@ -77,10 +80,61 @@ export class NotesListComponent implements OnInit, OnDestroy {
         self.loadNotes();
       }
     }));
+
+    this.translate.get('DETAILS.DIALOG_NOTE_DELETE').subscribe((msg) => this.confirm = msg);
+    this.translate.get('DETAILS.DIALOG_NOTE_CANCEL').subscribe((msg) => this.cancel = msg);
+    this.translate.get('DETAILS.DIALOG_NOTE_TITLE').subscribe((msg) => this.confirmTitle = msg);
+    this.translate.get('DETAILS.DIALOG_NOTE_CONFIRM').subscribe((msg) => this.confirmMessage = msg);
   }
 
   ngOnDestroy(): void {
     this.subscription.unsubscribe();
+  }
+
+  addNewNote(): void {
+    const self = this;
+    if (self.newNote && self.isValid()) {
+      self.mapService.createNote(self.newNote).subscribe((result) => {
+          self.loadNotes();
+        },
+        error => {
+          // error will occur when user's permissions have changed, or attempting to save note to project that has been deleted.
+          this.router.navigate([''], {replaceUrl: true, state: {error: error.error}});
+        });
+    }
+  }
+
+  canDelete(note: Note): boolean {
+    const owners = this.task?.mapping.project.owners;
+    const isOwner = owners?.filter((u) => u.id === this.currentUser?.id).length ? owners?.filter((u) => u.id === this.currentUser?.id).length > 0 : false;
+    return this.authService.isAdmin() || isOwner || note.noteBy.id === this.currentUser?.id;
+  }
+
+  deleteNote(note: Note): void {
+    const self = this;
+    const confirmDialogRef = self.dialog.open(ConfirmDialogComponent, {
+      data: {
+        title: self.confirmTitle,
+        message: self.confirmMessage,
+        button: self.confirm,
+        cancel: self.cancel,
+        type: DialogType.CONFIRM
+      }
+    });
+    confirmDialogRef.afterClosed().subscribe(
+      ok => {
+        if (ok) {
+          self.mapService.deleteNote(note).subscribe(result => {
+              self.loadNotes();
+            },
+            error => {
+              this.errorNotifier.showError("test")
+              // this.router.navigate([''], {replaceUrl: true, state: {error: error.error}});
+            }
+          );
+        }
+      }
+    );
   }
 
   loadNotes(): void {
@@ -106,19 +160,6 @@ export class NotesListComponent implements OnInit, OnDestroy {
     return false;
   }
 
-  addNewNote(): void {
-    const self = this;
-    if (self.newNote && self.isValid()) {
-      self.mapService.createNote(self.newNote).subscribe((result) => {
-        self.loadNotes();
-      },
-      error => {
-        // error will occur when user's permissions have changed, or attempting to save note to project that has been deleted.
-        this.router.navigate([''], {replaceUrl: true, state: {error: error.error}});
-      });
-    }
-  }
-
   /**
    * Allow targets to be dropped into input
    * @param $event search target drag n drop
@@ -127,5 +168,18 @@ export class NotesListComponent implements OnInit, OnDestroy {
     if (this.newNote && $event.data){
       this.newNote.noteText += `[${$event.data.code}] ${$event.data.display}`;
     }
+  }
+
+  // Sort by modified desc
+  sortNotes(a: Note, b: Note): number {
+    if (a.modified && b.modified) {
+      if (a.modified > b.modified) {
+        return -1;
+      }
+      if (a.modified < b.modified) {
+        return 1;
+      }
+    }
+    return 0;
   }
 }
