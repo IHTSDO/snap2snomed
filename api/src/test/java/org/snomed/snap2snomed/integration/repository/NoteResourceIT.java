@@ -65,12 +65,35 @@ public class NoteResourceIT extends IntegrationTestBase {
   }
 
   @Test
+  public void shouldDeleteNote() throws Exception {
+    long noteId = restClient.createNote(DEFAULT_TEST_USER_SUBJECT, mapRowId, "Test note");
+    restClient.givenDefaultUser()
+              .delete("/notes/delete/" + String.valueOf(noteId))
+              .then().statusCode(204);
+  }
+
+  @Test
   public void shouldListNotes() throws Exception {
     restClient.givenDefaultUser().body(restClient.createNoteJson(mapRowId, DEFAULT_TEST_USER_SUBJECT, "This is a test note"))
         .post("/notes/").then().statusCode(201);
     restClient.givenDefaultUser().get("/notes")
         .then().log().ifValidationFails(LogDetail.BODY).statusCode(200)
         .body("content", hasSize(greaterThan(0)));
+  }
+
+  @Test
+  public void shouldNotListDeletedNotes() throws Exception {
+    long noteId = restClient.createNote(DEFAULT_TEST_USER_SUBJECT, mapRowId, "Test note");
+    restClient.createNote(DEFAULT_TEST_USER_SUBJECT, mapRowId, "Test note 2");
+    restClient.givenDefaultUser()
+              .delete("/notes/delete/" + String.valueOf(noteId))
+              .then().statusCode(204);
+    restClient.givenDefaultUser()
+              .queryParam("projection", "noteView")
+              .queryParam("id", mapRowId)
+              .get("/notes/search/findByMapRowId")
+              .then().log().ifValidationFails(LogDetail.BODY).statusCode(200)
+              .body("content", hasSize(1));
   }
 
   @Test
