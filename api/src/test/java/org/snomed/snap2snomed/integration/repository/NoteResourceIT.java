@@ -19,6 +19,7 @@ package org.snomed.snap2snomed.integration.repository;
 import java.io.IOException;
 import java.time.ZonedDateTime;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.junit.jupiter.api.Test;
@@ -26,6 +27,8 @@ import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.TestInstance.Lifecycle;
 import org.snomed.snap2snomed.integration.IntegrationTestBase;
 import io.restassured.filter.log.LogDetail;
+import org.snomed.snap2snomed.model.Note;
+
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
@@ -85,6 +88,12 @@ public class NoteResourceIT extends IntegrationTestBase {
   public void shouldNotListDeletedNotes() throws Exception {
     long noteId = restClient.createNote(DEFAULT_TEST_USER_SUBJECT, mapRowId, "Test note");
     restClient.createNote(DEFAULT_TEST_USER_SUBJECT, mapRowId, "Test note 2");
+    List<Note> content = restClient.givenDefaultUser()
+                                   .queryParam("projection", "noteView")
+                                   .queryParam("id", mapRowId)
+                                   .get("/notes/search/findByMapRowId")
+                                   .then().log().ifValidationFails(LogDetail.BODY).statusCode(200)
+                                   .extract().body().jsonPath().get("content");
     restClient.givenDefaultUser()
               .delete("/notes/delete/" + String.valueOf(noteId))
               .then().statusCode(204);
@@ -93,7 +102,7 @@ public class NoteResourceIT extends IntegrationTestBase {
               .queryParam("id", mapRowId)
               .get("/notes/search/findByMapRowId")
               .then().log().ifValidationFails(LogDetail.BODY).statusCode(200)
-              .body("content", hasSize(1));
+              .body("content", hasSize(content.size() - 1));
   }
 
   @Test
