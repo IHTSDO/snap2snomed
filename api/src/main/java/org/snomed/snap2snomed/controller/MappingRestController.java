@@ -47,7 +47,7 @@ public class MappingRestController {
   @Parameter(name = "projectId", in = ParameterIn.QUERY, required = true,
       description = "ID of the project the map belongs to")
   @ResponseStatus(value= HttpStatus.NO_CONTENT)
-  @DeleteMapping(path = "/map/delete/{mapId}")
+  @DeleteMapping(path = "/maps/delete/{mapId}")
   void updateMappingForMap(@PathVariable("mapId") Long mapId, @RequestParam("projectId") Long projectId) {
     if (!webSecurity.isValidUser()) {
       throw new NoSuchUserProblem();

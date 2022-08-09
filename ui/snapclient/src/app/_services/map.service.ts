@@ -164,7 +164,7 @@ export class MapService {
   }
 
   deleteMapping(mapping: Mapping): Observable<any> {
-    const url = `${this.config.apiBaseUrl}/map/delete/${mapping.id}?projectId=${mapping.project.id}`;
+    const url = `${this.config.apiBaseUrl}/maps/delete/${mapping.id}?projectId=${mapping.project.id}`;
     const header = ServiceUtils.getHTTPHeaders();
     return this.http.delete(url, header);
   }

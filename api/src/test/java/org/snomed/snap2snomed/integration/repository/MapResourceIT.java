@@ -195,13 +195,49 @@ public class MapResourceIT extends IntegrationTestBase {
   }  
 
 	@Test
-	public void shouldDeleteEntity() throws Exception {
+	public void failDeleteEntity() throws Exception {
     restClient.givenDefaultUser()
         .body(restClient.createMapJson("Testing Map Version",
             "http://snomed.info/sct/32506021000036107/version/2021053", "http://map.test.toscope",
             projectId, testImportedCodeSetId))
         .delete("/maps/" + mapId).then().log().ifValidationFails(LogDetail.BODY).statusCode(405);
 	}
+
+  @Test
+  public void shouldDeleteMap() throws Exception {
+    restClient.givenDefaultUser()
+              .body(restClient.createMapJson("Testing Map Version",
+                  "http://snomed.info/sct/32506021000036107/version/2021053", "http://map.test.toscope",
+                  projectId, testImportedCodeSetId))
+              .queryParam("projectId", projectId)
+              .delete("/maps/delete/" + mapId).then().log().ifValidationFails(LogDetail.BODY).statusCode(204);
+  }
+
+  @Test
+  public void failDeleteMapWhenOnlyMapInProject() throws Exception {
+    long deleteProjectId = restClient.createProject("Delete Project Title", "Testing Project Description",
+        Set.of(DEFAULT_TEST_USER_SUBJECT), Set.of(MEMBER), Set.of(GUEST));
+    testImportedCodeSetId = restClient.createImportedCodeSet("map1 row code", "map1 row display", "test code set", "1.2.3", 34);
+    long deleteMapId = restClient.createMap("Delete Map Version",
+        "http://snomed.info/sct/32506021000036107/version/20210531", "http://map.test.toscope",
+        deleteProjectId, testImportedCodeSetId);
+    restClient.givenDefaultUser()
+              .queryParam("projectId", deleteProjectId)
+              .delete("/maps/delete/" + deleteMapId).then().log().ifValidationFails(LogDetail.BODY).statusCode(405);
+  }
+
+  @Test
+  public void failDeleteMapWhenNotMapOwnerOrAdmin() throws Exception {
+    long deleteProjectId = restClient.createProject("Delete Project Title", "Testing Project Description",
+        Set.of(DEFAULT_TEST_USER_SUBJECT), Set.of(MEMBER), Set.of(GUEST));
+    testImportedCodeSetId = restClient.createImportedCodeSet("map1 row code", "map1 row display", "test code set", "1.2.3", 34);
+    long deleteMapId = restClient.createMap("Delete Map Version",
+        "http://snomed.info/sct/32506021000036107/version/20210531", "http://map.test.toscope",
+        deleteProjectId, testImportedCodeSetId);
+    restClient.givenUser(MEMBER)
+              .queryParam("projectId", deleteProjectId)
+              .delete("/maps/delete/" + deleteMapId).then().log().ifValidationFails(LogDetail.BODY).statusCode(403);
+  }
 
 	@Test
 	public void shouldRetrieveSortedMaps() throws Exception {
