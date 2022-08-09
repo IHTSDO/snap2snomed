@@ -128,8 +128,9 @@ export class NotesListComponent implements OnInit, OnDestroy {
               self.loadNotes();
             },
             error => {
-              this.errorNotifier.showError("test")
-              // this.router.navigate([''], {replaceUrl: true, state: {error: error.error}});
+              if (error.error.detail) {
+                this.errorNotifier.showError(`Error encountered while attempting to delete note: ${error.error.detail}`)
+              }
             }
           );
         }

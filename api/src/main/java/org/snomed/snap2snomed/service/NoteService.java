@@ -3,7 +3,7 @@ package org.snomed.snap2snomed.service;
 import lombok.extern.slf4j.Slf4j;
 import org.snomed.snap2snomed.model.Note;
 import org.snomed.snap2snomed.model.User;
-import org.snomed.snap2snomed.problem.project.DeleteProblem;
+import org.snomed.snap2snomed.problem.DeleteProblem;
 import org.snomed.snap2snomed.repository.NoteRepository;
 import org.snomed.snap2snomed.security.AuthenticationFacade;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,14 +26,15 @@ public class NoteService {
 
     if (optional.isPresent()) {
       Note note = optional.get();
-      authenticationFacade.isAdminUser();
       User currentUser = authenticationFacade.getAuthenticatedUser();
-      if (authenticationFacade.isAdminUser() || note.getNoteBy().equals(currentUser) || note.getMapRow().getMap().getProject().getOwners().contains(currentUser)) {
+      boolean isNoteAuthor = note.getNoteBy().equals(currentUser);
+      boolean isProjectOwner = note.getMapRow().getMap().getProject().getOwners().contains(currentUser);
+      if (authenticationFacade.isAdminUser() || isNoteAuthor || isProjectOwner) {
         note.setDeleted(true);
         noteRepository.save(note);
       }
       else {
-        throw new DeleteProblem("note", "Only a project owner or the note creator can delete a note",
+        throw new DeleteProblem("note", "Only map owners or the note author can delete a note",
             Status.METHOD_NOT_ALLOWED);
       }
     }
