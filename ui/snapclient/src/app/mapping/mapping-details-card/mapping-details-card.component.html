@@ -1,11 +1,8 @@
 <mat-card class="details-card">
   <mat-card-content>
     <div class="row">
-      <h2 id="map-title" class="one-line-ellipse">{{mapping.project.title}}</h2>
-      <p id="map-version" class="one-line-ellipse"><b>{{'MAP.VERSION' | translate}}</b>: {{mapping.mapVersion}}</p>
-    </div>
-    <div class="row">
       <div class="col-project">
+        <h2 id="map-title" class="one-line-ellipse">{{mapping.project.title}}</h2>
         <ul class="sources-list">
           <li class="one-line-ellipse"><b>{{'SOURCE.SOURCE' | translate}}:</b>&nbsp;{{mapping.source.name}},
             <i>{{'MAP.VERSION' | translate}}</i> {{mapping.source.version}}
@@ -19,6 +16,14 @@
         </ul>
       </div>
       <div class="col-action">
+        <mat-form-field>
+          <mat-label>{{'MAP.MAP_VERSION' | translate}}</mat-label>
+          <mat-select id="map-version-select" (selectionChange)="versionSelectionChange($event)" [(value)]="mapping.id">
+            <mat-option [value]="map.id" *ngFor="let map of mapping.project.maps">
+              {{ map.mapVersion }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
         <small><i>{{'MAP.LAST_UPDATED' | translate}}: {{mapping.modified | lastupdated}}</i></small>
         <p *ngIf="hasHandler()">
           <a class="mat-primary" mat-stroked-button (click)="clickHandler()">

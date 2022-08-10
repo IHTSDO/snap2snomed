@@ -26,6 +26,7 @@ import javax.validation.constraints.Size;
 
 import lombok.*;
 import org.hibernate.envers.Audited;
+import org.snomed.snap2snomed.model.Project.ListView;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
@@ -105,7 +106,7 @@ public class Map implements Snap2SnomedEntity {
 
     ImportedCodeSet getSource();
 
-    Project getProject();
+    ListView getProject();
 
     @Value("#{target.getProject().getOwners()}")
     List<User> getOwners();

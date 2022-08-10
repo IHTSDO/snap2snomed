@@ -15,8 +15,9 @@
  */
 
 import {HttpClientTestingModule} from '@angular/common/http/testing';
-import {ComponentFixture, TestBed} from '@angular/core/testing';
+import {ComponentFixture, fakeAsync, TestBed, tick} from '@angular/core/testing';
 import {By} from '@angular/platform-browser';
+import {RouterTestingModule} from '@angular/router/testing';
 import {TranslateLoader, TranslateModule} from '@ngx-translate/core';
 import {HttpLoaderFactory} from 'src/app/app.module';
 import {Mapping} from 'src/app/_models/mapping';
@@ -28,13 +29,13 @@ import { MappingDetailsCardComponent } from './mapping-details-card.component';
 describe('MappingDetailsCardComponent', () => {
   let component: MappingDetailsCardComponent;
   let fixture: ComponentFixture<MappingDetailsCardComponent>;
-
-  const mapping = new Mapping();
-  mapping.project.maps.push(mapping);
+  let mapping: Mapping;
+  let secondMapping: Mapping;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [
+        RouterTestingModule.withRoutes([]),
         HttpClientTestingModule,
         TranslateModule.forRoot({
           loader: {
@@ -53,12 +54,20 @@ describe('MappingDetailsCardComponent', () => {
   });
 
   beforeEach(() => {
+
+    mapping = new Mapping();
+    mapping.project.maps.push(mapping);
+
     const project = mapping.project;
     project.id = '1';
     project.title = 'Test Map';
 
     mapping.id = '2';
     mapping.mapVersion = 'V1.0';
+
+    secondMapping = new Mapping();
+    secondMapping.id = '3';
+    secondMapping.mapVersion = 'V2.1';
 
     fixture = TestBed.createComponent(MappingDetailsCardComponent);
     component = fixture.componentInstance;
@@ -76,5 +85,42 @@ describe('MappingDetailsCardComponent', () => {
     expect(el.nativeElement.textContent).toBe('Test Map');
     expect(el).toBeTruthy();
   });
+
+  it('should show version number', () => {
+    fixture.detectChanges();
+    const el = fixture.debugElement.query(By.css('#map-version-select'));
+    expect(el).toBeTruthy();
+    expect(el.nativeElement.textContent.trim()).toBe('V1.0');
+  });
+
+  it('should show version number in drop down', () => {
+    const select = fixture.debugElement.query(By.css('#map-version-select')).nativeElement;
+    select.click();
+    fixture.detectChanges();
+    const versionOptions = fixture.debugElement.queryAll(By.css('mat-option'));
+    expect(versionOptions.length).toEqual(1);
+    expect(versionOptions[0].nativeElement.textContent.trim()).toBe('V1.0');
+  });
+
+  it('should have multiple versions in dropdown', () => {
+    mapping.project.maps.push(secondMapping);
+
+    const select = fixture.debugElement.query(By.css('#map-version-select')).nativeElement;
+    select.click();
+    fixture.detectChanges();
+    const versionOptions = fixture.debugElement.queryAll(By.css('mat-option'));
+    expect(versionOptions.length).toEqual(2);
+    expect(versionOptions[0].nativeElement.textContent.trim()).toBe('V1.0');
+    expect(versionOptions[1].nativeElement.textContent.trim()).toBe('V2.1');
+  });
+
+  it('should execute the component method on change', fakeAsync(() => {
+    const select = fixture.debugElement.query(By.css('#map-version-select')).nativeElement;
+    fixture.detectChanges();
+    spyOn(component, 'versionSelectionChange');
+    select.dispatchEvent(new Event('selectionChange'));
+    tick();
+    expect(component.versionSelectionChange).toHaveBeenCalled();
+  }));  
 
 });

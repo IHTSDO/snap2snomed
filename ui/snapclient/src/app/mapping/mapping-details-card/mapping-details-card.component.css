@@ -34,12 +34,6 @@ div.row > #map-title {
   flex: 4;
 }
 
-div.row > #map-version {
-  flex: 1;
-  margin-top: 10px;
-  text-align: right;
-}
-
 a.mat-primary {
   position: absolute;
   bottom: 0.5em;

@@ -15,6 +15,8 @@
  */
 
 import {Component, EventEmitter, Input, Output} from '@angular/core';
+import { MatSelectChange } from '@angular/material/select';
+import { Router } from '@angular/router';
 import {TranslateService} from '@ngx-translate/core';
 import {Mapping} from 'src/app/_models/mapping';
 
@@ -30,7 +32,19 @@ export class MappingDetailsCardComponent {
 
   @Output() clicked = new EventEmitter();
 
-  constructor(private translate: TranslateService) { }
+  constructor(private translate: TranslateService,
+    private router: Router) { 
+  }
+
+
+  versionSelectionChange($event: MatSelectChange): void {
+    // if access is restricted in the future at the mapping version 
+    // level rather than at the project level (current situation), 
+    // we would have to test access here before proceeding.  
+    // Currently entry to the project has this 
+    // test if (this.currentUser && this.hasProjectRole(project))
+    this.router.navigate(['map-view', $event.value], {replaceUrl: false});
+  }
 
   clickHandler(): void {
     this.clicked.emit();
