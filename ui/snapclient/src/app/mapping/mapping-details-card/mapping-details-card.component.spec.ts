@@ -21,8 +21,10 @@ import {RouterTestingModule} from '@angular/router/testing';
 import { provideMockStore } from '@ngrx/store/testing';
 import {TranslateLoader, TranslateModule} from '@ngx-translate/core';
 import {HttpLoaderFactory} from 'src/app/app.module';
+import { selectAuthorizedProjects } from 'src/app/store/app.selectors';
 import { initialAppState } from 'src/app/store/app.state';
 import {Mapping} from 'src/app/_models/mapping';
+import { Project } from 'src/app/_models/project';
 import {LastupdatedPipe} from 'src/app/_utils/lastupdated_pipe';
 
 import { MappingDetailsCardComponent } from './mapping-details-card.component';
@@ -32,6 +34,8 @@ describe('MappingDetailsCardComponent', () => {
   let fixture: ComponentFixture<MappingDetailsCardComponent>;
   let mapping: Mapping;
   let secondMapping: Mapping;
+  let project: Project;
+
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
@@ -47,7 +51,14 @@ describe('MappingDetailsCardComponent', () => {
         })
       ],
       providers: [
-        provideMockStore({initialState: initialAppState}),
+        provideMockStore({
+          initialState: initialAppState,
+          selectors: [
+            {
+              selector: selectAuthorizedProjects, 
+              value: {project: project},
+            }
+          ],}),
       ],
       declarations: [
         MappingDetailsCardComponent,
@@ -60,22 +71,25 @@ describe('MappingDetailsCardComponent', () => {
   beforeEach(() => {
 
     mapping = new Mapping();
-    mapping.project.maps.push(mapping);
+    mapping.id = '2';
+    mapping.mapVersion = 'V1.0';
 
-    const project = mapping.project;
+    project = mapping.project;
     project.id = '1';
     project.title = 'Test Map';
 
-    mapping.id = '2';
-    mapping.mapVersion = 'V1.0';
+    mapping.project.maps.push(mapping);
 
     secondMapping = new Mapping();
     secondMapping.id = '3';
     secondMapping.mapVersion = 'V2.1';
+    secondMapping.project = mapping.project;
+    secondMapping.project.maps.push(secondMapping);
 
     fixture = TestBed.createComponent(MappingDetailsCardComponent);
     component = fixture.componentInstance;
     component.mapping = mapping;
+    component.allMapsInProject = mapping.project.maps;
     fixture.detectChanges();
   });
 
@@ -94,7 +108,7 @@ describe('MappingDetailsCardComponent', () => {
     fixture.detectChanges();
     const el = fixture.debugElement.query(By.css('#map-version-select'));
     expect(el).toBeTruthy();
-    expect(el.nativeElement.textContent.trim()).toBe('V1.0');
+    expect(el.nativeElement.textContent.trim()).toContain('V1.0');
   });
 
   it('should show version number in drop down', () => {
@@ -102,20 +116,18 @@ describe('MappingDetailsCardComponent', () => {
     select.click();
     fixture.detectChanges();
     const versionOptions = fixture.debugElement.queryAll(By.css('mat-option'));
-    expect(versionOptions.length).toEqual(1);
-    expect(versionOptions[0].nativeElement.textContent.trim()).toBe('V1.0');
+    expect(versionOptions.length).toEqual(2);
+    expect(versionOptions[0].nativeElement.textContent.trim()).toContain('V1.0');
   });
 
   it('should have multiple versions in dropdown', () => {
-    mapping.project.maps.push(secondMapping);
-
     const select = fixture.debugElement.query(By.css('#map-version-select')).nativeElement;
     select.click();
     fixture.detectChanges();
     const versionOptions = fixture.debugElement.queryAll(By.css('mat-option'));
     expect(versionOptions.length).toEqual(2);
-    expect(versionOptions[0].nativeElement.textContent.trim()).toBe('V1.0');
-    expect(versionOptions[1].nativeElement.textContent.trim()).toBe('V2.1');
+    expect(versionOptions[0].nativeElement.textContent.trim()).toContain('V1.0');
+    expect(versionOptions[1].nativeElement.textContent.trim()).toContain('V2.1');
   });
 
   it('should execute the component method on change', fakeAsync(() => {
