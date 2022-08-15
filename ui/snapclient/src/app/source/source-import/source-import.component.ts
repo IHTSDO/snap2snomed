@@ -89,7 +89,7 @@ export class SourceImportComponent implements OnInit, OnDestroy, AfterViewChecke
         self.uploading = state.isLoading;
         self.saved = !!state.selectedSource;
         if (self.saved) {
-          self.onClose();
+          self.onClose(true);
         }
       });
     }
@@ -180,8 +180,11 @@ export class SourceImportComponent implements OnInit, OnDestroy, AfterViewChecke
     }
   }
 
-  onClose(): void {
-    this.dialogRef.close();
+  /** 
+   * @param saved false if 'close' clicked (i.e. dialog cancelled), true otherwise  ('save' clicked)
+   */
+  onClose(saved : boolean): void {
+    this.dialogRef.close(saved);
   }
 
   // TODO: Mergemap is deprecated find another way to do this
