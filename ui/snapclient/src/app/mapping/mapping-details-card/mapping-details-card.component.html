@@ -19,7 +19,7 @@
         <mat-form-field>
           <mat-label>{{'MAP.MAP_VERSION' | translate}}</mat-label>
           <mat-select id="map-version-select" (selectionChange)="versionSelectionChange($event)" [(value)]="mapping.id">
-            <mat-option [value]="map.id" *ngFor="let map of mapping.project.maps">
+            <mat-option [value]="map.id" *ngFor="let map of allMapsInProject">
               {{ map.mapVersion }}
             </mat-option>
           </mat-select>
