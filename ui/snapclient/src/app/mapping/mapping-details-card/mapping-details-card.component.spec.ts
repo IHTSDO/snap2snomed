@@ -18,10 +18,11 @@ import {HttpClientTestingModule} from '@angular/common/http/testing';
 import {ComponentFixture, fakeAsync, TestBed, tick} from '@angular/core/testing';
 import {By} from '@angular/platform-browser';
 import {RouterTestingModule} from '@angular/router/testing';
+import { provideMockStore } from '@ngrx/store/testing';
 import {TranslateLoader, TranslateModule} from '@ngx-translate/core';
 import {HttpLoaderFactory} from 'src/app/app.module';
+import { initialAppState } from 'src/app/store/app.state';
 import {Mapping} from 'src/app/_models/mapping';
-import {Project} from 'src/app/_models/project';
 import {LastupdatedPipe} from 'src/app/_utils/lastupdated_pipe';
 
 import { MappingDetailsCardComponent } from './mapping-details-card.component';
@@ -44,6 +45,9 @@ describe('MappingDetailsCardComponent', () => {
             deps: [HttpClientTestingModule]
           }
         })
+      ],
+      providers: [
+        provideMockStore({initialState: initialAppState}),
       ],
       declarations: [
         MappingDetailsCardComponent,
