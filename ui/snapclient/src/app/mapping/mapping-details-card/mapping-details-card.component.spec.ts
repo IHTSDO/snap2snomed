@@ -15,12 +15,16 @@
  */
 
 import {HttpClientTestingModule} from '@angular/common/http/testing';
-import {ComponentFixture, TestBed} from '@angular/core/testing';
+import {ComponentFixture, fakeAsync, TestBed, tick} from '@angular/core/testing';
 import {By} from '@angular/platform-browser';
+import {RouterTestingModule} from '@angular/router/testing';
+import { provideMockStore } from '@ngrx/store/testing';
 import {TranslateLoader, TranslateModule} from '@ngx-translate/core';
 import {HttpLoaderFactory} from 'src/app/app.module';
+import { selectAuthorizedProjects } from 'src/app/store/app.selectors';
+import { initialAppState } from 'src/app/store/app.state';
 import {Mapping} from 'src/app/_models/mapping';
-import {Project} from 'src/app/_models/project';
+import { Project } from 'src/app/_models/project';
 import {LastupdatedPipe} from 'src/app/_utils/lastupdated_pipe';
 
 import { MappingDetailsCardComponent } from './mapping-details-card.component';
@@ -28,13 +32,15 @@ import { MappingDetailsCardComponent } from './mapping-details-card.component';
 describe('MappingDetailsCardComponent', () => {
   let component: MappingDetailsCardComponent;
   let fixture: ComponentFixture<MappingDetailsCardComponent>;
+  let mapping: Mapping;
+  let secondMapping: Mapping;
+  let project: Project;
 
-  const mapping = new Mapping();
-  mapping.project.maps.push(mapping);
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [
+        RouterTestingModule.withRoutes([]),
         HttpClientTestingModule,
         TranslateModule.forRoot({
           loader: {
@@ -43,6 +49,16 @@ describe('MappingDetailsCardComponent', () => {
             deps: [HttpClientTestingModule]
           }
         })
+      ],
+      providers: [
+        provideMockStore({
+          initialState: initialAppState,
+          selectors: [
+            {
+              selector: selectAuthorizedProjects, 
+              value: {project: project},
+            }
+          ],}),
       ],
       declarations: [
         MappingDetailsCardComponent,
@@ -53,16 +69,27 @@ describe('MappingDetailsCardComponent', () => {
   });
 
   beforeEach(() => {
-    const project = mapping.project;
+
+    mapping = new Mapping();
+    mapping.id = '2';
+    mapping.mapVersion = 'V1.0';
+
+    project = mapping.project;
     project.id = '1';
     project.title = 'Test Map';
 
-    mapping.id = '2';
-    mapping.mapVersion = 'V1.0';
+    mapping.project.maps.push(mapping);
+
+    secondMapping = new Mapping();
+    secondMapping.id = '3';
+    secondMapping.mapVersion = 'V2.1';
+    secondMapping.project = mapping.project;
+    secondMapping.project.maps.push(secondMapping);
 
     fixture = TestBed.createComponent(MappingDetailsCardComponent);
     component = fixture.componentInstance;
     component.mapping = mapping;
+    component.allMapsInProject = mapping.project.maps;
     fixture.detectChanges();
   });
 
@@ -76,5 +103,40 @@ describe('MappingDetailsCardComponent', () => {
     expect(el.nativeElement.textContent).toBe('Test Map');
     expect(el).toBeTruthy();
   });
+
+  it('should show version number', () => {
+    fixture.detectChanges();
+    const el = fixture.debugElement.query(By.css('#map-version-select'));
+    expect(el).toBeTruthy();
+    expect(el.nativeElement.textContent.trim()).toContain('V1.0');
+  });
+
+  it('should show version number in drop down', () => {
+    const select = fixture.debugElement.query(By.css('#map-version-select')).nativeElement;
+    select.click();
+    fixture.detectChanges();
+    const versionOptions = fixture.debugElement.queryAll(By.css('mat-option'));
+    expect(versionOptions.length).toEqual(2);
+    expect(versionOptions[0].nativeElement.textContent.trim()).toContain('V1.0');
+  });
+
+  it('should have multiple versions in dropdown', () => {
+    const select = fixture.debugElement.query(By.css('#map-version-select')).nativeElement;
+    select.click();
+    fixture.detectChanges();
+    const versionOptions = fixture.debugElement.queryAll(By.css('mat-option'));
+    expect(versionOptions.length).toEqual(2);
+    expect(versionOptions[0].nativeElement.textContent.trim()).toContain('V1.0');
+    expect(versionOptions[1].nativeElement.textContent.trim()).toContain('V2.1');
+  });
+
+  it('should execute the component method on change', fakeAsync(() => {
+    const select = fixture.debugElement.query(By.css('#map-version-select')).nativeElement;
+    fixture.detectChanges();
+    spyOn(component, 'versionSelectionChange');
+    select.dispatchEvent(new Event('selectionChange'));
+    tick();
+    expect(component.versionSelectionChange).toHaveBeenCalled();
+  }));  
 
 });
