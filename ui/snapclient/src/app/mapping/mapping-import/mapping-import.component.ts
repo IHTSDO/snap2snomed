@@ -32,12 +32,12 @@ interface RowColumn {
   viewValue: string;
 }
 
-const SOURCE_CODE_OPTION_LABEL = 'Source Code';
-//const SOURCE_DISPLAY_OPTION_LABEL = 'Source Display';
-const TARGET_CODE_OPTION_LABEL = 'Target Code';
-const TARGET_DISPLAY_OPTION_LABEL = 'Target Display';
-const RELATIONSHIP_TYPE_CODE_OPTION_LABEL = 'Relationship Type Code';
-const NO_MAP_FLAG_OPTION_LABEL = "No Map Flag";
+const SOURCE_CODE_OPTION_LABEL = 'Source code';
+//const SOURCE_DISPLAY_OPTION_LABEL = 'Source display';
+const TARGET_CODE_OPTION_LABEL = 'Target code';
+const TARGET_DISPLAY_OPTION_LABEL = 'Target display';
+const RELATIONSHIP_TYPE_CODE_OPTION_LABEL = 'Relationship type code';
+const NO_MAP_FLAG_OPTION_LABEL = "No map flag";
 const STATUS_OPTION_LABEL = "Status";
 
 const ALT_SOURCE_CODE_OPTION_LABEL = 'source_code';
