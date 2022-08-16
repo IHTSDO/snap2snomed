@@ -149,6 +149,7 @@
     "STATUS_NOT_STARTED": "Not started",
     "TITLE": "Title",
     "TITLE_ERROR": "Title field is required and cannot start with a space",
+    "MAP_VERSION": "Map Version",
     "VERSION": "Version",
     "VERSIONS": "Map Versions",
     "VERSION_ERROR": "A map version is required and cannot start with a space",

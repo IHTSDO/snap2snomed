@@ -43,6 +43,7 @@ import {tap} from "rxjs/operators";
 import {ConfirmDialogComponent, DialogType} from "../../dialog/confirm-dialog/confirm-dialog.component";
 import {MatDialog} from "@angular/material/dialog";
 import {ErrorDetail} from "../../_models/error_detail";
+import { FormUtils } from 'src/app/_utils/form_utils';
 
 @Component({
   selector: 'app-mapping-list',
@@ -126,7 +127,7 @@ export class MappingListComponent implements OnInit, AfterViewInit, OnDestroy {
     self.store.dispatch(new LoadProjects({pageSize: this.pageSize, currentPage: this.currentPage, sort: `${this.sortCol},${this.sortDir}`, text: this.filterText, role: this.filterRole}));
     self.store.select(selectMappingLoading).subscribe((res) => this.loading = res);
     self.store.select(selectMappingError).subscribe((error) => {
-      if (error !== null) {
+      if (error) {
         this.setError(error);
       }
     });
@@ -222,12 +223,10 @@ export class MappingListComponent implements OnInit, AfterViewInit, OnDestroy {
       const selectedId = this.selectedMapping[project.id]?.id;
       if (selectedId) {
         this.mapService.getMapForId(selectedId).subscribe(res => {
-          console.log(res);
           this.newMapping = new Mapping();
           this.newMapping.id = selectedId;  // source of new version
           this.newMapping.project = res.project;
-          const newVersion = (+res.mapVersion) + 1;
-          this.newMapping.mapVersion = isNaN(newVersion) ? (res.mapVersion + '.1') : newVersion.toString();
+          this.newMapping.mapVersion = FormUtils.calculateNextVersion(res.mapVersion);
           this.newMapping.source = new Source();
           this.newMapping.source.id = '' + res.source.id;
           this.newMapping.toVersion = res.toVersion;

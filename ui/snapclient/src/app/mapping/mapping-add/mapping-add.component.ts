@@ -65,6 +65,7 @@ export class MappingAddComponent implements OnInit {
   VALID_STRING_PATTERN = FormUtils.VALID_STRING_PATTERN;
 
   mappingModel!: Mapping;
+  previousVersionSource: Source | undefined;
 
   @Input() set mapping(value: Mapping) {
     if (value) {
@@ -87,6 +88,7 @@ export class MappingAddComponent implements OnInit {
           }
         }
       }
+      this.previousVersionSource = this.sources.find((source) => source.id === this.mappingModel.source.id);
       // get other map versions
       this.store.select(selectAuthorizedProjects).subscribe((projects) => {
         if (this.mappingModel?.project && this.mappingModel.project.id !== '') {
@@ -186,7 +188,12 @@ export class MappingAddComponent implements OnInit {
               });
             }
           }
-          // this.closed.emit();  // manually close to allow any errors to show
+          
+          // manually close if any errors show
+          if (!this.error.message) {
+            this.closed.emit();
+          }
+    
         } else {
           this.translate.get('MAP.TARGET_SCOPE_INVALID_ERROR').subscribe((res) => {
             this.error.message = res;
@@ -205,16 +212,27 @@ export class MappingAddComponent implements OnInit {
   addSource($event: MouseEvent): void {
     $event.preventDefault();
     this.store.dispatch(new InitSelectedSource());
+    let data = new Source();
+
+    // pre-fill values SNOMED-453
+    if (this.previousVersionSource) {
+      data.name = this.previousVersionSource.name;
+      data.version = FormUtils.calculateNextVersion(this.previousVersionSource.version);
+    }
+
     const dialogRef = this.dialog.open(SourceImportComponent, {
-      width: this.width, data: new Source()
+      width: this.width, data
     });
 
     dialogRef.afterClosed().subscribe(
-      (result: any) => {
-        this.store.select(selectSourceState).subscribe((state) => {
-          this.sources = state.sources;
-          this.mappingModel.source = state.selectedSource ?? new Source();
-        });
+      (result: boolean) => {
+        if (result) {
+          // don't do this if the user selected cancel, it clears the existing source out
+          this.store.select(selectSourceState).subscribe((state) => {
+            this.sources = state.sources;
+            this.mappingModel.source = state.selectedSource ?? new Source();
+          });
+        }
       });
   }
 

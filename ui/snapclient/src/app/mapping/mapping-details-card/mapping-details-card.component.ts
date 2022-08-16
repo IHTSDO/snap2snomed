@@ -15,8 +15,14 @@
  */
 
 import {Component, EventEmitter, Input, Output} from '@angular/core';
+import { MatSelectChange } from '@angular/material/select';
+import { Router } from '@angular/router';
+import { Store } from '@ngrx/store';
 import {TranslateService} from '@ngx-translate/core';
+import { IAppState } from 'src/app/store/app.state';
 import {Mapping} from 'src/app/_models/mapping';
+import { Project } from 'src/app/_models/project';
+import {selectAuthorizedProjects} from '../../store/app.selectors';
 
 @Component({
   selector: 'app-mapping-details-card',
@@ -30,7 +36,33 @@ export class MappingDetailsCardComponent {
 
   @Output() clicked = new EventEmitter();
 
-  constructor(private translate: TranslateService) { }
+  allMapsInProject: Mapping[] | null = null;
+
+  constructor(private translate: TranslateService,
+    private router: Router,
+    private store: Store<IAppState>) { 
+  }
+
+  ngOnInit(): void {
+
+    // get all maps for project
+    this.store.select(selectAuthorizedProjects).subscribe((projects) => {
+      if (this.mapping?.project && this.mapping.project.id !== '') {
+        // use "==" not "===" as new maps come through as string ids, but existing maps come through as numbers
+        const mapProject: Project[] = projects.filter((proj) => proj.id == this.mapping.project.id); 
+        this.allMapsInProject = mapProject[0] ? mapProject[0].maps: null;
+      }
+    }).unsubscribe();
+  }
+
+  versionSelectionChange($event: MatSelectChange): void {
+    // if access is restricted in the future at the mapping version 
+    // level rather than at the project level (current situation), 
+    // we would have to test access here before proceeding.  
+    // Currently entry to the project has this 
+    // test if (this.currentUser && this.hasProjectRole(project))
+    this.router.navigate(['map-view', $event.value], {replaceUrl: false});
+  }
 
   clickHandler(): void {
     this.clicked.emit();
