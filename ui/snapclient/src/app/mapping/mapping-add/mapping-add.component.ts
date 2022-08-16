@@ -186,7 +186,12 @@ export class MappingAddComponent implements OnInit {
               });
             }
           }
-          // this.closed.emit();  // manually close to allow any errors to show
+          
+          // manually close if any errors show
+          if (!this.error.message) {
+            this.closed.emit();
+          }
+    
         } else {
           this.translate.get('MAP.TARGET_SCOPE_INVALID_ERROR').subscribe((res) => {
             this.error.message = res;
