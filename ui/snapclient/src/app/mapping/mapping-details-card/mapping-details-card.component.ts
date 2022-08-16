@@ -48,7 +48,8 @@ export class MappingDetailsCardComponent {
     // get all maps for project
     this.store.select(selectAuthorizedProjects).subscribe((projects) => {
       if (this.mapping?.project && this.mapping.project.id !== '') {
-        const mapProject: Project[] = projects.filter((proj) => proj.id === this.mapping.project.id);
+        // use "==" not "===" as new maps come through as string ids, but existing maps come through as numbers
+        const mapProject: Project[] = projects.filter((proj) => proj.id == this.mapping.project.id); 
         this.allMapsInProject = mapProject[0] ? mapProject[0].maps: null;
       }
     }).unsubscribe();
