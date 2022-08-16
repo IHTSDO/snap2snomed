@@ -66,7 +66,7 @@
                 </mat-option>
               </mat-select>
               <mat-error *ngIf="!selectedEdition">{{ 'MAP.TARGET_EDITION_ERROR' | translate }}</mat-error>
-            </mat-form-field> 
+            </mat-form-field>
             <mat-form-field class="field-withbutton-width multi-field-row-field">
               <mat-label>{{ 'MAP.TARGET_VERSION' | translate }}</mat-label>
               <mat-select [(ngModel)]="mappingModel.toVersion"
@@ -162,10 +162,17 @@
       </div>
       <mat-divider></mat-divider>
       <mat-card-actions>
+        <div class="alert-danger warning-message" *ngIf="warnDelete">
+          <mat-icon class="mat-icon-warning">info</mat-icon>
+          <div [innerHtml]="'FORM.DELETE_WARN' | translate" class="infotext"></div>
+        </div>
         <button *ngIf="mode !== 'FORM.VIEW'" mat-raised-button color="primary" type="submit"
                 [disabled]="myForm.form.invalid">{{ 'FORM.SAVE' | translate }}</button>
         <button mat-raised-button color="default" type="cancel"
                 (click)="onCancel($event, myForm)">{{ (mode !== 'FORM.VIEW' ? 'FORM.CLOSE' : 'FORM.CANCEL') | translate }}</button>
+        <button *ngIf="mode === 'FORM.EDIT'" id="delete" mat-raised-button color="accent" (click)="deleteMap()" type="button">
+          {{ (warnDelete ? 'FORM.DELETE_CONFIRM' : 'FORM.DELETE') | translate }}
+        </button>
       </mat-card-actions>
     </mat-card>
   </form>

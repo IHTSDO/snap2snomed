@@ -17,6 +17,11 @@
   "DETAILS": {
     "ADD_NOTE": "Add note",
     "APPLIED_FILTER": "Applied Filter",
+    "DELETE": "Delete target",
+    "DIALOG_NOTE_CANCEL": "CANCEL",
+    "DIALOG_NOTE_CONFIRM": "Are you sure you wish to delete this note? This cannot be undone.",
+    "DIALOG_NOTE_DELETE": "DELETE NOTE",
+    "DIALOG_NOTE_TITLE": "Delete Note",
     "NOTES": "Notes",
     "HAS_NOTES": "Source has notes",
     "SOURCE_DETAILS": "Source details",
@@ -24,13 +29,15 @@
     "TARGET_BY_RELATIONSHIP": "Target by relationship",
     "MAPPED_SOURCE_TO_TARGET": "Mapped Source to Target",
     "TARGET_PROPERTIES": "Target Properties",
+    "NOTE_DELETE": "Delete note",
     "NOTE_TEXT": "Add your notes here",
     "NOTE_TEXT_ERROR": "Notes text entry cannot start with a space",
-    "DELETE": "Delete target"
+    "NOTE_SAVE": "Save note"
   },
   "ERROR": {
     "LOGIN": "Incorrect username and/or password.",
     "ADD_MAPPING": "Unable to create Map - check required fields",
+    "DELETE_MAPPING": "Unable to delete map version",
     "DELETE_PROJECT": "Unable to delete project",
     "FILE_EXCEEDS_MAX_SIZE": "File size is too large",
     "FILE_TYPE_NOT_SUPPORTED": "File type is not supported",
@@ -92,6 +99,9 @@
   "FORM": {
     "CANCEL": "Cancel",
     "CREATE": "Create",
+    "DELETE": "Delete Version",
+    "DELETE_CONFIRM": "Confirm Delete Version",
+    "DELETE_WARN": "Are you sure you wish to delete this map version? This cannot be undone.",
     "EDIT": "Edit",
     "SAVE": "Save",
     "CLEAR": "Clear",

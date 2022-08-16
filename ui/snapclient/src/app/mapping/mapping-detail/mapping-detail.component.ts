@@ -48,6 +48,7 @@ import {ConceptHierarchy} from 'src/app/store/fhir-feature/fhir.actions';
 import {StatusUtils} from '../../_utils/status_utils';
 import {WriteDisableUtils} from "../../_utils/write_disable_utils";
 import {debounceTime} from "rxjs/operators";
+import {User} from "../../_models/user";
 
 
 export type SourceRow = {
@@ -89,6 +90,7 @@ export class MappingDetailComponent implements OnInit, OnDestroy {
 
   currentSelection: any;
 
+  @Input() currentUser: User | null = null;
   @Input() task: Task | undefined;
   @Input() paging!: TableParams;
   @Input() filterEntity!: MapViewFilter;

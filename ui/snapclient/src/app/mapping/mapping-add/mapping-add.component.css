@@ -1,3 +1,7 @@
+.alert-danger.warning-message {
+  margin-right: 20px;
+}
+
 .full-page-container {
   background-color: white;
   margin: auto;
@@ -110,4 +114,8 @@ table.details-table td {
 
 .multi-field-row-field {
   margin-right: 10px;
+}
+
+button#delete {
+  float: right;
 }

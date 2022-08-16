@@ -43,6 +43,9 @@ import {Source} from '../../_models/source';
 import {MapRow} from '../../_models/map_row';
 import {MatFormFieldModule} from '@angular/material/form-field';
 import {FormsModule} from '@angular/forms';
+import {MatSnackBarModule} from "@angular/material/snack-bar";
+import {ErrorNotifier} from "../../errorhandler/errornotifier";
+import {MatDialogModule, MatDialogRef} from "@angular/material/dialog";
 
 describe('NotesListComponent', () => {
   let component: NotesListComponent;
@@ -62,9 +65,11 @@ describe('NotesListComponent', () => {
         MatIconModule,
         MatCardModule,
         MatChipsModule,
+        MatDialogModule,
         MatTooltipModule,
         MatInputModule,
         MatFormFieldModule,
+        MatSnackBarModule,
         NoopAnimationsModule,
         FormsModule,
         TranslateModule.forRoot({
@@ -77,12 +82,13 @@ describe('NotesListComponent', () => {
       ],
       providers: [
         {provide: APP_CONFIG, useValue: {}},
+        {provide: MatDialogRef, useValue: {}},
         provideMockStore({
           initialState: initialAppState,
           selectors: [
             {selector: selectCurrentMapping, value: mapping},
           ],
-        }), TranslateService,
+        }), TranslateService, ErrorNotifier,
         {provide: MapService, useValue: mockMapService}],
       declarations: [NotesListComponent]
     })
