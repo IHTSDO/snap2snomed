@@ -17,6 +17,11 @@
   "DETAILS": {
     "ADD_NOTE": "Add note",
     "APPLIED_FILTER": "Applied Filter",
+    "DELETE": "Delete target",
+    "DIALOG_NOTE_CANCEL": "CANCEL",
+    "DIALOG_NOTE_CONFIRM": "Are you sure you wish to delete this note? This cannot be undone.",
+    "DIALOG_NOTE_DELETE": "DELETE NOTE",
+    "DIALOG_NOTE_TITLE": "Delete Note",
     "NOTES": "Notes",
     "HAS_NOTES": "Source has notes",
     "SOURCE_DETAILS": "Source details",
@@ -24,9 +29,10 @@
     "TARGET_BY_RELATIONSHIP": "Target by relationship",
     "MAPPED_SOURCE_TO_TARGET": "Mapped Source to Target",
     "TARGET_PROPERTIES": "Target Properties",
+    "NOTE_DELETE": "Delete note",
     "NOTE_TEXT": "Add your notes here",
     "NOTE_TEXT_ERROR": "Notes text entry cannot start with a space",
-    "DELETE": "Delete target"
+    "NOTE_SAVE": "Save note"
   },
   "ERROR": {
     "LOGIN": "Incorrect username and/or password.",
