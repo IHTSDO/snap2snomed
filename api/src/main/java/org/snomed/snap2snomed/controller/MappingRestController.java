@@ -31,22 +31,34 @@ import org.snomed.snap2snomed.problem.auth.NotAuthorisedProblem;
 import org.snomed.snap2snomed.security.WebSecurity;
 import org.snomed.snap2snomed.service.MappingService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @Validated
 @RestController
 public class MappingRestController {
 
-  @Autowired
-  MappingService mappingService;
+  @Autowired private MappingService mappingService;
+  @Autowired private WebSecurity webSecurity;
 
-  @Autowired
-  WebSecurity webSecurity;
+  @Operation(description = "Deletes a map")
+  @Parameter(name = "mapId", in = ParameterIn.PATH, required = true, description = "ID of the map to be deleted")
+  @Parameter(name = "projectId", in = ParameterIn.QUERY, required = true,
+      description = "ID of the project the map belongs to")
+  @ResponseStatus(value= HttpStatus.NO_CONTENT)
+  @DeleteMapping(path = "/maps/delete/{mapId}")
+  void updateMappingForMap(@PathVariable("mapId") Long mapId, @RequestParam("projectId") Long projectId) {
+    if (!webSecurity.isValidUser()) {
+      throw new NoSuchUserProblem();
+    }
+
+    if (!(webSecurity.isAdminUser() || webSecurity.isProjectOwnerForMapId(mapId))) {
+      throw new NotAuthorisedProblem("Not authorised to delete mapping if the user is not admin or owner of an associated project!");
+    }
+
+    mappingService.deleteMap(projectId, mapId);
+  }
 
   @Operation(description = "Applies a series of bulk changes to a map, each specified by a MappingUpdateDto, "
       + "typically used when a user has manually selected a specific set of rows to modify")

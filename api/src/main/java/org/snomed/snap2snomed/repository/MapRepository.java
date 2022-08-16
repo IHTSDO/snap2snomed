@@ -52,6 +52,9 @@ public interface MapRepository
   // ---------------------------------
 
   @RestResource(exported = false)
+  Set<Map> findAllByProjectId(Long projectId);
+
+  @RestResource(exported = false)
   @Query("select m from Map m where m.project.id = :projectId and m.mapVersion = :version")
   Set<Map> findAllByProjectIdAndVersion(Long projectId, String version);
 
