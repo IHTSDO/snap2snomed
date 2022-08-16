@@ -25,7 +25,6 @@ import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -44,12 +43,9 @@ public class ProjectService {
 
   @Autowired private AuthenticationFacade authenticationFacade;
   @Autowired private EntityManager entityManager;
+  @Autowired private MappingService mappingService;
   @Autowired private MapRepository mapRepository;
-  @Autowired private MapRowRepository mapRowRepository;
-  @Autowired private MapRowTargetRepository mapRowTargetRepository;
-  @Autowired private NoteRepository noteRepository;
   @Autowired private ProjectRepository projectRepository;
-  @Autowired private TaskRepository taskRepository;
 
   QProject project = QProject.project;
 
@@ -63,7 +59,7 @@ public class ProjectService {
   @Transactional
   public void deleteProject(Project project) {
     List<Map> maps = project.getMaps();
-    maps.forEach(this::deleteMapRelatives);
+    maps.forEach(map -> mappingService.deleteMapRelatedEntities(map.getId()));
     List<Long> mapIds = maps.stream().map(Map::getId).collect(Collectors.toList());
     mapRepository.deleteAllById(mapIds);
     projectRepository.delete(project);
@@ -156,20 +152,5 @@ public class ProjectService {
     if (whereClause != null) {
       query.where(whereClause);
     }
-  }
-
-  private void deleteMapRelatives(Map map) {
-    Long mapId = map.getId();
-    List<MapRow> mapRows = mapRowRepository.findMapRowsByMapId(mapId);
-
-    mapRows.forEach(mapRow -> {
-      Set<Note> notes = mapRow.getNotes();
-      noteRepository.deleteAll(notes);
-      List<MapRowTarget> mapRowTargets = mapRow.getMapRowTargets();
-      mapRowTargetRepository.deleteAll(mapRowTargets);
-    });
-
-    mapRowRepository.deleteAll(mapRows);
-    taskRepository.deleteAllByMapId(mapId);
   }
 }

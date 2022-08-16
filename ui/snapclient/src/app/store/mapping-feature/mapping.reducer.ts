@@ -43,6 +43,7 @@ export const initialMappingState: IMappingState = {
 
 export function mappingReducer(state = initialMappingState, action: MappingActions): IMappingState {
   switch (action.type) {
+    case MappingActionTypes.DELETE_MAPPING:
     case MappingActionTypes.DELETE_PROJECT:
     case MappingActionTypes.LOAD_PROJECTS:
     case MappingActionTypes.ADD_MAPPING:
@@ -100,6 +101,13 @@ export function mappingReducer(state = initialMappingState, action: MappingActio
         errorMessage: null
       };
 
+    case MappingActionTypes.DELETE_MAPPING_SUCCESS:
+      return {
+        ...state,
+        isLoading: false,
+        errorMessage: null
+      };
+
     /**
      * Edit map title, description, version
      */
@@ -141,13 +149,6 @@ export function mappingReducer(state = initialMappingState, action: MappingActio
       };
     }
 
-    case MappingActionTypes.DELETE_PROJECT_FAILED:
-      return {
-        ...state,
-        isLoading: false,
-        errorMessage: action.payload.error
-      }
-
     case MappingActionTypes.LOAD_PROJECTS_FAILED:
       return {
         ...state,
@@ -165,6 +166,8 @@ export function mappingReducer(state = initialMappingState, action: MappingActio
         errorMessage: action.payload.error
       };
 
+    case MappingActionTypes.DELETE_MAPPING_FAILED:
+    case MappingActionTypes.DELETE_PROJECT_FAILED:
     case MappingActionTypes.UPDATE_MAPPING_FAILED:
       return {
         ...state,
@@ -202,6 +205,12 @@ export function mappingReducer(state = initialMappingState, action: MappingActio
       return {
         ...state,
         selectedRows: deepCopy(action.payload.selectedrows)
+      };
+
+    case MappingActionTypes.CLEAR_ERRORS:
+      return {
+        ...state,
+        errorMessage: null
       };
 
     default:
