@@ -205,12 +205,12 @@ public class MapResourceIT extends IntegrationTestBase {
 
   @Test
   public void shouldDeleteMap() throws Exception {
+    Long deleteMapId = restClient.createMap("Delete Map Version",
+        "http://snomed.info/sct/32506021000036107/version/20210731", "http://map.test2.toscope",
+        projectId, testImportedCodeSet2Id);
     restClient.givenDefaultUser()
-              .body(restClient.createMapJson("Testing Map Version",
-                  "http://snomed.info/sct/32506021000036107/version/2021053", "http://map.test.toscope",
-                  projectId, testImportedCodeSetId))
               .queryParam("projectId", projectId)
-              .delete("/maps/delete/" + mapId).then().log().ifValidationFails(LogDetail.BODY).statusCode(204);
+              .delete("/maps/delete/" + deleteMapId).then().log().ifValidationFails(LogDetail.BODY).statusCode(204);
   }
 
   @Test
