@@ -15,6 +15,7 @@
  */
 
 export class FormUtils {
+
   static readonly MAX_TITLE = 100;
   static readonly MAX_VERSION = 30;
   static readonly MAX_DESCRIPTION = 200;
@@ -22,4 +23,13 @@ export class FormUtils {
   static readonly MAX_NOTE = 255;
   static readonly MAX_TASK_DESCRIPTION = 60;
   static readonly VALID_STRING_PATTERN = /^\S+.*/;
+
+  /**
+   * Used to calculate the next version of a mapping and a source
+   * @param currentVersion the current version of the mapping or the source
+   */
+  static calculateNextVersion(currentVersion: string) : string {
+    const newVersion = (+currentVersion) + 1;
+    return isNaN(newVersion) ? (currentVersion + '.1') : newVersion.toString();
+  }
 };
