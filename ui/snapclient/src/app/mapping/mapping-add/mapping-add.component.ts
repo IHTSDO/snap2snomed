@@ -131,7 +131,7 @@ export class MappingAddComponent implements OnInit {
 
   ngOnChanges(changes: SimpleChanges): void {
     // clear all errors when drawer is closed
-    if (changes.drawerOpen.currentValue === false && changes.drawerOpen.previousValue === true) {
+    if (changes.drawerOpen && changes.drawerOpen.currentValue === false && changes.drawerOpen.previousValue === true) {
       this.warnDelete = false;
       this.error = {};
       this.store.dispatch(new ClearErrors());
