@@ -1,3 +1,19 @@
+/*
+ * Copyright © 2022 SNOMED International
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.snomed.snap2snomed.controller;
 
 import io.swagger.v3.oas.annotations.Parameter;
@@ -7,7 +23,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import org.snomed.snap2snomed.controller.dto.ProjectDto;
 import org.snomed.snap2snomed.model.Project;
 import org.snomed.snap2snomed.problem.auth.NoSuchUserProblem;
-import org.snomed.snap2snomed.problem.project.DeleteProblem;
+import org.snomed.snap2snomed.problem.DeleteProblem;
 import org.snomed.snap2snomed.security.WebSecurity;
 import org.snomed.snap2snomed.service.ProjectService;
 import org.snomed.snap2snomed.service.ProjectService.ProjectFilter;
@@ -72,7 +88,7 @@ public class ProjectRestController {
     }
 
     if (!webSecurity.isAdminUser() && !webSecurity.isProjectOwnerForId(projectId)) {
-      throw new DeleteProblem("only-owners", "Only a project owner can delete a project",
+      throw new DeleteProblem("project", "Only a project owner can delete a project",
           Status.METHOD_NOT_ALLOWED);
     }
 

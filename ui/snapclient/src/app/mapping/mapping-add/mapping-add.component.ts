@@ -14,10 +14,16 @@
  * limitations under the License.
  */
 
-import {AfterViewInit, Component, EventEmitter, Input, OnInit, Output, ViewChild} from '@angular/core';
+import {Component, ElementRef, EventEmitter, Input, OnInit, Output, SimpleChanges, ViewChild} from '@angular/core';
 import {Store} from '@ngrx/store';
 import {IAppState} from '../../store/app.state';
-import {AddMapping, CopyMapping, UpdateMapping} from '../../store/mapping-feature/mapping.actions';
+import {
+  AddMapping,
+  ClearErrors,
+  CopyMapping,
+  DeleteMapping,
+  UpdateMapping
+} from '../../store/mapping-feature/mapping.actions';
 import {TranslateService} from '@ngx-translate/core';
 import {selectMappingError, selectMappingLoading} from '../../store/mapping-feature/mapping.selectors';
 import {selectCurrentUser} from '../../store/auth-feature/auth.selectors';
@@ -65,6 +71,8 @@ export class MappingAddComponent implements OnInit {
   VALID_STRING_PATTERN = FormUtils.VALID_STRING_PATTERN;
 
   mappingModel!: Mapping;
+  previousVersionSource: Source | undefined;
+  warnDelete = false;
 
   @Input() set mapping(value: Mapping) {
     if (value) {
@@ -87,6 +95,7 @@ export class MappingAddComponent implements OnInit {
           }
         }
       }
+      this.previousVersionSource = this.sources.find((source) => source.id === this.mappingModel.source.id);
       // get other map versions
       this.store.select(selectAuthorizedProjects).subscribe((projects) => {
         if (this.mappingModel?.project && this.mappingModel.project.id !== '') {
@@ -100,10 +109,12 @@ export class MappingAddComponent implements OnInit {
   }
 
   @Input() mode = 'FORM.CREATE';
+  @Input() drawerOpen = false;
 
   @Output() closed = new EventEmitter();
 
   constructor(
+    private elRef: ElementRef,
     private store: Store<IAppState>,
     private translate: TranslateService,
     private fhirService: FhirService,
@@ -116,6 +127,15 @@ export class MappingAddComponent implements OnInit {
     self.loadReleases();
     self.store.dispatch(new LoadSources());
     self.load();
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    // clear all errors when drawer is closed
+    if (changes.drawerOpen && changes.drawerOpen.currentValue === false && changes.drawerOpen.previousValue === true) {
+      this.warnDelete = false;
+      this.error = {};
+      this.store.dispatch(new ClearErrors());
+    }
   }
 
   private newMapping(): void {
@@ -136,7 +156,12 @@ export class MappingAddComponent implements OnInit {
     self.store.select(selectMappingFile).subscribe((res) => this.mappingFile = res);
     self.store.select(selectMappingError).subscribe((error) => {
       if (error !== null) {
-        self.translate.get('ERROR.ADD_MAPPING').subscribe((res: string) => self.createOrAppendError(res));
+        if (error.type && error.type.includes("mapping-delete/last-map")) {
+          self.translate.get('ERROR.DELETE_MAPPING').subscribe((res: string) => self.createOrAppendError(res));
+        }
+        else {
+          self.translate.get('ERROR.ADD_MAPPING').subscribe((res: string) => self.createOrAppendError(res));
+        }
         self.error.detail = error;
       }
     });
@@ -186,7 +211,12 @@ export class MappingAddComponent implements OnInit {
               });
             }
           }
-          // this.closed.emit();  // manually close to allow any errors to show
+
+          // manually close if any errors show
+          if (!this.error.message) {
+            this.closed.emit();
+          }
+
         } else {
           this.translate.get('MAP.TARGET_SCOPE_INVALID_ERROR').subscribe((res) => {
             this.error.message = res;
@@ -198,6 +228,7 @@ export class MappingAddComponent implements OnInit {
 
   onCancel($event: Event, form: NgForm): void {
     $event.preventDefault();
+    this.warnDelete = false;
     this.closed.emit();
     this.error = {};
   }
@@ -205,16 +236,27 @@ export class MappingAddComponent implements OnInit {
   addSource($event: MouseEvent): void {
     $event.preventDefault();
     this.store.dispatch(new InitSelectedSource());
+    let data = new Source();
+
+    // pre-fill values SNOMED-453
+    if (this.previousVersionSource) {
+      data.name = this.previousVersionSource.name;
+      data.version = FormUtils.calculateNextVersion(this.previousVersionSource.version);
+    }
+
     const dialogRef = this.dialog.open(SourceImportComponent, {
-      width: this.width, data: new Source()
+      width: this.width, data
     });
 
     dialogRef.afterClosed().subscribe(
-      (result: any) => {
-        this.store.select(selectSourceState).subscribe((state) => {
-          this.sources = state.sources;
-          this.mappingModel.source = state.selectedSource ?? new Source();
-        });
+      (result: boolean) => {
+        if (result) {
+          // don't do this if the user selected cancel, it clears the existing source out
+          this.store.select(selectSourceState).subscribe((state) => {
+            this.sources = state.sources;
+            this.mappingModel.source = state.selectedSource ?? new Source();
+          });
+        }
       });
   }
 
@@ -275,10 +317,21 @@ export class MappingAddComponent implements OnInit {
       // select the most recent (or only, if just 1) version
       this.mappingModel.toVersion = this.editionVersions[0].uri;
     }
-  } 
+  }
+
+  deleteMap(): void {
+    if (!this.warnDelete) {
+      this.warnDelete = true;
+    }
+    else {
+      this.warnDelete = false;
+      this.store.dispatch(new DeleteMapping(this.mappingModel));
+    }
+  }
 
   private createOrAppendError(err: string): void {
     const self = this;
+    self.elRef.nativeElement.parentElement.scrollTop = 0;
     if (!self.error.messages) {
       self.error.messages = [];
     }

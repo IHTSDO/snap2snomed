@@ -115,7 +115,7 @@
           <button mat-raised-button color="primary" type="submit" [disabled]="disableSubmit()"
                   (click)="onSubmit()">{{ 'FORM.SAVE' | translate }}</button>
           <button mat-raised-button color="default" type="cancel"
-                  (click)="onClose()">{{ 'FORM.CLOSE' | translate }}</button>
+                  (click)="onClose(false)">{{ 'FORM.CLOSE' | translate }}</button>
         </mat-card-actions>
       </div>
     </form>

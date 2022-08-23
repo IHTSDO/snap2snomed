@@ -2,11 +2,11 @@
   width: 100%;
 }
 
-.mat-icon {
+mat-icon.add {
   margin-right: 8px;
 }
 
-button {
+button.add {
   margin-top: 24px;
   float: right;
 }
