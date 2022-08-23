@@ -81,7 +81,7 @@ public class Map implements Snap2SnomedEntity {
   private String toScope;
 
   @NotNull(message = "A Map must always belong to a project")
-  @ManyToOne
+  @ManyToOne(cascade = {CascadeType.MERGE})
   private Project project;
 
   @ReadOnlyProperty

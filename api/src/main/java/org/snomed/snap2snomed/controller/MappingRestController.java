@@ -26,6 +26,7 @@ import org.snomed.snap2snomed.controller.dto.MappingDto;
 import org.snomed.snap2snomed.controller.dto.MappingResponse;
 import org.snomed.snap2snomed.controller.dto.MappingUpdateDto;
 import org.snomed.snap2snomed.controller.dto.ValidationResult;
+import org.snomed.snap2snomed.model.Map;
 import org.snomed.snap2snomed.problem.auth.NoSuchUserProblem;
 import org.snomed.snap2snomed.problem.auth.NotAuthorisedProblem;
 import org.snomed.snap2snomed.security.WebSecurity;
@@ -58,6 +59,22 @@ public class MappingRestController {
     }
 
     mappingService.deleteMap(projectId, mapId);
+  }
+
+  @Operation(description = "Updates the project metadata")
+  @Parameter(name = "mapId", in = ParameterIn.PATH, required = true, description = "Identifier of the map to clone")
+  @Parameter(name = "map", required = true, description = "The updated map")
+  @PutMapping(value = "/maps/update/{mapId}", consumes = "application/json")
+  @ResponseStatus(value = HttpStatus.NO_CONTENT)
+  void updateMap(@PathVariable("mapId") Long mapId, @RequestBody @Valid Map map) throws IOException {
+
+    if (!webSecurity.isValidUser()) {
+      throw new NoSuchUserProblem();
+    }
+    if (!webSecurity.isAdminUser() && !webSecurity.isProjectOwnerForMapId(mapId)) {
+      throw new NotAuthorisedProblem("Not authorised to import mapping if the user is not admin or member of an associated project!");
+    }
+    mappingService.updateMap(map);
   }
 
   @Operation(description = "Applies a series of bulk changes to a map, each specified by a MappingUpdateDto, "

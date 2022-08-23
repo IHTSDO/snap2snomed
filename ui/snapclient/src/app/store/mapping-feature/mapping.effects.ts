@@ -25,6 +25,7 @@ import {
   DeleteMappingFailure,
   DeleteMappingSuccess,
   DeleteProjectFailure,
+  LoadMapping,
   LoadMappingFailure,
   LoadMappingSuccess,
   LoadMapViewFailure,
@@ -139,19 +140,16 @@ export class MappingEffects {
     })
   ), {dispatch: false});
 
-
   updateMapping$ = createEffect(() => this.actions$.pipe(
     ofType(MappingActionTypes.UPDATE_MAPPING),
     map(action => action.payload),
     concatMap((mapping: Mapping) => {
       // id comes as a number, not a string
       mapping.id = '' + mapping.id;
-      this.mapService.updateMapping(mapping).subscribe((res) => res, error => throwError({error}));
-      this.mapService.updateProject(mapping.project).subscribe((res) => res, error => throwError({error}));
-      this.mapService.updateProjectRoles(mapping.project).subscribe((res) => res, error => throwError({error}));
+      this.mapService.updateMap(mapping).subscribe((res) => res, error => throwError({error}));
       return of(mapping);
     }),
-    switchMap((mapping: Mapping) => of(new UpdateMappingSuccess(mapping))),
+    switchMap((mapping: Mapping) => of(new UpdateMappingSuccess(mapping), new LoadMapping({id: mapping.id ?? ''}))),
     catchError((err: any) => of(new UpdateMappingFailure(err)))
   ), {dispatch: true});
 
