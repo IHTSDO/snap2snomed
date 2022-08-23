@@ -32,6 +32,82 @@
       </div> 
     </div>
   </div>
+  <div id="lines" *ngIf="lines && csvHeaders">
+    <div *ngIf="isCorrectDelimiter(); then csvheaders; else incorrectdelimiter"></div>
+    <ng-template #csvheaders>
+      <button class="alert alert-warning">
+        <mat-icon>warning</mat-icon>
+        {{'IMPORT.IMPORT_SELECT_COLUMNS' | translate}}
+      </button>
+      <!-- may be required in the future 
+      <div class="field-full-width pull-right">
+        <mat-checkbox [(ngModel)]="data.source.hasHeader"
+                      [ngModelOptions]="ngModelOptions">{{'IMPORT.IMPORT_HAS_HEADER' | translate}}</mat-checkbox>
+      </div> -->
+      <mat-form-field class="field-full-width">
+        <mat-label>{{ 'SOURCE.CODE_COL_HEADER' | translate }}</mat-label>
+        <mat-select [(ngModel)]="data.source.codeColumnIndex"
+                    [ngModelOptions]="ngModelOptions" (selectionChange)="updateSelection3($event, SOURCE_CODE_OPTION_VALUE)">
+          <mat-option *ngFor="let col of csvHeaders; let idx = index" [value]="idx">
+            {{col}}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+      <mat-form-field class="field-full-width">
+        <mat-label>{{ 'SOURCE.TARGET_CODE_COL_HEADER' | translate }}</mat-label>
+        <mat-select [(ngModel)]="data.source.targetCodeColumnIndex"
+                    [ngModelOptions]="ngModelOptions" (selectionChange)="updateSelection3($event, TARGET_CODE_OPTION_VALUE)">
+          <mat-option *ngFor="let col of csvHeaders; let idx = index" [value]="idx">
+            {{col}}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+      <mat-form-field class="field-full-width">
+        <mat-label>{{ 'SOURCE.TARGET_DISPLAY_COL_HEADER' | translate }}</mat-label>
+        <mat-select [(ngModel)]="data.source.targetDisplayColumnIndex"
+                    [ngModelOptions]="ngModelOptions" (selectionChange)="updateSelection3($event, TARGET_DISPLAY_OPTION_VALUE)">
+          <mat-option *ngFor="let col of csvHeaders; let idx = index" [value]="idx">
+            {{col}}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+      <mat-form-field class="field-full-width">
+        <mat-label>{{ 'SOURCE.RELATIONSHIP_TYPE_CODE_COL_HEADER' | translate }}</mat-label>
+        <mat-select [(ngModel)]="data.source.relationshipColumnIndex"
+                    [ngModelOptions]="ngModelOptions" (selectionChange)="updateSelection3($event, RELATIONSHIP_TYPE_CODE_OPTION_VALUE)">
+          <mat-option *ngFor="let col of csvHeaders; let idx = index" [value]="idx">
+            {{col}}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+      <mat-form-field class="field-full-width">
+        <mat-label>{{ 'SOURCE.NO_MAP_FLAG_COL_HEADER' | translate }}</mat-label>
+        <mat-select [(ngModel)]="data.source.noMapFlagColumnIndex"
+                    [ngModelOptions]="ngModelOptions" (selectionChange)="updateSelection3($event, NO_MAP_FLAG_OPTION_VALUE)">
+          <mat-option *ngFor="let col of csvHeaders; let idx = index" [value]="idx">
+            {{col}}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+      <mat-form-field class="field-full-width">
+        <mat-label>{{ 'SOURCE.STATUS_COL_HEADER' | translate }}</mat-label>
+        <mat-select [(ngModel)]="data.source.statusColumnIndex"
+                    [ngModelOptions]="ngModelOptions" (selectionChange)="updateSelection3($event, STATUS_OPTION_VALUE)">
+          <mat-option *ngFor="let col of csvHeaders; let idx = index" [value]="idx">
+            {{col}}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+    </ng-template>
+    <ng-template #incorrectdelimiter>
+      <button class="alert alert-danger">
+        <mat-icon>warning</mat-icon>
+        {{'SOURCE.INCORRECT_DELIMITER' | translate}}</button>
+    </ng-template>
+  </div>
+  <mat-error>{{error.message}}</mat-error>
+  <!-- file preview implementation .. preferred display was individual drop-downs for each value rather than a file preview
+       but kept here in case the file preview approach is wanted in the future
   <div *ngIf="contents">
     <div class="alert-warning warning-message">
       <mat-icon>info</mat-icon>
@@ -63,6 +139,7 @@
       </table>
     </section>
   </div>
+  -->
 
   <mat-card-actions>
     <button mat-raised-button color="primary" type="submit" [disabled]="disableSubmit()" (click)="onSubmit()">{{
