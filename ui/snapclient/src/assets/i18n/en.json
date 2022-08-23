@@ -296,6 +296,11 @@
     "CODE_COL_ERROR": "Invalid source code column header",
     "DISPLAY_COL": "Source display column header",
     "DISPLAY_COL_ERROR": "Invalid source display column header",
+    "TARGET_CODE_COL_HEADER": "Target code column header",
+    "TARGET_DISPLAY_COL_HEADER": "Target display column header",
+    "RELATIONSHIP_TYPE_CODE_COL_HEADER": "Relationship type code column header",
+    "NO_MAP_FLAG_COL_HEADER": "No map flag column header",
+    "STATUS_COL_HEADER": "Status column header",
     "FILE": "Source file",
     "FILE_REQUIRED": "A source file is required",
     "HAS_HEADER": "The source file has a header row",
@@ -458,6 +463,8 @@
     "IMPORT_LARGE_MAP": "Large maps can take long to import, please do not refresh your browser while the import is running.",
     "IMPORT_WARNING": "Warning! This operation will clear and override all existing mappings!",
     "IMPORT_RESULT": "Successfully imported {{insertCount}} lines from {{recordCount}} lines.",
-    "IMPORT_SELECT_COLUMNS": "We have selected columns for import where possible. Please check these are correct as they cannot be changed later."
+    "IMPORT_SELECT_COLUMNS": "We have selected columns for import where possible. Please check these are correct as they cannot be changed later.",
+    "IMPORT_HAS_HEADER": "The imported file has a header row",
+    "IMPORT_COL_NOT_SPECIFIED": "Not Specified"
   }
 }

@@ -27,6 +27,13 @@ import {ErrorInfo} from '../../errormessage/errormessage.component';
 import {MappingImportSource} from 'src/app/_models/mapping_import_source';
 import { MatSelectChange } from '@angular/material/select';
 
+// export interface HeaderDetails {
+//   source_code_col_index: number;
+//   target_code_col__index: number;
+//   target_display_col__index: number;
+//   relationship_col__index: number;
+// }
+
 interface RowColumn {
   value: string;
   viewValue: string;
@@ -45,14 +52,6 @@ const ALT_TARGET_CODE_OPTION_LABEL = 'target_code';
 const ALT_TARGET_DISPLAY_OPTION_LABEL = 'target_display';
 const ALT_RELATIONSHIP_TYPE_CODE_OPTION_LABEL = 'relationship';
 
-const SOURCE_CODE_OPTION_VALUE = 'sourceCode';
-const SOURCE_DISPLAY_OPTION_VALUE = 'sourceDisplay';
-const TARGET_CODE_OPTION_VALUE = 'targetCode';
-const TARGET_DISPLAY_OPTION_VALUE = 'targetDisplay';
-const RELATIONSHIP_TYPE_CODE_OPTION_VALUE = 'relationshipTypeCode';
-const NO_MAP_FLAG_OPTION_VALUE = 'noMapFlag';
-const STATUS_OPTION_VALUE = "status";
-
 const NUM_SAMPLE_LINES = 3;
 
 @Component({
@@ -62,17 +61,24 @@ const NUM_SAMPLE_LINES = 3;
 })
 export class MappingImportComponent implements OnInit, OnDestroy, AfterViewChecked {
 
+  readonly SOURCE_CODE_OPTION_VALUE = 'sourceCode';
+  readonly TARGET_CODE_OPTION_VALUE = 'targetCode';
+  readonly TARGET_DISPLAY_OPTION_VALUE = 'targetDisplay';
+  readonly RELATIONSHIP_TYPE_CODE_OPTION_VALUE = 'relationshipTypeCode';
+  readonly NO_MAP_FLAG_OPTION_VALUE = 'noMapFlag';
+  readonly STATUS_OPTION_VALUE = "status";
+
   displayedColumns: string[] = [];
   dataSource : {[key: string]: string}[] = [];
 
   columns: RowColumn[] = [
-    {value: SOURCE_CODE_OPTION_VALUE, viewValue: SOURCE_CODE_OPTION_LABEL},
-//    {value: SOURCE_DISPLAY_OPTION_VALUE, viewValue: SOURCE_DISPLAY_OPTION_LABEL},
-    {value: TARGET_CODE_OPTION_VALUE, viewValue: TARGET_CODE_OPTION_LABEL},
-    {value: TARGET_DISPLAY_OPTION_VALUE, viewValue: TARGET_DISPLAY_OPTION_LABEL},
-    {value: RELATIONSHIP_TYPE_CODE_OPTION_VALUE, viewValue: RELATIONSHIP_TYPE_CODE_OPTION_LABEL},
-    {value: NO_MAP_FLAG_OPTION_VALUE, viewValue: NO_MAP_FLAG_OPTION_LABEL},
-    {value: STATUS_OPTION_VALUE, viewValue: STATUS_OPTION_LABEL},
+    {value: this.SOURCE_CODE_OPTION_VALUE, viewValue: SOURCE_CODE_OPTION_LABEL},
+//    {value: this.SOURCE_DISPLAY_OPTION_VALUE, viewValue: SOURCE_DISPLAY_OPTION_LABEL},
+    {value: this.TARGET_CODE_OPTION_VALUE, viewValue: TARGET_CODE_OPTION_LABEL},
+    {value: this.TARGET_DISPLAY_OPTION_VALUE, viewValue: TARGET_DISPLAY_OPTION_LABEL},
+    {value: this.RELATIONSHIP_TYPE_CODE_OPTION_VALUE, viewValue: RELATIONSHIP_TYPE_CODE_OPTION_LABEL},
+    {value: this.NO_MAP_FLAG_OPTION_VALUE, viewValue: NO_MAP_FLAG_OPTION_LABEL},
+    {value: this.STATUS_OPTION_VALUE, viewValue: STATUS_OPTION_LABEL},
   ];
 
   private readonly MAXFILESIZE: number;
@@ -133,6 +139,16 @@ export class MappingImportComponent implements OnInit, OnDestroy, AfterViewCheck
     }
   }
 
+  isCorrectDelimiter(): boolean {
+    if (this.csvHeadersLine && this.data.source.delimiter) {
+      if (this.csvHeadersLine.indexOf(this.data.source.delimiter) === -1) {
+        return false;
+      }
+      return true;
+    }
+    return true;
+  }
+
   onFileSelected(event: any): void {
 
     this.clearFields(); // incase user selects a subsequent file before importing
@@ -165,7 +181,8 @@ export class MappingImportComponent implements OnInit, OnDestroy, AfterViewCheck
         fileReader.onloadend = (e) => {
           try {
             this.contents = fileReader.result?.slice(0, 1024 * 4) as string;
-            const lines = this.contents.split(ServiceUtils.getEOL());
+            let lines = this.contents.split(ServiceUtils.getEOL());
+            lines = lines.filter(line => line.length >= 1); // remove any empty rows
             this.lines = lines;
             const firstLine = lines.slice(0,1)[0]; //lines.shift(); .. show header line in preview
             if (!this.data.source.delimiter && event.type === 'change') {
@@ -177,7 +194,8 @@ export class MappingImportComponent implements OnInit, OnDestroy, AfterViewCheck
             if (lines.length > 1 && firstLine && this.data.source.delimiter) {
               this.csvHeadersLine =  firstLine;
               let headersFound : string[] = []; 
-              this.csvHeaders = firstLine.split(this.data.source.delimiter).map(header => {
+              // filter removes empty values that may be there due to trailing tabs
+              this.csvHeaders = firstLine.split(this.data.source.delimiter).filter(header => header.trim() !== "").map(header => {
                 let trimmedHeader = header.trim();
                 
                 // deal with files with no headers and duplicated values
@@ -187,8 +205,18 @@ export class MappingImportComponent implements OnInit, OnDestroy, AfterViewCheck
                 }
                 headersFound.push(trimmedHeader);
 
-                return trimmedHeader
+                return trimmedHeader;
               });
+
+              this.translate.get('IMPORT.IMPORT_COL_NOT_SPECIFIED').subscribe(
+                (t) => this.csvHeaders?.push("-- " + t + " --"));
+
+              this.data.source.codeColumnIndex = this.getDropdownDefaultIndex(this.SOURCE_CODE_OPTION_VALUE);
+              this.data.source.targetCodeColumnIndex = this.getDropdownDefaultIndex(this.TARGET_CODE_OPTION_VALUE);
+              this.data.source.targetDisplayColumnIndex = this.getDropdownDefaultIndex(this.TARGET_DISPLAY_OPTION_VALUE);
+              this.data.source.relationshipColumnIndex = this.getDropdownDefaultIndex(this.RELATIONSHIP_TYPE_CODE_OPTION_VALUE);
+              this.data.source.noMapFlagColumnIndex = this.getDropdownDefaultIndex(this.NO_MAP_FLAG_OPTION_VALUE);
+              this.data.source.statusColumnIndex = this.getDropdownDefaultIndex(this.STATUS_OPTION_VALUE);
 
               this.data.source.hasHeader = true;
               this.validFile = true;
@@ -233,6 +261,86 @@ export class MappingImportComponent implements OnInit, OnDestroy, AfterViewCheck
     }
   }
 
+  /**
+   * For dropdown column UI (simple)
+   * @param columnType accepts one of const SOURCE_CODE_OPTION_VALUE, TARGET_CODE_OPTION_VALUE, TARGET_DISPLAY_OPTION_VALUE, RELATIONSHIP_TYPE_CODE_OPTION_VALUE, 
+   * NO_MAP_FLAG_OPTION_VALUE, STATUS_OPTION_VALUE;
+   * @returns the index in this.csvHeaders that columnType corresponds to, otherwise, the highest index in this.csvHeaders which is 
+   * expected to be "not selected". returns null if this.csvHeaders !== true
+   */
+  getDropdownDefaultIndex(columnType: string) {
+
+    if (this.csvHeaders) {
+
+      let notSelectedIndex = this.csvHeaders.length - 1;
+      let defaultIndex;
+
+      switch(columnType) {
+        case (this.SOURCE_CODE_OPTION_VALUE): {
+          let index = this.csvHeaders.findIndex(element => {
+            return (element.toLowerCase() === SOURCE_CODE_OPTION_LABEL.toLowerCase()) || element.toLowerCase() === (ALT_SOURCE_CODE_OPTION_LABEL.toLowerCase());
+          });
+          defaultIndex = index;
+          break;
+        }
+        case (this.TARGET_CODE_OPTION_VALUE): {
+          let index = this.csvHeaders.findIndex(element => {
+            return (element.toLowerCase() === TARGET_CODE_OPTION_LABEL.toLowerCase()) || element.toLowerCase() === (ALT_TARGET_CODE_OPTION_LABEL.toLowerCase());
+          });
+          defaultIndex = index;
+          break;
+        }
+        case (this.TARGET_DISPLAY_OPTION_VALUE): {
+          let index = this.csvHeaders.findIndex(element => {
+            return (element.toLowerCase() === TARGET_DISPLAY_OPTION_LABEL.toLowerCase()) || element.toLowerCase() === (ALT_TARGET_DISPLAY_OPTION_LABEL.toLowerCase());
+          });
+          defaultIndex = index;
+          break;
+        }
+        case (this.RELATIONSHIP_TYPE_CODE_OPTION_VALUE): {
+          let index = this.csvHeaders.findIndex(element => {
+            return (element.toLowerCase() === RELATIONSHIP_TYPE_CODE_OPTION_LABEL.toLowerCase()) || element.toLowerCase() === (ALT_RELATIONSHIP_TYPE_CODE_OPTION_LABEL.toLowerCase());
+          });
+          defaultIndex = index;
+          break;
+        }
+        case (this.NO_MAP_FLAG_OPTION_VALUE): {
+          let index = this.csvHeaders.findIndex(element => {
+            return (element.toLowerCase() === NO_MAP_FLAG_OPTION_LABEL.toLowerCase());
+          });
+          defaultIndex = index;
+          break;
+        }
+        case (this.STATUS_OPTION_VALUE): {
+          let index = this.csvHeaders.findIndex(element => {
+            return (element.toLowerCase() === STATUS_OPTION_LABEL.toLowerCase());
+          });
+          defaultIndex = index;
+          break;
+        }
+        default: { 
+          defaultIndex = -1;
+          break; 
+       } 
+      }
+
+      if (defaultIndex == -1) {
+        return notSelectedIndex;
+      }
+      else {
+        return defaultIndex;
+      }
+    }
+
+    return null;
+
+  }
+
+  /**
+   * For file preview UI (advanced, currently not displayed)
+   * @param i 
+   * @returns 
+   */
   getDropdownDefault(i: number) : string {
 
     if (this.csvHeaders) {
@@ -241,25 +349,25 @@ export class MappingImportComponent implements OnInit, OnDestroy, AfterViewCheck
       
       switch(fileColHeader.toLowerCase()) { 
         case (SOURCE_CODE_OPTION_LABEL.toLowerCase() || ALT_SOURCE_CODE_OPTION_LABEL): { 
-          return SOURCE_CODE_OPTION_VALUE; 
+          return this.SOURCE_CODE_OPTION_VALUE; 
         } 
         // case SOURCE_DISPLAY_OPTION_LABEL.toLowerCase(): { 
         //    return SOURCE_DISPLAY_OPTION_VALUE;
         // } 
         case (TARGET_CODE_OPTION_LABEL.toLowerCase() || ALT_TARGET_CODE_OPTION_LABEL): { 
-          return TARGET_CODE_OPTION_VALUE;
+          return this.TARGET_CODE_OPTION_VALUE;
         } 
         case (TARGET_DISPLAY_OPTION_LABEL.toLowerCase() || ALT_TARGET_DISPLAY_OPTION_LABEL): {
-          return TARGET_DISPLAY_OPTION_VALUE;
+          return this.TARGET_DISPLAY_OPTION_VALUE;
         } 
         case (RELATIONSHIP_TYPE_CODE_OPTION_LABEL.toLowerCase() || ALT_RELATIONSHIP_TYPE_CODE_OPTION_LABEL): { 
-          return RELATIONSHIP_TYPE_CODE_OPTION_VALUE;
+          return this.RELATIONSHIP_TYPE_CODE_OPTION_VALUE;
         } 
         case NO_MAP_FLAG_OPTION_LABEL.toLowerCase(): {
-          return NO_MAP_FLAG_OPTION_VALUE;
+          return this.NO_MAP_FLAG_OPTION_VALUE;
         }
         case STATUS_OPTION_LABEL.toLowerCase(): {
-          return STATUS_OPTION_VALUE;
+          return this.STATUS_OPTION_VALUE;
         }
         default: { 
            break; 
@@ -270,6 +378,107 @@ export class MappingImportComponent implements OnInit, OnDestroy, AfterViewCheck
     return '';
   }
 
+  /**
+   * For dropdown column UI (simple)
+   * @param $event 
+   * @param columnHeader 
+   */
+  updateSelection3($event : MatSelectChange, columnHeader : string): void {
+    console.log("new value", $event);
+    console.log("column", columnHeader);
+
+    this.error.message = "";
+
+    let notSelectedIndex = this.csvHeaders!.length - 1;
+
+    switch(columnHeader) { 
+      case this.SOURCE_CODE_OPTION_VALUE: { 
+        this.codeColumnIndexArray.splice(0);
+        if ($event.value < notSelectedIndex) {
+          this.codeColumnIndexArray.push($event.value);
+        }
+        break; 
+      } 
+      case this.TARGET_CODE_OPTION_VALUE: { 
+        this.targetCodeColumnIndexArray.splice(0);
+        if ($event.value < notSelectedIndex) {
+          this.targetCodeColumnIndexArray.push($event.value);
+        }
+        break;
+      } 
+      case this.TARGET_DISPLAY_OPTION_VALUE: { 
+        this.targetDisplayColumnIndexArray.splice(0);
+        if ($event.value < notSelectedIndex) {
+          this.targetDisplayColumnIndexArray.push($event.value);
+        }
+        break;
+      } 
+      case this.RELATIONSHIP_TYPE_CODE_OPTION_VALUE: { 
+        this.relationshipColumnIndexArray.splice(0);
+        if ($event.value < notSelectedIndex) {
+          this.relationshipColumnIndexArray.push($event.value);
+        }
+        break;
+      } 
+      case this.NO_MAP_FLAG_OPTION_VALUE: {
+        this.noMapFlagColumnIndexArray.splice(0);
+        if ($event.value < notSelectedIndex) {
+          this.noMapFlagColumnIndexArray.push($event.value);
+        }
+        break;
+      }
+      case this.STATUS_OPTION_VALUE: {
+        this.statusColumnIndexArray.splice(0);
+        if ($event.value < notSelectedIndex) {
+          this.statusColumnIndexArray.push($event.value);
+        }
+        break;
+      }
+      default: { 
+         break; 
+      } 
+    } 
+
+    // inform user of multiple assignment of column type and prevent file upload
+    let concatArrays = this.codeColumnIndexArray.concat(this.targetCodeColumnIndexArray, this.targetDisplayColumnIndexArray, this.relationshipColumnIndexArray, this.noMapFlagColumnIndexArray, this.statusColumnIndexArray)
+    let duplicatedValues = concatArrays.filter((e, i, a) => a.indexOf(e) !== i)
+    if (duplicatedValues.length > 0) {
+      this.translate.get('ERROR.IMPORT_COLUMN_DUPLICATED', {col: this.csvHeaders![duplicatedValues[0]]}).subscribe((msg) => {
+        this.error.message = msg;
+      })
+    }
+
+    if (this.error.message === "") {
+      // inform user of missing required columns and prevent file upload
+      if (this.codeColumnIndexArray.length < 1) {
+        this.translate.get('ERROR.IMPORT_COLUMN_MISSING', {col: SOURCE_CODE_OPTION_LABEL}).subscribe((msg) => {
+          this.error.message = msg;
+        })
+      }
+      else if (this.targetCodeColumnIndexArray.length < 1) {
+        this.translate.get('ERROR.IMPORT_COLUMN_MISSING', {col: TARGET_CODE_OPTION_LABEL}).subscribe((msg) => {
+          this.error.message = msg;
+        })
+      }
+      else if (this.targetDisplayColumnIndexArray.length < 1) {
+        this.translate.get('ERROR.IMPORT_COLUMN_MISSING', {col: TARGET_DISPLAY_OPTION_LABEL}).subscribe((msg) => {
+          this.error.message = msg;
+        })
+      }
+      else if (this.relationshipColumnIndexArray.length < 1) {
+        this.translate.get('ERROR.IMPORT_COLUMN_MISSING', {col: RELATIONSHIP_TYPE_CODE_OPTION_LABEL}).subscribe((msg) => {
+          this.error.message = msg;
+        })
+      }
+    }
+
+  }
+
+  /**
+   * For file preview UI (advanced, currently not displayed)
+   * @param newValue 
+   * @param index 
+   */
   updateSelection2(newValue : string, index : number): void {
     
     this.error.message = "";
@@ -301,7 +510,7 @@ export class MappingImportComponent implements OnInit, OnDestroy, AfterViewCheck
     }
 
     switch(newValue) { 
-      case SOURCE_CODE_OPTION_VALUE: { 
+      case this.SOURCE_CODE_OPTION_VALUE: { 
         this.codeColumnIndexArray.push(index);
         break;
       } 
@@ -309,23 +518,23 @@ export class MappingImportComponent implements OnInit, OnDestroy, AfterViewCheck
       // case SOURCE_DISPLAY_OPTION_VALUE: { 
       //   break;
       // } 
-      case TARGET_CODE_OPTION_VALUE: { 
+      case this.TARGET_CODE_OPTION_VALUE: { 
         this.targetCodeColumnIndexArray.push(index);
         break;
       } 
-      case TARGET_DISPLAY_OPTION_VALUE: {
+      case this.TARGET_DISPLAY_OPTION_VALUE: {
         this.targetDisplayColumnIndexArray.push(index);
         break;
       } 
-      case RELATIONSHIP_TYPE_CODE_OPTION_VALUE: { 
+      case this.RELATIONSHIP_TYPE_CODE_OPTION_VALUE: { 
         this.relationshipColumnIndexArray.push(index);
         break;
       } 
-      case NO_MAP_FLAG_OPTION_VALUE: {
+      case this.NO_MAP_FLAG_OPTION_VALUE: {
         this.noMapFlagColumnIndexArray.push(index);
         break;
       }
-      case STATUS_OPTION_VALUE: {
+      case this.STATUS_OPTION_VALUE: {
         this.statusColumnIndexArray.push(index);
         break;
       }
@@ -385,7 +594,7 @@ export class MappingImportComponent implements OnInit, OnDestroy, AfterViewCheck
           this.error.message = msg;
         })
       }
-      else if (this.relationshipColumnIndexArray.length < 1) {TARGET_DISPLAY_OPTION_LABEL
+      else if (this.relationshipColumnIndexArray.length < 1) {
         this.translate.get('ERROR.IMPORT_COLUMN_MISSING', {col: RELATIONSHIP_TYPE_CODE_OPTION_LABEL}).subscribe((msg) => {
           this.error.message = msg;
         })
