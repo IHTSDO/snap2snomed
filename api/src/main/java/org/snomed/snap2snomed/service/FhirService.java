@@ -39,7 +39,7 @@ import java.util.stream.Collectors;
 public class FhirService {
 
     private static final String DEFAULT_CODE_SYSTEM = "http://snomed.info/sct";
-    private static final int THRESHOLD = 50000;
+    private static final int THRESHOLD = 49999;
 
     @Autowired
     TerminologyProvider terminologyProvider;
