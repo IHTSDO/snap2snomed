@@ -19,7 +19,7 @@ import {HttpClient, HttpParams} from '@angular/common/http';
 import {Observable} from 'rxjs';
 import {Mapping} from '../_models/mapping';
 import {Project} from '../_models/project';
-import {Task, TaskType} from '../_models/task';
+import {Task} from '../_models/task';
 import {ServiceUtils} from '../_utils/service_utils';
 import {MappedRowDetailsDto, MapRow, MapRowRelationship, MapRowStatus, MapView} from '../_models/map_row';
 import {JSONTargetRow, TargetRow} from '../_models/target_row';
@@ -161,6 +161,18 @@ export class MapService {
       toScope: mapping.toScope
     });
     return this.http.post(url, body, header);
+  }
+
+  deleteMapping(mapping: Mapping): Observable<any> {
+    const url = `${this.config.apiBaseUrl}/maps/delete/${mapping.id}?projectId=${mapping.project.id}`;
+    const header = ServiceUtils.getHTTPHeaders();
+    return this.http.delete(url, header);
+  }
+
+  deleteProject(id: string): Observable<any> {
+    const url = `${this.config.apiBaseUrl}/projects/delete/${id}`;
+    const header = ServiceUtils.getHTTPHeaders();
+    return this.http.delete(url, header);
   }
 
   fetchProjects(pageSize: number, currentPage: number, sort: string, text: string, role: string): Observable<ProjectResults> {
@@ -432,6 +444,12 @@ export class MapService {
     const header = ServiceUtils.getHTTPHeaders();
     const body = JSON.stringify(newNote, Note.replacer);
     return this.http.post<Note>(url, body, header);
+  }
+
+  deleteNote(note: Note): Observable<any> {
+    const url = `${this.config.apiBaseUrl}/notes/delete/${note.id}`;
+    const header = ServiceUtils.getHTTPHeaders();
+    return this.http.delete(url, header);
   }
 
   /**

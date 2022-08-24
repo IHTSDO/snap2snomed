@@ -377,7 +377,7 @@ public class MapViewService {
     return new JPAQuery<MapView>(entityManager)
         .select(Projections.constructor(MapView.class, mapRow, mapTarget,
             ExpressionUtils.as(JPAExpressions.select(note.modified.max()).from(note)
-                .where(note.mapRow.eq(mapRow)), "latestNote")))
+                .where(note.mapRow.eq(mapRow).and(note.deleted.isFalse())), "latestNote")))
         .from(mapRow)
         .leftJoin(mapTarget).on(mapTarget.row.eq(mapRow))
         .leftJoin(mapRow.authorTask)

@@ -14,21 +14,14 @@
  * limitations under the License.
  */
 
-package org.snomed.snap2snomed.service;
+package org.snomed.snap2snomed.problem.mapping;
 
-import org.snomed.snap2snomed.model.MapRowTarget;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
+import org.snomed.snap2snomed.problem.Snap2SnomedProblem;
+import org.zalando.problem.Status;
 
-@Builder
-@Data
-@AllArgsConstructor
-public class MapRowTargetParams {
+public class DeleteMapProblem extends Snap2SnomedProblem {
 
-  private MapRowTarget mapRowTarget;
-  private String sourceCode;
-  private Integer noMapFlag;
-  private Integer status;
-  
+  public DeleteMapProblem(String subUrl, String message, Status status) {
+    super("mapping-delete/" + subUrl, "Map cannot be deleted", status, message);
+  }
 }

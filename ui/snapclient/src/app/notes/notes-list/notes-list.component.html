@@ -16,9 +16,10 @@
         <mat-hint align="end">{{text.value?.length || 0}}/{{MAX_NOTE}}</mat-hint>
         <mat-error *ngIf="text.invalid">{{ 'DETAILS.NOTE_TEXT_ERROR' | translate }}</mat-error>
       </mat-form-field>
-      <button color="primary" mat-raised-button type="button"
+      <button class="add" color="primary" mat-raised-button type="button"
               (click)="addNewNote()" [disabled]="!isValid()">
-        <mat-icon>save</mat-icon>Save note
+        <mat-icon class="add">save</mat-icon>
+        {{'DETAILS.NOTE_SAVE' | translate}}
       </button>
     </mat-card-content>
   </mat-card>
@@ -32,7 +33,11 @@
     <mat-card-content>
       <div id="notes-list">
         <div *ngFor="let note of notes">
-          <app-notes-item [note]="note"></app-notes-item>
+          <app-notes-item [note]="note">
+            <button mat-icon-button color="accent" title="{{'PROJECT.DELETE_TOOLTIP' | translate}}"
+                    [disabled]="!canDelete(note)"
+                    (click)="deleteNote(note)"><mat-icon>delete</mat-icon></button>
+          </app-notes-item>
         </div>
       </div>
     </mat-card-content>

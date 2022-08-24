@@ -125,10 +125,9 @@ public class MapRow implements Snap2SnomedEntity {
   @ManyToOne
   private User lastReviewer;
 
-  @OneToMany(mappedBy = "row", fetch = FetchType.EAGER)
+  @OneToMany(mappedBy = "row", fetch = FetchType.EAGER, cascade = CascadeType.REMOVE)
   @Exclude
   List<MapRowTarget> mapRowTargets;
-
 
   @Projection(name = "withLatestNote", types = {MapRow.class})
   public interface MapRowWithLatestNote {
@@ -152,7 +151,7 @@ public class MapRow implements Snap2SnomedEntity {
     Task getReviewTask();
 
     default Instant getLatestNote() {
-      Note note = getNotes().stream().findFirst().orElse(null);
+      Note note = getNotes().stream().filter(n -> !n.isDeleted()).findFirst().orElse(null);
       if (note != null) {
         return note.getModified();
       }

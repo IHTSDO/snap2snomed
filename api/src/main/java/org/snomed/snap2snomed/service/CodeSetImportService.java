@@ -125,14 +125,32 @@ public class CodeSetImportService {
     private List<MapRowTargetParams> mapRowTargetParams = new ArrayList<>();
     private Long mapId;
 
-    public void add(MapRowTarget mapRowTarget, String sourceCode, Long mapId) {
-      mapRowTargetParams.add(new MapRowTargetParams(mapRowTarget, sourceCode));
+    /**
+     * @param noMapFlagArg can be null
+     * @param mapStatusArg can be null
+     */
+    public void add(MapRowTarget mapRowTarget, String sourceCode, Long mapId,
+      Integer noMapFlagArg, MapStatus mapStatusArg) {
+
+      // default values if non supplied
+      Integer noMapFlag = 0;
+      Integer mapStatus = MapStatus.DRAFT.ordinal();
+
+      if (noMapFlagArg != null)  {
+        noMapFlag = noMapFlagArg;
+      }      
+
+      if (mapStatusArg != null) {
+        mapStatus = mapStatusArg.ordinal();
+      }
+
+      mapRowTargetParams.add(new MapRowTargetParams(mapRowTarget, sourceCode, noMapFlag, mapStatus));
       this.mapId = mapId;
     }
 
     @Override
     public void execute(Connection connection) throws SQLException {
-      // Delete existing mapping
+      // Delete existing mapping targets
       // Note: We have to wrap the subquery for IN into another subquery for MySQL. MariaDB doesn't have this issue:
       // see: https://www.xaprb.com/blog/2006/06/23/how-to-select-from-an-update-target-in-mysql
       PreparedStatement statement = connection.prepareStatement(
@@ -187,25 +205,40 @@ public class CodeSetImportService {
         "insert into map_row_target (relationship, target_code, target_display, row_id, flagged) " +
         "values(?, ?, ?, ?, ?)");
       for (MapRowTargetParams mapRowTargetParam : mapRowTargetParams) {
-        statement.setInt(1, mapRowTargetParam.getMapRowTarget().getRelationship().ordinal());
-        statement.setString(2, mapRowTargetParam.getMapRowTarget().getTargetCode());
-        statement.setString(3, mapRowTargetParam.getMapRowTarget().getTargetDisplay());
-        statement.setLong(4, mapRowTargetParam.getMapRowTarget().getRow().getId());
-        statement.setBoolean(5, mapRowTargetParam.getMapRowTarget().isFlagged());
-        statement.addBatch();
+        if (mapRowTargetParam.getMapRowTarget().getTargetCode() != null && !mapRowTargetParam.getMapRowTarget().getTargetCode().isEmpty()) {
+          statement.setInt(1, mapRowTargetParam.getMapRowTarget().getRelationship().ordinal());
+          statement.setString(2, mapRowTargetParam.getMapRowTarget().getTargetCode());
+          statement.setString(3, mapRowTargetParam.getMapRowTarget().getTargetDisplay());
+          statement.setLong(4, mapRowTargetParam.getMapRowTarget().getRow().getId());
+          statement.setBoolean(5, mapRowTargetParam.getMapRowTarget().isFlagged());
+          statement.addBatch();
+        }
       }
       statement.executeLargeBatch();
 
+      // Obsolete: we now take the status from the file, or use DRAFT if not provided for all rows
       // Set imported MapRows to DRAFT for the map
       // Note: We have to wrap the subquery for IN into another subquery for MySQL. MariaDB doesn't have this issue:
       // see: https://www.xaprb.com/blog/2006/06/23/how-to-select-from-an-update-target-in-mysql
+      // statement = connection.prepareStatement(
+      //   "update map_row set status = ?, modified = ? where map_id = ? and id in (select id from " +
+      //   "(select mr.id from map_row mr join map_row_target mt on mr.id = mt.row_id) mr2)");
+      // statement.setInt(1, MapStatus.DRAFT.ordinal());
+      // statement.setTimestamp(2, new Timestamp(System.currentTimeMillis()));
+      // statement.setLong(3, mapId);
+      // statement.executeUpdate();
+
+      // update the status and no_map flag for all rows with a target or a no_map
       statement = connection.prepareStatement(
-        "update map_row set status = ?, modified = ? where map_id = ? and id in (select id from " +
-        "(select mr.id from map_row mr join map_row_target mt on mr.id = mt.row_id) mr2)");
-      statement.setInt(1, MapStatus.DRAFT.ordinal());
-      statement.setTimestamp(2, new Timestamp(System.currentTimeMillis()));
-      statement.setLong(3, mapId);
-      statement.executeUpdate();
+        "UPDATE map_row SET status = ?, no_map = ?, modified = ? WHERE id = ?");
+      for (MapRowTargetParams mapRowTargetParam : mapRowTargetParams) {
+        statement.setInt(1, mapRowTargetParam.getStatus());
+        statement.setInt(2, mapRowTargetParam.getNoMapFlag().intValue());
+        statement.setTimestamp(3, new Timestamp(System.currentTimeMillis()));
+        statement.setLong(4, mapRowTargetParam.getMapRowTarget().getRow().getId());
+        statement.addBatch();
+      }
+      statement.executeLargeBatch();
     }
 
     int getInsertCount() {
@@ -312,13 +345,24 @@ public class CodeSetImportService {
       throw new CodeSetImportProblem("invalid-relationship-index", "Relationship column index is invalid", "Relationship column index "
           + importDetails.getRelationshipColumnIndex() + " is more than the number of columns in the record " + csvRecord.size());
     }
+    //optional fields
+    if (importDetails.getNoMapFlagColumnIndex() != null && csvRecord.size() - 1 < importDetails.getNoMapFlagColumnIndex()) {
+      throw new CodeSetImportProblem("invalid-relationship-index", "Relationship column index is invalid", "Relationship column index "
+          + importDetails.getNoMapFlagColumnIndex() + " is more than the number of columns in the record " + csvRecord.size());
+    }
+    if (importDetails.getStatusColumnIndex() != null && csvRecord.size() - 1 < importDetails.getStatusColumnIndex()) {
+      throw new CodeSetImportProblem("invalid-relationship-index", "Relationship column index is invalid", "Relationship column index "
+          + importDetails.getStatusColumnIndex() + " is more than the number of columns in the record " + csvRecord.size());
+    }
   }
   private void validateRecord(Set<String> importedCodes, String code, String targetCode,
-                              String targetDisplay, long recordNumber) {
+                              String targetDisplay, long recordNumber, Integer noMapFlag, MapStatus status) {
     checkCode(code, recordNumber);
     checkCode(targetCode, recordNumber);
     checkDuplicateCodes(importedCodes, code + targetCode);
     checkDisplay(targetDisplay, recordNumber);
+    checkNoMapFlag(targetCode, noMapFlag);
+    checkStatus(targetCode, status);
   }
 
   private void validateRecord(Set<String> importedCodes, String code, String display, long recordNumber) {
@@ -353,6 +397,25 @@ public class CodeSetImportService {
       throw new CodeSetImportProblem("display-size", "Display in the import file is too large",
           "The display value for record " + recordNumber + " is " + display.length() + " which is longer than the allowed limit of "
               + ImportedCode.DISPLAY_SIZE_LIMIT);
+    }
+  }
+  
+  private void checkNoMapFlag(String targetCode, Integer noMapFlag) {
+
+    // cannot have a row with a target and the noMap flag ticked
+    if ((noMapFlag != null) && (noMapFlag == Integer.valueOf(1)) && (targetCode != null && !(targetCode.isBlank()))) {
+      throw new CodeSetImportProblem("no-map-with-target", "The import file contains no map rows with a target",
+          "A row with target code " + targetCode + " has no map specified. Rows cannot have both a target and be a no map.");
+    }
+
+  }
+
+  private void checkStatus(String targetCode, MapStatus status) {
+    
+    // cannot have a row with a target and be in the "unmapped" state
+    if ((status != null) && (status.equals(MapStatus.UNMAPPED) == true) && (targetCode != null && !(targetCode.isBlank()))) {
+      throw new CodeSetImportProblem("map-with-unmapped-status", "The import file contains rows with a target and an unmapped status",
+          "A row with target code " + targetCode + " has a status of UNMAPPED specified. Rows with a target must have a status of MAPPED or DRAFT.");
     }
   }
 
@@ -451,17 +514,33 @@ public class CodeSetImportService {
           String targetCode = csvRecord.get(importDetails.getTargetCodeColumnIndex());
           String targetDisplay = csvRecord.get(importDetails.getTargetDisplayColumnIndex());
           String relationship = csvRecord.get(importDetails.getRelationshipColumnIndex());
+          // optional
+          Integer noMap = null;
+          if (importDetails.getNoMapFlagColumnIndex() != null) {
+            String noMapString = csvRecord.get(importDetails.getNoMapFlagColumnIndex());
+            noMap = Boolean.parseBoolean(noMapString) ? 1 : 0;
+          }
+          MapStatus status = null;
+          if (importDetails.getStatusColumnIndex() != null) {
+            String stringStatus = csvRecord.get(importDetails.getStatusColumnIndex());
+            status = MapStatus.valueOf(stringStatus);
+          }
           long recordNumber = csvRecord.getRecordNumber();
-
           if (targetCode != null && !targetCode.isEmpty()) {
-            validateRecord(importedCodes, code, targetCode, targetDisplay, recordNumber);
+            validateRecord(importedCodes, code, targetCode, targetDisplay, recordNumber, noMap, status);
             MapRowTarget mapRowTarget = MapRowTarget.builder()
                     .targetCode(targetCode)
                     .targetDisplay(targetDisplay)
                     .relationship(MappingRelationship.valueOf(relationship))
                     .build();
-            insertMappingCodeWork.add(mapRowTarget, code, Long.valueOf(importDetails.getMapId()));
+            insertMappingCodeWork.add(mapRowTarget, code, Long.valueOf(importDetails.getMapId()),
+              noMap, status);
             importedCodes.add(code + targetCode);
+          }
+          else if (noMap != null && noMap.equals(1)) {
+            // no target code but no map has been ticked
+            insertMappingCodeWork.add(new MapRowTarget(), code, Long.valueOf(importDetails.getMapId()),
+              noMap, status);
           }
         }
         importResponse.setRecordCount(parser.getRecordNumber());

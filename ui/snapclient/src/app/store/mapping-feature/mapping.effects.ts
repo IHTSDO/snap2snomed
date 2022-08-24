@@ -22,10 +22,14 @@ import {
   AddMappingSuccess,
   CopyMappingFailure,
   CopyMappingSuccess,
+  DeleteMappingFailure,
+  DeleteMappingSuccess,
+  DeleteProjectFailure,
   LoadMappingFailure,
   LoadMappingSuccess,
   LoadMapViewFailure,
   LoadMapViewSuccess,
+  LoadProjects,
   LoadProjectsFailure,
   LoadProjectsSuccess,
   MappingActions,
@@ -44,7 +48,7 @@ import {User} from '../../_models/user';
 import {Source} from '../../_models/source';
 import {UserService} from 'src/app/_services/user.service';
 import {SourceService} from 'src/app/_services/source.service';
-import {ImportMappingFileFailure, ImportMappingFileResult, ImportMappingFileSuccess} from '../source-feature/source.actions';
+import {ImportMappingFileFailure, ImportMappingFileResult, ImportMappingFileSuccess, LoadSources} from '../source-feature/source.actions';
 import {cloneDeep} from 'lodash';
 
 
@@ -159,6 +163,36 @@ export class MappingEffects {
     })
   ), {dispatch: false});
 
+  deleteMapping$ = createEffect(() => this.actions$.pipe(
+    ofType(MappingActionTypes.DELETE_MAPPING),
+    map(action => action.payload),
+    switchMap((mapping: Mapping) => this.mapService.deleteMapping(mapping).pipe(
+      switchMap(val => of(new DeleteMappingSuccess(mapping))),
+      catchError(err => of(new DeleteMappingFailure(err)))
+    ))
+  ), {dispatch: true});
+
+  deleteMappingSuccess$ = createEffect(() => this.actions$.pipe(
+    ofType(MappingActionTypes.DELETE_MAPPING_SUCCESS),
+    map(action => this.router.navigate([''], {replaceUrl: true}))
+  ), {dispatch: false})
+
+  deleteProject$ = createEffect(() => this.actions$.pipe(
+    ofType(MappingActionTypes.DELETE_PROJECT),
+    map(action => action.payload),
+    switchMap(payload => this.mapService.deleteProject(payload.id).pipe(
+      concatMap(() => [
+        new LoadProjects({pageSize: payload.pageSize, currentPage: payload.currentPage, sort: payload.sort, text: payload.text, role: payload.role}),
+        new LoadSources()
+      ]),
+      catchError(err => of(
+        new DeleteProjectFailure(err),
+        new LoadProjects({pageSize: payload.pageSize, currentPage: payload.currentPage, sort: payload.sort, text: payload.text, role: payload.role}),
+        new LoadSources())
+      )
+    ))
+  ), {dispatch: true});
+
   loadProjects$ = createEffect(() => {
     return this.actions$.pipe(
       ofType(MappingActionTypes.LOAD_PROJECTS),
@@ -185,6 +219,13 @@ export class MappingEffects {
     )),
   ), {dispatch: true});
 
+  loadMappingFailure$ = createEffect(() => this.actions$.pipe(
+    ofType(MappingActionTypes.LOAD_MAPPING_FAILED),
+    map((action) => {
+      this.router.navigate([''], {replaceUrl: true, state: {error: action.payload.error}});
+    })
+  ), {dispatch: false});
+
   loadMapView$ = createEffect(() => this.actions$.pipe(
     ofType(MappingActionTypes.LOAD_MAP_VIEW),
     map((action) => action.payload),
@@ -193,10 +234,17 @@ export class MappingEffects {
       return this.mapService.getMapView(payload.mapping, context.pageIndex,
         context.pageSize, context.sortColumn, context.sortDir, context.filter).pipe(
         switchMap((mapView: MapViewResults) => of(new LoadMapViewSuccess(mapView))),
-        catchError((error: any) => of(new LoadMapViewFailure({error}))),
+        catchError((error: any) => of(new LoadMapViewFailure(error))),
       );
     }),
   ), {dispatch: true});
+
+  loadMapViewFailure$ = createEffect(() => this.actions$.pipe(
+    ofType(MappingActionTypes.LOAD_MAP_VIEW_FAILED),
+    map((action) => {
+      this.router.navigate([''], {replaceUrl: true, state: {error: action.payload.error}});
+    })
+  ), {dispatch: false});
 
   loadTaskView$ = createEffect(() => this.actions$.pipe(
     ofType(MappingActionTypes.LOAD_TASK_VIEW),

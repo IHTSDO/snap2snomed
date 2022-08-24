@@ -83,6 +83,10 @@ public class Note implements Comparable<Note>, Snap2SnomedEntity {
     @ManyToOne
     User noteBy;
 
+    @Column(columnDefinition = "boolean default false")
+    @Builder.Default
+    private boolean deleted = false;
+
     @Override
     public int compareTo(Note o) {
         // NB other fields are included to prevent collisions in sorted sets

@@ -1,13 +1,15 @@
 <mat-drawer-container>
   <mat-drawer class="mapping-add" mode="over" position="end" [(opened)]="opened">
-    <app-mapping-add (closed)="closeCreate()" [mapping]="newMapping" [mode]="mode"></app-mapping-add>
+    <app-mapping-add [drawerOpen]="opened" (closed)="closeCreate()" [mapping]="newMapping" [mode]="mode"></app-mapping-add>
   </mat-drawer>
   <mat-toolbar>
     <span class="space-fill"></span>
     <button mat-raised-button color="accent" (click)="createMap()">{{'MAP.MAP_ADD' | translate}}</button>
   </mat-toolbar>
   <app-errormessage [error]="error"></app-errormessage>
-
+  <div *ngIf="loading">
+    <app-loading-spinner></app-loading-spinner>
+  </div>
   <div class="container" [ngClass]="{'has-error': error.message}">
     <div class="header">
       <mat-form-field class='filter' appearance="standard">
@@ -67,9 +69,10 @@
           <td mat-cell *matCellDef="let project">
             <button mat-stroked-button color="primary" title="{{'MAP.NEW_VERSION' | translate}}"
                     [disabled]="!isOwner(project)" (click)="newVersion(project)">{{'MAP.NEW_VERSION' | translate}}</button>
-            <span class="space-fill">&nbsp;</span>
-            <button mat-stroked-button color="primary" title="{{'MAP.OPEN' | translate}}"
+            <button mat-stroked-button mat-icon-button color="primary" title="{{'MAP.OPEN' | translate}}"
                     [disabled]="!hasProjectRole(project)" (click)="viewMapping(project)"><mat-icon>visibility</mat-icon></button>
+            <button mat-stroked-button mat-icon-button color="primary" title="{{'PROJECT.DELETE_TOOLTIP' | translate}}"
+                    [disabled]="!hasProjectRole(project)" (click)="deleteProject(project)"><mat-icon>delete</mat-icon></button>
           </td>
         </ng-container>
         <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>

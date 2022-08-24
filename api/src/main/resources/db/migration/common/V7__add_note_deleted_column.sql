@@ -14,21 +14,5 @@
  * limitations under the License.
  */
 
-package org.snomed.snap2snomed.service;
-
-import org.snomed.snap2snomed.model.MapRowTarget;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-
-@Builder
-@Data
-@AllArgsConstructor
-public class MapRowTargetParams {
-
-  private MapRowTarget mapRowTarget;
-  private String sourceCode;
-  private Integer noMapFlag;
-  private Integer status;
-  
-}
+alter table note add deleted boolean default false;
+alter table note_aud add deleted boolean default false;

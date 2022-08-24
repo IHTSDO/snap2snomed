@@ -34,11 +34,14 @@ public interface NoteRepository extends RevisionRepository<Note, Long, Integer>,
     // Exported in REST interface
     // ---------------------------------
 
-    @Query("select n from Note n where n.mapRow.id = :id and (true = ?#{@authenticationFacadeImpl.isAdminUser()} or exists (select 1 from User u where u.id = ?#{@authenticationFacadeImpl.principalSubject} and n.mapRow.id = :id and (u member of n.mapRow.map.project.owners or u member of n.mapRow.map.project.members or u member of n.mapRow.map.project.guests))) ")
+    @Query("select n from Note n where n.mapRow.id = :id and n.deleted = false and " +
+        "(true = ?#{@authenticationFacadeImpl.isAdminUser()} or exists (select 1 from User u where u.id = " +
+        "?#{@authenticationFacadeImpl.principalSubject} and n.mapRow.id = :id and (u member of n.mapRow.map.project.owners or u member of n.mapRow.map.project.members or u member of n.mapRow.map.project.guests))) ")
     Page<Note> findByMapRowId(Long id, Pageable pageable);
 
     @Override
-    @Query("select n from Note n where true = ?#{@authenticationFacadeImpl.isAdminUser()} or exists (select 1 from User u where u.id = ?#{@authenticationFacadeImpl.principalSubject} and (u member of n.mapRow.map.project.owners or u member of n.mapRow.map.project.members or u member of n.mapRow.map.project.guests)) ")
+    @Query("select n from Note n where n.deleted = false and true = ?#{@authenticationFacadeImpl.isAdminUser()} or " +
+        "exists (select 1 from User u where u.id = ?#{@authenticationFacadeImpl.principalSubject} and (u member of n.mapRow.map.project.owners or u member of n.mapRow.map.project.members or u member of n.mapRow.map.project.guests)) ")
     Page<Note> findAll(Pageable pageable);
 
     @Override

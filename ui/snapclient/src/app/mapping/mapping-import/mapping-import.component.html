@@ -1,32 +1,146 @@
 <mat-dialog-content>
-  <div class="alert-danger warning-message" *ngIf="!createMode">
-    <mat-icon>warning</mat-icon>
-    {{ 'IMPORT.IMPORT_WARNING' | translate }}
+  <div class="row">
+    <div class="column">
+      <div class="field-full-width source-file mat-elevation-z2 infotext">
+        <div class="file">
+          <label>{{ 'SOURCE.FILE' | translate }}</label>
+          <button id="fileUploadButton" mat-button mat-raised-button type="button" (click)="fileUpload.click()">{{
+            'FORM.FILE' | translate }}</button>
+          <input matInput id="fileUploadName" type="text" readonly [(ngModel)]="file_name" [ngModelOptions]="ngModelOptions"
+            required />
+          <input hidden type="file" class="file-upload" id="fileUpload" name="fileUpload" accept="{{fileaccept}}"
+            #fileUpload (change)="onFileSelected($event)" />
+          <p><small>{{fileUploadInstructions}}</small></p>
+        </div>
+        <div class="delimiter-group">
+          <mat-form-field class="field-one-character">
+            <mat-label>{{ 'SOURCE.DELIMITERTEXT' | translate }}</mat-label>
+            <input id="delimiter" name="delimiter" matInput [ngModel]="data.source.delimiter" #delimiterinput="ngModel"
+              [ngModelOptions]="ngModelOptions" [maxLength]="1" [disabled]="true">
+          </mat-form-field>
+        </div>
+      </div>
+    </div>
+    <div class="column">
+      <div class="alert-danger warning-message" *ngIf="!createMode">
+        <mat-icon>warning</mat-icon>
+        <div [innerHtml]="'IMPORT.IMPORT_WARNING' | translate" class="infotext"></div>
+      </div>
+      <div class="alert-warning warning-message">
+        <mat-icon>info</mat-icon>
+        <div [innerHtml]="'IMPORT.IMPORT_INFO' | translate" class="infotext"></div>
+      </div> 
+    </div>
   </div>
-  <div class="alert-warning warning-message">
-    <mat-icon>info</mat-icon>
-    <div [innerHtml]="'IMPORT.IMPORT_INFO' | translate" class="infotext"></div>
-  </div> 
-  <div class="field-full-width source-file mat-elevation-z2">
-    <div class="file">
-      <label>{{ 'SOURCE.FILE' | translate }}</label>
-      <button id="fileUploadButton" mat-button mat-raised-button type="button" (click)="fileUpload.click()">{{
-        'FORM.FILE' | translate }}</button>
-      <input matInput id="fileUploadName" type="text" readonly [(ngModel)]="file_name" [ngModelOptions]="ngModelOptions"
-        required />
-      <input hidden type="file" class="file-upload" id="fileUpload" name="fileUpload" accept="{{fileaccept}}"
-        #fileUpload (change)="onFileSelected($event)" />
-      <p><small>{{fileUploadInstructions}}</small></p>
-    </div>
-    <div class="delimiter-group">
-      <mat-form-field class="field-one-character">
-        <mat-label>{{ 'SOURCE.DELIMITERTEXT' | translate }}</mat-label>
-        <input id="delimiter" name="delimiter" matInput [ngModel]="data.source.delimiter" #delimiterinput="ngModel"
-          [ngModelOptions]="ngModelOptions" [maxLength]="1" [disabled]="true">
+  <div id="lines" *ngIf="lines && csvHeaders">
+    <div *ngIf="isCorrectDelimiter(); then csvheaders; else incorrectdelimiter"></div>
+    <ng-template #csvheaders>
+      <button class="alert alert-warning">
+        <mat-icon>warning</mat-icon>
+        {{'IMPORT.IMPORT_SELECT_COLUMNS' | translate}}
+      </button>
+      <!-- may be required in the future 
+      <div class="field-full-width pull-right">
+        <mat-checkbox [(ngModel)]="data.source.hasHeader"
+                      [ngModelOptions]="ngModelOptions">{{'IMPORT.IMPORT_HAS_HEADER' | translate}}</mat-checkbox>
+      </div> -->
+      <mat-form-field class="field-full-width">
+        <mat-label>{{ 'SOURCE.CODE_COL_HEADER' | translate }}</mat-label>
+        <mat-select [(ngModel)]="data.source.codeColumnIndex"
+                    [ngModelOptions]="ngModelOptions" (selectionChange)="updateSelection3($event, SOURCE_CODE_OPTION_VALUE)">
+          <mat-option *ngFor="let col of csvHeaders; let idx = index" [value]="idx">
+            {{col}}
+          </mat-option>
+        </mat-select>
       </mat-form-field>
-    </div>
+      <mat-form-field class="field-full-width">
+        <mat-label>{{ 'SOURCE.TARGET_CODE_COL_HEADER' | translate }}</mat-label>
+        <mat-select [(ngModel)]="data.source.targetCodeColumnIndex"
+                    [ngModelOptions]="ngModelOptions" (selectionChange)="updateSelection3($event, TARGET_CODE_OPTION_VALUE)">
+          <mat-option *ngFor="let col of csvHeaders; let idx = index" [value]="idx">
+            {{col}}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+      <mat-form-field class="field-full-width">
+        <mat-label>{{ 'SOURCE.TARGET_DISPLAY_COL_HEADER' | translate }}</mat-label>
+        <mat-select [(ngModel)]="data.source.targetDisplayColumnIndex"
+                    [ngModelOptions]="ngModelOptions" (selectionChange)="updateSelection3($event, TARGET_DISPLAY_OPTION_VALUE)">
+          <mat-option *ngFor="let col of csvHeaders; let idx = index" [value]="idx">
+            {{col}}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+      <mat-form-field class="field-full-width">
+        <mat-label>{{ 'SOURCE.RELATIONSHIP_TYPE_CODE_COL_HEADER' | translate }}</mat-label>
+        <mat-select [(ngModel)]="data.source.relationshipColumnIndex"
+                    [ngModelOptions]="ngModelOptions" (selectionChange)="updateSelection3($event, RELATIONSHIP_TYPE_CODE_OPTION_VALUE)">
+          <mat-option *ngFor="let col of csvHeaders; let idx = index" [value]="idx">
+            {{col}}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+      <mat-form-field class="field-full-width">
+        <mat-label>{{ 'SOURCE.NO_MAP_FLAG_COL_HEADER' | translate }}</mat-label>
+        <mat-select [(ngModel)]="data.source.noMapFlagColumnIndex"
+                    [ngModelOptions]="ngModelOptions" (selectionChange)="updateSelection3($event, NO_MAP_FLAG_OPTION_VALUE)">
+          <mat-option *ngFor="let col of csvHeaders; let idx = index" [value]="idx">
+            {{col}}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+      <mat-form-field class="field-full-width">
+        <mat-label>{{ 'SOURCE.STATUS_COL_HEADER' | translate }}</mat-label>
+        <mat-select [(ngModel)]="data.source.statusColumnIndex"
+                    [ngModelOptions]="ngModelOptions" (selectionChange)="updateSelection3($event, STATUS_OPTION_VALUE)">
+          <mat-option *ngFor="let col of csvHeaders; let idx = index" [value]="idx">
+            {{col}}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+    </ng-template>
+    <ng-template #incorrectdelimiter>
+      <button class="alert alert-danger">
+        <mat-icon>warning</mat-icon>
+        {{'SOURCE.INCORRECT_DELIMITER' | translate}}</button>
+    </ng-template>
   </div>
   <mat-error>{{error.message}}</mat-error>
+  <!-- file preview implementation .. preferred display was individual drop-downs for each value rather than a file preview
+       but kept here in case the file preview approach is wanted in the future
+  <div *ngIf="contents">
+    <div class="alert-warning warning-message">
+      <mat-icon>info</mat-icon>
+      <div [innerHtml]="'IMPORT.IMPORT_SELECT_COLUMNS' | translate" class="infotext"></div>
+    </div> 
+  </div>
+  <mat-error>{{error.message}}</mat-error>
+  <div *ngIf="contents">
+    <label class="mat-body-2"> Source File Sample:</label>
+    <section class="table-container">
+      <table mat-table [dataSource]="dataSource" class="mat-elevation-z8">
+  
+        <ng-container *ngFor="let column of displayedColumns; index as i" [matColumnDef]="column">
+          <th mat-header-cell *matHeaderCellDef>
+            <mat-form-field appearance="outline">
+              <mat-select [value]="getDropdownDefault(i)" (selectionChange)="updateSelection($event, i)">
+                <mat-option>--</mat-option>
+                <mat-option *ngFor="let col of columns" [value]="col.value">
+                  {{col.viewValue}}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+          </th>
+          <td mat-cell *matCellDef="let importRow"> {{importRow[i]}} </td>
+        </ng-container>
+      
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row [ngClass]="{'header-row': i === 0}" *matRowDef="let row; columns: displayedColumns; let i = index"></tr>
+      </table>
+    </section>
+  </div>
+  -->
+
   <mat-card-actions>
     <button mat-raised-button color="primary" type="submit" [disabled]="disableSubmit()" (click)="onSubmit()">{{
       createMode ? ('FORM.SELECT_FILE' | translate) : ('FORM.IMPORT_EXISTING_MAP' | translate) }}</button>

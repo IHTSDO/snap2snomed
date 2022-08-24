@@ -57,7 +57,7 @@ public class ValidateCodesIT extends IntegrationTestBase {
         Long mapId = restClient.createMap("1", "http://snomed.info/sct/32506021000036107/version/20210731",
                 "http://map.test.toscope", projectId, codeSetId);
         MappingImportResponse mappingImportResponse = restClient.createImportedMap(0, 2, 3,
-        4, true, ",", mapFileResource.getFile(), "text/csv", mapId);
+        4, -1, -1, true, ",", mapFileResource.getFile(), "text/csv", mapId);
         Assert.assertEquals(Integer.valueOf(1996), mappingImportResponse.getInsertCount());
         try {
             ValidationResult validationResult = restClient.validateMapTargets(mapId);
@@ -72,7 +72,7 @@ public class ValidateCodesIT extends IntegrationTestBase {
         Long mapId = restClient.createMap("2", "http://snomed.info/sct/32506021000036107/version/20210731",
                 "< 41146007 |Bacterium|", projectId, codeSetId);
         MappingImportResponse mappingImportResponse = restClient.createImportedMap(0, 2, 3,
-                4, true, ",", mapFileResource.getFile(), "text/csv", mapId);
+                4, -1, -1, true, ",", mapFileResource.getFile(), "text/csv", mapId);
         Assert.assertEquals(Integer.valueOf(1996), mappingImportResponse.getInsertCount());
         try {
             ValidationResult validationResult = restClient.validateMapTargets(mapId);

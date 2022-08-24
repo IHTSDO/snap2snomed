@@ -105,6 +105,7 @@
                 (closedStart)="hideDetail()">
       <div id="details-view" *ngIf="isDetailsView()">
         <app-mapping-detail [task]="task"
+                            [currentUser]="currentUser"
                             (detailClose)="detailClosed()"
                             [paging]="tableParams"
                             [filterEntity]="tableFilter"
