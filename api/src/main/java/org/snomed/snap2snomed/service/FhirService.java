@@ -23,6 +23,7 @@ import org.hl7.fhir.r4.model.*;
 import org.ihtsdo.snomed.util.SnomedUtils;
 import org.ihtsdo.snomed.util.rf2.schema.RF2SchemaConstants;
 import org.snomed.snap2snomed.config.Snap2snomedConfiguration;
+import org.snomed.snap2snomed.config.TerminologyServerConfiguration;
 import org.snomed.snap2snomed.controller.dto.ValidationResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.codec.Utf8;
@@ -39,7 +40,6 @@ import java.util.stream.Collectors;
 public class FhirService {
 
     private static final String DEFAULT_CODE_SYSTEM = "http://snomed.info/sct";
-    private static final int THRESHOLD = 50000;
 
     @Autowired
     TerminologyProvider terminologyProvider;
@@ -66,7 +66,7 @@ public class FhirService {
       List<ValueSet.ConceptReferenceComponent> conceptReferenceComponents =
               codes.stream().map(targetCode -> new ValueSet.ConceptReferenceComponent(new CodeType(targetCode))).collect(Collectors.toList());
       List<List<ValueSet.ConceptReferenceComponent>> partitionedConceptReferenceComponents =
-              Lists.partition(conceptReferenceComponents, THRESHOLD);
+              Lists.partition(conceptReferenceComponents, configuration.getDefaultTerminologyServer().getExpandBatchSize().intValue());
       String reqScope = scope;
       if (reqScope != null) {
         if (!reqScope.matches("^http.*")) {
