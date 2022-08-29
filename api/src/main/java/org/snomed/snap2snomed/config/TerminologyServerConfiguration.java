@@ -27,4 +27,12 @@ public class TerminologyServerConfiguration {
   @NotNull
   @URL(regexp = "^(http|https).*")
   String url;
+
+  /**
+   * The max size of each batch that will be sent to the expand operation.
+   * expandBatchSize should be no larger than the THRESHOLD of the expand operation.
+   * Values less than the THRESHOLD could give better performance if the requests are run in parallel.
+   */
+  @NotNull
+  Integer expandBatchSize ;
 }
