@@ -84,6 +84,7 @@
 
 .mat-row {
   height: 61px;
+  cursor: pointer;
 }
 
 button.cancel {
