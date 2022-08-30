@@ -17,6 +17,12 @@
       {{ 'BULKCHANGEDIALOG.CHANGETYPE_' + chngType | translate }}</mat-radio-button>
   </mat-radio-group>
   <div>
+    <mat-form-field appearance="fill" class="field-full-width" id="searchView">
+      <app-concept-search [scope]="data.map?.toScope || ''"
+                          [version]="data.map?.toVersion || ''">
+        <span class="search-title">{{'MAP.SEARCH_TARGET' | translate}}</span>
+      </app-concept-search>
+    </mat-form-field>
     <mat-form-field appearance="fill" class="field-full-width" id="relationships"
       *ngIf="((data.task &&  data.task.type !== 'REVIEW') || data.task === null) && !clearTarget && noMapValue == null">
       <mat-label>{{'TABLE.RELATIONSHIP' | translate}}</mat-label>
@@ -66,7 +72,7 @@
   </mat-card>
   <mat-divider class="divider"></mat-divider>
   <div class="box spaced">
-    <button mat-raised-button color="primary" 
+    <button mat-raised-button color="primary"
       [disabled]="!changedRelationship && !changedStatus && noMapValue == null && !clearTarget"
       (click)="onOk()">{{'DIALOG.OK' | translate}}</button>
     <button mat-raised-button color="any"
