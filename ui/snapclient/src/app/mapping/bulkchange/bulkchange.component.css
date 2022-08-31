@@ -1,7 +1,15 @@
 .setwidth {
-  width: 450px;
+  width: 800px;
   height: 100%;
   overflow: unset;
+}
+
+.row {
+  display: flex;
+}
+
+.column {
+  flex: 50%;
 }
 
 .mat-icon {

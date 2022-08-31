@@ -89,8 +89,8 @@ export class BulkchangeComponent implements OnInit {
   changedStatus: string | null | undefined;
   clearTarget: boolean;
   error: ErrorInfo = {};
-  changeTypes = ['ALL', 'SELECTED']
-  changeType: string;
+  // changeTypes = ['ALL', 'SELECTED']
+  // changeType: string;
   isMapView: boolean;
   processing: boolean;
 
@@ -107,7 +107,7 @@ export class BulkchangeComponent implements OnInit {
     this.noMap = false;
     this.clearNoMap = false;
     this.clearTarget = false;
-    this.changeType = 'ALL';
+    // this.changeType = 'ALL';
     this.isMapView = false;
       this.processing = false;
   }
@@ -124,10 +124,11 @@ export class BulkchangeComponent implements OnInit {
 
   ngOnInit(): void {
     this.isMapView = this.data.isMapView!;
-    if (this.data.selectedRows && this.data.selectedRows.length > 0) {
-      this.changeType = 'SELECTED';
-    } else {
-      this.changeType = 'ALL';
+    if (!this.data.selectedRows || this.data.selectedRows.length == 0) {
+    //   this.changeType = 'SELECTED';
+    // } else {
+    //   this.changeType = 'ALL';
+      this.error = new Error("NO ROWS SELECTED")
     }
   }
 
@@ -136,21 +137,21 @@ export class BulkchangeComponent implements OnInit {
     if (this.noMap == false && this.clearNoMap == false) {
       this.noMapValue = null;
     }
-    let mappingDto: MappingDto = {
-      targetId: null,
-      noMap: this.noMapValue,
-      status: this.changedStatus,
-      relationship: this.changedRelationship,
-      clearTarget: !this.clearTarget ? null : true
-    }
+    // let mappingDto: MappingDto = {
+    //   targetId: null,
+    //   noMap: this.noMapValue,
+    //   status: this.changedStatus,
+    //   relationship: this.changedRelationship,
+    //   clearTarget: !this.clearTarget ? null : true
+    // }
 
-    if (this.changeType == 'ALL' && this.data.task) {
-      // Bulk update all items for a task
-      this.doBulkChange(this.mapService.bulkUpdateAllRowsForTask(this.data.task.id, mappingDto));
-    } else if (this.changeType == 'ALL' && this.data.map) {
-      // Bulk update all for a map
-      this.doBulkChange(this.mapService.bulkUpdateAllRowsForMap(this.data.map.id!, mappingDto));
-    } else {
+    // if (this.changeType == 'ALL' && this.data.task) {
+    //   // Bulk update all items for a task
+    //   this.doBulkChange(this.mapService.bulkUpdateAllRowsForTask(this.data.task.id, mappingDto));
+    // } else if (this.changeType == 'ALL' && this.data.map) {
+    //   // Bulk update all for a map
+    //   this.doBulkChange(this.mapService.bulkUpdateAllRowsForMap(this.data.map.id!, mappingDto));
+    // } else {
       // Bulk update selected items
       const mappingDetails: MappingDetails[] = [];
       const mappingDto: MappingDto = {
@@ -171,7 +172,7 @@ export class BulkchangeComponent implements OnInit {
         mappingDetails: mappingDetails
       }
       this.doBulkChange(this.mapService.bulkUpdate(mappingUpdateDto));
-    }
+    // }
   }
 
   doBulkChange(serviceFunction: any): void {
@@ -222,8 +223,8 @@ export class BulkchangeComponent implements OnInit {
     }
   }
 
-  setChangeTypeSelection($event: MatRadioChange): void {
-    this.changeType = $event.value;
-  }
+  // setChangeTypeSelection($event: MatRadioChange): void {
+  //   this.changeType = $event.value;
+  // }
 
 }
