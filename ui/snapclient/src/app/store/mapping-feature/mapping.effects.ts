@@ -25,6 +25,7 @@ import {
   DeleteMappingFailure,
   DeleteMappingSuccess,
   DeleteProjectFailure,
+  LoadMapping,
   LoadMappingFailure,
   LoadMappingSuccess,
   LoadMapViewFailure,
@@ -139,16 +140,13 @@ export class MappingEffects {
     })
   ), {dispatch: false});
 
-
   updateMapping$ = createEffect(() => this.actions$.pipe(
     ofType(MappingActionTypes.UPDATE_MAPPING),
     map(action => action.payload),
     concatMap((mapping: Mapping) => {
       // id comes as a number, not a string
       mapping.id = '' + mapping.id;
-      this.mapService.updateMapping(mapping).subscribe((res) => res, error => throwError({error}));
-      this.mapService.updateProject(mapping.project).subscribe((res) => res, error => throwError({error}));
-      this.mapService.updateProjectRoles(mapping.project).subscribe((res) => res, error => throwError({error}));
+      this.mapService.updateMap(mapping).subscribe((res) => res, error => throwError({error}));
       return of(mapping);
     }),
     switchMap((mapping: Mapping) => of(new UpdateMappingSuccess(mapping))),
@@ -158,9 +156,11 @@ export class MappingEffects {
 
   updateMappingSuccess$ = createEffect(() => this.actions$.pipe(
     ofType(MappingActionTypes.UPDATE_MAPPING_SUCCESS),
-    map((action) => {
-      this.router.navigate(['map-view', action.payload.id], {replaceUrl: true});
-    })
+    map(action => action.payload),
+    map((mapping: Mapping) => [
+      of(new LoadMapping({id: mapping.id ?? ''})),
+      this.router.navigate(['map-view', mapping.id], {replaceUrl: true})
+    ])
   ), {dispatch: false});
 
   deleteMapping$ = createEffect(() => this.actions$.pipe(
