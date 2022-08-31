@@ -200,6 +200,12 @@ export class MapService {
     return this.http.get<{ _embedded: { maps: Mapping[] }, _links: any }>(url, header);
   }
 
+  updateMap(mapping: Mapping): Observable<any> {
+    const url = `${this.config.apiBaseUrl}/maps/update/${mapping.id}`;
+    const header = ServiceUtils.getHTTPHeaders();
+    return this.http.put(url, mapping, header);
+  }
+
   updateMapping(mapping: Mapping): Observable<any> {
     const url = `${this.config.apiBaseUrl}/maps/${mapping.id}`;
     const header = ServiceUtils.getHTTPHeaders();

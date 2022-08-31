@@ -55,7 +55,7 @@ describe('MappingDetailsCardComponent', () => {
           initialState: initialAppState,
           selectors: [
             {
-              selector: selectAuthorizedProjects, 
+              selector: selectAuthorizedProjects,
               value: {project: project},
             }
           ],}),
@@ -89,7 +89,6 @@ describe('MappingDetailsCardComponent', () => {
     fixture = TestBed.createComponent(MappingDetailsCardComponent);
     component = fixture.componentInstance;
     component.mapping = mapping;
-    component.allMapsInProject = mapping.project.maps;
     fixture.detectChanges();
   });
 
@@ -137,6 +136,6 @@ describe('MappingDetailsCardComponent', () => {
     select.dispatchEvent(new Event('selectionChange'));
     tick();
     expect(component.versionSelectionChange).toHaveBeenCalled();
-  }));  
+  }));
 
 });
