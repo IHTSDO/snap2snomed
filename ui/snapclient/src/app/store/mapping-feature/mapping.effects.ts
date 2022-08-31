@@ -156,9 +156,11 @@ export class MappingEffects {
 
   updateMappingSuccess$ = createEffect(() => this.actions$.pipe(
     ofType(MappingActionTypes.UPDATE_MAPPING_SUCCESS),
-    map((action) => {
-      this.router.navigate(['map-view', action.payload.id], {replaceUrl: true});
-    })
+    map(action => action.payload),
+    map((mapping: Mapping) => [
+      of(new LoadMapping({id: mapping.id ?? ''})),
+      this.router.navigate(['map-view', mapping.id], {replaceUrl: true})
+    ])
   ), {dispatch: false});
 
   deleteMapping$ = createEffect(() => this.actions$.pipe(
