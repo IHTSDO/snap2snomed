@@ -88,10 +88,10 @@
             <mat-select id="toScopeSelect" name="toScope"
                         [(ngModel)]="mappingModel.toScope">
               <mat-option value="*">{{ 'MAP.ECL_ANY' | translate }}</mat-option>
-              <mat-option value="<< 404684003">{{ 'MAP.ECL_FINDINGS' | translate }}</mat-option>
-              <mat-option value="<< 71388002">{{ 'MAP.ECL_PROCEDURES' | translate }}</mat-option>
-              <mat-option value="<< (373873005 OR 105590001)">{{ 'MAP.ECL_MEDICATIONS' | translate }}</mat-option>
-              <mat-option value="<< 410607006">{{ 'MAP.ECL_ORGANISMS' | translate }}</mat-option>
+              <mat-option value="<< 404684003|Clinical finding|">{{ 'MAP.ECL_FINDINGS' | translate }}</mat-option>
+              <mat-option value="<< 71388002|Procedure|">{{ 'MAP.ECL_PROCEDURES' | translate }}</mat-option>
+              <mat-option value="<< (373873005|Pharmaceutical / biologic product| OR 105590001|Substance|)">{{ 'MAP.ECL_MEDICATIONS' | translate }}</mat-option>
+              <mat-option value="<< 410607006|Organism|">{{ 'MAP.ECL_ORGANISMS' | translate }}</mat-option>
               <mat-option>{{ 'MAP.ECL_CUSTOM' | translate }}</mat-option>
             </mat-select>
           </mat-form-field>
