@@ -123,9 +123,6 @@ table {
 }
 
 .mat-row:hover .mat-cell {
-  background-color: #e6e6e6;
-  border-top: solid;
-  border-bottom: solid;
-  border-width: 1px;
+  background-color: #dcf1fc;
 }
 
