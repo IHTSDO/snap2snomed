@@ -149,7 +149,7 @@ export class MappingEffects {
       this.mapService.updateMap(mapping).subscribe((res) => res, error => throwError({error}));
       return of(mapping);
     }),
-    switchMap((mapping: Mapping) => of(new UpdateMappingSuccess(mapping), new LoadMapping({id: mapping.id ?? ''}))),
+    switchMap((mapping: Mapping) => of(new UpdateMappingSuccess(mapping))),
     catchError((err: any) => of(new UpdateMappingFailure(err)))
   ), {dispatch: true});
 
