@@ -106,6 +106,11 @@ public class MappingService {
   }
 
   @Transactional
+  public void updateMap(Map map) {
+    mapRepository.save(map);
+  }
+
+  @Transactional
   public MappingResponse updateMapping(MappingUpdateDto mappings) {
     if (mappings.getMappingDetails() == null || mappings.getMappingDetails().isEmpty()) {
       throw new InvalidBulkChangeProblem("No changes were specified");

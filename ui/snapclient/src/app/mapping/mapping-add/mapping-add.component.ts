@@ -155,7 +155,7 @@ export class MappingAddComponent implements OnInit {
     self.store.select(selectMappingLoading).subscribe((res) => this.loading = res);
     self.store.select(selectMappingFile).subscribe((res) => this.mappingFile = res);
     self.store.select(selectMappingError).subscribe((error) => {
-      if (error !== null) {
+      if (error != null) {
         if (error.type && error.type.includes("mapping-delete/last-map")) {
           self.translate.get('ERROR.DELETE_MAPPING').subscribe((res: string) => self.createOrAppendError(res));
         }
