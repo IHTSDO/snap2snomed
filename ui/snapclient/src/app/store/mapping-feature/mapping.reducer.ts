@@ -29,6 +29,7 @@ export interface IMappingState {
   selectedRows: MappedRowDetailsDto[];
   isLoading: boolean;
   errorMessage: any | null;
+  addEditMappingSuccess: boolean;
 }
 
 export const initialMappingState: IMappingState = {
@@ -38,7 +39,8 @@ export const initialMappingState: IMappingState = {
   selectedView: null,
   selectedRows: [],
   isLoading: false,
-  errorMessage: null
+  errorMessage: null,
+  addEditMappingSuccess: false
 };
 
 export function mappingReducer(state = initialMappingState, action: MappingActions): IMappingState {
@@ -82,7 +84,8 @@ export function mappingReducer(state = initialMappingState, action: MappingActio
         projects,
         selectedMapping: null,
         isLoading: false,
-        errorMessage: null
+        errorMessage: null,
+        addEditMappingSuccess: true
       };
 
     /**
@@ -98,7 +101,8 @@ export function mappingReducer(state = initialMappingState, action: MappingActio
         projects: [...state.projects, project],
         selectedMapping: action.payload,
         isLoading: false,
-        errorMessage: null
+        errorMessage: null,
+        addEditMappingSuccess: true
       };
 
     case MappingActionTypes.DELETE_MAPPING_SUCCESS:
@@ -119,7 +123,8 @@ export function mappingReducer(state = initialMappingState, action: MappingActio
         projects: updatedProjects,
         selectedMapping: action.payload,
         isLoading: false,
-        errorMessage: null
+        errorMessage: null,
+        addEditMappingSuccess: true
       };
     }
 
@@ -163,7 +168,8 @@ export function mappingReducer(state = initialMappingState, action: MappingActio
         ...state,
         selectedMapping: null,
         isLoading: false,
-        errorMessage: action.payload.error
+        errorMessage: action.payload.error,
+        addEditMappingSuccess: false
       };
 
     case MappingActionTypes.DELETE_MAPPING_FAILED:
@@ -172,7 +178,8 @@ export function mappingReducer(state = initialMappingState, action: MappingActio
       return {
         ...state,
         isLoading: false,
-        errorMessage: action.payload.error
+        errorMessage: action.payload.error,
+        addEditMappingSuccess: false
       };
 
     case MappingActionTypes.LOAD_MAPPING_FAILED:

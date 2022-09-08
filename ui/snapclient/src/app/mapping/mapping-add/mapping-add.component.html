@@ -15,7 +15,7 @@
           <input matInput [(ngModel)]="mappingModel.project.title"
                  id="title" name="title" #title="ngModel"
                  [maxLength]="MAX_TITLE" [pattern]="VALID_STRING_PATTERN"
-                 [disabled]="mode !== 'FORM.CREATE'" required>
+                 [disabled]="mode === 'FORM.COPY'" required>
           <mat-hint *ngIf="!title.invalid" align="end">{{title.value?.length || 0}}/{{MAX_TITLE}}</mat-hint>
           <mat-error *ngIf="title.invalid">{{ 'MAP.TITLE_ERROR' | translate }}</mat-error>
         </mat-form-field>
@@ -24,7 +24,7 @@
           <input matInput [(ngModel)]="mappingModel.mapVersion"
                  id="mapVersion" name="mapVersion" #version="ngModel"
                  [maxLength]="MAX_VERSION" [pattern]="VALID_STRING_PATTERN"
-                 [disabled]="mode !== 'FORM.CREATE' && mode !== 'FORM.COPY'" required>
+                 required>
           <mat-hint align="end">{{version.value?.length || 0}}/{{MAX_VERSION}}</mat-hint>
           <mat-error *ngIf="version.invalid">{{ 'MAP.VERSION_ERROR' | translate }}</mat-error>
         </mat-form-field>

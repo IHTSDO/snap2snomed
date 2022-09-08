@@ -59,3 +59,8 @@ export const selectSelectedRows = createSelector(
   selectModules,
   (state: IMappingState) => state.selectedRows
 );
+
+export const selectAddEditMappingSuccess = createSelector(
+  selectModules,
+  (state: IMappingState) => state.addEditMappingSuccess
+);
