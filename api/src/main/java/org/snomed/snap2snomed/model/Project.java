@@ -85,7 +85,7 @@ public class Project implements Snap2SnomedEntity {
   @Size(min = 1, max = 100, message = "Title must be between 1 and 100 characters")
   private String title;
 
-  @Size(min = 1, max = 200, message = "Description must be between 1 and 200 characters")
+  @Size(max = 200, message = "Description must be less than 200 characters")
   private String description;
 
   @OneToMany(mappedBy = "project", cascade = {CascadeType.PERSIST, CascadeType.REMOVE}, orphanRemoval = true)

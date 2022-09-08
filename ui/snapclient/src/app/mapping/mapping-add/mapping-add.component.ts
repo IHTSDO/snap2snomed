@@ -25,7 +25,11 @@ import {
   UpdateMapping
 } from '../../store/mapping-feature/mapping.actions';
 import {TranslateService} from '@ngx-translate/core';
-import {selectMappingError, selectMappingLoading} from '../../store/mapping-feature/mapping.selectors';
+import {
+  selectAddEditMappingSuccess,
+  selectMappingError,
+  selectMappingLoading
+} from '../../store/mapping-feature/mapping.selectors';
 import {selectCurrentUser} from '../../store/auth-feature/auth.selectors';
 import {Mapping} from '../../_models/mapping';
 import {SourceImportComponent} from '../../source/source-import/source-import.component';
@@ -182,6 +186,11 @@ export class MappingAddComponent implements OnInit {
         self.error.detail = error;
       }
     });
+    self.store.select(selectAddEditMappingSuccess).subscribe(res => {
+      if (res && !self.error.detail) {
+        this.closed.emit();
+      }
+    });
   }
 
   onSubmit(): void {
@@ -210,11 +219,6 @@ export class MappingAddComponent implements OnInit {
                 this.error.message = res;
               });
             }
-          }
-
-          // manually close if any errors show
-          if (!this.error.message) {
-            this.closed.emit();
           }
 
         } else {
