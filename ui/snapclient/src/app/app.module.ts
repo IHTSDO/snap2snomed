@@ -130,6 +130,7 @@ import { MappingImportComponent } from './mapping/mapping-import/mapping-import.
 import { FooterComponent } from './footer/footer.component';
 import { FeedbackWidgetComponent } from './feedback-widget/feedback-widget.component';
 import { AcceptTermsComponent } from './accept-terms/accept-terms.component';
+import { MappingNotesComponent } from './mapping/mapping-table-notes/mapping-notes.component';
 
 // AoT requires an exported function for factories
 export function HttpLoaderFactory(httpClient: HttpClient): TranslateHttpLoader {
@@ -155,6 +156,7 @@ export function HttpLoaderFactory(httpClient: HttpClient): TranslateHttpLoader {
     MappingWorkComponent,
     AutomapDialogComponent,
     MappingTableComponent,
+    MappingNotesComponent,
     DraggableDirective,
     DroppableDirective,
     ConceptPropertiesComponent,

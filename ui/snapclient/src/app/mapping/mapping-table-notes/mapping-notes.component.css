@@ -1,0 +1,12 @@
+table {
+    width: 100%;
+}
+
+.mat-header-cell {
+    padding: 0 5px 0 0;
+    color: #4b6b85;
+}
+
+.mat-dialog-actions {
+    justify-content: flex-end;
+}
