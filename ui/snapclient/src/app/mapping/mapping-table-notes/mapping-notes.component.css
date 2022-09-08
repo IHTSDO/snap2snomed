@@ -10,3 +10,8 @@ table {
 .mat-dialog-actions {
     justify-content: flex-end;
 }
+
+.notes-container {
+  height: 400px;
+  overflow: auto;
+}
