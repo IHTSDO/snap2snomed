@@ -11,7 +11,24 @@ table {
     justify-content: flex-end;
 }
 
+/* adds scrollbar to deal with lots of notes */
 .notes-container {
   height: 400px;
   overflow: auto;
 }
+
+/* make date column "fixed width" so it doesn't get spread over multiple rows when the notes are long */
+.mat-column-dateTime {
+    flex: none;
+    min-width: 80px !important;
+    padding-right: 15px;
+}
+
+/* make user column "fixed width" so it doesn't get spread over multiple rows when the notes are long */
+.mat-column-noteBy {
+    flex: none;
+    min-width: 120px !important;
+    padding-right: 15px;
+}
+
+

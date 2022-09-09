@@ -410,7 +410,7 @@ export class MappingTableComponent implements OnInit, AfterViewInit, OnDestroy {
   notesView(row_idx: number, mapRow: MapView): void {
 
     this.dialog.open(MappingNotesComponent, {
-      width: '600px', 
+      width: '800px', 
       data: {
         rowId: mapRow.rowId,
         sourceCode: mapRow.sourceCode,
