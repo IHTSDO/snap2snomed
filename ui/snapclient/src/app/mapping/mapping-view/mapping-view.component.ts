@@ -492,6 +492,10 @@ export class MappingViewComponent implements OnInit, AfterViewInit, OnDestroy {
     this.router.navigate(['map-view', this.mapping_id], {queryParams: params, replaceUrl: true});
   }
 
+  hasSelectedRows(): boolean {
+    return (this.mappingTableSelector?.selectedRows && this.mappingTableSelector?.selectedRows.length > 0) || false;
+  }
+
   isOwner(): boolean {
     return this.mapping?.project.owners.map(u => u.id).includes(this.currentUser.id) ?? false;
   }

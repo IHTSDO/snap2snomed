@@ -194,6 +194,10 @@ public class MappingService {
     List<MappingDetails> mappingDetails = new ArrayList<MappingDetails>();
     mappings.getMappingDetails().forEach(mappingDetail -> {
       mappingDetail.getSelection().forEach(selection -> {
+        Long targetId = mappingDetail.getMappingUpdate().getTargetId();
+        if (targetId == null) {
+          targetId = selection.getMapRowTargetId();
+        }
         mappingDetails.add(
           MappingDetails.builder()
             .rowId(selection.getMapRowId())
@@ -203,7 +207,7 @@ public class MappingService {
               .relationship(mappingDetail.getMappingUpdate().getRelationship())
               .status(mappingDetail.getMappingUpdate().getStatus())
               .clearTarget(mappingDetail.getMappingUpdate().getClearTarget())
-              .targetId(selection.getMapRowTargetId())
+              .targetId(targetId)
               .build()
               )
             .build());
