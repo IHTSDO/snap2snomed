@@ -102,13 +102,6 @@ describe('BulkchangeComponent', () => {
     expect(el.nativeElement.textContent).toContain('BULKCHANGEDIALOG.SELECTED');
   });
 
-  it('should show header for all', () => {
-    component.changeType = 'ALL';
-    fixture.detectChanges();
-    const el = fixture.debugElement.query(By.css('.mat-dialog-title'));
-    expect(el.nativeElement.textContent).toContain('BULKCHANGEDIALOG.ALL');
-  });
-
   it('should hide relationship and status selection - on clear no map', () => {
     component.setClearNoMap(true);
     fixture.detectChanges();
