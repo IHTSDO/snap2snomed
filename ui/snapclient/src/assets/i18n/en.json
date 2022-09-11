@@ -451,6 +451,10 @@
     "UPDATED_ROWS_ERROR_MESSAGE": "{{updated}} out of {{selected}} rows have been updated. {{diff}} row(s) unable to be changed due to invalid status or relationship changes."
   },
 
+  "NOTESDIALOG": {
+    "HEADING": "Notes for Source Code:"
+  },
+
   "SELECTION": {
     "CLEAR": "Clear Selection",
     "SELECT_ALL": "Select all rows on all pages",

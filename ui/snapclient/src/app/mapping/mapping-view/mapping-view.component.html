@@ -121,6 +121,16 @@
                 <mat-icon *ngIf="maprow.flagged" color="accent">flag</mat-icon>
               </td>
             </ng-container>
+            <!-- Note Column -->
+            <ng-container matColumnDef="latestNote">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header>{{'TABLE.NOTES' | translate}}</th>
+              <td mat-cell *matCellDef="let maprow; let i = index">
+                <button *ngIf="maprow.latestNote" mat-icon-button
+                        #tooltip="matTooltip" matTooltip="View Notes"
+                        (click)="notesView(i, maprow)"
+                ><mat-icon>chat_bubble_outline</mat-icon></button>
+              </td>
+            </ng-container>
             <!-- Last Author Column -->
             <ng-container matColumnDef="lastAuthorReviewer">
               <th mat-header-cell *matHeaderCellDef mat-sort-header>{{'TABLE.LAST_AUTHOR_REVIEWER' | translate}}</th>
@@ -300,6 +310,19 @@
                       <span class="userchip"><app-user-chip *ngIf="member" [user]="member"></app-user-chip></span>
                       {{member.givenName}} {{member.familyName}}
                     </mat-option>
+                  </mat-select>
+                </mat-form-field>
+              </th>
+            </ng-container>
+            <!-- Filter Notes -->
+            <ng-container matColumnDef="filter-notes">
+              <th mat-header-cell *matHeaderCellDef [attr.colspan]="1">
+                <mat-form-field appearance="outline">
+                  <mat-select [(ngModel)]="filterEntity.notes" (selectionChange)="filterChange()"
+                              id="notes" name="notes" #flagged="ngModel">
+                    <mat-option [value]="">---</mat-option>
+                    <mat-option *ngFor="let opt of noMapOptions"
+                                [value]="opt[1]">{{'NOMAP.' + opt[0] | translate}}</mat-option>
                   </mat-select>
                 </mat-form-field>
               </th>

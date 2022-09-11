@@ -162,11 +162,12 @@ export class MapViewFilter {
   assignedAuthor: string[] | string = '';
   assignedReviewer: string[] | string = '';
   flagged?: boolean | undefined;
+  notes?: boolean | undefined;
 
   hasFilters(): boolean {
     return this.sourceCode !== '' || this.sourceDisplay !== '' || this.targetCode !== '' || this.targetDisplay !== ''
       || this.relationship !== '' || this.status !== '' || this.noMap !== undefined || this.flagged !== undefined
-      || this.lastAuthorReviewer !== '' || this.assignedAuthor !== '' || this.assignedReviewer !== '';
+      || this.lastAuthorReviewer !== '' || this.assignedAuthor !== '' || this.assignedReviewer !== '' || this.notes !== undefined;
   }
 }
 
