@@ -1,3 +1,6 @@
 # Accept the risk for DEX
 CVE-2022-27191
 CVE-2022-30065
+
+# Accept the risk for DoS Attack for now and apply dependabot fixes as they arrive (then remove this)
+CVE-2022-25857
