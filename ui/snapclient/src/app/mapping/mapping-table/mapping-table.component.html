@@ -84,8 +84,8 @@
     <th mat-header-cell *matHeaderCellDef mat-sort-header>{{'TABLE.NOTES' | translate}}</th>
     <td mat-cell *matCellDef="let maprow; let i = index">
       <button *ngIf="maprow.latestNote" mat-icon-button
-              #tooltip="matTooltip" matTooltip="{{maprow.latestNote | date: 'medium' }}"
-              (click)="detailsView(i)"
+              #tooltip="matTooltip" matTooltip="View Notes"
+              (click)="notesView(i, maprow)"
       ><mat-icon>chat_bubble_outline</mat-icon></button>
     </td>
   </ng-container>
@@ -223,6 +223,19 @@
       </mat-form-field>
     </th>
   </ng-container>
+    <!-- Filter Notes -->
+    <ng-container matColumnDef="filter-notes">
+      <th mat-header-cell *matHeaderCellDef [attr.colspan]="1">
+        <mat-form-field appearance="outline">
+          <mat-select [(ngModel)]="filterEntity.notes" (selectionChange)="filterUpdate()"
+                      id="notes" name="notes" #noMap="ngModel">
+            <mat-option [value]="">---</mat-option>
+            <mat-option *ngFor="let opt of yesNoOptions"
+                        [value]="opt[1]">{{'NOMAP.' + opt[0] | translate}}</mat-option>
+          </mat-select>
+        </mat-form-field>
+      </th>
+    </ng-container>
 
   <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
   <tr mat-header-row *matHeaderRowDef="filteredColumns" [attr.hidden]="filterEnabled? null : true"></tr>

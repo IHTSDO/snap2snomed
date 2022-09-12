@@ -51,6 +51,7 @@ import {MappingTableSelectorComponent} from '../mapping-table-selector/mapping-t
 import {MatTable} from '@angular/material/table';
 import {WriteDisableUtils} from '../../_utils/write_disable_utils';
 import {FhirService} from "../../_services/fhir.service";
+import { MappingNotesComponent } from '../mapping-table-notes/mapping-notes.component';
 
 export interface TableParams extends Params {
   pageIndex?: number;
@@ -95,13 +96,15 @@ export class MappingTableComponent implements OnInit, AfterViewInit, OnDestroy {
     'filter-relationship',
     'filter-noMap',
     'filter-status',
-    'filter-flagged'
+    'filter-flagged',
+    'filter-notes'
   ];
 
   @Output() filterChange = new EventEmitter<MapViewFilter>();
   @Output() sortChange = new EventEmitter<Sort>();
   @Output() pagingChange = new EventEmitter<PageEvent>();
   @Output() showDetail = new EventEmitter<number>();
+  @Output() showNotes = new EventEmitter<number>();
   @Output() updateTableEvent = new EventEmitter();
 
   mappingTableSelector: MappingTableSelectorComponent | null | undefined;
@@ -402,6 +405,19 @@ export class MappingTableComponent implements OnInit, AfterViewInit, OnDestroy {
 
   detailsView(row_idx: number): void {
     this.showDetail.emit(row_idx);
+  }
+
+  notesView(row_idx: number, mapRow: MapView): void {
+
+    this.dialog.open(MappingNotesComponent, {
+      width: '800px', 
+      data: {
+        rowId: mapRow.rowId,
+        sourceCode: mapRow.sourceCode,
+        sourceDisplay: mapRow.sourceDisplay
+      }
+    });
+
   }
 
   getDuplicateTargetDialogData(): DialogData {

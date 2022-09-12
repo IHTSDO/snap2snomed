@@ -143,24 +143,22 @@ export class MappingEffects {
   updateMapping$ = createEffect(() => this.actions$.pipe(
     ofType(MappingActionTypes.UPDATE_MAPPING),
     map(action => action.payload),
-    concatMap((mapping: Mapping) => {
+    map((mapping: Mapping) => {
       // id comes as a number, not a string
       mapping.id = '' + mapping.id;
-      this.mapService.updateMap(mapping).subscribe((res) => res, error => throwError({error}));
-      return of(mapping);
+      return mapping;
     }),
-    switchMap((mapping: Mapping) => of(new UpdateMappingSuccess(mapping))),
-    catchError((err: any) => of(new UpdateMappingFailure(err)))
+    switchMap((mapping: Mapping) => this.mapService.updateMap(mapping).pipe(
+      switchMap(res => of(new UpdateMappingSuccess(mapping), new LoadMapping({id: mapping.id ?? ''}))),
+      catchError(err => of(new UpdateMappingFailure(err)))
+    )),
   ), {dispatch: true});
-
 
   updateMappingSuccess$ = createEffect(() => this.actions$.pipe(
     ofType(MappingActionTypes.UPDATE_MAPPING_SUCCESS),
-    map(action => action.payload),
-    map((mapping: Mapping) => [
-      of(new LoadMapping({id: mapping.id ?? ''})),
-      this.router.navigate(['map-view', mapping.id], {replaceUrl: true})
-    ])
+    map((action) => {
+      this.router.navigate(['map-view', action.payload.id], {replaceUrl: true});
+    })
   ), {dispatch: false});
 
   deleteMapping$ = createEffect(() => this.actions$.pipe(
