@@ -384,8 +384,6 @@ export class MappingImportComponent implements OnInit, OnDestroy, AfterViewCheck
    * @param columnHeader 
    */
   updateSelection3($event : MatSelectChange, columnHeader : string): void {
-    console.log("new value", $event);
-    console.log("column", columnHeader);
 
     this.error.message = "";
 

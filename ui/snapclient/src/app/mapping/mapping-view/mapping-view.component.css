@@ -126,11 +126,16 @@ ul.sources-list li {
   text-align: center;
 }
 
+::ng-deep .mat-column-filter-notes .mat-form-field,
 ::ng-deep .mat-column-filter-noMap .mat-form-field {
   width: 100px;
 }
 
 ::ng-deep .mat-column-filter-flagged .mat-form-field{
+  width: 60px;
+}
+
+::ng-deep .mat-column-filter-notes .mat-form-field{
   width: 60px;
 }
 

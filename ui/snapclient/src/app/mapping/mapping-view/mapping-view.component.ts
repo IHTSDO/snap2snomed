@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {AfterViewInit, Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import {AfterViewInit, Component, EventEmitter, OnDestroy, OnInit, Output, ViewChild} from '@angular/core';
 import {Mapping} from '../../_models/mapping';
 import {ActivatedRoute, Router} from '@angular/router';
 import {IAppState} from '../../store/app.state';
@@ -32,6 +32,7 @@ import {
   mapRowRelationships,
   MapRowStatus,
   mapRowStatuses,
+  MapView,
   MapViewFilter,
   MapViewPaging,
   Page
@@ -65,6 +66,8 @@ import {AuthService} from '../../_services/auth.service';
 import {MappingImportSource} from 'src/app/_models/mapping_import_source';
 import {ImportMappingFile, ImportMappingFileParams, InitSelectedMappingFile} from 'src/app/store/source-feature/source.actions';
 import {MappingImportComponent} from '../mapping-import/mapping-import.component';
+import { MappingNotesComponent } from '../mapping-table-notes/mapping-notes.component';
+import { SourceNavigationService } from 'src/app/_services/source-navigation.service';
 
 @Component({
   selector: 'app-mapping-view',
@@ -72,6 +75,7 @@ import {MappingImportComponent} from '../mapping-import/mapping-import.component
   styleUrls: ['./mapping-view.component.css']
 })
 export class MappingViewComponent implements OnInit, AfterViewInit, OnDestroy {
+
   private subscription = new Subscription();
   private debounce = 200;
 
@@ -124,6 +128,7 @@ export class MappingViewComponent implements OnInit, AfterViewInit, OnDestroy {
     'noMap',
     'status',
     'flagged',
+    'latestNote',
     'lastAuthorReviewer',
     'assignedAuthor',
     'assignedReviewer'
@@ -139,6 +144,7 @@ export class MappingViewComponent implements OnInit, AfterViewInit, OnDestroy {
     'filter-noMap',
     'filter-status',
     'filter-flagged',
+    'filter-notes',
     'filter-last-author-reviewer',
     'filter-author',
     'filter-reviewer'
@@ -190,7 +196,8 @@ export class MappingViewComponent implements OnInit, AfterViewInit, OnDestroy {
               private translate: TranslateService,
               private mapService: MapService,
               private fhirService: FhirService,
-              private authService: AuthService) {
+              private authService: AuthService,
+              private sourceNavigation: SourceNavigationService,) {
     this.translate.get('TASK.SELECT_A_TASK').subscribe((res) => this.selectedLabel = res);
 
     this.paging = new MapViewPaging();
@@ -494,6 +501,18 @@ export class MappingViewComponent implements OnInit, AfterViewInit, OnDestroy {
 
   hasSelectedRows(): boolean {
     return (this.mappingTableSelector?.selectedRows && this.mappingTableSelector?.selectedRows.length > 0) || false;
+  }
+
+  notesView(row_idx: number, mapRow: MapView): void {
+
+    this.dialog.open(MappingNotesComponent, {
+      width: '800px',
+      data: {
+        rowId: mapRow.rowId,
+        sourceCode: mapRow.sourceCode,
+        sourceDisplay: mapRow.sourceDisplay
+      }
+    });
   }
 
   isOwner(): boolean {
