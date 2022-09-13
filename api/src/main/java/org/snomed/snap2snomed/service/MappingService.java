@@ -21,6 +21,7 @@ import org.snomed.snap2snomed.controller.dto.*;
 import org.snomed.snap2snomed.model.Map;
 import org.snomed.snap2snomed.model.*;
 import org.snomed.snap2snomed.model.enumeration.MapStatus;
+import org.snomed.snap2snomed.model.enumeration.MappingRelationship;
 import org.snomed.snap2snomed.model.enumeration.TaskType;
 import org.snomed.snap2snomed.problem.Snap2SnomedProblem;
 import org.snomed.snap2snomed.problem.auth.NotAuthorisedProblem;
@@ -191,12 +192,15 @@ public class MappingService {
   @Transactional
   public MappingResponse updateMappingForSelection(MappingUpdateDto mappings) {
     MappingUpdateDto mapUpdate = new MappingUpdateDto();
-    List<MappingDetails> mappingDetails = new ArrayList<MappingDetails>();
+    List<MappingDetails> mappingDetails = new ArrayList<>();
     mappings.getMappingDetails().forEach(mappingDetail -> {
       mappingDetail.getSelection().forEach(selection -> {
-        Long targetId = mappingDetail.getMappingUpdate().getTargetId();
-        if (targetId == null) {
+        Long targetId;
+        if (mappingDetail.getMappingUpdate().getTarget() == null) {
           targetId = selection.getMapRowTargetId();
+        }
+        else {
+          targetId = createTarget(mappingDetail, selection);
         }
         mappingDetails.add(
           MappingDetails.builder()
@@ -251,6 +255,24 @@ public class MappingService {
       throw new InvalidBulkChangeProblem(
           "Cannot set status to UNMAPPED, UNMAPPED is a system controlled state when a row has no targets and no map is not set");
     }
+  }
+
+  private Long createTarget(MappingDetails mappingDetails, MappedRowDetailsDto details) {
+    Long targetId = null;
+    if (details.getMapRowTargetId() == null) {
+      MapRowTarget target = new MapRowTarget();
+      TargetDto targetDto = mappingDetails.getMappingUpdate().getTarget();
+      target.setTargetCode(targetDto.getCode());
+      target.setTargetDisplay(targetDto.getDisplay());
+      target.setRelationship(mappingDetails.getMappingUpdate().getRelationship());
+      Optional<MapRow> mapRowOpt = this.mapRowRepository.findById(details.getMapRowId());
+      if (mapRowOpt.isPresent()) {
+        MapRow mapRow = mapRowOpt.get();
+        target.setRow(mapRow);
+      }
+      targetId = mapRowTargetRepository.save(target).getId();
+    }
+    return targetId;
   }
 
   private MappingResponse updateMapRowsForMappingDto(MappingDto mappingUpdate, Task task, Collection<MapRow> mapRows) {

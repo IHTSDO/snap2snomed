@@ -109,6 +109,7 @@ export interface MappingDetails {
 }
 
 export interface MappingDto {
+  target: number | null | undefined;
   targetId: number | null | undefined;
   noMap: boolean | null | undefined;
   status: string | null | undefined;

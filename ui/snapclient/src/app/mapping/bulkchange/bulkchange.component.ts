@@ -16,16 +16,14 @@
 
 import {Component, Inject, OnInit} from '@angular/core';
 import {Task, TaskType} from '../../../app/_models/task';
-import {MappedRowDetailsDto, MapRowRelationship, mapRowRelationships, MapRowStatus, MapView} from '../../../app/_models/map_row';
+import {MappedRowDetailsDto, MapRowRelationship, mapRowRelationships, MapRowStatus} from '../../../app/_models/map_row';
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
 import {authorStatuses, reviewStatuses} from '../../_models/map_row';
 import {MappingDetails, MappingDto, MappingUpdateDto, MapService} from '../../../app/_services/map.service';
 import {TranslateService} from '@ngx-translate/core';
 import {ErrorInfo} from '../../../app/errormessage/errormessage.component';
-import {MatRadioChange} from '@angular/material/radio';
 import {ErrorNotifier} from '../../../app/errorhandler/errornotifier';
 import {Mapping} from '../../../app/_models/mapping';
-import { ServiceUtils } from 'src/app/_utils/service_utils';
 import {SelectionService} from "../../_services/selection.service";
 import {Subscription} from "rxjs";
 
@@ -149,7 +147,8 @@ export class BulkchangeComponent implements OnInit {
     // Bulk update selected items
     const mappingDetails: MappingDetails[] = [];
     const mappingDto: MappingDto = {
-      targetId: this.currentSelection.code,
+      targetId: null,
+      target: this.currentSelection,
       noMap: this.noMapValue,
       status: this.changedStatus,
       relationship: this.changedRelationship,
