@@ -115,6 +115,7 @@
     "CLEAR_SELECTED_FILE": "Clear selected file"
   },
   "MAP": {
+    "BULK_CHANGE_TOOLTIP": "Perform bulk changes to selected rows",
     "BULK_UPDATE": "BULK UPDATE",
     "DESCRIPTION": "Description",
     "DESCRIPTION_ERROR": "Description text cannot start with a space",

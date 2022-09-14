@@ -32,7 +32,7 @@
                 </span>
               <button mat-stroked-button
                       (click)="clickBulkChange()"
-                      [disabled]="isAdmin && currentUser?.id !== task.assignee?.id">
+                      [disabled]="(isAdmin && currentUser?.id !== task.assignee?.id) ||  !hasSelectedRows()">
                 {{'TABLE.BULK_CHANGE' | translate}}
               </button>
             </div>

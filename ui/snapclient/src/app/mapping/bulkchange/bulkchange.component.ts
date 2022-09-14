@@ -16,16 +16,16 @@
 
 import {Component, Inject, OnInit} from '@angular/core';
 import {Task, TaskType} from '../../../app/_models/task';
-import {MappedRowDetailsDto, MapRowRelationship, mapRowRelationships, MapRowStatus, MapView} from '../../../app/_models/map_row';
+import {MappedRowDetailsDto, MapRowRelationship, mapRowRelationships, MapRowStatus} from '../../../app/_models/map_row';
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
 import {authorStatuses, reviewStatuses} from '../../_models/map_row';
 import {MappingDetails, MappingDto, MappingUpdateDto, MapService} from '../../../app/_services/map.service';
 import {TranslateService} from '@ngx-translate/core';
 import {ErrorInfo} from '../../../app/errormessage/errormessage.component';
-import {MatRadioChange} from '@angular/material/radio';
 import {ErrorNotifier} from '../../../app/errorhandler/errornotifier';
 import {Mapping} from '../../../app/_models/mapping';
-import { ServiceUtils } from 'src/app/_utils/service_utils';
+import {SelectionService} from "../../_services/selection.service";
+import {Subscription} from "rxjs";
 
 export interface BulkChangeDialogData {
   task: Task | null | undefined;
@@ -88,17 +88,18 @@ export class BulkchangeComponent implements OnInit {
   changedRelationship: string | null | undefined;
   changedStatus: string | null | undefined;
   clearTarget: boolean;
+  currentSelection: any;
   error: ErrorInfo = {};
-  changeTypes = ['ALL', 'SELECTED']
-  changeType: string;
   isMapView: boolean;
   processing: boolean;
+
+  private subscription = new Subscription();
 
   constructor(
     public dialogRef: MatDialogRef<BulkchangeComponent>,
     private mapService: MapService,
     private errorNotifier: ErrorNotifier,
-    private translateService: TranslateService,
+    private selectionService: SelectionService,
     @Inject(MAT_DIALOG_DATA) public data: BulkChangeDialogData) {
     dialogRef.disableClose = true;
     this.relationships = mapRowRelationships;
@@ -107,7 +108,6 @@ export class BulkchangeComponent implements OnInit {
     this.noMap = false;
     this.clearNoMap = false;
     this.clearTarget = false;
-    this.changeType = 'ALL';
     this.isMapView = false;
       this.processing = false;
   }
@@ -123,12 +123,20 @@ export class BulkchangeComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.isMapView = this.data.isMapView!;
-    if (this.data.selectedRows && this.data.selectedRows.length > 0) {
-      this.changeType = 'SELECTED';
-    } else {
-      this.changeType = 'ALL';
+    const self = this;
+    self.isMapView = self.data.isMapView!;
+    if (!self.data.selectedRows || self.data.selectedRows.length == 0) {
+      self.error = new Error("NO ROWS SELECTED")
     }
+
+    self.subscription.add(self.selectionService.subscribeWithCurrent({
+      next(selection: any): void {
+        self.currentSelection = selection;
+      },
+      error(error): void {
+        console.error('Selection error', error);
+      }
+    }));
   }
 
   onOk(): void {
@@ -136,42 +144,27 @@ export class BulkchangeComponent implements OnInit {
     if (this.noMap == false && this.clearNoMap == false) {
       this.noMapValue = null;
     }
-    let mappingDto: MappingDto = {
+    // Bulk update selected items
+    const mappingDetails: MappingDetails[] = [];
+    const mappingDto: MappingDto = {
       targetId: null,
+      target: this.currentSelection,
       noMap: this.noMapValue,
       status: this.changedStatus,
       relationship: this.changedRelationship,
       clearTarget: !this.clearTarget ? null : true
     }
-
-    if (this.changeType == 'ALL' && this.data.task) {
-      // Bulk update all items for a task
-      this.doBulkChange(this.mapService.bulkUpdateAllRowsForTask(this.data.task.id, mappingDto));
-    } else if (this.changeType == 'ALL' && this.data.map) {
-      // Bulk update all for a map
-      this.doBulkChange(this.mapService.bulkUpdateAllRowsForMap(this.data.map.id!, mappingDto));
-    } else {
-      // Bulk update selected items
-      const mappingDetails: MappingDetails[] = [];
-      const mappingDto: MappingDto = {
-        targetId: null,
-        noMap: this.noMapValue,
-        status: this.changedStatus,
-        relationship: this.changedRelationship,
-        clearTarget: !this.clearTarget ? null : true
-      }
-      let mappingDetail: MappingDetails = {
-        rowId: null,
-        taskId: this.data.task ? parseInt(this.data.task.id) : null,
-        selection: this.data.selectedRows,
-        mappingUpdate: mappingDto
-      }
-      mappingDetails.push(mappingDetail);
-      const mappingUpdateDto: MappingUpdateDto = {
-        mappingDetails: mappingDetails
-      }
-      this.doBulkChange(this.mapService.bulkUpdate(mappingUpdateDto));
+    let mappingDetail: MappingDetails = {
+      rowId: null,
+      taskId: this.data.task ? parseInt(this.data.task.id) : null,
+      selection: this.data.selectedRows,
+      mappingUpdate: mappingDto
     }
+    mappingDetails.push(mappingDetail);
+    const mappingUpdateDto: MappingUpdateDto = {
+      mappingDetails: mappingDetails
+    }
+    this.doBulkChange(this.mapService.bulkUpdate(mappingUpdateDto));
   }
 
   doBulkChange(serviceFunction: any): void {
@@ -221,9 +214,4 @@ export class BulkchangeComponent implements OnInit {
       this.noMapValue = null;
     }
   }
-
-  setChangeTypeSelection($event: MatRadioChange): void {
-    this.changeType = $event.value;
-  }
-
 }

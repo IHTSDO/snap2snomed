@@ -25,6 +25,8 @@ import org.snomed.snap2snomed.model.enumeration.MappingRelationship;
 @Builder(toBuilder = true)
 public class MappingDto {
 
+  private TargetDto target;
+
   private Long targetId;
 
   private Boolean noMap;
