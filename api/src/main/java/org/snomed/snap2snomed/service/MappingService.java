@@ -258,21 +258,34 @@ public class MappingService {
   }
 
   private Long createTarget(MappingDetails mappingDetails, MappedRowDetailsDto details) {
-    Long targetId = null;
+    MapRowTarget target = new MapRowTarget();
+    TargetDto targetDto = mappingDetails.getMappingUpdate().getTarget();
+
     if (details.getMapRowTargetId() == null) {
-      MapRowTarget target = new MapRowTarget();
-      TargetDto targetDto = mappingDetails.getMappingUpdate().getTarget();
-      target.setTargetCode(targetDto.getCode());
-      target.setTargetDisplay(targetDto.getDisplay());
-      target.setRelationship(mappingDetails.getMappingUpdate().getRelationship());
       Optional<MapRow> mapRowOpt = this.mapRowRepository.findById(details.getMapRowId());
       if (mapRowOpt.isPresent()) {
         MapRow mapRow = mapRowOpt.get();
         target.setRow(mapRow);
       }
-      targetId = mapRowTargetRepository.save(target).getId();
+      else {
+        throw new InvalidBulkChangeProblem("Could not find map row with id <" + details.getMapRowId() + ">");
+      }
     }
-    return targetId;
+    else {
+      Optional<MapRowTarget> optional = this.mapRowTargetRepository.findById(details.getMapRowTargetId());
+      if (optional.isPresent()) {
+        target = optional.get();
+      }
+      else {
+        throw new InvalidBulkChangeProblem("Could not find map row target with id <" + details.getMapRowTargetId() + ">");
+      }
+    }
+
+    target.setTargetCode(targetDto.getCode());
+    target.setTargetDisplay(targetDto.getDisplay());
+    target.setRelationship(mappingDetails.getMappingUpdate().getRelationship());
+
+    return mapRowTargetRepository.save(target).getId();
   }
 
   private MappingResponse updateMapRowsForMappingDto(MappingDto mappingUpdate, Task task, Collection<MapRow> mapRows) {

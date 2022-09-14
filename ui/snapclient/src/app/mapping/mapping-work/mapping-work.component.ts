@@ -337,6 +337,10 @@ export class MappingWorkComponent implements OnInit, OnDestroy {
     this.opened = false;
   }
 
+  hasSelectedRows(): boolean {
+    return (this.mapTable?.mappingTableSelector?.selectedRows && this.mapTable?.mappingTableSelector?.selectedRows.length > 0) || false;
+  }
+
   hideDetail(): void {
     this.opened = false;
 
