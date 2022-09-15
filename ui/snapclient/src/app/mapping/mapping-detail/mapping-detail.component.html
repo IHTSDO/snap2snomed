@@ -71,25 +71,6 @@
             <span class="search-title">{{'MAP.SEARCH_TARGET' | translate}}</span>
           </app-concept-search>
         </div>
-        <div class="tree-view card-col">
-          <button class="view-toggle" mat-icon-button (click)="toggleHierarchy()"
-                  #tooltip="matTooltip"
-                  matTooltip="{{'MAP.SWITCH_VIEW' | translate}}">
-            <mat-icon color="{{hierarchyView === 'tree' ? 'accent' : undefined}}">account_tree</mat-icon>
-          </button>
-          <div *ngIf="hierarchyView === 'tree'">
-            <app-tree-view [task]="task"></app-tree-view>
-          </div>
-          <div class="hierarchy-view" *ngIf="hierarchyView !== 'tree'">
-            <mat-progress-bar mode="indeterminate" *ngIf="loadingHierarchy; else heirarchyLoaded"></mat-progress-bar>
-            <ng-template #heirarchyLoaded>
-              <lib-shrimp-hierarchy
-              [rows]="nodes"
-              (selected)="onSelected($event)"
-            ></lib-shrimp-hierarchy>
-            </ng-template>
-          </div>
-        </div>
         <div class="relationship-view card-col">
           <mat-card>
             <mat-card-header>
@@ -130,6 +111,25 @@
               </span>
           </mat-card-footer>
         </mat-card>
+      </div>
+      <div class="tree-view card-col">
+        <button class="view-toggle" mat-icon-button (click)="toggleHierarchy()"
+                #tooltip="matTooltip"
+                matTooltip="{{'MAP.SWITCH_VIEW' | translate}}">
+          <mat-icon color="{{hierarchyView === 'tree' ? 'accent' : undefined}}">account_tree</mat-icon>
+        </button>
+        <div *ngIf="hierarchyView === 'tree'">
+          <app-tree-view [task]="task"></app-tree-view>
+        </div>
+        <div class="hierarchy-view" *ngIf="hierarchyView !== 'tree'">
+          <mat-progress-bar mode="indeterminate" *ngIf="loadingHierarchy; else heirarchyLoaded"></mat-progress-bar>
+          <ng-template #heirarchyLoaded>
+            <lib-shrimp-hierarchy
+            [rows]="nodes"
+            (selected)="onSelected($event)"
+          ></lib-shrimp-hierarchy>
+          </ng-template>
+        </div>
       </div>
       <div class="properties-view card-col">
         <app-concept-properties [version]="task.mapping?.toVersion || ''">
