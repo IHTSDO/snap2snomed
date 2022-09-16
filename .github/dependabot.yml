@@ -9,12 +9,14 @@ updates:
     directory: "/"
     schedule:
       interval: "daily"
+    target-branch: "develop"
     allow:
       - dependency-name: "*"
         dependency-type: "production"
         
   - package-ecosystem: "maven"
     directory: "/api"
+    target-branch: "develop"
     schedule:
       interval: "daily"
     allow:
@@ -23,6 +25,7 @@ updates:
 
   - package-ecosystem: "maven"
     directory: "/ui"
+    target-branch: "develop"
     schedule:
       interval: "daily"
     allow:
@@ -31,6 +34,7 @@ updates:
 
   - package-ecosystem: "terraform"
     directory: "/terraform"
+    target-branch: "develop"
     schedule:
       interval: "daily"
     allow:
@@ -39,6 +43,7 @@ updates:
         
   - package-ecosystem: "npm"
     directory: "/ui"
+    target-branch: "develop"
     schedule:
       interval: "daily"
     allow:
