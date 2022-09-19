@@ -50,7 +50,8 @@ public class MappingDto {
   }
 
   public boolean isValid() {
-    return (noMap != null && status == null && relationship == null && clearTarget == null)
+    return (noMap && status == null && relationship == null && clearTarget == null)
+        || (!noMap && status == null && clearTarget == null)
         || (noMap == null && (status != null || relationship != null) && clearTarget == null)
         || (noMap == null && status == null && relationship == null && clearTarget != null);
   }
