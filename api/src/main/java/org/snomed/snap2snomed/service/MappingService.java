@@ -195,20 +195,21 @@ public class MappingService {
     List<MappingDetails> mappingDetails = new ArrayList<>();
     mappings.getMappingDetails().forEach(mappingDetail -> {
       mappingDetail.getSelection().forEach(selection -> {
-        boolean hasNewTarget = mappingDetail.getMappingUpdate().getTarget() != null;
         Long targetId;
-        if (!hasNewTarget) {
+        Boolean noMap = mappingDetail.getMappingUpdate().getNoMap();
+        if (mappingDetail.getMappingUpdate().getTarget() == null) {
           targetId = selection.getMapRowTargetId();
         }
         else {
           targetId = createTarget(mappingDetail, selection);
+          noMap = false;
         }
         mappingDetails.add(
           MappingDetails.builder()
             .rowId(selection.getMapRowId())
             .taskId(mappingDetail.getTaskId())
             .mappingUpdate(MappingDto.builder()
-              .noMap(hasNewTarget ? false : mappingDetail.getMappingUpdate().getNoMap())
+              .noMap(noMap)
               .relationship(mappingDetail.getMappingUpdate().getRelationship())
               .status(mappingDetail.getMappingUpdate().getStatus())
               .clearTarget(mappingDetail.getMappingUpdate().getClearTarget())
