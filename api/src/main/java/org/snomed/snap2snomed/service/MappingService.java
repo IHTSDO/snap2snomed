@@ -156,7 +156,8 @@ public class MappingService {
       }
 
       List<MapRowTarget> mapRowTargets = new ArrayList<>();
-      if (mappingDetails.getMappingUpdate().getTargetId() != null && mappingDetails.getMappingUpdate().getNoMap() == null) {
+      if (mappingDetails.getMappingUpdate().getTargetId() != null && (mappingDetails.getMappingUpdate().getNoMap() == null ||
+          (mappingDetails.getMappingUpdate().getNoMap() == false && mappingDetails.getMappingUpdate().getTarget() != null))) {
         MapRowTarget mapRowTarget = mapRowTargetRepository
             .findById(mappingDetails.getMappingUpdate().getTargetId())
             .orElseThrow(() -> new InvalidMappingProblem("MapRowTarget", mappingDetails.getMappingUpdate().getTargetId()));
@@ -166,7 +167,8 @@ public class MappingService {
         mapRowTargets = List.of(mapRowTarget);
       }
       // Clear Status if NO MAP is set or unset as it will be set automatically
-      if (mappingDetails.getMappingUpdate().getNoMap() != null) {
+      // unless NO MAP is set because of new target
+      if (mappingDetails.getMappingUpdate().getNoMap() != null && mappingDetails.getMappingUpdate().getTarget() == null) {
         mappingDetails.getMappingUpdate().setStatus(null);
       }
 
@@ -194,15 +196,19 @@ public class MappingService {
     MappingUpdateDto mapUpdate = new MappingUpdateDto();
     List<MappingDetails> mappingDetails = new ArrayList<>();
     mappings.getMappingDetails().forEach(mappingDetail -> {
+      TargetDto targetDto = mappingDetail.getMappingUpdate().getTarget();
       mappingDetail.getSelection().forEach(selection -> {
         Long targetId;
         Boolean noMap = mappingDetail.getMappingUpdate().getNoMap();
-        if (mappingDetail.getMappingUpdate().getTarget() == null) {
+        MapStatus mapStatus = mappingDetail.getMappingUpdate().getStatus();
+
+        if (targetDto == null) {
           targetId = selection.getMapRowTargetId();
         }
         else {
           targetId = createTarget(mappingDetail, selection);
           noMap = false;
+          mapStatus = MapStatus.DRAFT;
         }
         mappingDetails.add(
           MappingDetails.builder()
@@ -211,9 +217,10 @@ public class MappingService {
             .mappingUpdate(MappingDto.builder()
               .noMap(noMap)
               .relationship(mappingDetail.getMappingUpdate().getRelationship())
-              .status(mappingDetail.getMappingUpdate().getStatus())
+              .status(mapStatus)
               .clearTarget(mappingDetail.getMappingUpdate().getClearTarget())
               .targetId(targetId)
+              .target(targetDto)
               .build()
               )
             .build());
