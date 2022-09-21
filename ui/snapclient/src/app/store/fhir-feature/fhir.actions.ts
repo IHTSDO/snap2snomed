@@ -35,9 +35,9 @@ export enum FhirActionTypes {
   LOOKUP_CONCEPT = "[Fhir] Lookup Concept",
   LOOKUP_CONCEPT_SUCCESS = "[Fhir] Lookup Concept Succeeded",
   LOOKUP_CONCEPT_FAILED = "[Fhir] Lookup Concept Failed",
-  LOOKUP_MODULE = "[Fhir] Lookup Module",
-  LOOKUP_MODULE_SUCCESS = "[Fhir] Lookup Module Succeeded",
-  LOOKUP_MODULE_FAILED = "[Fhir] Lookup Module Failed",
+  DISPLAY_RESOLVED_LOOKUP_CONCEPT = "[Fhir] Display Resolved Lookup Concept",
+  DISPLAY_RESOLVED_LOOKUP_CONCEPT_SUCCESS = "Display Resolved Lookup Concept Succeeded",
+  DISPLAY_RESOLVED_LOOKUP_CONCEPT_FAILED = "Display Resolved Lookup Concept Failed",
   CONCEPT_HIERARCHY = "[Fhir] Concept Hierarchy",
   CONCEPT_HIERARCHY_SUCCESS = "Concept Hierarchy Succeeded",
   CONCEPT_HIERARCHY_FAILED = "Concept Hierarchy Failed"
@@ -106,7 +106,7 @@ export class AutoSuggestFailure implements Action {
 export class LookupConcept implements Action {
   readonly type = FhirActionTypes.LOOKUP_CONCEPT;
 
-  constructor(public payload: {code: string, system: string, version: string}) {
+  constructor(public payload: {code: string, system: string, version: string, properties: string[]}) {
   }
 }
 
@@ -124,22 +124,22 @@ export class LookupConceptFailure implements Action {
   }
 }
 
-export class LookupModule implements Action {
-  readonly type = FhirActionTypes.LOOKUP_MODULE;
+export class DisplayResolvedLookupConcept implements Action {
+  readonly type = FhirActionTypes.DISPLAY_RESOLVED_LOOKUP_CONCEPT;
 
-  constructor(public payload: {code: string, system: string, version: string}) {
+  constructor(public payload: {code: string, system: string, version: string, properties: string[]}) {
   }
 }
 
-export class LookupModuleSuccess implements Action {
-  readonly type = FhirActionTypes.LOOKUP_MODULE_SUCCESS;
+export class DisplayResolvedLookupConceptSuccess implements Action {
+  readonly type = FhirActionTypes.DISPLAY_RESOLVED_LOOKUP_CONCEPT_SUCCESS;
 
   constructor(public payload: Properties) {
   }
 }
 
-export class LookupModuleFailure implements Action {
-  readonly type = FhirActionTypes.LOOKUP_MODULE_FAILED;
+export class DisplayResolvedLookupConceptFailure implements Action {
+  readonly type = FhirActionTypes.DISPLAY_RESOLVED_LOOKUP_CONCEPT_FAILED;
 
   constructor(public payload: { error: any }) {
   }
@@ -178,9 +178,9 @@ export type FhirActions = LoadReleases
   | LookupConcept
   | LookupConceptSuccess
   | LookupConceptFailure
-  | LookupModule
-  | LookupModuleSuccess
-  | LookupModuleFailure
+  | DisplayResolvedLookupConcept
+  | DisplayResolvedLookupConceptSuccess
+  | DisplayResolvedLookupConceptFailure
   | ConceptHierarchy
   | ConceptHierarchySuccess
   | ConceptHierarchyFailure

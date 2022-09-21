@@ -16,6 +16,10 @@
   background-color: #00000010;
 }
 
+.row-line-above {
+  border-top: 2px solid black;
+}
+
 .properties .mat-cell {
   padding: 3px 6px;
 }
@@ -49,4 +53,9 @@
 
 .properties-header {
   width: 150px;
+}
+
+/* make date role group "fixed width" as it only ever contains a circle (or not) */
+.mat-column-roleGroup {
+  width: 10px;
 }

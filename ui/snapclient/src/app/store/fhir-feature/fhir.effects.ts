@@ -16,7 +16,7 @@
 
 import { Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
-import { catchError, map, switchMap } from 'rxjs/operators';
+import { catchError, map, switchMap, tap } from 'rxjs/operators';
 import { of } from 'rxjs/internal/observable/of';
 import { FhirService } from '../../_services/fhir.service';
 import { R4 } from '@ahryman40k/ts-fhir-types';
@@ -33,8 +33,10 @@ import {
   AutoSuggestFailure,
   ConceptHierarchySuccess,
   ConceptHierarchyFailure,
-  LookupModuleSuccess,
-  LookupModuleFailure
+  // LookupModuleSuccess,
+  // LookupModuleFailure,
+  DisplayResolvedLookupConceptSuccess,
+  DisplayResolvedLookupConceptFailure
 } from './fhir.actions';
 
 import { Release } from '../../_services/fhir.service';
@@ -125,8 +127,21 @@ export class FhirEffects {
         case 'property': {
           if (part) {
             const partKey = part.find((sub: any) => sub?.name === 'code').valueCode;
-            const partValue = FhirEffects.getValue(part.find((sub: any) => sub.name?.startsWith('value')));
-            FhirEffects.updateProps(props, partKey, [partValue]);
+            if ("609096000" === partKey) { // role group
+              const subproperties = part.filter((sub: any) => sub.name?.startsWith('subproperty')).map((subproperty: any) => subproperty.part);
+              FhirEffects.updateProps(props, "attributeRelationships", subproperties);
+            }
+            else if (!isNaN(+partKey)) {
+              part.filter((part: any) => part);
+              FhirEffects.updateProps(props, "attributeRelationships", part.filter((part: any) => part));
+            }
+            else {
+              let partValue = FhirEffects.getValue(part.find((sub: any) => sub.name?.startsWith('valueString')));
+              if (!partValue) {
+                partValue = FhirEffects.getValue(part.find((sub: any) => sub.name?.startsWith('value')));
+              }
+              FhirEffects.updateProps(props, partKey, [partValue]);
+            }
           }
           break;
         }
@@ -161,22 +176,23 @@ export class FhirEffects {
     return props;
   }
 
-  lookupModule$ = createEffect(() => this.actions$.pipe(
-    ofType(FhirActionTypes.LOOKUP_MODULE),
-    map(action => action.payload),
-    switchMap((action) => this.fhirService.lookupConcept(action.code, action.system, action.version).pipe(
-      map(parameters => this.mapParameters(parameters, action)),
-      switchMap((props) => of(new LookupModuleSuccess(props))),
-      catchError((err) => of(new LookupModuleFailure({ error: err })))
-    ))), { dispatch: true });
 
   lookupConcept$ = createEffect(() => this.actions$.pipe(
     ofType(FhirActionTypes.LOOKUP_CONCEPT),
     map(action => action.payload),
-    switchMap((action) => this.fhirService.lookupConcept(action.code, action.system, action.version).pipe(
+    switchMap((action) => this.fhirService.lookupConcept(action.code, action.system, action.version, action.properties).pipe(
       map(parameters => this.mapParameters(parameters, action)),
       switchMap((props) => of(new LookupConceptSuccess(props))),
       catchError((err) => of(new LookupConceptFailure({ error: err })))
+    ))), { dispatch: true });
+
+  displayResolvedLookupConcept$ = createEffect(() => this.actions$.pipe(
+    ofType(FhirActionTypes.DISPLAY_RESOLVED_LOOKUP_CONCEPT),
+    map(action => action.payload),
+    switchMap((action) => this.fhirService.displayResolvedLookupConcept(action.code, action.system, action.version, action.properties).pipe(
+      map(parameters => this.mapParameters(parameters, action)),
+      switchMap((props) => of(new DisplayResolvedLookupConceptSuccess(props))),
+      catchError((err) => of(new DisplayResolvedLookupConceptFailure({ error: err })))
     ))), { dispatch: true });
 
   constructor(

@@ -73,7 +73,7 @@ h2 {
 
 .tree-view {
   flex: 2;
-  height: 500px;
+  /* height: 500px; */
   position: relative;
 }
 
@@ -84,6 +84,9 @@ h2 {
   z-index: 10;
 }
 
+.tab_view {
+  flex: 1;
+}
 .properties-view {
   flex: 1;
 }

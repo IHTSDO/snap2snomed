@@ -20,7 +20,7 @@ import {Observable, of} from 'rxjs';
 import {ServiceUtils} from '../_utils/service_utils';
 import {APP_CONFIG, AppConfig} from '../app.config';
 import {R4} from '@ahryman40k/ts-fhir-types';
-import {catchError, map, mergeMap} from 'rxjs/operators';
+import {catchError, concatMap, map, mergeMap, tap} from 'rxjs/operators';
 import {ErrorDetail} from '../_models/error_detail';
 import {BundleTypeKind, Bundle_RequestMethodKind} from '@ahryman40k/ts-fhir-types/lib/R4';
 import {Coding, Match} from '../store/fhir-feature/fhir.reducer';
@@ -154,6 +154,121 @@ export class FhirService {
 
   static conceptNodeId(code: string, system: string): string {
     return system + '|' + code;
+  }
+
+  displayResolvedLookupConcept(code: string, system: string, version: string, properties: string[] = []): Observable<R4.IParameters> {
+
+    let expandList = "";
+    let conceptDisplayMap = new Map<string, string>();
+
+    return this.lookupConcept(code, system, version, properties).pipe(
+      tap(parameters => {
+        // Step 1. find all the concept codes in the properties so their display can be looked up
+        parameters.parameter?.map(param => {
+          if ("property" === param.name) {
+            let value;
+            
+            param.part?.forEach(part => {
+              if (part.name) {
+                if ('value' === part.name) {
+                  if (part.valueCode) {
+                    value = part.valueCode
+                    if (expandList.length > 0) {
+                      expandList += " OR ";
+                    }
+                    expandList += value;
+                  }
+                }
+                else if ('subproperty' === part.name) {
+                  part.part?.map(subPropPart => {
+                    if (subPropPart.hasOwnProperty('valueCode')) {
+                      if (expandList.length > 0) {
+                        expandList += " OR ";
+                      }
+                      expandList += subPropPart.valueCode;
+                    }
+                  })
+                }
+                else if ('code' === part.name && part.valueCode && !isNaN(+part.valueCode)) {
+                  // pick up the attribute relationships that do not reside in a role group
+                  if ('609096000' !== part.valueCode) { // role group
+                    if (expandList.length > 0) {
+                      expandList += " OR ";
+                    }
+                    expandList += part.valueCode;
+
+                  }
+
+                }
+              }
+
+            })
+
+          }
+        })
+      }),
+      concatMap(parameters => {
+
+        // 2. Look up the display for the concept codes 
+
+        const url = `${this.config.fhirBaseUrl}/ValueSet/$expand`;
+        const params: any = {
+          url: FhirService.toValueSet('http://snomed.info/sct', expandList),
+        };
+    
+        const options = ServiceUtils.getHTTPHeaders();
+        options.headers = options.headers
+          .set('Accept', ['application/fhir+json', 'application/json']);
+    
+        options.params = {...options.params, ...params};
+        return this.http.get<R4.IValueSet | R4.IOperationOutcome>(url, options).pipe( 
+          tap(res => {
+            if (res.resourceType === 'ValueSet') {
+              res.expansion?.contains?.map(param => {
+                if (param.code && param.display) {
+                  conceptDisplayMap.set(param.code, param.display);
+                }
+              })
+            }
+        }),
+        map(res => {
+
+          // 3. update the parameters with display terms for display in the UI
+          
+          parameters.parameter?.map(param => {
+            if ("property" === param.name) {
+              let parameterCode : string | undefined;
+  
+              param.part?.forEach(paramPart => {
+                if ('value' === paramPart.name) {
+                  parameterCode = paramPart.valueCode;
+                  param.part?.push({name: 'valueString', valueString: conceptDisplayMap.get(parameterCode!)});
+                }
+                else if ('subproperty' === paramPart.name) {
+                  paramPart.part?.map(subpart => {
+                    if (subpart.valueCode) {
+                      if ('code' === subpart.name  || 'value' === subpart.name || 'valueCode' === subpart.name) {
+                        paramPart.part?.push({name: subpart.name, valueString: conceptDisplayMap.get(subpart.valueCode)});
+                      }
+                    }                
+                  })
+                }
+                else if ('code' === paramPart.name && paramPart.valueCode && !isNaN(+paramPart.valueCode)) {
+                  // pick up the attribute relationships that do not reside in a role group
+                  if ('609096000' !== paramPart.valueCode) { // role gorup
+                    parameterCode = paramPart.valueCode;
+                    param.part?.push({name: 'code', valueString: conceptDisplayMap.get(parameterCode!)});  
+                  }
+
+                }
+              })  
+            }
+          })
+          return parameters;
+        })
+        )
+      })
+    );
   }
 
   conceptHierarchy(code: string, system: string, version: string): Observable<ConceptNode<Coding>[]> {
