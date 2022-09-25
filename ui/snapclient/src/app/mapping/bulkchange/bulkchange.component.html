@@ -3,7 +3,7 @@
     <app-loading-spinner></app-loading-spinner>
   </div>
   <h2 mat-dialog-title>
-  {{ 'BULKCHANGEDIALOG.' + changeType | translate }}
+  {{ 'BULKCHANGEDIALOG.SELECTED' | translate }}
   </h2>
   <div *ngIf="isMapView" class="alert-warning box">
     <mat-icon>warning</mat-icon>
@@ -11,16 +11,16 @@
   </div>
   <mat-divider class="divider"></mat-divider>
   <app-errormessage [error]="error"></app-errormessage>
-  <mat-radio-group class="change-radio-group" [(ngModel)]="changeType" ngDefaultControl required>
-    <mat-radio-button class="change-radio-button" *ngFor="let chngType of changeTypes" [value]="chngType"
-      [disabled]="chngType === 'SELECTED' && data.selectedRows?.length === 0">
-      {{ 'BULKCHANGEDIALOG.CHANGETYPE_' + chngType | translate }}</mat-radio-button>
-  </mat-radio-group>
   <div>
+    <app-concept-search #searchComponent [scope]="data.map?.toScope || data.task?.mapping?.toScope || ''"
+                        [version]="data.map?.toVersion || data.task?.mapping?.toVersion || ''"
+                        *ngIf="((data.task &&  data.task.type !== 'REVIEW') || data.task === null) && !clearTarget && noMapValue == null && changedStatus == null">
+      <span class="search-title">{{'BULKCHANGEDIALOG.SELECTED_TARGET' | translate}} {{currentSelection?.display || 'BULKCHANGEDIALOG.NO_SELECTED_TARGET' | translate}}</span>
+    </app-concept-search>
     <mat-form-field appearance="fill" class="field-full-width" id="relationships"
-      *ngIf="((data.task &&  data.task.type !== 'REVIEW') || data.task === null) && !clearTarget && noMapValue == null">
+      *ngIf="((data.task &&  data.task.type !== 'REVIEW') || data.task === null) && !clearTarget && noMapValue == null && changedStatus == null">
       <mat-label>{{'TABLE.RELATIONSHIP' | translate}}</mat-label>
-      <mat-select [(ngModel)]="changedRelationship " [disabled]="changedStatus != null" ngDefaultControl>
+      <mat-select [(ngModel)]="changedRelationship" ngDefaultControl>
         <mat-option>--</mat-option>
         <mat-option *ngFor="let relationship of relationships" [value]="relationship">
           {{'RELATIONSHIP.' + relationship | translate}}
@@ -28,9 +28,9 @@
       </mat-select>
     </mat-form-field>
     <div></div>
-    <mat-form-field appearance="fill" class="field-full-width" *ngIf="noMapValue !== false && !clearTarget" id="statuses">
+    <mat-form-field appearance="fill" class="field-full-width" *ngIf="noMapValue == null && !clearTarget && changedRelationship == null && !hasSearchValue" id="statuses">
       <mat-label>{{'TABLE.STATUS' | translate}}</mat-label>
-      <mat-select [disabled]="clearTarget || noMapValue != null || changedRelationship != null" [(ngModel)]="changedStatus" ngDefaultControl>
+      <mat-select [(ngModel)]="changedStatus" ngDefaultControl>
         <mat-option>--</mat-option>
         <mat-option *ngFor="let status of statuses; let j = index" [value]="status">
           {{'STATUS.' + status | translate}}
@@ -39,7 +39,7 @@
     </mat-form-field>
   </div>
   <div class="alert-warning" *ngIf="noMapValue != null || clearTarget">{{'BULKCHANGEDIALOG.STATUS_AUTO' | translate}}</div>
-  <mat-card *ngIf="((data.task && data.task.type !== 'REVIEW') || data.task === null) && !clearTarget">
+  <mat-card *ngIf="((data.task && data.task.type !== 'REVIEW') || data.task === null) && !clearTarget && changedStatus == null && changedRelationship == null && !hasSearchValue">
     <div class="box spaced">
       <span class="box">
         <mat-checkbox color="primary"
@@ -56,7 +56,7 @@
     </div>
     <div *ngIf="noMapValue" class="alert-danger">{{'BULKCHANGEDIALOG.NOMAP_WARNING' | translate}}</div>
   </mat-card>
-  <mat-card *ngIf="((data.task && data.task.type !== 'REVIEW') || data.task === null) && !(noMapValue != null)">
+  <mat-card *ngIf="((data.task && data.task.type !== 'REVIEW') || data.task === null) && !(noMapValue != null) && changedStatus == null && changedRelationship == null && !hasSearchValue">
     <div class="box">
       <mat-checkbox color="primary"
       [(ngModel)]="clearTarget"
@@ -66,7 +66,7 @@
   </mat-card>
   <mat-divider class="divider"></mat-divider>
   <div class="box spaced">
-    <button mat-raised-button color="primary" 
+    <button mat-raised-button color="primary"
       [disabled]="!changedRelationship && !changedStatus && noMapValue == null && !clearTarget"
       (click)="onOk()">{{'DIALOG.OK' | translate}}</button>
     <button mat-raised-button color="any"
