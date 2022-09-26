@@ -42,7 +42,8 @@
                     matTooltipShowDelay="1000">
               {{'MAP.VALIDATE_TARGETS' | translate}}
             </button>
-            <button id="bulk-change" mat-stroked-button *ngIf="isOwner()" (click)="clickBulkChange()">
+            <button id="bulk-change" mat-stroked-button *ngIf="isOwner()" (click)="clickBulkChange()"
+                    [disabled]="!hasSelectedRows()" matTooltip="{{'MAP.BULK_CHANGE_TOOLTIP' | translate}}">
               {{'TABLE.BULK_CHANGE' | translate}}
             </button>
             <span><button class="mat-primary" mat-stroked-button

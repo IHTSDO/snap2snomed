@@ -75,7 +75,7 @@ import { SourceNavigationService } from 'src/app/_services/source-navigation.ser
   styleUrls: ['./mapping-view.component.css']
 })
 export class MappingViewComponent implements OnInit, AfterViewInit, OnDestroy {
-  
+
   private subscription = new Subscription();
   private debounce = 200;
 
@@ -499,10 +499,14 @@ export class MappingViewComponent implements OnInit, AfterViewInit, OnDestroy {
     this.router.navigate(['map-view', this.mapping_id], {queryParams: params, replaceUrl: true});
   }
 
+  hasSelectedRows(): boolean {
+    return (this.mappingTableSelector?.selectedRows && this.mappingTableSelector?.selectedRows.length > 0) || false;
+  }
+
   notesView(row_idx: number, mapRow: MapView): void {
 
     this.dialog.open(MappingNotesComponent, {
-      width: '800px', 
+      width: '800px',
       data: {
         rowId: mapRow.rowId,
         sourceCode: mapRow.sourceCode,
@@ -510,7 +514,7 @@ export class MappingViewComponent implements OnInit, AfterViewInit, OnDestroy {
       }
     });
   }
-  
+
   isOwner(): boolean {
     return this.mapping?.project.owners.map(u => u.id).includes(this.currentUser.id) ?? false;
   }

@@ -21,6 +21,7 @@ import org.snomed.snap2snomed.controller.dto.*;
 import org.snomed.snap2snomed.model.Map;
 import org.snomed.snap2snomed.model.*;
 import org.snomed.snap2snomed.model.enumeration.MapStatus;
+import org.snomed.snap2snomed.model.enumeration.MappingRelationship;
 import org.snomed.snap2snomed.model.enumeration.TaskType;
 import org.snomed.snap2snomed.problem.Snap2SnomedProblem;
 import org.snomed.snap2snomed.problem.auth.NotAuthorisedProblem;
@@ -155,7 +156,8 @@ public class MappingService {
       }
 
       List<MapRowTarget> mapRowTargets = new ArrayList<>();
-      if (mappingDetails.getMappingUpdate().getTargetId() != null && mappingDetails.getMappingUpdate().getNoMap() == null) {
+      if (mappingDetails.getMappingUpdate().getTargetId() != null && (mappingDetails.getMappingUpdate().getNoMap() == null ||
+          (mappingDetails.getMappingUpdate().getNoMap() == false && mappingDetails.getMappingUpdate().getTarget() != null))) {
         MapRowTarget mapRowTarget = mapRowTargetRepository
             .findById(mappingDetails.getMappingUpdate().getTargetId())
             .orElseThrow(() -> new InvalidMappingProblem("MapRowTarget", mappingDetails.getMappingUpdate().getTargetId()));
@@ -165,7 +167,8 @@ public class MappingService {
         mapRowTargets = List.of(mapRowTarget);
       }
       // Clear Status if NO MAP is set or unset as it will be set automatically
-      if (mappingDetails.getMappingUpdate().getNoMap() != null) {
+      // unless NO MAP is set because of new target
+      if (mappingDetails.getMappingUpdate().getNoMap() != null && mappingDetails.getMappingUpdate().getTarget() == null) {
         mappingDetails.getMappingUpdate().setStatus(null);
       }
 
@@ -191,19 +194,33 @@ public class MappingService {
   @Transactional
   public MappingResponse updateMappingForSelection(MappingUpdateDto mappings) {
     MappingUpdateDto mapUpdate = new MappingUpdateDto();
-    List<MappingDetails> mappingDetails = new ArrayList<MappingDetails>();
+    List<MappingDetails> mappingDetails = new ArrayList<>();
     mappings.getMappingDetails().forEach(mappingDetail -> {
+      TargetDto targetDto = mappingDetail.getMappingUpdate().getTarget();
       mappingDetail.getSelection().forEach(selection -> {
+        Long targetId;
+        Boolean noMap = mappingDetail.getMappingUpdate().getNoMap();
+        MapStatus mapStatus = mappingDetail.getMappingUpdate().getStatus();
+
+        if (targetDto == null) {
+          targetId = selection.getMapRowTargetId();
+        }
+        else {
+          targetId = createTarget(mappingDetail, selection);
+          noMap = false;
+          mapStatus = MapStatus.DRAFT;
+        }
         mappingDetails.add(
           MappingDetails.builder()
             .rowId(selection.getMapRowId())
             .taskId(mappingDetail.getTaskId())
             .mappingUpdate(MappingDto.builder()
-              .noMap(mappingDetail.getMappingUpdate().getNoMap())
+              .noMap(noMap)
               .relationship(mappingDetail.getMappingUpdate().getRelationship())
-              .status(mappingDetail.getMappingUpdate().getStatus())
+              .status(mapStatus)
               .clearTarget(mappingDetail.getMappingUpdate().getClearTarget())
-              .targetId(selection.getMapRowTargetId())
+              .targetId(targetId)
+              .target(targetDto)
               .build()
               )
             .build());
@@ -247,6 +264,37 @@ public class MappingService {
       throw new InvalidBulkChangeProblem(
           "Cannot set status to UNMAPPED, UNMAPPED is a system controlled state when a row has no targets and no map is not set");
     }
+  }
+
+  private Long createTarget(MappingDetails mappingDetails, MappedRowDetailsDto details) {
+    MapRowTarget target = new MapRowTarget();
+    TargetDto targetDto = mappingDetails.getMappingUpdate().getTarget();
+
+    if (details.getMapRowTargetId() == null) {
+      Optional<MapRow> mapRowOpt = this.mapRowRepository.findById(details.getMapRowId());
+      if (mapRowOpt.isPresent()) {
+        MapRow mapRow = mapRowOpt.get();
+        target.setRow(mapRow);
+      }
+      else {
+        throw new InvalidBulkChangeProblem("Could not find map row with id <" + details.getMapRowId() + ">");
+      }
+    }
+    else {
+      Optional<MapRowTarget> optional = this.mapRowTargetRepository.findById(details.getMapRowTargetId());
+      if (optional.isPresent()) {
+        target = optional.get();
+      }
+      else {
+        throw new InvalidBulkChangeProblem("Could not find map row target with id <" + details.getMapRowTargetId() + ">");
+      }
+    }
+
+    target.setTargetCode(targetDto.getCode());
+    target.setTargetDisplay(targetDto.getDisplay());
+    target.setRelationship(mappingDetails.getMappingUpdate().getRelationship());
+
+    return mapRowTargetRepository.save(target).getId();
   }
 
   private MappingResponse updateMapRowsForMappingDto(MappingDto mappingUpdate, Task task, Collection<MapRow> mapRows) {

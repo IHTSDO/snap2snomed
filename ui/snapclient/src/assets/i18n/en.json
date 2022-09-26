@@ -115,6 +115,7 @@
     "CLEAR_SELECTED_FILE": "Clear selected file"
   },
   "MAP": {
+    "BULK_CHANGE_TOOLTIP": "Perform bulk changes to selected rows",
     "BULK_UPDATE": "BULK UPDATE",
     "DESCRIPTION": "Description",
     "DESCRIPTION_ERROR": "Description text cannot start with a space",
@@ -446,7 +447,9 @@
     "CHANGETYPE_SELECTED": "Selected",
     "STATUS_AUTO": "Status will update automatically",
     "NOMAP_WARNING": "This will clear any mapped targets!",
+    "NO_SELECTED_TARGET": "None",
     "ERROR_DEFAULT_MESSAGE": "Unexpected error occured during the Bulk change operation.",
+    "SELECTED_TARGET": "Selected target:",
     "UPDATED_ROWS_MESSAGE": "{{updated}} out of {{selected}} rows have been updated.",
     "UPDATED_ROWS_ERROR_MESSAGE": "{{updated}} out of {{selected}} rows have been updated. {{diff}} row(s) unable to be changed due to invalid status or relationship changes."
   },
