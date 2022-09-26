@@ -113,7 +113,7 @@ describe('BulkchangeComponent', () => {
     expect(el.attributes['ng-reflect-disabled']).toEqual('false');
   });
 
-  it('should hide relationship selection and disable status - on no map', () => {
+  it('should hide relationship selection and status - on no map', () => {
     component.setNoMap(true);
     fixture.detectChanges();
     const el = fixture.debugElement.query(By.css('.alert-warning'));
@@ -121,7 +121,7 @@ describe('BulkchangeComponent', () => {
     const el1 = fixture.debugElement.query(By.css('#relationships'));
     expect(el1).toBeFalsy();
     const el2 = fixture.debugElement.query(By.css('#statuses'));
-    expect(el2.classes['mat-form-field-disabled']).toBeTruthy();
+    expect(el2).toBeFalsy();
     const el3 = fixture.debugElement.query(By.css('button.mat-primary'));
     console.log(el3.attributes['ng-reflect-disabled']);
     expect(el3.attributes['ng-reflect-disabled']).toEqual('false');

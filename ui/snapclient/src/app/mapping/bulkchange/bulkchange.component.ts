@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Component, Inject, OnInit} from '@angular/core';
+import {Component, Inject, OnInit, ViewChild} from '@angular/core';
 import {Task, TaskType} from '../../../app/_models/task';
 import {MappedRowDetailsDto, MapRowRelationship, mapRowRelationships, MapRowStatus} from '../../../app/_models/map_row';
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
@@ -26,6 +26,7 @@ import {ErrorNotifier} from '../../../app/errorhandler/errornotifier';
 import {Mapping} from '../../../app/_models/mapping';
 import {SelectionService} from "../../_services/selection.service";
 import {Subscription} from "rxjs";
+import {ConceptSearchComponent} from "../../concept-search/concept-search.component";
 
 export interface BulkChangeDialogData {
   task: Task | null | undefined;
@@ -90,8 +91,11 @@ export class BulkchangeComponent implements OnInit {
   clearTarget: boolean;
   currentSelection: any;
   error: ErrorInfo = {};
+  hasSearchValue: boolean;
   isMapView: boolean;
   processing: boolean;
+
+  @ViewChild('searchComponent') searchComponent: ConceptSearchComponent | undefined;
 
   private subscription = new Subscription();
 
@@ -108,8 +112,9 @@ export class BulkchangeComponent implements OnInit {
     this.noMap = false;
     this.clearNoMap = false;
     this.clearTarget = false;
+    this.hasSearchValue = false;
     this.isMapView = false;
-      this.processing = false;
+    this.processing = false;
   }
   getStatuses(task: Task | null | undefined): MapRowStatus[] {
     let authStatuses = authorStatuses.filter(stat => stat !== MapRowStatus.UNMAPPED);
@@ -137,6 +142,22 @@ export class BulkchangeComponent implements OnInit {
         console.error('Selection error', error);
       }
     }));
+  }
+
+  ngAfterViewInit(): void {
+    this.subscription.add(this.searchComponent?.searchControl.valueChanges
+      .subscribe((value: string) => {
+        if (value && !this.hasSearchValue) {
+          this.hasSearchValue = true;
+        }
+        else if (!value && this.hasSearchValue) {
+          this.hasSearchValue = false;
+        }
+
+        if (!value) {
+          this.currentSelection = null;
+        }
+      }));
   }
 
   onOk(): void {
