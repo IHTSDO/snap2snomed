@@ -91,6 +91,10 @@ locals {
     {
       name = "snap2snomed.mainPageText",
       value = var.main_page_text
+    },
+    {
+      name = "snap2snomed.identityProvider",
+      value = var.identity_provider
     }
   ]
   dex_ecs_environment = [

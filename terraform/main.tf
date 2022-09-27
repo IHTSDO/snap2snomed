@@ -60,6 +60,7 @@ module "api" {
   dex_loglevel                     = var.dex_loglevel
   database_backup_retention_period = var.database_backup_retention_period
   jumpbox_ami_id                   = var.jumpbox_ami_id
+  identity_provider                = var.identity_provider
 }
 
 module "ui" {

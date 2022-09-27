@@ -244,3 +244,9 @@ variable "dex_loglevel" {
   type        = string
   default     = "info"
 }
+
+variable "identity_provider" {
+  description = "Identity provider"
+  type        = string
+  default     = ""
+}
