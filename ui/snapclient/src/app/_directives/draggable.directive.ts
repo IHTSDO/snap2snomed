@@ -15,6 +15,7 @@
  */
 
 import { Directive, ElementRef, Input, OnDestroy, OnInit, Renderer2 } from '@angular/core';
+import { MapView } from '../_models/map_row';
 import { DragService } from '../_services/drag.service';
 
 export interface DraggableOptions {
@@ -57,9 +58,26 @@ export class DraggableDirective implements OnInit, OnDestroy {
   }
 
   private ghostImage(data: any): Element {
+
+    const DRAG_GHOST_ELEM_ID = 'drag-ghost';
+    
+    // prevent ghosting of previous drags 
+    const existingElem = document.getElementById(DRAG_GHOST_ELEM_ID);
+    if (existingElem) {
+      document.body.removeChild(existingElem);
+    }
+
     const elem = document.createElement('span');
-    elem.id = 'drag-ghost';
-    elem.innerHTML = `${data.code} | ${data.display}`;
+    elem.id = DRAG_GHOST_ELEM_ID;
+    if (typeof data === 'string') {
+      elem.innerHTML = `${data}`;
+    }
+    else if (data instanceof MapView) {
+      elem.innerHTML = `${data.targetCode} | ${data.targetDisplay}`;
+    }
+    else {
+      elem.innerHTML = `${data.code} | ${data.display}`;
+    }
     elem.style.position = 'absolute';
     elem.style.top = '-1000px';
     document.body.appendChild(elem);
