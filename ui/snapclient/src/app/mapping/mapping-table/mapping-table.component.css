@@ -8,7 +8,7 @@
   overflow: auto;
 }
 
-.mat-column-targetDisplay, .mat-column-targetCode {
+.mat-column-sourceDisplay, .mat-column-targetDisplay, .mat-column-targetCode {
   cursor: pointer;
 }
 
