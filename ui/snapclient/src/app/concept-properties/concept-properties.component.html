@@ -1,101 +1,112 @@
-<mat-card *ngIf="!showAttributeRelationships" class="properties-control">
-  <mat-card-content>
-    <app-errormessage [error]="error"></app-errormessage>
-    <div class="properties" *ngIf="propertiesView.length; else noProperties">
-      <mat-table id="properties"
-                 class="field-full-width mat-elevation-z0"
-                 [dataSource]="propertiesView"
-      >
-
-        <!-- Key Column -->
-        <ng-container matColumnDef="key">
-          <th mat-header-cell *matHeaderCellDef>{{'SEARCH.PROPERTY' | translate}}</th>
-          <td mat-cell class="properties-header" *matCellDef="let element">
-            <span> {{element.key}} </span>
-          </td>
-        </ng-container>
-
-        <!-- Auxilliary column -->
-        <ng-container matColumnDef="aux">
-          <th mat-header-cell *matHeaderCellDef></th>
-          <td mat-cell *matCellDef="let element">
-            <mat-chip *ngIf="element.value.length > 1">{{ element.value[1] }}</mat-chip>
-            <mat-icon *ngIf="element.key === 'code'" class="grip"
-                  [appDraggable]="{data: {code: code, display: display, system: system}, zones: ['conceptZone', 'relationshipZone']}"
-            >
-              drag_indicator
-            </mat-icon>
-          </td>
-        </ng-container>
-
-        <!-- Value Column -->
-        <ng-container matColumnDef="value">
-          <th mat-header-cell *matHeaderCellDef>{{'SEARCH.VALUE' | translate}}</th>
-          <td mat-cell *matCellDef="let element">
-            {{ element.value[0] }}
-          </td>
-        </ng-container>
-
-        <tr mat-row *matRowDef="let row; columns: displayedColumns; let idx = index;"
-        ></tr>
-      </mat-table>
-    </div>
-  </mat-card-content>
-</mat-card>
-<ng-template #noProperties>
-  <ng-content select=".no-properties"></ng-content>
-</ng-template>
-<br>
-<mat-card *ngIf="showAttributeRelationships"> 
-  <mat-card-content>
-    <div class="properties" *ngIf="propertiesView.length; else noProperties">
-      <mat-table id="properties"
-                 class="field-full-width mat-elevation-z0"
-                 [dataSource]="attributeRelationshipsView"
-      >
-
-      <ng-container matColumnDef="roleGroup">
-        <th mat-header-cell *matHeaderCellDef>
-        </th>
-        <td mat-cell [ngClass]="{'row-line-above': element.firstValue}" *matCellDef="let element">
-          <div *ngIf="element.roleGroup">
-            &#9711;
-          </div>
-        </td>
-      </ng-container>
-
-        <!-- Key Column -->
-        <ng-container matColumnDef="key">
-          <th mat-header-cell *matHeaderCellDef>{{'SEARCH.PROPERTY' | translate}}</th>
-          <td mat-cell [ngClass]="{'row-line-above': element.firstValue}" class="properties-header" *matCellDef="let element">
-            <span> {{element.key}} </span>
-          </td>
-        </ng-container>
-
-        <!-- Auxilliary column -->
-        <ng-container matColumnDef="aux">
-          <th mat-header-cell *matHeaderCellDef></th>
-          <td mat-cell [ngClass]="{'row-line-above': element.firstValue}" *matCellDef="let element">
-            <mat-chip *ngIf="element.value.length > 1">{{ element.value[1] }}</mat-chip>
-            <mat-icon *ngIf="element.key === 'code'" class="grip"
-                  [appDraggable]="{data: {code: code, display: display, system: system}, zones: ['conceptZone', 'relationshipZone']}"
-            >
-              drag_indicator
-            </mat-icon>
-          </td>
-        </ng-container>
-
-        <!-- Value Column -->
-        <ng-container matColumnDef="value">
-          <th mat-header-cell *matHeaderCellDef>{{'SEARCH.VALUE' | translate}}</th>
-          <td mat-cell [ngClass]="{'row-line-above': element.firstValue}" *matCellDef="let element">
-            {{ element.value[0] }}
-          </td>
-        </ng-container>
-
-        <tr mat-row *matRowDef="let row; columns: displayedAttributeRelationshipColumns; let idx = index;"
-        ></tr>
-      </mat-table>
-    </div>
-  </mat-card-content>
+<mat-card class="tab-view card-col">
+  <mat-tab-group animationDuration="0ms">
+    <mat-tab label="Target Properties">
+      <div class="properties-view card-col">
+        <mat-card class="properties-control" *ngIf="propertiesView.length; else noProperties">
+          <mat-card-content>
+            <app-errormessage [error]="error"></app-errormessage>
+            <div class="properties">
+              <mat-table id="properties"
+                         class="field-full-width mat-elevation-z0"
+                         [dataSource]="propertiesView"
+              >
+        
+                <!-- Key Column -->
+                <ng-container matColumnDef="key">
+                  <th mat-header-cell *matHeaderCellDef>{{'SEARCH.PROPERTY' | translate}}</th>
+                  <td mat-cell class="properties-header" *matCellDef="let element">
+                    <span> {{element.key}} </span>
+                  </td>
+                </ng-container>
+        
+                <!-- Auxilliary column -->
+                <ng-container matColumnDef="aux">
+                  <th mat-header-cell *matHeaderCellDef></th>
+                  <td mat-cell *matCellDef="let element">
+                    <mat-chip *ngIf="element.value.length > 1">{{ element.value[1] }}</mat-chip>
+                    <mat-icon *ngIf="element.key === 'code'" class="grip"
+                          [appDraggable]="{data: {code: code, display: display, system: system}, zones: ['conceptZone', 'relationshipZone']}"
+                    >
+                      drag_indicator
+                    </mat-icon>
+                  </td>
+                </ng-container>
+        
+                <!-- Value Column -->
+                <ng-container matColumnDef="value">
+                  <th mat-header-cell *matHeaderCellDef>{{'SEARCH.VALUE' | translate}}</th>
+                  <td mat-cell *matCellDef="let element">
+                    {{ element.value[0] }}
+                  </td>
+                </ng-container>
+        
+                <tr mat-row *matRowDef="let row; columns: displayedColumns; let idx = index;"
+                ></tr>
+              </mat-table>
+            </div>
+          </mat-card-content>
+        </mat-card>
+        <ng-template #noProperties>
+          <ng-content select=".no-properties"></ng-content>
+        </ng-template>
+      </div>
+    </mat-tab>
+    <mat-tab label="Attribute Relationships">
+      <div class="properties-view card-col">
+        <mat-card> 
+          <mat-card-content>
+            <div class="properties">
+              <mat-table id="properties"
+                         class="field-full-width mat-elevation-z0"
+                         [dataSource]="attributeRelationshipsView"
+              >
+        
+              <ng-container matColumnDef="roleGroup">
+                <th mat-header-cell *matHeaderCellDef>
+                </th>
+                <td mat-cell [ngClass]="{'row-line-above': element.firstValue}" *matCellDef="let element">
+                  <div *ngIf="element.roleGroup">
+                    &#9711;
+                  </div>
+                </td>
+              </ng-container>
+        
+                <!-- Key Column -->
+                <ng-container matColumnDef="key">
+                  <th mat-header-cell *matHeaderCellDef>{{'SEARCH.PROPERTY' | translate}}</th>
+                  <td mat-cell [ngClass]="{'row-line-above': element.firstValue}" class="properties-header" *matCellDef="let element">
+                    <span> {{element.key}} </span>
+                  </td>
+                </ng-container>
+        
+                <!-- Auxilliary column -->
+                <ng-container matColumnDef="aux">
+                  <th mat-header-cell *matHeaderCellDef></th>
+                  <td mat-cell [ngClass]="{'row-line-above': element.firstValue}" *matCellDef="let element">
+                    <mat-chip *ngIf="element.value.length > 1">{{ element.value[1] }}</mat-chip>
+                    <mat-icon *ngIf="element.key === 'code'" class="grip"
+                          [appDraggable]="{data: {code: code, display: display, system: system}, zones: ['conceptZone', 'relationshipZone']}"
+                    >
+                      drag_indicator
+                    </mat-icon>
+                  </td>
+                </ng-container>
+        
+                <!-- Value Column -->
+                <ng-container matColumnDef="value">
+                  <th mat-header-cell *matHeaderCellDef>{{'SEARCH.VALUE' | translate}}</th>
+                  <td mat-cell [ngClass]="{'row-line-above': element.firstValue}" *matCellDef="let element">
+                    {{ element.value[0] }}
+                  </td>
+                </ng-container>
+        
+                <tr mat-row *matRowDef="let row; columns: displayedAttributeRelationshipColumns; let idx = index;"
+                ></tr>
+              </mat-table>
+            </div>
+          </mat-card-content>
+        </mat-card>    
+      </div>
+    </mat-tab>
+  </mat-tab-group>
 </mat-card>

@@ -1,5 +1,9 @@
 .properties {
   overflow: auto;
+  max-height: 200px;
+}
+
+.mat-card {
   max-height: 340px;
 }
 

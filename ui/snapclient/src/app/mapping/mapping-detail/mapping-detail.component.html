@@ -112,45 +112,27 @@
           </mat-card-footer>
         </mat-card>
       </div>
-      <mat-card class="tab-view card-col">
-        <mat-tab-group>
-          <mat-tab label="Target Properties">
-            <div class="properties-view card-col">
-              <app-concept-properties [version]="task.mapping?.toVersion || ''" [showAttributeRelationships]=false>
-                <!-- <span class="properties-title">{{'DETAILS.TARGET_PROPERTIES' | translate}}</span> -->
-              </app-concept-properties>
-            </div>
-          </mat-tab>
-          <mat-tab label="Attribute Relationships">
-            <div class="properties-view card-col">
-              <app-concept-properties [version]="task.mapping?.toVersion || ''" [showAttributeRelationships]=true>
-                <!-- <span class="properties-title">{{'DETAILS.TARGET_PROPERTIES' | translate}}</span> -->
-              </app-concept-properties>
-            </div>
-          </mat-tab>
-          <mat-tab label="Parent Tree">
-            <div class="tree-view card-col">
-              <button class="view-toggle" mat-icon-button (click)="toggleHierarchy()"
-                      #tooltip="matTooltip"
-                      matTooltip="{{'MAP.SWITCH_VIEW' | translate}}">
-                <mat-icon color="{{hierarchyView === 'tree' ? 'accent' : undefined}}">account_tree</mat-icon>
-              </button>
-              <div *ngIf="hierarchyView === 'tree'">
-                <app-tree-view [task]="task"></app-tree-view>
-              </div>
-              <div class="hierarchy-view" *ngIf="hierarchyView !== 'tree'">
-                <mat-progress-bar mode="indeterminate" *ngIf="loadingHierarchy; else heirarchyLoaded"></mat-progress-bar>
-                <ng-template #heirarchyLoaded>
-                  <lib-shrimp-hierarchy
-                  [rows]="nodes"
-                  (selected)="onSelected($event)"
-                ></lib-shrimp-hierarchy>
-                </ng-template>
-              </div>
-            </div>
-          </mat-tab>
-        </mat-tab-group>
-      </mat-card>
+      <div class="tree-view card-col">
+        <button class="view-toggle" mat-icon-button (click)="toggleHierarchy()"
+                #tooltip="matTooltip"
+                matTooltip="{{'MAP.SWITCH_VIEW' | translate}}">
+          <mat-icon color="{{hierarchyView === 'tree' ? 'accent' : undefined}}">account_tree</mat-icon>
+        </button>
+        <div *ngIf="hierarchyView === 'tree'">
+          <app-tree-view [task]="task"></app-tree-view>
+        </div>
+        <div class="hierarchy-view" *ngIf="hierarchyView !== 'tree'">
+          <mat-progress-bar mode="indeterminate" *ngIf="loadingHierarchy; else heirarchyLoaded"></mat-progress-bar>
+          <ng-template #heirarchyLoaded>
+            <lib-shrimp-hierarchy
+            [rows]="nodes"
+            (selected)="onSelected($event)"
+          ></lib-shrimp-hierarchy>
+          </ng-template>
+        </div>
+      </div>
+      <app-concept-properties class="tab-view card-col" [version]="task.mapping?.toVersion || ''">
+      </app-concept-properties>
     </div>
     <div class="container-row">
       <div class="notes-view card-col">

@@ -33,7 +33,6 @@ import { SelectionService } from '../_services/selection.service';
 export class ConceptPropertiesComponent implements OnInit, OnDestroy {
   @Input() active = true;
   @Input() version = '';
-  @Input() showAttributeRelationships = false;
 
   code = '';
   display = '';
@@ -176,6 +175,7 @@ export class ConceptPropertiesComponent implements OnInit, OnDestroy {
     ));
 
     self.propertiesView = [];
+    self.attributeRelationshipsView = [];
 
   }
 
