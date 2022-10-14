@@ -54,7 +54,7 @@ h2 {
 .container-row {
   display: flex;
   flex-direction: row;
-  flex-wrap: wrap;
+  /* flex-wrap: wrap;  this causes properties / attributes to wrap to the next row which is not desirable */
 }
 
 .card-col {
