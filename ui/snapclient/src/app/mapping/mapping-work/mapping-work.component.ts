@@ -100,6 +100,8 @@ export class MappingWorkComponent implements OnInit, OnDestroy {
   isAdmin = false;
   private navigationSubscription: Subscription;
 
+  targetConceptSearchText = '';
+
   constructor(private router: Router,
               private route: ActivatedRoute,
               private snackBar: MatSnackBar,
@@ -362,6 +364,10 @@ export class MappingWorkComponent implements OnInit, OnDestroy {
     } else {
       self.mode = self.task?.type === 'AUTHOR' ? TaskMode.AUTHOR_TABLE : TaskMode.REVIEW_TABLE;
     }
+  }
+
+  targetConceptSearchString(text: string): void {
+    this.targetConceptSearchText = text;
   }
 
   sortChange(event: Sort): void {

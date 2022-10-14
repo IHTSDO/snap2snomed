@@ -106,6 +106,7 @@ export class MappingTableComponent implements OnInit, AfterViewInit, OnDestroy {
   @Output() showDetail = new EventEmitter<number>();
   @Output() showNotes = new EventEmitter<number>();
   @Output() updateTableEvent = new EventEmitter();
+  @Output() targetConceptSearchString = new EventEmitter<string>();
 
   mappingTableSelector: MappingTableSelectorComponent | null | undefined;
 
@@ -225,6 +226,10 @@ export class MappingTableComponent implements OnInit, AfterViewInit, OnDestroy {
           this.filterUpdate();
         }));
     });
+  }
+
+  clickSourceDisplay(row: MapView): void {
+    this.targetConceptSearchString.emit(row.sourceDisplay);
   }
 
   clickRow(idx: number, row: MapView): void {

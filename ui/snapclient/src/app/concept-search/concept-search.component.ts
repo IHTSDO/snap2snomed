@@ -149,4 +149,7 @@ export class ConceptSearchComponent implements OnInit, OnDestroy {
     return m;
   }
 
+  onDrop($event: any) {
+    this.searchControl.setValue($event.data);
+  }
 }

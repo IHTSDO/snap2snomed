@@ -44,7 +44,8 @@
         <div class="search-view card-col">
           <app-concept-search [active]="!opened"
                               [scope]="mapping?.toScope || ''"
-                              [version]="mapping?.toVersion || ''">
+                              [version]="mapping?.toVersion || ''"
+                              [initial]="targetConceptSearchText">
             <span class="search-title">{{'MAP.SEARCH_TARGET' | translate}}</span>
           </app-concept-search>
         </div>
@@ -96,6 +97,7 @@
                              (sortChange)="sortChange($event)"
                              (pagingChange)="pagingChange($event)"
                              (updateTableEvent)="updateTable($event)"
+                             (targetConceptSearchString)="targetConceptSearchString($event)"
           ></app-mapping-table>
         </div>
       </div>

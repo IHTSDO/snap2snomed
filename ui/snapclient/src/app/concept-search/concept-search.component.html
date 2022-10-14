@@ -21,7 +21,9 @@
         ></app-concept-autosuggest>
 
         <mat-form-field id="search-input" class="search-field field-full-width-no-margin"
-                        appearance="outline">
+                        appearance="outline"
+                        [appDroppable]="{zone: 'searchZone'}"
+                        (onDroppableComplete)="onDrop($event)">
           <mat-label>{{'SEARCH.INPUT_LABEL' | translate}}
           </mat-label>
           <input id="conceptSearch" type="search"

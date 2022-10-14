@@ -7,7 +7,7 @@
     "USER_GUIDE": "User Guide"
   },
   "BREADCRUMBS": {
-    "HOME": "Maps",
+    "HOME": "Home",
     "MAP_ADD": "Map",
     "MAP_DETAIL": "Source Details",
     "MAP_VIEW": "View Map",
@@ -182,6 +182,8 @@
     "TARGET_INEXACT_SOURCE": "Target is an inexact match to source",
     "TARGET_EQUIVALENT_SOURCE": "Target is equivalent to source",
     "TARGET_FLAGGED": "Flag Target",
+    "VIEW_NOTES": "View Notes",
+    "SEARCH_SOURCE_DISPLAY": "Search for Target Concept Using Source Display",
     "IMPORT": "IMPORT",
     "EXPORT": "EXPORT",
     "REFRESH_TARGET_VERSIONS": "Refresh target SNOMED CT version list",
