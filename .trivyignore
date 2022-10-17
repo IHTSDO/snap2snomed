@@ -8,3 +8,6 @@ CVE-2022-25857
 # resource exhaustion attack on jackson-databind, a transitive dependency of problem-spring-web-starter (api) remove when problem-spring-web-starter updates dependency to 2.14.0-rc1 or greater
 CVE-2022-42003
 CVE-2022-42004
+
+# arbitrary code execution issue - low risk as a dependency of mockserver-netty which is only used in testing the api. Fix should come in the next version of mockserver-netty as the update to 1.10 is already included in the code base
+CVE-2022-42889
