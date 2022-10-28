@@ -129,3 +129,9 @@ td.mat-cell {
 .mat-stroked-button {
   color: #4a4a4a;
 }
+
+.mat-icon-button {
+  width:30px !important;
+  height:30px !important;
+  line-height: 30px !important;
+}
