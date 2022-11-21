@@ -15,24 +15,24 @@
   </app-mapping-table-selector>
   <!-- Source index Column -->
   <ng-container matColumnDef="sourceIndex">
-    <th mat-header-cell *matHeaderCellDef mat-sort-header>{{'TABLE.SOURCE_INDEX' | translate}}</th>
+    <th mat-header-cell *matHeaderCellDef class="tableHeaderCellDiv"><div mat-sort-header>{{'TABLE.SOURCE_INDEX' | translate}}</div></th>
     <td mat-cell *matCellDef="let maprow">{{maprow.sourceIndex}}</td>
   </ng-container>
   <!-- Source code Column -->
   <ng-container matColumnDef="sourceCode">
-    <th mat-header-cell *matHeaderCellDef mat-sort-header>{{'TABLE.SOURCE_CODE' | translate}}</th>
+    <th mat-header-cell *matHeaderCellDef class="tableHeaderCellDiv"><div mat-sort-header>{{'TABLE.SOURCE_CODE' | translate}}</div></th>
     <td mat-cell *matCellDef="let maprow">{{maprow.sourceCode}}</td>
   </ng-container>
   <!-- Source display Column -->
   <ng-container matColumnDef="sourceDisplay">
-    <th mat-header-cell *matHeaderCellDef mat-sort-header>{{'TABLE.SOURCE_DISPLAY' | translate}}</th>
+    <th mat-header-cell *matHeaderCellDef class="tableHeaderCellDiv"><div mat-sort-header>{{'TABLE.SOURCE_DISPLAY' | translate}}</div></th>
     <td mat-cell *matCellDef="let maprow" 
         #tooltip="matTooltip" matTooltip="{{'MAP.SEARCH_SOURCE_DISPLAY' | translate}}" 
         (click)="clickSourceDisplay(maprow)" [appDraggable]="{data: maprow.sourceDisplay, zones: ['searchZone']}">{{maprow.sourceDisplay}}</td>
   </ng-container>
   <!-- Relationship Column -->
   <ng-container matColumnDef="relationship">
-    <th mat-header-cell *matHeaderCellDef mat-sort-header>{{'TABLE.RELATIONSHIP' | translate}}</th>
+    <th mat-header-cell *matHeaderCellDef class="tableHeaderCellDiv"><div mat-sort-header>{{'TABLE.RELATIONSHIP' | translate}}</div></th>
     <td mat-cell *matCellDef="let maprow; let i = index"
         #tooltip="matTooltip" matTooltip="{{explainRelationship(maprow.relationship)}}">
       <mat-select [(ngModel)]="maprow.relationship" [value]="maprow.relationship"
@@ -46,21 +46,21 @@
   </ng-container>
   <!-- Target code Column -->
   <ng-container matColumnDef="targetCode">
-    <th mat-header-cell *matHeaderCellDef mat-sort-header>{{'TABLE.TARGET_CODE' | translate}}</th>
+    <th mat-header-cell *matHeaderCellDef class="tableHeaderCellDiv"><div mat-sort-header>{{'TABLE.TARGET_CODE' | translate}}</div></th>
     <td mat-cell *matCellDef="let maprow; let i = index" (click)="clickRow(i, maprow)">
       <span *ngIf="!maprow.noMap">{{maprow.targetCode}}</span>
     </td>
   </ng-container>
   <!-- Target display Column -->
   <ng-container matColumnDef="targetDisplay">
-    <th mat-header-cell *matHeaderCellDef mat-sort-header>{{'TABLE.TARGET_DISPLAY' | translate}}</th>
+    <th mat-header-cell *matHeaderCellDef class="tableHeaderCellDiv"><div mat-sort-header>{{'TABLE.TARGET_DISPLAY' | translate}}</div></th>
     <td mat-cell *matCellDef="let maprow; let i = index" (click)="clickRow(i, maprow)">
       <span *ngIf="!maprow.noMap">{{maprow.targetDisplay}}</span>
     </td>
   </ng-container>
   <!-- No Map Column -->
   <ng-container matColumnDef="noMap">
-    <th mat-header-cell *matHeaderCellDef mat-sort-header>{{'TABLE.NO_MAP' | translate}}</th>
+    <th mat-header-cell *matHeaderCellDef class="tableHeaderCellDiv"><div mat-sort-header>{{'TABLE.NO_MAP' | translate}}</div></th>
     <td mat-cell *matCellDef="let maprow; let i = index">
       &nbsp;&nbsp;
       <mat-checkbox (change)="updateNoMapRow($event, i)" color="primary"
@@ -70,7 +70,7 @@
   </ng-container>
   <!-- Status Column -->
   <ng-container matColumnDef="status">
-    <th mat-header-cell *matHeaderCellDef mat-sort-header>{{'TABLE.STATUS' | translate}}</th>
+    <th mat-header-cell *matHeaderCellDef class="tableHeaderCellDiv"><div mat-sort-header>{{'TABLE.STATUS' | translate}}</div></th>
     <td mat-cell *matCellDef="let maprow; let i = index">
       <mat-select [(ngModel)]="maprow.status" [disabled]="writeDisableUtils.isStatusSelectionDisabled(this.task?.type, maprow.status)"
                   (selectionChange)="updateMapRow(maprow, i)">
@@ -83,7 +83,7 @@
   </ng-container>
   <!-- Note Column -->
   <ng-container matColumnDef="latestNote">
-    <th mat-header-cell *matHeaderCellDef mat-sort-header>{{'TABLE.NOTES' | translate}}</th>
+    <th mat-header-cell *matHeaderCellDef class="tableHeaderCellDiv"><div mat-sort-header>{{'TABLE.NOTES' | translate}}</div></th>
     <td mat-cell *matCellDef="let maprow; let i = index">
       <button *ngIf="maprow.latestNote" mat-icon-button
               #tooltip="matTooltip" matTooltip="{{'MAP.VIEW_NOTES' | translate}}"
@@ -93,7 +93,7 @@
   </ng-container>
   <!-- Flagged Column -->
   <ng-container matColumnDef="flagged">
-    <th mat-header-cell *matHeaderCellDef mat-sort-header>{{'TABLE.FLAG' | translate}}</th>
+    <th mat-header-cell *matHeaderCellDef class="tableHeaderCellDiv"><div mat-sort-header>{{'TABLE.FLAG' | translate}}</div></th>
     <td mat-cell *matCellDef="let maprow">
       <button mat-icon-button (click)="updateFlag(maprow)"
               [ngClass]="['flag']" *ngIf="hasTarget(maprow)"
@@ -108,7 +108,7 @@
     </td>
   </ng-container>
   <ng-container matColumnDef="actions">
-    <th mat-header-cell *matHeaderCellDef>{{'TABLE.ACTIONS' | translate}}</th>
+    <th mat-header-cell *matHeaderCellDef class="tableHeaderCellDiv">{{'TABLE.ACTIONS' | translate}}</th>
     <td mat-cell *matCellDef="let maprow; let i = index">
       <button mat-icon-button #tooltip="matTooltip" matTooltip="{{'MAP.MAP_DETAILS' | translate}}"
               (click)="detailsView(i)"
