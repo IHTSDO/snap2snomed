@@ -102,6 +102,22 @@ export class MappingWorkComponent implements OnInit, OnDestroy {
 
   targetConceptSearchText = '';
 
+  // override so have access to populate show / hide column menu
+  displayedColumns: string[] = [
+    'id',
+    'sourceIndex',
+    'sourceCode',
+    'sourceDisplay',
+    'targetCode',
+    'targetDisplay',
+    'relationship',
+    'noMap',
+    'status',
+    'flagged',
+    'latestNote',
+    'actions'
+  ];
+
   constructor(private router: Router,
               private route: ActivatedRoute,
               private snackBar: MatSnackBar,

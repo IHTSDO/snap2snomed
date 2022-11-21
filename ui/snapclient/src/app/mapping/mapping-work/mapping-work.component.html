@@ -84,6 +84,10 @@
             </div>
             <button mat-stroked-button
                     (click)="mapTable.clearFilter()">{{'TABLE_FILTER.CLEAR_FILTER_BUTTON_NAME' | translate}}</button>
+            <button mat-stroked-button [matMenuTriggerFor]="menu">SHOW / HIDE</button>
+            <mat-menu #menu="matMenu">
+              <mat-checkbox class="mat-menu-item" *ngFor="let column of displayedColumns" [checked]="true">{{column}}</mat-checkbox>
+            </mat-menu>
           </div>
         </div>
         <div class="container-table">
@@ -99,6 +103,7 @@
                              (pagingChange)="pagingChange($event)"
                              (updateTableEvent)="updateTable($event)"
                              (targetConceptSearchString)="targetConceptSearchString($event)"
+                             (displayedColumns)="displayedColumns"
           ></app-mapping-table>
         </div>
       </div>
