@@ -8,3 +8,6 @@ CVE-2022-25857
 # resource exhaustion attack on jackson-databind, a transitive dependency of problem-spring-web-starter (api) remove when problem-spring-web-starter updates dependency to 2.14.0-rc1 or greater
 CVE-2022-42003
 CVE-2022-42004
+
+# Accept the risk as a transitive dependency of mockserver and so only used for tests remove when upgrade mockserver > 5.14.0 (as yet unrelease)
+CVE-2022-42889 
