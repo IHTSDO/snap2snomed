@@ -96,6 +96,15 @@ export class SourceImportComponent implements OnInit, OnDestroy, AfterViewChecke
     self.store.select(selectSourceList).subscribe((res) => this.initialSourceList = res).unsubscribe();
   }
 
+  // required because this.data.additionalColumnIndexes is a primative type
+  trackByIdx(index: number, obj: any): any {
+    return index;
+  }
+
+  onAddAdditionalColumn() {
+    this.data.additionalColumnIndexes.push(-1);
+  }
+
   onFileSelected(event: any): void {
     const fileUpload = document.getElementById('fileUpload') as HTMLInputElement;
     this.csvHeaders = undefined;

@@ -23,6 +23,7 @@ export class Source {
   contentType: string;
   codeColumnIndex: number | null;
   displayColumnIndex: number | null;
+  additionalColumnIndexes: number[];
   source_file?: File | null;
   delimiter?: string | null;
 
@@ -35,6 +36,7 @@ export class Source {
     this.contentType = 'text/plain';
     this.codeColumnIndex = null;
     this.displayColumnIndex = null;
+    this.additionalColumnIndexes = [];
     this.source_file = null;
     this.delimiter = null;
   }
