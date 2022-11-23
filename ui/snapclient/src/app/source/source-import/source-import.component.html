@@ -101,14 +101,14 @@
               <mat-form-field class="field-full-width" *ngFor="let additionalCol of data.additionalColumnIndexes.values(); index as i; trackBy:trackByIdx">
                 <mat-label>{{ 'SOURCE.ADDITIONAL_INFORMATION_COLUMN' | translate : {count: i+1} }}</mat-label>
                 <mat-select [(ngModel)]="data.additionalColumnIndexes[i]"
-                  [ngModelOptions]="ngModelOptions">
+                  [ngModelOptions]="ngModelOptions" [disabled]="!data.hasHeader">
                   <mat-option *ngFor="let col of csvHeaders; let idx = index" [value]="idx">
                     {{col}}
                   </mat-option>
                 </mat-select>
               </mat-form-field>
     
-              <button mat-raised-button
+              <button mat-raised-button [disabled]="!data.hasHeader"
                 (click)="onAddAdditionalColumn()">{{ 'SOURCE.IMPORT_ADDITIONAL_SOURCE_COLUMN_BUTTON' | translate }}
               </button>
             </ng-template>
