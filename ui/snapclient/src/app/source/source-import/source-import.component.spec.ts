@@ -132,10 +132,12 @@ describe('SourceImportComponent', () => {
 
   it('should show columns if file loaded correctly', () => {
     component.lines = ['1', '2'];
+    component.data.additionalColumnIndexes = [];
     fixture.detectChanges();
     el = fixture.debugElement.query(By.css('#lines'));
     expect(el).toBeTruthy();
     expect(el.nativeElement.textContent).toContain('SOURCE.SELECT_COLUMNS');
   });
+
 
 });
