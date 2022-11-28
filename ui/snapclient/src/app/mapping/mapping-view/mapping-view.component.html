@@ -57,6 +57,13 @@
         [(ngModel)]="filterEnabled">{{'TABLE_FILTER.TABLE_FILTER_TOGGLE_NAME' | translate}}</mat-slide-toggle>
       <button mat-stroked-button [disabled]="!filterEnabled"
               (click)="clearFilter()">{{'TABLE_FILTER.CLEAR_FILTER_BUTTON_NAME' | translate}}</button>
+      <button mat-stroked-button [matMenuTriggerFor]="menu">{{'TABLE_FILTER.SHOW_HIDE_BUTTON_NAME' | translate}}</button>
+      <mat-menu #menu="matMenu">
+       <!-- mat-checkbox is in a div to stop multiple items appearing on the one line and to make scroll work -->
+        <div mat-menu-item *ngFor="let column of hideShowColumns">
+          <mat-checkbox [checked]="true" (change)="onHideShowChange($event, column)">{{getHideShowItemLabel(column) | translate}}</mat-checkbox> 
+        </div>
+      </mat-menu> 
       &nbsp;
     </div>
     <mat-sidenav-container autosize>
@@ -78,12 +85,12 @@
             </ng-container>
             <!-- Source code Column -->
             <ng-container matColumnDef="sourceCode">
-              <th mat-header-cell *matHeaderCellDef mat-sort-header>{{'TABLE.SOURCE_CODE' | translate}}</th>
+              <th mat-header-cell *matHeaderCellDef class="tableHeaderCellDiv"><div mat-sort-header>{{'TABLE.SOURCE_CODE' | translate}}</div></th>
               <td mat-cell *matCellDef="let maprow">{{maprow.sourceCode}}</td>
             </ng-container>
             <!-- Source display Column -->
             <ng-container matColumnDef="sourceDisplay">
-              <th mat-header-cell *matHeaderCellDef mat-sort-header>{{'TABLE.SOURCE_DISPLAY' | translate}}</th>
+              <th mat-header-cell *matHeaderCellDef class="tableHeaderCellDiv"><div mat-sort-header>{{'TABLE.SOURCE_DISPLAY' | translate}}</div></th>
               <td mat-cell *matCellDef="let maprow">{{maprow.sourceDisplay}}</td>
             </ng-container>
             <!-- Relationship Column -->
@@ -96,12 +103,12 @@
             </ng-container>
             <!-- Target code Column -->
             <ng-container matColumnDef="targetCode">
-              <th mat-header-cell *matHeaderCellDef mat-sort-header>{{'TABLE.TARGET_CODE' | translate}}</th>
+              <th mat-header-cell *matHeaderCellDef class="tableHeaderCellDiv"><div mat-sort-header>{{'TABLE.TARGET_CODE' | translate}}</div></th>
               <td mat-cell *matCellDef="let maprow">{{maprow.targetCode}}</td>
             </ng-container>
             <!-- Target display Column -->
             <ng-container matColumnDef="targetDisplay">
-              <th mat-header-cell *matHeaderCellDef mat-sort-header>{{'TABLE.TARGET_DISPLAY' | translate}}</th>
+              <th mat-header-cell *matHeaderCellDef class="tableHeaderCellDiv"><div mat-sort-header>{{'TABLE.TARGET_DISPLAY' | translate}}</div></th>
               <td mat-cell *matCellDef="let maprow">{{maprow.targetDisplay}}</td>
             </ng-container>
             <!-- No Map Column -->
@@ -329,10 +336,10 @@
               </th>
             </ng-container>
 
-            <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
+            <tr mat-header-row *matHeaderRowDef="getDisplayedColumns(); sticky: true"></tr>
             <tr mat-header-row *matHeaderRowDef="filteredColumns"
                 [attr.hidden]="filterEnabled? null : true"></tr>
-            <tr mat-row *matRowDef="let row; columns: displayedColumns"
+            <tr mat-row *matRowDef="let row; columns: getDisplayedColumns()"
                 [class.selected-row]="mappingTableSelector?.checkSelected(row)"></tr>
 
           </table>

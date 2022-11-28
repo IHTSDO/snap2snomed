@@ -39,7 +39,7 @@ import {
 } from '../../_models/map_row';
 import {TranslateService} from '@ngx-translate/core';
 import {MapService} from '../../_services/map.service';
-import {from, merge, Subscription} from 'rxjs';
+import {from, merge, Observable, Subscription} from 'rxjs';
 import {debounceTime, distinctUntilChanged, last, mergeMap, tap} from 'rxjs/operators';
 import {MatSort} from '@angular/material/sort';
 import {Task, TaskType} from '../../_models/task';
@@ -68,6 +68,8 @@ import {ImportMappingFile, ImportMappingFileParams, InitSelectedMappingFile} fro
 import {MappingImportComponent} from '../mapping-import/mapping-import.component';
 import { MappingNotesComponent } from '../mapping-table-notes/mapping-notes.component';
 import { SourceNavigationService } from 'src/app/_services/source-navigation.service';
+import { MatCheckboxChange } from '@angular/material/checkbox';
+import { TableColumn } from '../mapping-table/mapping-table.component';
 
 @Component({
   selector: 'app-mapping-view',
@@ -117,8 +119,24 @@ export class MappingViewComponent implements OnInit, AfterViewInit, OnDestroy {
   targetDisplayFilterControl = new FormControl('');
 
   /** Columns displayed in the table. Columns IDs can be added, removed, or reordered. */
-  displayedColumns: string[] = [
-    'id',
+  displayedColumns : TableColumn[] = [
+    {columnId: 'id', columnDisplay: '', displayed: true},
+    {columnId: 'sourceIndex', columnDisplay: 'TABLE.SOURCE_INDEX', displayed: true},
+    {columnId: 'sourceCode', columnDisplay: 'TABLE.SOURCE_CODE', displayed: true},
+    {columnId: 'sourceDisplay', columnDisplay: 'TABLE.SOURCE_DISPLAY', displayed: true},
+    {columnId: 'targetCode', columnDisplay: 'TABLE.TARGET_CODE', displayed: true},
+    {columnId: 'targetDisplay', columnDisplay: 'TABLE.TARGET_DISPLAY', displayed: true},
+    {columnId: 'relationship', columnDisplay: 'TABLE.RELATIONSHIP', displayed: true},
+    {columnId: 'noMap', columnDisplay: 'TABLE.NO_MAP', displayed: true},
+    {columnId: 'status', columnDisplay: 'TABLE.STATUS', displayed: true},
+    {columnId: 'flagged', columnDisplay: 'TABLE.FLAG', displayed: true},
+    {columnId: 'latestNote', columnDisplay: 'SOURCE.TABLE.NOTES', displayed: true},
+    {columnId: 'lastAuthorReviewer', columnDisplay: 'TABLE.LAST_AUTHOR_REVIEWER', displayed: true},
+    {columnId: 'assignedAuthor', columnDisplay: 'TABLE.AUTHOR', displayed: true},
+    {columnId: 'assignedReviewer', columnDisplay: 'TABLE.REVIEWER', displayed: true},
+  ];
+  // columns that are eligable for user controlling the hiding / displaying
+  hideShowColumns: string[] = [
     'sourceIndex',
     'sourceCode',
     'sourceDisplay',
@@ -126,9 +144,6 @@ export class MappingViewComponent implements OnInit, AfterViewInit, OnDestroy {
     'targetDisplay',
     'relationship',
     'noMap',
-    'status',
-    'flagged',
-    'latestNote',
     'lastAuthorReviewer',
     'assignedAuthor',
     'assignedReviewer'
@@ -398,6 +413,38 @@ export class MappingViewComponent implements OnInit, AfterViewInit, OnDestroy {
       const context = this.getContext();
       this.store.dispatch(new LoadMapView({mapping: this.mapping_id, context}));
     }
+  }
+
+  getDisplayedColumns() : string[] {
+    return this.displayedColumns.filter(obj => obj.displayed === true).map((obj) => obj.columnId);
+  }
+
+  onHideShowChange(event_checked : MatCheckboxChange, column: string) {
+
+    if (event_checked.checked === false) {
+      const columnNames = this.displayedColumns.map((obj) => obj.columnId);
+      const index = columnNames.indexOf(column, 0);
+      if (index > -1) {
+        this.displayedColumns[index].displayed = false;
+      }
+    }
+    else {
+      const columnNames = this.displayedColumns.map((obj) => obj.columnId);
+      const index = columnNames.indexOf(column, 0);
+      if (index > -1) {
+        this.displayedColumns[index].displayed = true;
+      }
+    }
+
+  }
+
+  getHideShowItemLabel(columnName : string) : string {
+    const columnNames = this.displayedColumns.map((obj) => obj.columnId);
+    const index = columnNames.indexOf(columnName, 0);
+    if (index > -1) {
+      return this.displayedColumns[index].columnDisplay;
+    }
+    return "unknown";
   }
 
   editMapping(): void {

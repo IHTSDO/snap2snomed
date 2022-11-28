@@ -60,6 +60,12 @@ export interface TableParams extends Params {
   sortDirection?: string;
 }
 
+export interface TableColumn {
+  columnId: string;
+  columnDisplay: string;
+  displayed: boolean;
+}
+
 @Component({
   selector: 'app-mapping-table',
   templateUrl: './mapping-table.component.html',
@@ -72,19 +78,19 @@ export class MappingTableComponent implements OnInit, AfterViewInit, OnDestroy {
   @Input() isOwner!: boolean;
 
   /** Columns displayed in the table - specified in html. Columns IDs can be added, removed, or reordered. */
-  @Input() displayedColumns: string[] = [
-    'id',
-    'sourceIndex',
-    'sourceCode',
-    'sourceDisplay',
-    'targetCode',
-    'targetDisplay',
-    'relationship',
-    'noMap',
-    'status',
-    'flagged',
-    'latestNote',
-    'actions'
+  @Input() displayedColumns: TableColumn[] = [
+    {columnId: 'id', columnDisplay: '', displayed: true},
+    {columnId: 'sourceIndex', columnDisplay: 'TABLE.SOURCE_INDEX', displayed: true},
+    {columnId: 'sourceCode', columnDisplay: 'TABLE.SOURCE_CODE', displayed: true},
+    {columnId: 'sourceDisplay', columnDisplay: 'TABLE.SOURCE_DISPLAY', displayed: true},
+    {columnId: 'targetCode', columnDisplay: 'TABLE.TARGET_CODE', displayed: true},
+    {columnId: 'targetDisplay', columnDisplay: 'TABLE.TARGET_DISPLAY', displayed: true},
+    {columnId: 'relationship', columnDisplay: 'TABLE.RELATIONSHIP', displayed: true},
+    {columnId: 'noMap', columnDisplay: 'TABLE.NO_MAP', displayed: true},
+    {columnId: 'status', columnDisplay: 'TABLE.STATUS', displayed: true},
+    {columnId: 'flagged', columnDisplay: 'TABLE.FLAG', displayed: true},
+    {columnId: 'latestNote', columnDisplay: 'SOURCE.TABLE.NOTES', displayed: true},
+    {columnId: 'actions', columnDisplay: '', displayed: true}
   ];
   @Input() filteredColumns: string[] = [
     'filter-id',
@@ -254,6 +260,10 @@ export class MappingTableComponent implements OnInit, AfterViewInit, OnDestroy {
 
   getMapping(): Mapping | undefined {
     return this.mapping ?? undefined;
+  }
+
+  getDisplayedColumns() : string[] {
+    return this.displayedColumns?.filter(obj => obj.displayed === true).map((obj) => obj.columnId);
   }
 
   dismiss(): void {
