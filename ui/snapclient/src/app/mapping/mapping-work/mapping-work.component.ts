@@ -117,7 +117,7 @@ export class MappingWorkComponent implements OnInit, OnDestroy {
               private authService: AuthService) {
     this.translate.get('TASK.SELECTED_TASK').subscribe((res) => this.selectedLabel = res);
     this.tableParams = {};
-    this.tableFilter = new MapViewFilter();
+    this.tableFilter = new MapViewFilter(2);
     this.isAdmin = this.authService.isAdmin();
     this.navigationSubscription = this.router.events.subscribe((e: any) => {
       // Refresh page re-load params and data

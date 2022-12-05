@@ -58,6 +58,7 @@ export type SourceRow = {
   index: string;
   noMap: boolean;
   status: string;
+  additionalColumns: any;
 };
 
 @Component({
@@ -131,7 +132,8 @@ export class MappingDetailComponent implements OnInit, OnDestroy {
           display: selected.mapRow.sourceDisplay,
           index: selected.mapRow.sourceIndex,
           noMap: selected.mapRow.noMap,
-          status: selected.mapRow.status
+          status: selected.mapRow.status,
+          additionalColumns: selected.mapRow.additionalColumns
         };
         self.loadTargets();
       }
@@ -271,7 +273,7 @@ export class MappingDetailComponent implements OnInit, OnDestroy {
             return new MapView(target.row?.id || '', target.id, source.index || '', source.code || '',
               source.display || '', target.targetCode, target.targetDisplay, target.relationship, status,
               false, target.row?.latestNote || null, null, null, null,
-              null, flagged);
+              null, flagged, source.additionalColumns);
           });
         } else {
           self.mapRows = [];

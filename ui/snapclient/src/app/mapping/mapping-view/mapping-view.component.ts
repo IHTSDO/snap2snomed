@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {AfterViewInit, Component, EventEmitter, OnDestroy, OnInit, Output, ViewChild} from '@angular/core';
+import {AfterViewInit, Component, ElementRef, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {Mapping} from '../../_models/mapping';
 import {ActivatedRoute, Router} from '@angular/router';
 import {IAppState} from '../../store/app.state';
@@ -39,8 +39,8 @@ import {
 } from '../../_models/map_row';
 import {TranslateService} from '@ngx-translate/core';
 import {MapService} from '../../_services/map.service';
-import {from, merge, Subscription} from 'rxjs';
-import {debounceTime, distinctUntilChanged, last, mergeMap, tap} from 'rxjs/operators';
+import {merge, Subscription} from 'rxjs';
+import {debounceTime, distinctUntilChanged, tap} from 'rxjs/operators';
 import {MatSort} from '@angular/material/sort';
 import {Task, TaskType} from '../../_models/task';
 import {LoadTasksForMap} from '../../store/task-feature/task.actions';
@@ -115,9 +115,15 @@ export class MappingViewComponent implements OnInit, AfterViewInit, OnDestroy {
   sourceDisplayFilterControl = new FormControl('');
   targetCodeFilterControl = new FormControl('');
   targetDisplayFilterControl = new FormControl('');
+  additionalColumnFilterControls : FormControl[] = [new FormControl('')];
 
-  /** Columns displayed in the table. Columns IDs can be added, removed, or reordered. */
+  /** 
+   * Columns displayed in the table - specified in html. Columns IDs can be added, removed, or reordered. 
+   * These are static columns that are always available
+   */
   displayedColumns: string[] = [
+  ];
+  constantColumns: string[] = [
     'id',
     'sourceIndex',
     'sourceCode',
@@ -133,7 +139,10 @@ export class MappingViewComponent implements OnInit, AfterViewInit, OnDestroy {
     'assignedAuthor',
     'assignedReviewer'
   ];
+  additionalDisplayedColumns: string[] = [];
   filteredColumns: string[] = [
+  ];
+  constantFilteredColumns: string[] = [
     'filter-id',
     'filter-source-index',
     'filter-source-code',
@@ -149,6 +158,8 @@ export class MappingViewComponent implements OnInit, AfterViewInit, OnDestroy {
     'filter-author',
     'filter-reviewer'
   ];
+  additionalFilteredColumns: string[] = [];
+
   loading = true;
   mapLoading = true;
   mappingFileLoading = true;
@@ -201,7 +212,7 @@ export class MappingViewComponent implements OnInit, AfterViewInit, OnDestroy {
     this.translate.get('TASK.SELECT_A_TASK').subscribe((res) => this.selectedLabel = res);
 
     this.paging = new MapViewPaging();
-    this.filterEntity = new MapViewFilter();
+    this.filterEntity = new MapViewFilter(2);
     this.filterType = MatTableFilter.ANYWHERE;
     this.relationships = mapRowRelationships;
     this.statuses = mapRowStatuses;
@@ -210,9 +221,16 @@ export class MappingViewComponent implements OnInit, AfterViewInit, OnDestroy {
       ['NO_MAP_TRUE', true],
       ['NO_MAP_FALSE', false]
     ];
+
+    // TODO remove unneeded resets .. about 3 at present
+    this.additionalDisplayedColumns = [];
+    this.additionalFilteredColumns = [];
   }
 
   ngOnInit(): void {
+
+    this.additionalDisplayedColumns = [];
+    this.additionalFilteredColumns = [];
     const self = this;
     this.store.dispatch(new InitSelectedMappingFile());
     self.loadParams();
@@ -249,6 +267,10 @@ export class MappingViewComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ngAfterViewInit(): void {
+
+    this.displayedColumns = this.constantColumns.concat(this.additionalDisplayedColumns);
+    this.filteredColumns = this.constantFilteredColumns.concat(this.additionalFilteredColumns);
+
     if (this.sort) {
       if (this.paging.sortCol) {
         this.sort.active = this.paging.sortCol;
@@ -279,11 +301,23 @@ export class MappingViewComponent implements OnInit, AfterViewInit, OnDestroy {
         .subscribe(() => this.filterChange()
         ));
     });
+
+    //TODO concat to above
+    this.additionalColumnFilterControls.forEach((control) => {
+      this.subscription.add(control.valueChanges
+        .pipe(debounceTime(this.debounce), distinctUntilChanged())
+        .subscribe(() => this.filterChange()
+        ));
+    });
   }
 
   ngOnDestroy(): void {
     this.loading = false;
     this.subscription.unsubscribe();
+  }
+
+  getDataListId(index : number) {
+    return "no_additional_column_display" + index;
   }
 
   /**
@@ -376,6 +410,16 @@ export class MappingViewComponent implements OnInit, AfterViewInit, OnDestroy {
     self.subscription.add(this.store.select(selectCurrentView).subscribe(
       (page) => {
         self.page = page ?? new Page();
+        this.additionalDisplayedColumns = [];
+        this.additionalFilteredColumns = [];
+
+        if (this.page.data.length > 0 && this.page.data[0].additionalColumns) {
+          for (let i = 0; i <  this.page.data[0].additionalColumns.length; i++) {
+            this.additionalDisplayedColumns.push("additionalColumn" + (i+1));
+            this.additionalFilteredColumns.push("filter-additionalColumn" + (i+1));
+          }
+        }
+        
         if (page?.sourceDetails) {
           self.allSourceDetails = page.sourceDetails;
         }

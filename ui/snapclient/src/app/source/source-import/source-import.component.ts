@@ -102,7 +102,13 @@ export class SourceImportComponent implements OnInit, OnDestroy, AfterViewChecke
   }
 
   onAddAdditionalColumn() {
-    this.data.additionalColumnIndexes.push(-1);
+    this.data.additionalColumnIndexes.push(undefined);
+    this.data.additionalColumnTypes.push(undefined);
+  }
+
+  onRemoveAdditionalColumn(index : number) {
+    this.data.additionalColumnIndexes.splice(index, 1);
+    this.data.additionalColumnTypes.splice(index, 1);
   }
 
   onFileSelected(event: any): void {
@@ -208,8 +214,22 @@ export class SourceImportComponent implements OnInit, OnDestroy, AfterViewChecke
     }
   }
 
+  /**
+   * If an additional column is supplied, check that a type is also supplied
+   */
+  allTypeFieldsSupplied() : boolean {
+    for (let i=0; i< this.data.additionalColumnIndexes.length; i++) {
+      if (this.data.additionalColumnIndexes[i] !== undefined) {
+        if (this.data.additionalColumnTypes[i] === undefined) {
+          return false;
+        }
+      }
+    };
+    return true
+  }
+
   disableSubmit(): boolean {
-    return !(this.data.name && this.data.version && this.data.source_file) || this.error.message !== undefined;
+    return !(this.data.name && this.data.version && this.data.source_file && this.allTypeFieldsSupplied()) || this.error.message !== undefined;
   }
 
   changeDelimiter(event: any): void {

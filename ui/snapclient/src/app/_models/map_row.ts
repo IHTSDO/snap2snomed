@@ -50,6 +50,9 @@ export class MapView {
   latestNote?: Date | null;
   flagged?: boolean;
 
+  //additionalColumns: string[] | undefined;
+  additionalColumns: any;
+
   // Previous values
   private prevTargetCode?: string;
   private prevTargetDisplay?: string;
@@ -62,7 +65,7 @@ export class MapView {
               targetCode: string | undefined, targetDisplay: string | undefined, relationship: string | undefined,
               status: string, noMap: boolean, latestNote: Date | null | undefined, assignedAuthor: User | null | undefined,
               assignedReviewer: User | null | undefined, lastAuthor: User | null | undefined,
-              lastReviewer: User | null | undefined, flagged: boolean | undefined) {
+              lastReviewer: User | null | undefined, flagged: boolean | undefined, additionalColumns: any) {
     this.rowId = rowId;
     this.targetId = targetId;
     this.sourceIndex = sourceIndex;
@@ -79,6 +82,7 @@ export class MapView {
     this.assignedReviewer = assignedReviewer;
     this.lastAuthor = lastAuthor;
     this.lastReviewer = lastReviewer;
+    this.additionalColumns = additionalColumns;
   }
 
   static create(mv: MapView): MapView {
@@ -87,14 +91,14 @@ export class MapView {
     return new MapView(
       rowId, mv.targetId, mv.sourceIndex, mv.sourceCode, mv.sourceDisplay,
       mv.targetCode, mv.targetDisplay, mv.relationship, mv.status, mv.noMap, mv.latestNote,
-      mv.assignedAuthor, mv.assignedReviewer, mv.lastAuthor, mv.lastReviewer, mv.flagged
+      mv.assignedAuthor, mv.assignedReviewer, mv.lastAuthor, mv.lastReviewer, mv.flagged, mv.additionalColumns
     );
   }
 
   convertToMapRow(mapping: Mapping): MapRow {
     return {
       id: this.rowId, map: mapping, noMap: this.noMap,
-      sourceCode: new SourceCode(this.sourceCode, this.sourceDisplay, mapping.source, this.sourceIndex),
+      sourceCode: new SourceCode(this.sourceCode, this.sourceDisplay, mapping.source, this.sourceIndex, this.additionalColumns),
       status: this.status, relationship: this.relationship, latestNote: this.latestNote
     } as unknown as MapRow;
   }
@@ -163,11 +167,22 @@ export class MapViewFilter {
   assignedReviewer: string[] | string = '';
   flagged?: boolean | undefined;
   notes?: boolean | undefined;
+  additionalColumns : string[] = [];
+
+  constructor(numAdditionalColumns : number) {
+    for (let i=0; i<numAdditionalColumns; i++) {
+      this.additionalColumns.push('');
+    }
+
+  }
 
   hasFilters(): boolean {
+    const filteredAdditionalColumns: string[] = this.additionalColumns.filter((s): s is string => Boolean(s));
+    console.log("has filteredAdditionalColumns", filteredAdditionalColumns)
+
     return this.sourceCode !== '' || this.sourceDisplay !== '' || this.targetCode !== '' || this.targetDisplay !== ''
       || this.relationship !== '' || this.status !== '' || this.noMap !== undefined || this.flagged !== undefined
-      || this.lastAuthorReviewer !== '' || this.assignedAuthor !== '' || this.assignedReviewer !== '' || this.notes !== undefined;
+      || this.lastAuthorReviewer !== '' || this.assignedAuthor !== '' || this.assignedReviewer !== '' || this.notes !== undefined || filteredAdditionalColumns.length > 0;
   }
 }
 

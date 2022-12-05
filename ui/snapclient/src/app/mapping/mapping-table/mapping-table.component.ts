@@ -73,6 +73,8 @@ export class MappingTableComponent implements OnInit, AfterViewInit, OnDestroy {
 
   /** Columns displayed in the table - specified in html. Columns IDs can be added, removed, or reordered. */
   @Input() displayedColumns: string[] = [
+  ];
+  constantColumns: string[] = [
     'id',
     'sourceIndex',
     'sourceCode',
@@ -86,6 +88,7 @@ export class MappingTableComponent implements OnInit, AfterViewInit, OnDestroy {
     'latestNote',
     'actions'
   ];
+  additionalDisplayedColumns: string[] = [];
   @Input() filteredColumns: string[] = [
     'filter-id',
     'filter-source-index',
@@ -171,7 +174,7 @@ export class MappingTableComponent implements OnInit, AfterViewInit, OnDestroy {
     const emitChanges = true;
 
     this.paging = {};
-    this.filterEntity = new MapViewFilter();
+    this.filterEntity = new MapViewFilter(2);
     this.filterType = MatTableFilter.ANYWHERE;
     this.relationships = mapRowRelationships;
     this.statuses = mapRowStatuses;
@@ -206,6 +209,16 @@ export class MappingTableComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ngAfterViewInit(): void {
+
+    this.additionalDisplayedColumns = [];
+    if (this.page.data[0].additionalColumns) {
+      for (let i = 0; i <  this.page.data[0].additionalColumns.length; i++) {
+        this.additionalDisplayedColumns.push("additionalColumn" + (i+1));
+      }
+    }
+
+    this.displayedColumns = this.constantColumns.concat(this.additionalDisplayedColumns);
+
     if (this.paging.sortCol) {
       this.sort.active = this.paging.sortCol;
     }
@@ -404,7 +417,7 @@ export class MappingTableComponent implements OnInit, AfterViewInit, OnDestroy {
 
   clearFilter(): void {
     this.mappingTableSelector?.clearAllSelectedRows();
-    this.filterEntity = new MapViewFilter();
+    this.filterEntity = new MapViewFilter(2);
     this.filterUpdate();
   }
 

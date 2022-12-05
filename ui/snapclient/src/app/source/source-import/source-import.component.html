@@ -98,18 +98,34 @@
                   </mat-option>
                 </mat-select>
               </mat-form-field>
-              <mat-form-field class="field-full-width" *ngFor="let additionalCol of data.additionalColumnIndexes.values(); index as i; trackBy:trackByIdx">
-                <mat-label>{{ 'SOURCE.ADDITIONAL_INFORMATION_COLUMN' | translate : {count: i+1} }}</mat-label>
-                <mat-select [(ngModel)]="data.additionalColumnIndexes[i]"
-                  [ngModelOptions]="ngModelOptions" [disabled]="!data.hasHeader">
-                  <mat-option *ngFor="let col of csvHeaders; let idx = index" [value]="idx">
-                    {{col}}
-                  </mat-option>
-                </mat-select>
-              </mat-form-field>
+              <div fxLayout="row" class="additional-column-section" *ngFor="let additionalCol of data.additionalColumnIndexes.values(); index as i; trackBy:trackByIdx">
+                <mat-form-field class="two-form-fields trailing-space">
+                  <mat-label>{{ 'SOURCE.ADDITIONAL_INFORMATION_COLUMN' | translate : {count: i+1} }}</mat-label>
+                  <mat-select [(ngModel)]="data.additionalColumnIndexes[i]"
+                    [ngModelOptions]="ngModelOptions" #additionalColumn{{i}}="ngModel" [disabled]="!data.hasHeader" required>
+                    <mat-option *ngFor="let col of csvHeaders; let idx = index" [value]="idx">
+                      {{col}}
+                    </mat-option>
+                  </mat-select>
+                  <mat-error>{{ 'SOURCE.ADDITIONAL_INFORMATION_COLUMN_ERROR' | translate }}</mat-error>
+                </mat-form-field>
+                <mat-form-field class="two-form-fields trailing-space">
+                  <mat-label>{{ 'SOURCE.ADDITIONAL_INFORMATION_COLUMN_TYPE' | translate : {count: i+1} }}</mat-label>
+                  <mat-select [(ngModel)]="data.additionalColumnTypes[i]" 
+                    [ngModelOptions]="ngModelOptions" #additionalColumnType{{i}}="ngModel" [disabled]="!data.hasHeader" required>
+                    <mat-option value="TEXT">{{ 'SOURCE.ADDITIONAL_INFORMATION_COLUMN_TYPE_TEXT' | translate }}</mat-option>
+                    <mat-option value="NUMBER">{{ 'SOURCE.ADDITIONAL_INFORMATION_COLUMN_TYPE_NUMBER' | translate }}</mat-option>
+                  </mat-select>
+                  <mat-error>{{ 'SOURCE.ADDITIONAL_INFORMATION_COLUMN_TYPE_ERROR' | translate }}</mat-error>
+                </mat-form-field>
+                <button mat-mini-fab color="accent" type="button" title="{{ 'SOURCE.REMOVE_ADDITIONAL_SOURCE_COLUMN_BUTTON' | translate }}"
+                        (click)="onRemoveAdditionalColumn(i)">
+                  <mat-icon>remove</mat-icon>
+                </button>
+              </div>
     
               <button mat-raised-button [disabled]="!data.hasHeader"
-                (click)="onAddAdditionalColumn()">{{ 'SOURCE.IMPORT_ADDITIONAL_SOURCE_COLUMN_BUTTON' | translate }}
+                (click)="onAddAdditionalColumn()"><mat-icon>add</mat-icon>{{ 'SOURCE.IMPORT_ADDITIONAL_SOURCE_COLUMN_BUTTON' | translate }}
               </button>
             </ng-template>
             <ng-template #incorrectdelimiter>
