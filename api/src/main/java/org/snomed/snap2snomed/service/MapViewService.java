@@ -188,7 +188,7 @@ public class MapViewService {
 
       if (!CollectionUtils.isEmpty(additionalColumns)) {
         expression = stringCollectionToOrStatements(expression, additionalColumns,
-        s -> QMapRow.mapRow.sourceCode.additionalColumns.get(0).value.containsIgnoreCase(s),
+        s -> QMapRow.mapRow.sourceCode.additionalColumns.any().value.containsIgnoreCase(s),
         (a, b) -> collectAndStatement(a, b));
       }
 
