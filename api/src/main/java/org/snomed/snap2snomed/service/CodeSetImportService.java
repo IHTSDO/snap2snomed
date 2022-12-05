@@ -311,13 +311,41 @@ public class CodeSetImportService {
           List<String> additionalColumnValues = new ArrayList<String>(); 
           List<AdditionalCodeColumn> additionalCodeColumns = new ArrayList<AdditionalCodeColumn>();
           if (importDetails.getHasHeader()) {
+            //TODO remove system.out
             System.out.println("header" + parser.getHeaderNames());
             List<Integer> additionalColumnIndexes = importDetails.getAdditionalColumnIndexes();
             List<String> additionalColumnTypes = importDetails.getAdditionalColumnTypes();
-            for (int i=0; i<additionalColumnIndexes.size(); i++) {
-              additionalColumnValues.add(csvRecord.get(additionalColumnIndexes.get(i)));
-              additionalCodeColumns.add(new AdditionalCodeColumn(parser.getHeaderNames().get(additionalColumnIndexes.get(i)), additionalColumnTypes.get(i), csvRecord.get(additionalColumnIndexes.get(i))));
-
+            if (additionalColumnIndexes.size() < additionalColumnTypes.size()) {
+              throw new CodeSetImportProblem("additional-column-mismatch",
+                      "Number of specified additional columns and their types do not match",
+                      "Additional column indexes specified were " + additionalColumnIndexes +
+                              " and additional column types were " + additionalColumnTypes +
+                              " - size of these collections must match");
+            }
+            if (additionalColumnIndexes != null && additionalColumnTypes != null) {
+              for (int i = 0; i < additionalColumnIndexes.size(); i++) {
+                Integer index = additionalColumnIndexes.get(i);
+                if (index == null) {
+                  throw new CodeSetImportProblem("additional-column-index-null",
+                          "Null additional column index",
+                          "Additional column index " + i +
+                                  " is null");
+                }
+                if(csvRecord.size() < index) {
+                  throw new CodeSetImportProblem("additional-column-index-too-large",
+                          "Additional column index is beyond CSV size",
+                          "Additional column index " + i +
+                                  " is " + index + " which is beyond the CSV record size " + csvRecord.size());
+                }
+                if(parser.getHeaderNames().size() < index) {
+                  throw new CodeSetImportProblem("additional-column-index-no-header",
+                          "Additional column index is beyond header size",
+                          "Additional column index " + i +
+                                  " is " + index + " which is beyond the header size " + parser.getHeaderNames().size());
+                }
+                additionalColumnValues.add(csvRecord.get(index));
+                additionalCodeColumns.add(new AdditionalCodeColumn(parser.getHeaderNames().get(index), additionalColumnTypes.get(i), csvRecord.get(index)));
+              }
             }
           }
 
