@@ -30,6 +30,12 @@
         #tooltip="matTooltip" matTooltip="{{'MAP.SEARCH_SOURCE_DISPLAY' | translate}}" 
         (click)="clickSourceDisplay(maprow)" [appDraggable]="{data: maprow.sourceDisplay, zones: ['searchZone']}">{{maprow.sourceDisplay}}</td>
   </ng-container>
+  <!-- Additional Source Columns -->
+  <ng-container *ngFor="let additionalCol of additionalDisplayedColumns; let idx = index" matColumnDef="{{additionalCol}}">
+    <!-- <th mat-header-cell *matHeaderCellDef mat-sort-header>Additional Column {{idx+1}}</th> -->
+    <th mat-header-cell *matHeaderCellDef mat-sort-header>{{page.data[0].additionalColumns[idx].name}}</th>
+    <td mat-cell *matCellDef="let maprow">{{maprow.additionalColumns[idx].value}}</td>
+  </ng-container>
   <!-- Relationship Column -->
   <ng-container matColumnDef="relationship">
     <th mat-header-cell *matHeaderCellDef mat-sort-header>{{'TABLE.RELATIONSHIP' | translate}}</th>

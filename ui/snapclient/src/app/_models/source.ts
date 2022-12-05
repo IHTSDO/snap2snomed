@@ -14,6 +14,11 @@
  * limitations under the License.
  */
 
+enum ColumnType {
+  Text = "TEXT",
+  Number = "NUMBER",
+}
+
 export class Source {
   id: string | null;
   name: string;
@@ -23,7 +28,8 @@ export class Source {
   contentType: string;
   codeColumnIndex: number | null;
   displayColumnIndex: number | null;
-  additionalColumnIndexes: number[];
+  additionalColumnIndexes: (number | undefined)[];
+  additionalColumnTypes: (ColumnType | undefined)[];
   source_file?: File | null;
   delimiter?: string | null;
 
@@ -37,6 +43,7 @@ export class Source {
     this.codeColumnIndex = null;
     this.displayColumnIndex = null;
     this.additionalColumnIndexes = [];
+    this.additionalColumnTypes = [];
     this.source_file = null;
     this.delimiter = null;
   }
