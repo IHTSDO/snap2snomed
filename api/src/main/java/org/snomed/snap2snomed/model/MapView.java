@@ -56,7 +56,6 @@ public class MapView {
       this.relationship = target.getRelationship();
       this.flagged = target.isFlagged();
     }
-
     if (row.getSourceCode().getAdditionalColumns().size() > 0) {
       this.additionalColumns = row.getSourceCode().getAdditionalColumns();
     }
