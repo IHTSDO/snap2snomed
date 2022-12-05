@@ -14,6 +14,6 @@
  * limitations under the License.
  */
 
-create table if not exists imported_code_additional_columns (imported_code_id bigint not null, name varchar(255), type varchar(255), value varchar(255));
+create table imported_code_additional_columns (imported_code_id bigint not null, name varchar(255), type varchar(255), value varchar(255));
 
 alter table imported_code_additional_columns add constraint FK5vpm8qo68l2bkocmeoufnfiqx foreign key (imported_code_id) references imported_code;
