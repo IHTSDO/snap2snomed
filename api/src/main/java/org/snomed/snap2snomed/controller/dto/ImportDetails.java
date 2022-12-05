@@ -16,6 +16,8 @@
 
 package org.snomed.snap2snomed.controller.dto;
 
+import java.util.List;
+
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
@@ -38,6 +40,10 @@ public class ImportDetails {
 
   @NotNull(message = "An index for the display text in a code set import file must be specified")
   Integer displayColumnIndex;
+
+  List<Integer> additionalColumnIndexes;
+
+  List<String> additionalColumnTypes;
 
   Character delimiter;
 

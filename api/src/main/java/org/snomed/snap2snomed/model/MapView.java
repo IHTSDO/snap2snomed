@@ -17,6 +17,8 @@
 package org.snomed.snap2snomed.model;
 
 import java.time.Instant;
+import java.util.List;
+
 import javax.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -53,7 +55,11 @@ public class MapView {
       this.targetDisplay = target.getTargetDisplay();
       this.relationship = target.getRelationship();
       this.flagged = target.isFlagged();
+
+    if (row.getSourceCode().getAdditionalColumns().size() > 0) {
+      this.additionalColumns = row.getSourceCode().getAdditionalColumns();
     }
+
   }
 
   @NotNull
@@ -92,4 +98,5 @@ public class MapView {
 
   private boolean flagged;
 
+  private List<AdditionalCodeColumn> additionalColumns;
 }

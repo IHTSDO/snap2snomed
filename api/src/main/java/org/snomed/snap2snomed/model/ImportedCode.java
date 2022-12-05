@@ -16,7 +16,11 @@
 
 package org.snomed.snap2snomed.model;
 
+import java.util.List;
+
+import javax.persistence.CollectionTable;
 import javax.persistence.Column;
+import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -70,5 +74,17 @@ public class ImportedCode implements Snap2SnomedEntity {
   @NotBlank
   @Size(max = DISPLAY_SIZE_LIMIT)
   String display;
+
+  // @ReadOnlyProperty
+  // @ElementCollection(targetClass=String.class)
+  // List<String> additionalColumns;
+
+  @ReadOnlyProperty
+  @ElementCollection
+  @CollectionTable(
+    name="IMPORTED_CODE_ADDITIONAL_COLUMNS",
+    joinColumns=@JoinColumn(name="IMPORTED_CODE_ID")
+  )
+  List<AdditionalCodeColumn> additionalColumns;
 
 }

@@ -108,7 +108,7 @@ public class CodeSetImportService {
     @Override
     public void execute(Connection connection) throws SQLException {
       PreparedStatement statement = connection.prepareStatement(
-          "insert into imported_code (code, display, _index, imported_codeset_id) values (?, ?, ?, ?)");
+          "insert into imported_code (code, display, _index, imported_codeset_id) values (?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
       for (ImportedCode code : codes) {
         statement.setString(1, code.getCode());
         statement.setString(2, code.getDisplay());
@@ -117,6 +117,25 @@ public class CodeSetImportService {
         statement.addBatch();
       }
       statement.executeLargeBatch();
+
+      PreparedStatement additionalColumnsStatement2 = connection.prepareStatement("insert into imported_code_additional_columns (imported_code_id, name, type, value) values (?, ?, ?, ?)");
+      ResultSet generatedKeys2 = statement.getGeneratedKeys();
+          
+            for (ImportedCode code : codes) {
+              generatedKeys2.next();
+              for (AdditionalCodeColumn additionalColumnVal : code.getAdditionalColumns()) {
+                additionalColumnsStatement2.setLong(1, generatedKeys2.getLong(1));
+                additionalColumnsStatement2.setString(2, additionalColumnVal.getName());
+                additionalColumnsStatement2.setString(3, additionalColumnVal.getType());
+                additionalColumnsStatement2.setString(4, additionalColumnVal.getValue());
+                additionalColumnsStatement2.addBatch();
+              }
+
+            }
+        //}
+      
+      additionalColumnsStatement2.executeLargeBatch();
+
     }
   }
 
@@ -289,9 +308,22 @@ public class CodeSetImportService {
           String display = csvRecord.get(importDetails.getDisplayColumnIndex());
           long recordNumber = csvRecord.getRecordNumber();
 
+          List<String> additionalColumnValues = new ArrayList<String>(); 
+          List<AdditionalCodeColumn> additionalCodeColumns = new ArrayList<AdditionalCodeColumn>();
+          if (importDetails.getHasHeader()) {
+            System.out.println("header" + parser.getHeaderNames());
+            List<Integer> additionalColumnIndexes = importDetails.getAdditionalColumnIndexes();
+            List<String> additionalColumnTypes = importDetails.getAdditionalColumnTypes();
+            for (int i=0; i<additionalColumnIndexes.size(); i++) {
+              additionalColumnValues.add(csvRecord.get(additionalColumnIndexes.get(i)));
+              additionalCodeColumns.add(new AdditionalCodeColumn(parser.getHeaderNames().get(additionalColumnIndexes.get(i)), additionalColumnTypes.get(i), csvRecord.get(additionalColumnIndexes.get(i))));
+
+            }
+          }
+
           validateRecord(importedCodes, code, display, recordNumber);
 
-          ImportedCode importedCode = new ImportedCode(null, code, importedCodeSet, recordNumber, display);
+          ImportedCode importedCode = new ImportedCode(null, code, importedCodeSet, recordNumber, display, additionalCodeColumns);
 
           importedCodes.add(code);
           insertCodeWork.add(importedCode);

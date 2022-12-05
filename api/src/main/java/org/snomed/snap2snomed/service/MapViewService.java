@@ -31,6 +31,8 @@ import org.snomed.snap2snomed.controller.dto.MappedRowDetailsDto;
 import org.snomed.snap2snomed.controller.dto.Snap2SnomedPagedModel;
 import org.snomed.snap2snomed.model.Map;
 import org.snomed.snap2snomed.model.MapView;
+import org.snomed.snap2snomed.model.QAdditionalCodeColumn;
+import org.snomed.snap2snomed.model.QImportedCode;
 import org.snomed.snap2snomed.model.QMapRow;
 import org.snomed.snap2snomed.model.QMapRowTarget;
 import org.snomed.snap2snomed.model.QNote;
@@ -89,11 +91,12 @@ public class MapViewService {
     private final List<String> assignedAuthor;
     private final List<String> assignedReviewer;
     private final Boolean flagged;
+    private final List<String> additionalColumns;
 
     public MapViewFilter(List<String> sourceCodes, List<String> sourceDisplays, Boolean noMap, List<String> targetCodes,
         List<String> targetDisplays, List<MappingRelationship> relationshipTypes, List<MapStatus> statuses, List<String> lastAuthor,
         List<String> lastReviewer, List<String> lastAuthorReviewer, List<String> assignedAuthor, List<String> assignedReviewer,
-        Boolean flagged) {
+        Boolean flagged, List<String> additionalColumns) {
       this.sourceCodes = sourceCodes;
       this.sourceDisplays = sourceDisplays;
       this.noMap = noMap;
@@ -107,6 +110,7 @@ public class MapViewService {
       this.assignedAuthor = assignedAuthor;
       this.assignedReviewer = assignedReviewer;
       this.flagged = flagged;
+      this.additionalColumns  = additionalColumns;
     }
 
     public BooleanExpression getExpression() {
@@ -180,6 +184,12 @@ public class MapViewService {
 
       if (flagged != null) {
         expression = collectAndStatement(expression, QMapRowTarget.mapRowTarget.flagged.eq(flagged));
+      }
+
+      if (!CollectionUtils.isEmpty(additionalColumns)) {
+        expression = stringCollectionToOrStatements(expression, additionalColumns,
+        s -> QMapRow.mapRow.sourceCode.additionalColumns.get(0).value.containsIgnoreCase(s),
+        (a, b) -> collectAndStatement(a, b));
       }
 
       return expression;
@@ -343,6 +353,9 @@ public class MapViewService {
             break;
           case "flagged":
             field = Arrays.asList(mapTarget.flagged);
+            break;
+          case "additionalColumn1":
+            field = Arrays.asList(mapRow.sourceCode.additionalColumns.get(0).value);
             break;
 
           default:
