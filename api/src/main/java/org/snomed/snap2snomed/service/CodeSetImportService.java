@@ -118,16 +118,18 @@ public class CodeSetImportService {
       }
       statement.executeLargeBatch();
 
-      PreparedStatement additionalColumnsStatement2 = connection.prepareStatement("insert into imported_code_additional_columns (imported_code_id, name, type, value) values (?, ?, ?, ?)");
+      PreparedStatement additionalColumnsStatement2 = connection.prepareStatement("insert into imported_code_additional_columns (imported_code_id, name, type, value, collection_order) values (?, ?, ?, ?, ?)");
       ResultSet generatedKeys2 = statement.getGeneratedKeys();
           
             for (ImportedCode code : codes) {
               generatedKeys2.next();
-              for (AdditionalCodeColumn additionalColumnVal : code.getAdditionalColumns()) {
+              for (int i=0; i < code.getAdditionalColumns().size(); i++) {
+                AdditionalCodeColumn additionalColumnVal = code.getAdditionalColumns().get(i);
                 additionalColumnsStatement2.setLong(1, generatedKeys2.getLong(1));
                 additionalColumnsStatement2.setString(2, additionalColumnVal.getName());
                 additionalColumnsStatement2.setString(3, additionalColumnVal.getType());
                 additionalColumnsStatement2.setString(4, additionalColumnVal.getValue());
+                additionalColumnsStatement2.setInt(5, i);
                 additionalColumnsStatement2.addBatch();
               }
 
