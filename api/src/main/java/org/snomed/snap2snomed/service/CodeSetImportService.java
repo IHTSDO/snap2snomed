@@ -311,8 +311,6 @@ public class CodeSetImportService {
           List<String> additionalColumnValues = new ArrayList<String>(); 
           List<AdditionalCodeColumn> additionalCodeColumns = new ArrayList<AdditionalCodeColumn>();
           if (importDetails.getHasHeader()) {
-            //TODO remove system.out
-            System.out.println("header" + parser.getHeaderNames());
             List<Integer> additionalColumnIndexes = importDetails.getAdditionalColumnIndexes();
             List<String> additionalColumnTypes = importDetails.getAdditionalColumnTypes();
             if (additionalColumnIndexes.size() < additionalColumnTypes.size()) {
