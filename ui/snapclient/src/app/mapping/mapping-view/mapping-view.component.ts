@@ -212,7 +212,7 @@ export class MappingViewComponent implements OnInit, AfterViewInit, OnDestroy {
     this.translate.get('TASK.SELECT_A_TASK').subscribe((res) => this.selectedLabel = res);
 
     this.paging = new MapViewPaging();
-    this.filterEntity = new MapViewFilter(2);
+    this.filterEntity = new MapViewFilter();
     this.filterType = MatTableFilter.ANYWHERE;
     this.relationships = mapRowRelationships;
     this.statuses = mapRowStatuses;
@@ -222,15 +222,10 @@ export class MappingViewComponent implements OnInit, AfterViewInit, OnDestroy {
       ['NO_MAP_FALSE', false]
     ];
 
-    // TODO remove unneeded resets .. about 3 at present
-    this.additionalDisplayedColumns = [];
-    this.additionalFilteredColumns = [];
   }
 
   ngOnInit(): void {
 
-    this.additionalDisplayedColumns = [];
-    this.additionalFilteredColumns = [];
     const self = this;
     this.store.dispatch(new InitSelectedMappingFile());
     self.loadParams();
@@ -267,9 +262,6 @@ export class MappingViewComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ngAfterViewInit(): void {
-
-    this.displayedColumns = this.constantColumns.concat(this.additionalDisplayedColumns);
-    this.filteredColumns = this.constantFilteredColumns.concat(this.additionalFilteredColumns);
 
     if (this.sort) {
       if (this.paging.sortCol) {
@@ -409,16 +401,25 @@ export class MappingViewComponent implements OnInit, AfterViewInit, OnDestroy {
     );
     self.subscription.add(this.store.select(selectCurrentView).subscribe(
       (page) => {
+
+        // TODO: find out why this triggers with the previously selected map first, and then
+        // the current map
+
         self.page = page ?? new Page();
         this.additionalDisplayedColumns = [];
         this.additionalFilteredColumns = [];
 
+        // NB: additionalDisplayedColumns and displayedColumns must be set together or the table will error
+        // as the html will be out of sync with the model (same applies to additionalFilteredColumns and filteredColumns)
         if (this.page.data.length > 0 && this.page.data[0].additionalColumns) {
           for (let i = 0; i <  this.page.data[0].additionalColumns.length; i++) {
             this.additionalDisplayedColumns.push("additionalColumn" + (i+1));
             this.additionalFilteredColumns.push("filter-additionalColumn" + (i+1));
-          }
+          }      
         }
+        this.displayedColumns = this.constantColumns.concat(this.additionalDisplayedColumns);
+        this.filteredColumns = this.constantFilteredColumns.concat(this.additionalFilteredColumns);
+
         
         if (page?.sourceDetails) {
           self.allSourceDetails = page.sourceDetails;

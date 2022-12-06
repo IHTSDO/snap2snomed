@@ -169,16 +169,17 @@ export class MapViewFilter {
   notes?: boolean | undefined;
   additionalColumns : string[] = [];
 
-  constructor(numAdditionalColumns : number) {
-    for (let i=0; i<numAdditionalColumns; i++) {
-      this.additionalColumns.push('');
+  constructor(numAdditionalColumns? : number) {
+    if (typeof numAdditionalColumns !== 'undefined') {
+      for (let i=0; i<numAdditionalColumns; i++) {
+        this.additionalColumns.push('');
+      }
     }
-
   }
 
+
   hasFilters(): boolean {
-    const filteredAdditionalColumns: string[] = this.additionalColumns.filter((s): s is string => Boolean(s));
-    console.log("has filteredAdditionalColumns", filteredAdditionalColumns)
+    const filteredAdditionalColumns: string[] = this.additionalColumns.length > 0 ? this.additionalColumns.filter((s): s is string => Boolean(s)) : [];
 
     return this.sourceCode !== '' || this.sourceDisplay !== '' || this.targetCode !== '' || this.targetDisplay !== ''
       || this.relationship !== '' || this.status !== '' || this.noMap !== undefined || this.flagged !== undefined
