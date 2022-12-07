@@ -79,6 +79,10 @@
   width: 60px;
 }
 
+::ng-deep .mat-column-filter-notes .mat-form-field{
+  width: 60px;
+}
+
 .mat-column-relationship, .mat-column-bulk-relationship, .mat-column-status {
   width: 120px;
   font-size: 0.8em;

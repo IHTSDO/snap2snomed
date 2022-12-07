@@ -179,7 +179,7 @@ export class MappingTableComponent implements OnInit, AfterViewInit, OnDestroy {
     const emitChanges = true;
 
     this.paging = {};
-    this.filterEntity = new MapViewFilter(2);
+    this.filterEntity = new MapViewFilter();
     this.filterType = MatTableFilter.ANYWHERE;
     this.relationships = mapRowRelationships;
     this.statuses = mapRowStatuses;
@@ -240,7 +240,7 @@ export class MappingTableComponent implements OnInit, AfterViewInit, OnDestroy {
 
     // search as you type
     [this.sourceCodeFilterControl, this.sourceDisplayFilterControl,
-      this.targetCodeFilterControl, this.targetDisplayFilterControl].forEach((control) => {
+      this.targetCodeFilterControl, this.targetDisplayFilterControl].concat(this.additionalColumnFilterControls).forEach((control) => {
       this.subscription.add(control.valueChanges
         .pipe(debounceTime(this.debounce), distinctUntilChanged())
         .subscribe(() => {
@@ -429,7 +429,7 @@ export class MappingTableComponent implements OnInit, AfterViewInit, OnDestroy {
 
   clearFilter(): void {
     this.mappingTableSelector?.clearAllSelectedRows();
-    this.filterEntity = new MapViewFilter(2);
+    this.filterEntity = new MapViewFilter();
     this.filterUpdate();
   }
 

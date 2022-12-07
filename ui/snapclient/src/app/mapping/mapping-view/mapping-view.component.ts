@@ -287,20 +287,13 @@ export class MappingViewComponent implements OnInit, AfterViewInit, OnDestroy {
 
     // search as you type
     [this.sourceCodeFilterControl, this.sourceDisplayFilterControl,
-      this.targetCodeFilterControl, this.targetDisplayFilterControl].forEach((control) => {
+      this.targetCodeFilterControl, this.targetDisplayFilterControl].concat(this.additionalColumnFilterControls).forEach((control) => {
       this.subscription.add(control.valueChanges
         .pipe(debounceTime(this.debounce), distinctUntilChanged())
         .subscribe(() => this.filterChange()
         ));
     });
 
-    //TODO concat to above
-    this.additionalColumnFilterControls.forEach((control) => {
-      this.subscription.add(control.valueChanges
-        .pipe(debounceTime(this.debounce), distinctUntilChanged())
-        .subscribe(() => this.filterChange()
-        ));
-    });
   }
 
   ngOnDestroy(): void {
