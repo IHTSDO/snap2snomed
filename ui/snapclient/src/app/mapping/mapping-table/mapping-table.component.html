@@ -32,7 +32,6 @@
   </ng-container>
   <!-- Additional Source Columns -->
   <ng-container *ngFor="let additionalCol of additionalDisplayedColumns; let idx = index" matColumnDef="{{additionalCol}}">
-    <!-- <th mat-header-cell *matHeaderCellDef mat-sort-header>Additional Column {{idx+1}}</th> -->
     <th mat-header-cell *matHeaderCellDef mat-sort-header>{{page.data[0].additionalColumns[idx].name}}</th>
     <td mat-cell *matCellDef="let maprow">{{maprow.additionalColumns[idx].value}}</td>
   </ng-container>
@@ -113,6 +112,7 @@
       </button>
     </td>
   </ng-container>
+  <!-- Actions Column -->
   <ng-container matColumnDef="actions">
     <th mat-header-cell *matHeaderCellDef>{{'TABLE.ACTIONS' | translate}}</th>
     <td mat-cell *matCellDef="let maprow; let i = index">
@@ -231,19 +231,39 @@
       </mat-form-field>
     </th>
   </ng-container>
-    <!-- Filter Notes -->
-    <ng-container matColumnDef="filter-notes">
-      <th mat-header-cell *matHeaderCellDef [attr.colspan]="1">
-        <mat-form-field appearance="outline">
-          <mat-select [(ngModel)]="filterEntity.notes" (selectionChange)="filterUpdate()"
-                      id="notes" name="notes" #noMap="ngModel">
-            <mat-option [value]="">---</mat-option>
-            <mat-option *ngFor="let opt of yesNoOptions"
-                        [value]="opt[1]">{{'NOMAP.' + opt[0] | translate}}</mat-option>
-          </mat-select>
-        </mat-form-field>
-      </th>
-    </ng-container>
+  <!-- Filter Notes -->
+  <ng-container matColumnDef="filter-notes">
+    <th mat-header-cell *matHeaderCellDef [attr.colspan]="1">
+      <mat-form-field appearance="outline">
+        <mat-select [(ngModel)]="filterEntity.notes" (selectionChange)="filterUpdate()"
+                    id="notes" name="notes" #noMap="ngModel">
+          <mat-option [value]="">---</mat-option>
+          <mat-option *ngFor="let opt of yesNoOptions"
+                      [value]="opt[1]">{{'NOMAP.' + opt[0] | translate}}</mat-option>
+        </mat-select>
+      </mat-form-field>
+    </th>
+  </ng-container>
+  <!-- Filter Actions-->
+  <ng-container matColumnDef="filter-actions">
+    <th mat-header-cell *matHeaderCellDef [attr.colspan]="1">
+    </th>
+  </ng-container>
+  <!-- Filter Additional Source Columns -->
+  <ng-container *ngFor="let additionalCol of additionalFilteredColumns; let idx = index" matColumnDef="{{additionalCol}}">
+    <th mat-header-cell *matHeaderCellDef [attr.colspan]="1">
+      <mat-form-field appearance="outline">
+        <input matInput autocapitalize="off" autocomplete="false" [attr.list]="getDataListId(idx)"
+          [(ngModel)]="filterEntity.additionalColumns[idx]" [formControl]="additionalColumnFilterControls[idx]">
+        <datalist id="getDataListId(idx)"></datalist>
+        <!-- workaround for Edge ignoring autocomplete="false" -->
+        <button *ngIf="filterEntity.additionalColumns[idx]" matSuffix mat-icon-button aria-label="Clear"
+                (click)="filterEntity.additionalColumns[idx]=''">
+          <mat-icon>cancel</mat-icon>
+        </button>
+      </mat-form-field>
+    </th>
+  </ng-container>
 
   <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
   <tr mat-header-row *matHeaderRowDef="filteredColumns" [attr.hidden]="filterEnabled? null : true"></tr>

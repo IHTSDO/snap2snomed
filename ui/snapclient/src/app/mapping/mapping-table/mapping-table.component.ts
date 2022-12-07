@@ -89,7 +89,9 @@ export class MappingTableComponent implements OnInit, AfterViewInit, OnDestroy {
     'actions'
   ];
   additionalDisplayedColumns: string[] = [];
-  @Input() filteredColumns: string[] = [
+  filteredColumns: string[] = [
+  ];
+  @Input() constantFilteredColumns: string[] = [
     'filter-id',
     'filter-source-index',
     'filter-source-code',
@@ -100,8 +102,10 @@ export class MappingTableComponent implements OnInit, AfterViewInit, OnDestroy {
     'filter-noMap',
     'filter-status',
     'filter-flagged',
-    'filter-notes'
+    'filter-notes',
+    'filter-actions',
   ];
+  additionalFilteredColumns: string[] = [];
 
   @Output() filterChange = new EventEmitter<MapViewFilter>();
   @Output() sortChange = new EventEmitter<Sort>();
@@ -161,6 +165,7 @@ export class MappingTableComponent implements OnInit, AfterViewInit, OnDestroy {
   sourceDisplayFilterControl = new FormControl('');
   targetCodeFilterControl = new FormControl('');
   targetDisplayFilterControl = new FormControl('');
+  additionalColumnFilterControls : FormControl[] = [new FormControl('')];
 
   constructor(private snackBar: MatSnackBar,
               private store: Store<IAppState>,
@@ -211,13 +216,16 @@ export class MappingTableComponent implements OnInit, AfterViewInit, OnDestroy {
   ngAfterViewInit(): void {
 
     this.additionalDisplayedColumns = [];
+    this.additionalFilteredColumns = [];
     if (this.page.data[0].additionalColumns) {
       for (let i = 0; i <  this.page.data[0].additionalColumns.length; i++) {
         this.additionalDisplayedColumns.push("additionalColumn" + (i+1));
+        this.additionalFilteredColumns.push("filter-additionalColumn" + (i+1));
       }
     }
 
     this.displayedColumns = this.constantColumns.concat(this.additionalDisplayedColumns);
+    this.filteredColumns = this.constantFilteredColumns.concat(this.additionalFilteredColumns);
 
     if (this.paging.sortCol) {
       this.sort.active = this.paging.sortCol;
@@ -239,6 +247,10 @@ export class MappingTableComponent implements OnInit, AfterViewInit, OnDestroy {
           this.filterUpdate();
         }));
     });
+  }
+
+  getDataListId(index : number) {
+    return "no_additional_column_display" + index;
   }
 
   clickSourceDisplay(row: MapView): void {
