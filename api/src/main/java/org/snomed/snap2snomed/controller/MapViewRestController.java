@@ -181,6 +181,8 @@ public class MapViewRestController {
       description = "Filters the results to those that are assigned to an review task assigned to one of the specified user ids.")
   @Parameter(name = "flagged", in = ParameterIn.QUERY, required = false, allowEmptyValue = true,
       description = "Filters the results to those that are flagged or not flagged.")
+  @Parameter(name = "additionalColumns", in = ParameterIn.QUERY, required = false, allowEmptyValue = true,
+      description = "Filters the results to those with an additional column matching one of the specified values.")
   @Parameter(name = "page", in = ParameterIn.QUERY, required = false, allowEmptyValue = false,
       description = "Zero-based page index (0..N)")
   @Parameter(name = "size", in = ParameterIn.QUERY, required = false, allowEmptyValue = false,
@@ -204,11 +206,12 @@ public class MapViewRestController {
       @RequestParam(required = false) List<String> assignedAuthor,
       @RequestParam(required = false) List<String> assignedReviewer,
       @RequestParam(required = false) Boolean flagged,
+      @RequestParam(required = false) List<String> additionalColumns,
       @Parameter(hidden = true) Pageable pageable,
       @Parameter(hidden = true) PagedResourcesAssembler<MapView> assembler) {
 
     MapViewFilter filter = mapViewService.new MapViewFilter(sourceCode, sourceDisplay, noMap, targetCode, targetDisplay, relationship,
-        status, lastAuthor, lastReviewer, lastAuthorReviewer, assignedAuthor, assignedReviewer, flagged, null);
+        status, lastAuthor, lastReviewer, lastAuthorReviewer, assignedAuthor, assignedReviewer, flagged, additionalColumns);
 
     if (!webSecurity.isValidUser()) {
       throw new NoSuchUserProblem();
