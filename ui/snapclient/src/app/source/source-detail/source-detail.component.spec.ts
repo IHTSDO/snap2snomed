@@ -39,7 +39,7 @@ describe('SourceDetailComponent', () => {
   source.id = '1';
   source.name = 'Test source codeset';
   source.version = '1.0';
-  const sourceCode = new SourceCode('ABC', 'Alphabet', source, '0');
+  const sourceCode = new SourceCode('ABC', 'Alphabet', source, '0', undefined);
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
