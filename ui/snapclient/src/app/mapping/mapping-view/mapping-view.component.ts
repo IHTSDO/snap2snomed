@@ -42,7 +42,6 @@ import {MapService} from '../../_services/map.service';
 // import {merge, Subscription} from 'rxjs';
 import {debounceTime, distinctUntilChanged, tap} from 'rxjs/operators';
 import {from, merge, Observable, Subscription} from 'rxjs';
-import {debounceTime, distinctUntilChanged, last, mergeMap, tap} from 'rxjs/operators';
 import {MatSort} from '@angular/material/sort';
 import {Task, TaskType} from '../../_models/task';
 import {LoadTasksForMap} from '../../store/task-feature/task.actions';
