@@ -47,6 +47,7 @@ import {MatTooltipModule} from '@angular/material/tooltip';
 import {MatDialogModule} from '@angular/material/dialog';
 import { MatBottomSheetModule } from '@angular/material/bottom-sheet';
 import {MappingDetailsCardComponent} from '../mapping-details-card/mapping-details-card.component';
+import { MatMenuModule } from '@angular/material/menu';
 
 
 describe('MappingWorkComponent', () => {
@@ -74,6 +75,7 @@ describe('MappingWorkComponent', () => {
         MatTooltipModule,
         MatDialogModule,
         MatBottomSheetModule,
+        MatMenuModule,
         TranslateModule.forRoot({
           loader: {
             provide: TranslateLoader,

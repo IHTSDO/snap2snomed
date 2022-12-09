@@ -124,8 +124,10 @@
                 </button>
               </div>
     
-              <button mat-raised-button [disabled]="!data.hasHeader"
-                (click)="onAddAdditionalColumn()"><mat-icon>add</mat-icon>{{ 'SOURCE.IMPORT_ADDITIONAL_SOURCE_COLUMN_BUTTON' | translate }}
+              <button mat-raised-button [disabled]="!data.hasHeader || data.additionalColumnIndexes.length >= 10"
+                (click)="onAddAdditionalColumn()"
+                matTooltip="{{ 'SOURCE.IMPORT_ADDITIONAL_SOURCE_COLUMN_TOOLTIP' | translate }}">
+                  <mat-icon>add</mat-icon>{{ 'SOURCE.IMPORT_ADDITIONAL_SOURCE_COLUMN_BUTTON' | translate }}
               </button>
             </ng-template>
             <ng-template #incorrectdelimiter>

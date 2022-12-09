@@ -35,7 +35,7 @@ import {Sort} from '@angular/material/sort';
 import {PageEvent} from '@angular/material/paginator';
 import {MapView, MapViewFilter, Page} from 'src/app/_models/map_row';
 import {ServiceUtils} from 'src/app/_utils/service_utils';
-import {MappingTableComponent, TableParams} from '../mapping-table/mapping-table.component';
+import {MappingTableComponent, TableColumn, TableParams} from '../mapping-table/mapping-table.component';
 import {selectTaskList} from 'src/app/store/task-feature/task.selectors';
 import {AssignedWorkComponent} from 'src/app/task/assigned-work/assigned-work.component';
 import {SourceRow} from '../mapping-detail/mapping-detail.component';
@@ -53,6 +53,7 @@ import {BulkchangeComponent, BulkChangeDialogData, getResultMessage} from '../bu
 import {ResultsdialogComponent} from 'src/app/resultsdialog/resultsdialog.component';
 import {MatBottomSheet, MatBottomSheetConfig} from '@angular/material/bottom-sheet';
 import {User} from '../../_models/user';
+import { MatCheckboxChange } from '@angular/material/checkbox';
 
 const enum TaskMode {
   AUTHOR_TABLE = 'AUTHOR_TABLE_VIEW',
@@ -101,6 +102,32 @@ export class MappingWorkComponent implements OnInit, OnDestroy {
   private navigationSubscription: Subscription;
 
   targetConceptSearchText = '';
+
+  // override so have access to populate show / hide column menu
+  displayedColumns : TableColumn[] = [
+    {columnId: 'id', columnDisplay: '', displayed: true},
+    {columnId: 'sourceIndex', columnDisplay: 'TABLE.SOURCE_INDEX', displayed: true},
+    {columnId: 'sourceCode', columnDisplay: 'TABLE.SOURCE_CODE', displayed: true},
+    {columnId: 'sourceDisplay', columnDisplay: 'TABLE.SOURCE_DISPLAY', displayed: true},
+    {columnId: 'targetCode', columnDisplay: 'TABLE.TARGET_CODE', displayed: true},
+    {columnId: 'targetDisplay', columnDisplay: 'TABLE.TARGET_DISPLAY', displayed: true},
+    {columnId: 'relationship', columnDisplay: 'TABLE.RELATIONSHIP', displayed: true},
+    {columnId: 'noMap', columnDisplay: 'TABLE.NO_MAP', displayed: true},
+    {columnId: 'status', columnDisplay: 'TABLE.STATUS', displayed: true},
+    {columnId: 'flagged', columnDisplay: 'TABLE.FLAG', displayed: true},
+    {columnId: 'latestNote', columnDisplay: 'SOURCE.TABLE.NOTES', displayed: true},
+    {columnId: 'actions', columnDisplay: '', displayed: true}
+  ];
+  // columns that are eligable for user controlling the hiding / displaying
+  hideShowColumns: string[] = [
+    'sourceIndex',
+    'sourceCode',
+    'sourceDisplay',
+    'targetCode',
+    'targetDisplay',
+    'relationship',
+    'noMap',
+  ];
 
   constructor(private router: Router,
               private route: ActivatedRoute,
@@ -244,6 +271,34 @@ export class MappingWorkComponent implements OnInit, OnDestroy {
 
   onSelected(node: Coding): void {
     this.selectionService.select(node);
+  }
+
+  onHideShowChange(event_checked : MatCheckboxChange, column: string) {
+
+    if (event_checked.checked === false) {
+      const columnNames = this.displayedColumns.map((obj) => obj.columnId);
+      const index = columnNames.indexOf(column, 0);
+      if (index > -1) {
+        this.displayedColumns[index].displayed = false;
+      }
+    }
+    else {
+      const columnNames = this.displayedColumns.map((obj) => obj.columnId);
+      const index = columnNames.indexOf(column, 0);
+      if (index > -1) {
+        this.displayedColumns[index].displayed = true;
+      }
+    }
+
+  }
+
+  getHideShowItemLabel(columnName : string) : string {
+    const columnNames = this.displayedColumns.map((obj) => obj.columnId);
+    const index = columnNames.indexOf(columnName, 0);
+    if (index > -1) {
+      return this.displayedColumns[index].columnDisplay;
+    }
+    return "unknown";
   }
 
   updateCurrentTask(): void {
