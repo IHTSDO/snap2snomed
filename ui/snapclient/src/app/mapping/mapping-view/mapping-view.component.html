@@ -93,11 +93,6 @@
               <th mat-header-cell *matHeaderCellDef [resizeColumn]="true" [index]="2" [title]="'TABLE.SOURCE_DISPLAY' | translate"></th>
               <td mat-cell *matCellDef="let maprow">{{maprow.sourceDisplay}}</td>
             </ng-container>
-            <!-- Additional Source Columns -->
-            <ng-container *ngFor="let additionalCol of additionalDisplayedColumns; let idx = index" matColumnDef="{{additionalCol.columnId}}">
-              <th mat-header-cell *matHeaderCellDef="let maprow" mat-sort-header>{{ page.additionalColumns[idx].name }}</th>
-              <td mat-cell *matCellDef="let maprow">{{maprow.additionalColumnValues[idx]}}</td>
-            </ng-container>
             <!-- Relationship Column -->
             <ng-container matColumnDef="relationship">
               <th mat-header-cell *matHeaderCellDef mat-sort-header>{{'TABLE.RELATIONSHIP' | translate}}</th>
@@ -169,6 +164,11 @@
                 <app-user-chip *ngIf="maprow.assignedReviewer" [user]="maprow.assignedReviewer"
                                [font_size]="'12px'"></app-user-chip>
               </td>
+            </ng-container>
+            <!-- Additional Source Columns -->
+            <ng-container *ngFor="let additionalCol of additionalDisplayedColumns; let idx = index" matColumnDef="{{additionalCol.columnId}}">
+              <th mat-header-cell *matHeaderCellDef="let maprow" [resizeColumn]="true" [index]="idx + 6" [title]="page.additionalColumns[idx].name"></th>
+              <td mat-cell *matCellDef="let maprow">{{maprow.additionalColumnValues[idx]}}</td>
             </ng-container>
 
             <!-- Filter Id -->
