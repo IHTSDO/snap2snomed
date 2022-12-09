@@ -191,9 +191,12 @@ public class MapViewService {
       }
 
       if (!CollectionUtils.isEmpty(additionalColumns)) {
-        expression = stringCollectionToOrStatements(expression, additionalColumns,
-        s -> QMapRow.mapRow.sourceCode.additionalColumns.get(0).value.containsIgnoreCase(s),
-        (a, b) -> collectAndStatement(a, b));
+        for (int i = 0; i < additionalColumns.size(); i++) {
+          final String string = additionalColumns.get(i);
+          if (!string.isEmpty()) {
+            expression = collectAndStatement(expression, QMapRow.mapRow.sourceCode.additionalColumns.get(i).value.containsIgnoreCase(string));
+          }
+        }
       }
 
       return expression;
