@@ -78,10 +78,6 @@ public class ImportedCode implements Snap2SnomedEntity {
   @Size(max = DISPLAY_SIZE_LIMIT)
   String display;
 
-  // @ReadOnlyProperty
-  // @ElementCollection(targetClass=String.class)
-  // List<String> additionalColumns;
-
   @ReadOnlyProperty
   @ElementCollection
   @OrderColumn(name = "collection_order")

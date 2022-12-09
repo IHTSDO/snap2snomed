@@ -32,10 +32,6 @@ import lombok.NoArgsConstructor;
 @Data
 public class AdditionalCodeColumn {
 
-    // @Id
-    // @GeneratedValue(strategy = GenerationType.IDENTITY)
-    // private Long id;
-
     @NotNull
     @ReadOnlyProperty
     private String name;
