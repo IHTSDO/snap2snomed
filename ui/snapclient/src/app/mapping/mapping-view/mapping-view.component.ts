@@ -39,9 +39,8 @@ import {
 } from '../../_models/map_row';
 import {TranslateService} from '@ngx-translate/core';
 import {MapService} from '../../_services/map.service';
-// import {merge, Subscription} from 'rxjs';
 import {debounceTime, distinctUntilChanged, tap} from 'rxjs/operators';
-import {from, merge, Observable, Subscription} from 'rxjs';
+import {merge, Subscription} from 'rxjs';
 import {MatSort} from '@angular/material/sort';
 import {Task, TaskType} from '../../_models/task';
 import {LoadTasksForMap} from '../../store/task-feature/task.actions';
@@ -141,6 +140,8 @@ export class MappingViewComponent implements OnInit, AfterViewInit, OnDestroy {
   ];
   // columns that are eligable for user controlling the hiding / displaying
   hideShowColumns: string[] = [
+  ];
+  constantHideShowColumns: string[] = [
     'sourceIndex',
     'sourceCode',
     'sourceDisplay',
@@ -153,6 +154,7 @@ export class MappingViewComponent implements OnInit, AfterViewInit, OnDestroy {
     'assignedReviewer'
   ];
   additionalDisplayedColumns: TableColumn[] = [];
+  additionalHideShowColumns: string[] = [];
   filteredColumns: string[] = [
   ];
   constantFilteredColumns: string[] = [
@@ -414,11 +416,14 @@ export class MappingViewComponent implements OnInit, AfterViewInit, OnDestroy {
         // TODO: find out why this triggers with the previously selected map first, and then
         // the current map
 
+        // This code has been written to cater for this being executed multiple times (which is the case)
+
         self.page = page ?? new Page();
 
         this.additionalDisplayedColumns = [];
         this.additionalFilteredColumns = [];
         this.additionalColumnFilterControls = [];
+        this.additionalHideShowColumns = [];
 
         // NB: additionalDisplayedColumns and displayedColumns must be set together or the table will error
         // as the html will be out of sync with the model (same applies to additionalFilteredColumns and filteredColumns)
@@ -426,11 +431,13 @@ export class MappingViewComponent implements OnInit, AfterViewInit, OnDestroy {
           this.additionalDisplayedColumns.push({columnId: "additionalColumn" + (i+1), columnDisplay: this.page.additionalColumns[i].name, displayed: true});
           this.additionalFilteredColumns.push("filter-additionalColumn" + (i+1));
           this.additionalColumnFilterControls.push(new FormControl(''));
+          this.additionalHideShowColumns.push("additionalColumn" + (i+1));
         }
         this.additionalColumnFilterControls.forEach(control => this.subscribeFilter(control));
 
         this.displayedColumns = this.constantColumns.concat(this.additionalDisplayedColumns);
         this.filteredColumns = this.constantFilteredColumns.concat(this.additionalFilteredColumns);
+        this.hideShowColumns = this.constantHideShowColumns.concat(this.additionalHideShowColumns);
         
         if (page?.sourceDetails) {
           self.allSourceDetails = page.sourceDetails;
