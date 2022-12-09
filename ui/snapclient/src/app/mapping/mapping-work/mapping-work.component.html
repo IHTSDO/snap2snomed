@@ -75,16 +75,18 @@
       </div>
       <div id="container-table-work">
         <div class="table-actions">
-          <span class="space-fill"></span>
-          <div class="table-actions-columns colright">
-            <div>
-              <mat-slide-toggle
-                [(ngModel)]="filterEnabled"
-                ngDefaultControl>{{'TABLE_FILTER.TABLE_FILTER_TOGGLE_NAME' | translate}}</mat-slide-toggle>
-            </div>
-            <button mat-stroked-button
-                    (click)="mapTable.clearFilter()">{{'TABLE_FILTER.CLEAR_FILTER_BUTTON_NAME' | translate}}</button>
-          </div>
+          <mat-slide-toggle
+            [(ngModel)]="filterEnabled">{{'TABLE_FILTER.TABLE_FILTER_TOGGLE_NAME' | translate}}</mat-slide-toggle>
+          <button mat-stroked-button [disabled]="!filterEnabled"
+                  (click)="mapTable.clearFilter()">{{'TABLE_FILTER.CLEAR_FILTER_BUTTON_NAME' | translate}}</button>
+          <button mat-stroked-button [matMenuTriggerFor]="menu">{{'TABLE_FILTER.SHOW_HIDE_BUTTON_NAME' | translate}}</button>
+          <mat-menu #menu="matMenu">
+            <!-- mat-checkbox is in a div to stop multiple items appearing on the one line and to make scroll work-->
+            <div mat-menu-item *ngFor="let column of hideShowColumns">
+              <mat-checkbox [checked]="true" (change)="onHideShowChange($event, column)">{{getHideShowItemLabel(column) | translate}}</mat-checkbox> 
+            </div>          
+          </mat-menu>
+          &nbsp;
         </div>
         <div class="container-table">
           <app-mapping-table #mapTable
@@ -99,6 +101,7 @@
                              (pagingChange)="pagingChange($event)"
                              (updateTableEvent)="updateTable($event)"
                              (targetConceptSearchString)="targetConceptSearchString($event)"
+                             [displayedColumns]="displayedColumns"
           ></app-mapping-table>
         </div>
       </div>
