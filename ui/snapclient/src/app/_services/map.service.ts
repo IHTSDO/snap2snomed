@@ -253,7 +253,6 @@ export class MapService {
   getMapView(mapping: string,
              pageIndex: number = 0, pageSize: number = 20, sortColumn: string = '', sortDir: string | null = null,
              filter: HttpParams | null): Observable<MapViewResults> {
-              console.log("getMapView called");
 
     const url = `${this.config.apiBaseUrl}/mapView/${mapping}`;
     return this.getView(url, pageIndex, pageSize, sortColumn, sortDir, filter);
