@@ -61,13 +61,11 @@ import {ResultsdialogComponent} from 'src/app/resultsdialog/resultsdialog.compon
 import {MappingTableSelectorComponent} from '../mapping-table-selector/mapping-table-selector.component';
 import {selectMappingFile, selectMappingFileError, selectMappingFileLoading, selectMappingFileSuccess} from 'src/app/store/source-feature/source.selectors';
 import {ErrorDetail} from 'src/app/_models/error_detail';
-import {FhirService} from 'src/app/_services/fhir.service';
 import {AuthService} from '../../_services/auth.service';
 import {MappingImportSource} from 'src/app/_models/mapping_import_source';
 import {ImportMappingFile, ImportMappingFileParams, InitSelectedMappingFile} from 'src/app/store/source-feature/source.actions';
 import {MappingImportComponent} from '../mapping-import/mapping-import.component';
 import { MappingNotesComponent } from '../mapping-table-notes/mapping-notes.component';
-import { SourceNavigationService } from 'src/app/_services/source-navigation.service';
 
 @Component({
   selector: 'app-mapping-view',
@@ -115,7 +113,7 @@ export class MappingViewComponent implements OnInit, AfterViewInit, OnDestroy {
   sourceDisplayFilterControl = new FormControl('');
   targetCodeFilterControl = new FormControl('');
   targetDisplayFilterControl = new FormControl('');
-  additionalColumnFilterControls : FormControl[] = [new FormControl('')];
+  additionalColumnFilterControls : FormControl[] = [];
 
   /** 
    * Columns displayed in the table - specified in html. Columns IDs can be added, removed, or reordered. 
@@ -206,9 +204,7 @@ export class MappingViewComponent implements OnInit, AfterViewInit, OnDestroy {
               private store: Store<IAppState>,
               private translate: TranslateService,
               private mapService: MapService,
-              private fhirService: FhirService,
-              private authService: AuthService,
-              private sourceNavigation: SourceNavigationService,) {
+              private authService: AuthService,) {
     this.translate.get('TASK.SELECT_A_TASK').subscribe((res) => this.selectedLabel = res);
 
     this.paging = new MapViewPaging();
@@ -222,6 +218,13 @@ export class MappingViewComponent implements OnInit, AfterViewInit, OnDestroy {
       ['NO_MAP_FALSE', false]
     ];
 
+  }
+
+  subscribeFilter(control: FormControl): void {
+    this.subscription.add(control.valueChanges
+      .pipe(debounceTime(this.debounce), distinctUntilChanged())
+      .subscribe(() => this.filterChange()
+      ));
   }
 
   ngOnInit(): void {
@@ -286,14 +289,10 @@ export class MappingViewComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     // search as you type
-    [this.sourceCodeFilterControl, this.sourceDisplayFilterControl,
-      this.targetCodeFilterControl, this.targetDisplayFilterControl].concat(this.additionalColumnFilterControls).forEach((control) => {
-      this.subscription.add(control.valueChanges
-        .pipe(debounceTime(this.debounce), distinctUntilChanged())
-        .subscribe(() => this.filterChange()
-        ));
-    });
-
+    [
+      this.sourceCodeFilterControl, this.sourceDisplayFilterControl,
+      this.targetCodeFilterControl, this.targetDisplayFilterControl,
+    ].forEach(control => this.subscribeFilter(control));
   }
 
   ngOnDestroy(): void {
@@ -321,7 +320,9 @@ export class MappingViewComponent implements OnInit, AfterViewInit, OnDestroy {
 
     this.subscription.add(this.route.queryParams.subscribe(qparams => {
       this.filterEntity = ServiceUtils.paramsToFilterEntity(qparams);
-      this._filterEnabled = this.filterEntity.hasFilters();
+      if (this.filterEntity.hasFilters()) {
+        this._filterEnabled = true;
+      }
       this.filterParams = ServiceUtils.filtersToParam(this.filterEntity);
       this.paging = ServiceUtils.pagingParamsToMapViewPaging(qparams);
       this.refreshPage();
@@ -399,18 +400,24 @@ export class MappingViewComponent implements OnInit, AfterViewInit, OnDestroy {
         // the current map
 
         self.page = page ?? new Page();
-        this.additionalDisplayedColumns = [];
-        this.additionalFilteredColumns = [];
 
-        // NB: additionalDisplayedColumns and displayedColumns must be set together or the table will error
-        // as the html will be out of sync with the model (same applies to additionalFilteredColumns and filteredColumns)
-        for (let i = 0; i <  this.page.additionalColumns.length; i++) {
-          this.additionalDisplayedColumns.push("additionalColumn" + (i+1));
-          this.additionalFilteredColumns.push("filter-additionalColumn" + (i+1));
+        if (this.page.additionalColumns.length != this.additionalDisplayedColumns.length) {
+          this.additionalDisplayedColumns = [];
+          this.additionalFilteredColumns = [];
+          this.additionalColumnFilterControls = [];
+
+          // NB: additionalDisplayedColumns and displayedColumns must be set together or the table will error
+          // as the html will be out of sync with the model (same applies to additionalFilteredColumns and filteredColumns)
+          for (let i = 0; i <  this.page.additionalColumns.length; i++) {
+            this.additionalDisplayedColumns.push("additionalColumn" + (i+1));
+            this.additionalFilteredColumns.push("filter-additionalColumn" + (i+1));
+            this.additionalColumnFilterControls.push(new FormControl(''));
+          }
+          this.additionalColumnFilterControls.forEach(control => this.subscribeFilter(control));
+
+          this.displayedColumns = this.constantColumns.concat(this.additionalDisplayedColumns);
+          this.filteredColumns = this.constantFilteredColumns.concat(this.additionalFilteredColumns);
         }
-
-        this.displayedColumns = this.constantColumns.concat(this.additionalDisplayedColumns);
-        this.filteredColumns = this.constantFilteredColumns.concat(this.additionalFilteredColumns);
         
         if (page?.sourceDetails) {
           self.allSourceDetails = page.sourceDetails;
@@ -520,7 +527,9 @@ export class MappingViewComponent implements OnInit, AfterViewInit, OnDestroy {
       const filter: any = this.filterEntity;
       Object.keys(filter).forEach(key => {
         const value = filter[key];
-        if (value !== undefined) {
+        if ('additionalColumns' === key && value.length > 0) {
+          params[key] = value.join(',');
+        } else if (value !== undefined) {
           params[key] = value;
         }
       });

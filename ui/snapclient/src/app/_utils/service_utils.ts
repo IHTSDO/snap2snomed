@@ -195,11 +195,7 @@ export class ServiceUtils {
       params = params.append('assignedReviewer', filterEntity.assignedReviewer.toString());
     }
     if (filterEntity.additionalColumns && filterEntity.additionalColumns.length > 0) {
-      for (let i=0; i<filterEntity.additionalColumns.length; i++) {
-        if (filterEntity.additionalColumns[i]) {
-          params = params.append('additionalColumns', filterEntity.additionalColumns[i].toString());
-        }
-      }
+      params = params.append('additionalColumns', filterEntity.additionalColumns.join(','));
     }
 
     return params;
@@ -246,8 +242,8 @@ export class ServiceUtils {
           mapViewFilter.assignedReviewer = v;
           break;
         case "additionalColumns":
-          if (v[0] !== undefined) {
-            mapViewFilter.additionalColumns = v;
+          if (v !== undefined) {
+            mapViewFilter.additionalColumns = v.split(',');
           }
           break;
       }
