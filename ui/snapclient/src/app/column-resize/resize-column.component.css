@@ -1,0 +1,33 @@
+.mat-table.resizing {
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    cursor: ew-resize;
+  }
+  
+  .mat-header-cell {
+    position: relative;
+  }
+  
+  .resize-holder {
+    cursor: ew-resize;
+    width: 5px;
+    margin-right: 10px;
+    height: 100%;
+    position: absolute;
+    right: 0px;
+    top: 0;
+    z-index: 1;
+    background-color: lightgrey;
+  }
+  
+  .triangle-bottomright {
+    cursor: ew-resize;
+    width: 0;
+    height: 0;
+    position: absolute;
+    right: 0px;
+    top: 45px;
+    border-bottom: 10px solid lightgrey;
+    border-left: 10px solid transparent;
+  }

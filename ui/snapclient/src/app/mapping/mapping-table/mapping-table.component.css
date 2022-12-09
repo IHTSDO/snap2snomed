@@ -136,7 +136,3 @@ td.mat-cell {
   line-height: 30px !important;
 }
 
-.tableHeaderCellDiv { 
-  resize: horizontal;  
-  overflow:hidden;
-}

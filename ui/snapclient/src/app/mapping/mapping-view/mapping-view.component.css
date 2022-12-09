@@ -288,9 +288,3 @@ td.mat-cell {
   padding-left: 8px;
   margin-right: 5px;
 }
-
-.tableHeaderCellDiv { 
-  resize: horizontal;  
-  overflow:hidden;
-}
-  
