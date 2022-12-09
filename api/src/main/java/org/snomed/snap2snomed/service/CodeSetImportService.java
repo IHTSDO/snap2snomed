@@ -66,7 +66,6 @@ import org.snomed.snap2snomed.problem.Snap2SnomedProblem;
 import org.snomed.snap2snomed.problem.auth.NotAuthorisedProblem;
 import org.snomed.snap2snomed.repository.ImportedCodeSetRepository;
 import org.snomed.snap2snomed.repository.MapRepository;
-import org.snomed.snap2snomed.security.AuthenticationFacade;
 import org.snomed.snap2snomed.security.WebSecurity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -92,12 +91,6 @@ public class CodeSetImportService {
 
   @Autowired
   private MapRepository mapRepository;
-
-  @Autowired
-  private AuthenticationFacade authenticationFacade;
-
-  @Autowired
-  private FhirService fhirService;
 
   @Autowired
   EntityManager entityManager;
