@@ -401,23 +401,21 @@ export class MappingViewComponent implements OnInit, AfterViewInit, OnDestroy {
 
         self.page = page ?? new Page();
 
-        if (this.page.additionalColumns.length != this.additionalDisplayedColumns.length) {
-          this.additionalDisplayedColumns = [];
-          this.additionalFilteredColumns = [];
-          this.additionalColumnFilterControls = [];
+        this.additionalDisplayedColumns = [];
+        this.additionalFilteredColumns = [];
+        this.additionalColumnFilterControls = [];
 
-          // NB: additionalDisplayedColumns and displayedColumns must be set together or the table will error
-          // as the html will be out of sync with the model (same applies to additionalFilteredColumns and filteredColumns)
-          for (let i = 0; i <  this.page.additionalColumns.length; i++) {
-            this.additionalDisplayedColumns.push("additionalColumn" + (i+1));
-            this.additionalFilteredColumns.push("filter-additionalColumn" + (i+1));
-            this.additionalColumnFilterControls.push(new FormControl(''));
-          }
-          this.additionalColumnFilterControls.forEach(control => this.subscribeFilter(control));
-
-          this.displayedColumns = this.constantColumns.concat(this.additionalDisplayedColumns);
-          this.filteredColumns = this.constantFilteredColumns.concat(this.additionalFilteredColumns);
+        // NB: additionalDisplayedColumns and displayedColumns must be set together or the table will error
+        // as the html will be out of sync with the model (same applies to additionalFilteredColumns and filteredColumns)
+        for (let i = 0; i <  this.page.additionalColumns.length; i++) {
+          this.additionalDisplayedColumns.push("additionalColumn" + (i+1));
+          this.additionalFilteredColumns.push("filter-additionalColumn" + (i+1));
+          this.additionalColumnFilterControls.push(new FormControl(''));
         }
+        this.additionalColumnFilterControls.forEach(control => this.subscribeFilter(control));
+
+        this.displayedColumns = this.constantColumns.concat(this.additionalDisplayedColumns);
+        this.filteredColumns = this.constantFilteredColumns.concat(this.additionalFilteredColumns);
         
         if (page?.sourceDetails) {
           self.allSourceDetails = page.sourceDetails;
