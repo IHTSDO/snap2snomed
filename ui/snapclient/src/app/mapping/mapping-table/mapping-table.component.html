@@ -20,12 +20,12 @@
   </ng-container>
   <!-- Source code Column -->
   <ng-container matColumnDef="sourceCode">
-    <th mat-header-cell *matHeaderCellDef mat-sort-header>{{'TABLE.SOURCE_CODE' | translate}}</th>
+    <th mat-header-cell *matHeaderCellDef [resizeColumn]="true" [index]="1" [title]="'TABLE.SOURCE_CODE' | translate"></th>
     <td mat-cell *matCellDef="let maprow">{{maprow.sourceCode}}</td>
   </ng-container>
   <!-- Source display Column -->
   <ng-container matColumnDef="sourceDisplay">
-    <th mat-header-cell *matHeaderCellDef mat-sort-header>{{'TABLE.SOURCE_DISPLAY' | translate}}</th>
+    <th mat-header-cell *matHeaderCellDef [resizeColumn]="true" [index]="2" [title]="'TABLE.SOURCE_DISPLAY' | translate"></th>
     <td mat-cell *matCellDef="let maprow" 
         #tooltip="matTooltip" matTooltip="{{'MAP.SEARCH_SOURCE_DISPLAY' | translate}}" 
         (click)="clickSourceDisplay(maprow)" [appDraggable]="{data: maprow.sourceDisplay, zones: ['searchZone']}">{{maprow.sourceDisplay}}</td>
@@ -46,14 +46,14 @@
   </ng-container>
   <!-- Target code Column -->
   <ng-container matColumnDef="targetCode">
-    <th mat-header-cell *matHeaderCellDef mat-sort-header>{{'TABLE.TARGET_CODE' | translate}}</th>
+    <th mat-header-cell *matHeaderCellDef [resizeColumn]="true" [index]="4" [title]="'TABLE.TARGET_CODE' | translate"></th>
     <td mat-cell *matCellDef="let maprow; let i = index" (click)="clickRow(i, maprow)">
       <span *ngIf="!maprow.noMap">{{maprow.targetCode}}</span>
     </td>
   </ng-container>
   <!-- Target display Column -->
   <ng-container matColumnDef="targetDisplay">
-    <th mat-header-cell *matHeaderCellDef mat-sort-header>{{'TABLE.TARGET_DISPLAY' | translate}}</th>
+    <th mat-header-cell *matHeaderCellDef [resizeColumn]="true" [index]="5" [title]="'TABLE.TARGET_DISPLAY' | translate"></th>
     <td mat-cell *matCellDef="let maprow; let i = index" (click)="clickRow(i, maprow)">
       <span *ngIf="!maprow.noMap">{{maprow.targetDisplay}}</span>
     </td>
@@ -239,10 +239,10 @@
       </th>
     </ng-container>
 
-  <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
+  <tr mat-header-row *matHeaderRowDef="getDisplayedColumns(); sticky: true"></tr>
   <tr mat-header-row *matHeaderRowDef="filteredColumns" [attr.hidden]="filterEnabled? null : true"></tr>
 
-  <tr mat-row *matRowDef="let row; columns: displayedColumns; let idx = index"
+  <tr mat-row *matRowDef="let row; columns: getDisplayedColumns(); let idx = index"
       [appDroppable]="{zone: 'conceptZone'}"
       [dropDisabled]="row.noMap || writeDisableUtils.isEditDisabled(this.task?.type, row.status)"
       [class.clicked-row]="isClicked(idx)"
