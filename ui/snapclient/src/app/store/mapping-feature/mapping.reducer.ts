@@ -142,7 +142,7 @@ export function mappingReducer(state = initialMappingState, action: MappingActio
 
     case MappingActionTypes.LOAD_MAP_VIEW_SUCCESS: {
       const result = action.payload;
-      const rows = result.content.map(mv => MapView.create(mv as MapView));
+      const rows = result.content.map(mv => MapView.create(mv));
       const page = new Page(rows, result.page.number, result.page.size,
         result.page.totalElements, result.page.totalPages, result.sourceDetails, result.additionalColumns);
 
