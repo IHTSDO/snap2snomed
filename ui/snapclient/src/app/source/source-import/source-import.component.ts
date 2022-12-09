@@ -102,8 +102,8 @@ export class SourceImportComponent implements OnInit, OnDestroy, AfterViewChecke
   }
 
   onAddAdditionalColumn() {
-    this.data.additionalColumnIndexes.push(undefined);
-    this.data.additionalColumnTypes.push(undefined);
+    this.data.additionalColumnIndexes.push(null);
+    this.data.additionalColumnTypes.push(null);
   }
 
   onRemoveAdditionalColumn(index : number) {

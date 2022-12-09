@@ -60,7 +60,7 @@ describe('MappingDetailComponent', () => {
     display: 'Alphabet',
     noMap: false,
     status: MapRowStatus.MAPPED,
-    additionalColumns: undefined,
+    additionalColumnValues: [],
   };
 
   beforeEach(async () => {

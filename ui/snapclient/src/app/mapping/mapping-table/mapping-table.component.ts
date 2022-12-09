@@ -197,6 +197,16 @@ export class MappingTableComponent implements OnInit, AfterViewInit, OnDestroy {
         if (page?.sourceDetails) {
           self.allSourceDetails = page.sourceDetails;
         }
+
+        this.additionalDisplayedColumns = [];
+        this.additionalFilteredColumns = [];
+        for (let i = 0; i <  this.page.additionalColumns.length; i++) {
+          this.additionalDisplayedColumns.push("additionalColumn" + (i+1));
+          this.additionalFilteredColumns.push("filter-additionalColumn" + (i+1));
+        }
+    
+        this.displayedColumns = this.constantColumns.concat(this.additionalDisplayedColumns);
+        this.filteredColumns = this.constantFilteredColumns.concat(this.additionalFilteredColumns);
       })
     );
     this.subscription.add(
@@ -217,15 +227,6 @@ export class MappingTableComponent implements OnInit, AfterViewInit, OnDestroy {
 
     this.additionalDisplayedColumns = [];
     this.additionalFilteredColumns = [];
-    if (this.page.data[0].additionalColumns) {
-      for (let i = 0; i <  this.page.data[0].additionalColumns.length; i++) {
-        this.additionalDisplayedColumns.push("additionalColumn" + (i+1));
-        this.additionalFilteredColumns.push("filter-additionalColumn" + (i+1));
-      }
-    }
-
-    this.displayedColumns = this.constantColumns.concat(this.additionalDisplayedColumns);
-    this.filteredColumns = this.constantFilteredColumns.concat(this.additionalFilteredColumns);
 
     if (this.paging.sortCol) {
       this.sort.active = this.paging.sortCol;

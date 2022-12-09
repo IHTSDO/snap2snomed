@@ -30,7 +30,7 @@
         </div>
         <div class="col-additional">
           <table class="additional-source-table">
-            <tr *ngFor="let additionalCol of source.additionalColumns; let idx = index; " id="source-index-row">
+            <tr *ngFor="let additionalCol of source.additionalColumnValues; let idx = index; " id="source-index-row">
               <th>{{'TABLE.ADDITIONAL_SOURCE_COLUMN' | translate}} {{idx+1}}</th>
               <td>{{additionalCol}}</td>
             </tr>

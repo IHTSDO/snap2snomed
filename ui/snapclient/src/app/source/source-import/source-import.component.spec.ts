@@ -111,6 +111,8 @@ describe('SourceImportComponent', () => {
   it('should have save button if file uploaded and name and version supplied', () => {
     component.data.name = 'source name';
     component.data.version = 'source version';
+    component.data.additionalColumnIndexes = [];
+    component.data.additionalColumnTypes = [];
     const blob = new Blob([''], {type: 'text/csv'});
     component.data.source_file = blob as File;
     fixture.detectChanges();

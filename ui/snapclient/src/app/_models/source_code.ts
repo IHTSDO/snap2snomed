@@ -23,13 +23,13 @@ export class SourceCode {
   display: string;
   source?: Source;
   index: string; // imported row index
-  additionalColumns: any;
+  additionalColumnValues: string[];
 
-  constructor(code: string, display: string, source: Source, index: string, additionalColumns: any) {
+  constructor(code: string, display: string, source: Source, index: string, additionalColumnValues: string[]) {
     this.code = code;
     this.display = display;
     this.source = source;
     this.index = index;
-    this.additionalColumns = this.additionalColumns;
+    this.additionalColumnValues = additionalColumnValues;
   }
 }

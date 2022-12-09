@@ -122,7 +122,7 @@ describe('TargetRelationshipComponent', () => {
       noMap: false,
       status: MapRowStatus.DRAFT,
       //additionalColumns: undefined,
-      additionalColumns: undefined
+      additionalColumnValues: []
     };
     fixture.detectChanges();
   });

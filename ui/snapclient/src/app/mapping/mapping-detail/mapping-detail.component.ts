@@ -22,6 +22,7 @@ import {Task, TaskType} from '../../_models/task';
 import {ErrorInfo} from '../../errormessage/errormessage.component';
 import {MapService} from '../../_services/map.service';
 import {
+  AdditionalColumn,
   authorStatuses,
   MapRow,
   MapRowStatus,
@@ -49,6 +50,7 @@ import {StatusUtils} from '../../_utils/status_utils';
 import {WriteDisableUtils} from "../../_utils/write_disable_utils";
 import {debounceTime} from "rxjs/operators";
 import {User} from "../../_models/user";
+import { AdditionalColumnValue } from 'src/app/_models/source';
 
 
 export type SourceRow = {
@@ -58,7 +60,7 @@ export type SourceRow = {
   index: string;
   noMap: boolean;
   status: string;
-  additionalColumns: any;
+  additionalColumnValues: string[];
 };
 
 @Component({
@@ -133,7 +135,7 @@ export class MappingDetailComponent implements OnInit, OnDestroy {
           index: selected.mapRow.sourceIndex,
           noMap: selected.mapRow.noMap,
           status: selected.mapRow.status,
-          additionalColumns: selected.mapRow.additionalColumns
+          additionalColumnValues: selected.mapRow.additionalColumnValues
         };
         self.loadTargets();
       }
@@ -273,7 +275,7 @@ export class MappingDetailComponent implements OnInit, OnDestroy {
             return new MapView(target.row?.id || '', target.id, source.index || '', source.code || '',
               source.display || '', target.targetCode, target.targetDisplay, target.relationship, status,
               false, target.row?.latestNote || null, null, null, null,
-              null, flagged, source.additionalColumns);
+              null, flagged, source.additionalColumnValues);
           });
         } else {
           self.mapRows = [];

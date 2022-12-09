@@ -50,8 +50,7 @@ export class MapView {
   latestNote?: Date | null;
   flagged?: boolean;
 
-  //additionalColumns: string[] | undefined;
-  additionalColumns: any;
+  additionalColumnValues: string[];
 
   // Previous values
   private prevTargetCode?: string;
@@ -65,7 +64,7 @@ export class MapView {
               targetCode: string | undefined, targetDisplay: string | undefined, relationship: string | undefined,
               status: string, noMap: boolean, latestNote: Date | null | undefined, assignedAuthor: User | null | undefined,
               assignedReviewer: User | null | undefined, lastAuthor: User | null | undefined,
-              lastReviewer: User | null | undefined, flagged: boolean | undefined, additionalColumns: any) {
+              lastReviewer: User | null | undefined, flagged: boolean | undefined, additionalColumnValues: string[] | undefined) {
     this.rowId = rowId;
     this.targetId = targetId;
     this.sourceIndex = sourceIndex;
@@ -82,23 +81,26 @@ export class MapView {
     this.assignedReviewer = assignedReviewer;
     this.lastAuthor = lastAuthor;
     this.lastReviewer = lastReviewer;
-    this.additionalColumns = additionalColumns;
+    this.additionalColumnValues = additionalColumnValues || [];
   }
 
-  static create(mv: MapView): MapView {
+  static create(mv: any): MapView {
     // Need to convert numbers to strings here; mv may (will) have been coerced to a MapView
     const rowId = mv.rowId === null ? '' : mv.rowId.toString();
+    const additionalColumnValues = mv.additionalColumns ?
+      mv.additionalColumns.map((ac: {value: string}) => ac.value) : [];
+
     return new MapView(
       rowId, mv.targetId, mv.sourceIndex, mv.sourceCode, mv.sourceDisplay,
       mv.targetCode, mv.targetDisplay, mv.relationship, mv.status, mv.noMap, mv.latestNote,
-      mv.assignedAuthor, mv.assignedReviewer, mv.lastAuthor, mv.lastReviewer, mv.flagged, mv.additionalColumns
+      mv.assignedAuthor, mv.assignedReviewer, mv.lastAuthor, mv.lastReviewer, mv.flagged, additionalColumnValues
     );
   }
 
   convertToMapRow(mapping: Mapping): MapRow {
     return {
       id: this.rowId, map: mapping, noMap: this.noMap,
-      sourceCode: new SourceCode(this.sourceCode, this.sourceDisplay, mapping.source, this.sourceIndex, this.additionalColumns),
+      sourceCode: new SourceCode(this.sourceCode, this.sourceDisplay, mapping.source, this.sourceIndex, this.additionalColumnValues),
       status: this.status, relationship: this.relationship, latestNote: this.latestNote
     } as unknown as MapRow;
   }

@@ -87,7 +87,7 @@ describe('NotesItemComponent', () => {
     component = fixture.componentInstance;
     const row = {
       id: '1', noMap: false, sourceCode: new SourceCode('code', 'display',
-        new Source(), '1', undefined), status: 'DRAFT'
+        new Source(), '1', []), status: 'DRAFT'
     } as MapRow;
     component.note = new Note(1, 'Test notes', new User(), '', '', row);
     fixture.detectChanges();
