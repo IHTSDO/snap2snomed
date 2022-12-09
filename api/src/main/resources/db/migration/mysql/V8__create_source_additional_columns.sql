@@ -14,6 +14,15 @@
  * limitations under the License.
  */
 
-create table imported_code_additional_columns (imported_code_id bigint not null, name varchar(255), type varchar(255), value varchar(255), collection_order integer not null);
+drop table if exists imported_code_additional_columns cascade;
+create table imported_code_additional_columns (imported_code_id bigint not null, value varchar(255), collection_order integer not null);
+create table imported_codeset_additional_columns (imported_codeset_id bigint not null, name varchar(255), type varchar(255), collection_order integer not null);
 
 alter table imported_code_additional_columns add constraint FK5vpm8qo68l2bkocmeoufnfiqx foreign key (imported_code_id) references imported_code (id);
+alter table imported_codeset_additional_columns add constraint FK5vpm8qo68l2bkocmeoufnfiqy foreign key (imported_codeset_id) references imported_codeset (id);
+
+create table imported_code_additional_columns_aud (imported_code_id bigint not null, rev integer not null, revtype tinyint, value varchar(255), collection_order integer not null, primary key (imported_code_id, collection_order, rev));
+create table imported_codeset_additional_columns_aud (imported_codeset_id bigint not null, rev integer not null, revtype tinyint, name varchar(255), type varchar(255), collection_order integer not null, primary key (imported_codeset_id, collection_order, rev));
+
+alter table imported_code_additional_columns_aud add constraint FK89ntto9kobwahrwxbne2nqcnx foreign key (rev) references revinfo (rev);
+alter table imported_codeset_additional_columns_aud add constraint FK89ntto9kobwahrwxbne2nqcny foreign key (rev) references revinfo (rev);

@@ -19,9 +19,8 @@ import {HttpClient, HttpParams} from '@angular/common/http';
 import {Observable} from 'rxjs';
 import {Mapping} from '../_models/mapping';
 import {Project} from '../_models/project';
-import {Task} from '../_models/task';
 import {ServiceUtils} from '../_utils/service_utils';
-import {MappedRowDetailsDto, MapRow, MapRowRelationship, MapRowStatus, MapView} from '../_models/map_row';
+import {AdditionalColumn, MappedRowDetailsDto, MapRow, MapRowRelationship, MapRowStatus, MapView} from '../_models/map_row';
 import {JSONTargetRow, TargetRow} from '../_models/target_row';
 import {Note} from '../_models/note';
 import {APP_CONFIG, AppConfig} from '../app.config';
@@ -50,6 +49,7 @@ export interface MapViewResults {
     number: number;
   };
   sourceDetails: MappedRowDetailsDto[];
+  additionalColumns: AdditionalColumn[] | undefined;
 }
 
 export interface MapRowResults {
@@ -256,9 +256,6 @@ export class MapService {
               console.log("getMapView called");
 
     const url = `${this.config.apiBaseUrl}/mapView/${mapping}`;
-console.log("sortColumn", sortColumn);
-console.log("sortDir", sortDir);
-console.log("filter", filter);
     return this.getView(url, pageIndex, pageSize, sortColumn, sortDir, filter);
   }
 

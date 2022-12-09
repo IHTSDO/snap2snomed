@@ -29,15 +29,16 @@ import javax.persistence.EntityManager;
 import org.snomed.snap2snomed.controller.MapViewRestController;
 import org.snomed.snap2snomed.controller.dto.MappedRowDetailsDto;
 import org.snomed.snap2snomed.controller.dto.Snap2SnomedPagedModel;
+import org.snomed.snap2snomed.model.AdditionalCodeColumn;
 import org.snomed.snap2snomed.model.Map;
 import org.snomed.snap2snomed.model.MapView;
-import org.snomed.snap2snomed.model.QAdditionalCodeColumn;
 import org.snomed.snap2snomed.model.QImportedCode;
 import org.snomed.snap2snomed.model.QMapRow;
 import org.snomed.snap2snomed.model.QMapRowTarget;
 import org.snomed.snap2snomed.model.QNote;
 import org.snomed.snap2snomed.model.QUser;
 import org.snomed.snap2snomed.model.Task;
+import org.snomed.snap2snomed.model.enumeration.ColumnType;
 import org.snomed.snap2snomed.model.enumeration.MapStatus;
 import org.snomed.snap2snomed.model.enumeration.MappingRelationship;
 import org.snomed.snap2snomed.model.enumeration.TaskType;
@@ -67,6 +68,7 @@ import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.ComparableExpressionBase;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.core.types.dsl.StringExpression;
+import com.querydsl.core.types.dsl.StringPath;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQuery;
 
@@ -75,6 +77,8 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @Component
 public class MapViewService {
+
+  private static final String ADDITIONAL_COLUMN_NAME = "additionalColumn";
 
   public class MapViewFilter {
 
@@ -199,7 +203,7 @@ public class MapViewService {
         Function<String, BooleanExpression> function, BiFunction<BooleanExpression, BooleanExpression, BooleanExpression> collector) {
       if (!CollectionUtils.isEmpty(stringCollection)) {
         BooleanExpression innerExpression = null;
-        for (String string : stringCollection) {
+        for (final String string : stringCollection) {
           innerExpression = collector.apply(innerExpression, function.apply(string));
         }
         return collectAndStatement(expression, innerExpression);
@@ -219,11 +223,11 @@ public class MapViewService {
   MapRepository mapRepository;
 
   @Autowired
-  WebSecurity webSecurity;  
+  WebSecurity webSecurity;
 
-  private QMapRow mapRow = QMapRow.mapRow;
-  private QMapRowTarget mapTarget = QMapRowTarget.mapRowTarget;
-  private QNote note = QNote.note;
+  private final QMapRow mapRow = QMapRow.mapRow;
+  private final QMapRowTarget mapTarget = QMapRowTarget.mapRowTarget;
+  private final QNote note = QNote.note;
 
 
   public Snap2SnomedPagedModel<EntityModel<MapView>> getMapResults(Long mapId, Pageable pageable, PagedResourcesAssembler<MapView> assembler,
@@ -237,7 +241,7 @@ public class MapViewService {
 
   public Snap2SnomedPagedModel<EntityModel<MapView>> getMapResultsByTask(Long taskId, Pageable pageable, PagedResourcesAssembler<MapView> assembler,
       MapViewFilter filter) {
-    Task task = taskRepository.findById(taskId).orElseThrow(() -> Problem.valueOf(Status.NOT_FOUND, "No Task found with id " + taskId));
+    final Task task = taskRepository.findById(taskId).orElseThrow(() -> Problem.valueOf(Status.NOT_FOUND, "No Task found with id " + taskId));
     if (!webSecurity.isAdminUser() && !webSecurity.hasAnyProjectRoleForMapId(task.getMap().getId())) {
       throw new NotAuthorisedProblem("Not authorised to view map if the user is not admin or member of an associated project!");
     }
@@ -245,7 +249,7 @@ public class MapViewService {
   }
 
   public String getFileNameForMapExport(Long mapId, String contentType) {
-    Map map = mapRepository.findById(mapId).orElseThrow(() -> Problem.valueOf(Status.NOT_FOUND, "No Map found with id " + mapId));
+    final Map map = mapRepository.findById(mapId).orElseThrow(() -> Problem.valueOf(Status.NOT_FOUND, "No Map found with id " + mapId));
     String extension;
     switch (contentType) {
       case MapViewRestController.TEXT_TSV:
@@ -273,19 +277,21 @@ public class MapViewService {
 
   private  Snap2SnomedPagedModel<EntityModel<MapView>> getMapResults(Long mapId, Task task, Pageable pageable,
       PagedResourcesAssembler<MapView> assembler, MapViewFilter filter) {
+    final List<AdditionalCodeColumn> additionalColumns = mapRepository.findSourceByMapId(mapId).get().getAdditionalColumnsMetadata();
+
     JPAQuery<MapView> query = getQueryForMap(mapId, task, filter);
-    query = transformSortable(query, pageable.getSort());
+    query = transformSortable(query, pageable.getSort(), additionalColumns);
     query = transformPageable(query, pageable);
 
-    QueryResults<MapView> results = query.fetchResults();
+    final QueryResults<MapView> results = query.fetchResults();
 
-    JPAQuery<MappedRowDetailsDto> mappingRowDetailsQuery = getQueryMappedRowDetailsForMap(mapId, task, filter,
+    final JPAQuery<MappedRowDetailsDto> mappingRowDetailsQuery = getQueryMappedRowDetailsForMap(mapId, task, filter,
             pageable);
-    QueryResults<MappedRowDetailsDto> sourceIndexResults = mappingRowDetailsQuery.fetchResults();
+    final QueryResults<MappedRowDetailsDto> sourceIndexResults = mappingRowDetailsQuery.fetchResults();
 
-    Page<MapView> page = new PageImpl<>(results.getResults(), pageable, results.getTotal());
-    PagedModel<EntityModel<MapView>> pagedModel = assembler.toModel(page);
-    Snap2SnomedPagedModel<EntityModel<MapView>> _results = new Snap2SnomedPagedModel<>(pagedModel, sourceIndexResults.getResults());
+    final Page<MapView> page = new PageImpl<>(results.getResults(), pageable, results.getTotal());
+    final PagedModel<EntityModel<MapView>> pagedModel = assembler.toModel(page);
+    final Snap2SnomedPagedModel<EntityModel<MapView>> _results = new Snap2SnomedPagedModel<>(pagedModel, sourceIndexResults.getResults(), additionalColumns);
     return _results;
   }
 
@@ -296,9 +302,9 @@ public class MapViewService {
     return query;
   }
 
-  protected JPAQuery<MapView> transformSortable(JPAQuery<MapView> query, Sort sort) {
+  protected JPAQuery<MapView> transformSortable(JPAQuery<MapView> query, Sort sort, List<AdditionalCodeColumn> additionalColumns) {
     if (sort != null) {
-      for (Order s : sort) {
+      for (final Order s : sort) {
         List<ComparableExpressionBase<?>> field;
         switch (s.getProperty()) {
           case "rowId":
@@ -354,17 +360,20 @@ public class MapViewService {
           case "flagged":
             field = Arrays.asList(mapTarget.flagged);
             break;
-          case "additionalColumn1":
-            field = Arrays.asList(mapRow.sourceCode.additionalColumns.get(0).value);
-            break;
 
           default:
-            field = null;
-            log.warn("Unknown MapView sort field '" + s.getProperty() + "' - ignored");
+            if (s.getProperty().startsWith(ADDITIONAL_COLUMN_NAME)) {
+              final int index = Integer.parseInt(s.getProperty().substring(ADDITIONAL_COLUMN_NAME.length())) - 1;
+              final ColumnType type = additionalColumns.get(index).getType();
+              field = Arrays.asList(getSortExpression(mapRow.sourceCode, type, index));
+            } else {
+              field = null;
+              log.warn("Unknown MapView sort field '" + s.getProperty() + "' - ignored");
+            }
         }
 
         if (null != field) {
-          for (ComparableExpressionBase<?> f : field) {
+          for (final ComparableExpressionBase<?> f : field) {
             if (s.isAscending()) {
               query = query.orderBy(f.asc());
             } else {
@@ -375,6 +384,15 @@ public class MapViewService {
       }
     }
     return query;
+  }
+
+  private ComparableExpressionBase<?> getSortExpression(QImportedCode code, ColumnType type, int index) {
+    final StringPath value = code.additionalColumns.get(index).value;
+    if (ColumnType.NUMBER.equals(type)) {
+      return value.castToNum(Double.class);
+    } else {
+      return value;
+    }
   }
 
   private StringExpression getUserSortComparison(QUser user) {
@@ -402,7 +420,7 @@ public class MapViewService {
 
   protected JPAQuery<MappedRowDetailsDto> getQueryMappedRowDetailsForMap(Long mapId, Task task, MapViewFilter filter,
                                                                          Pageable pageable                                                                      ) {
-    JPAQuery<MappedRowDetailsDto> query = new JPAQuery<MapView>(entityManager)
+    final JPAQuery<MappedRowDetailsDto> query = new JPAQuery<MapView>(entityManager)
             .select(Projections.constructor(MappedRowDetailsDto.class, mapRow.id, mapRow.sourceCode.index, mapTarget.id))
             .from(mapRow)
             .leftJoin(mapTarget).on(mapTarget.row.eq(mapRow));
@@ -429,7 +447,7 @@ public class MapViewService {
     }
 
     if (filter != null) {
-      BooleanExpression filterExpression = filter.getExpression();
+      final BooleanExpression filterExpression = filter.getExpression();
       if (filterExpression != null) {
         whereClause = whereClause.and(filterExpression);
       }

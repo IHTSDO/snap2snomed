@@ -404,15 +404,13 @@ export class MappingViewComponent implements OnInit, AfterViewInit, OnDestroy {
 
         // NB: additionalDisplayedColumns and displayedColumns must be set together or the table will error
         // as the html will be out of sync with the model (same applies to additionalFilteredColumns and filteredColumns)
-        if (this.page.data.length > 0 && this.page.data[0].additionalColumns) {
-          for (let i = 0; i <  this.page.data[0].additionalColumns.length; i++) {
-            this.additionalDisplayedColumns.push("additionalColumn" + (i+1));
-            this.additionalFilteredColumns.push("filter-additionalColumn" + (i+1));
-          }      
+        for (let i = 0; i <  this.page.additionalColumns.length; i++) {
+          this.additionalDisplayedColumns.push("additionalColumn" + (i+1));
+          this.additionalFilteredColumns.push("filter-additionalColumn" + (i+1));
         }
+
         this.displayedColumns = this.constantColumns.concat(this.additionalDisplayedColumns);
         this.filteredColumns = this.constantFilteredColumns.concat(this.additionalFilteredColumns);
-
         
         if (page?.sourceDetails) {
           self.allSourceDetails = page.sourceDetails;

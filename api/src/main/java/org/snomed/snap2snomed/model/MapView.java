@@ -20,12 +20,14 @@ import java.time.Instant;
 import java.util.List;
 
 import javax.validation.constraints.NotNull;
+
+import org.snomed.snap2snomed.model.enumeration.MapStatus;
+import org.snomed.snap2snomed.model.enumeration.MappingRelationship;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.snomed.snap2snomed.model.enumeration.MapStatus;
-import org.snomed.snap2snomed.model.enumeration.MappingRelationship;
 
 @Data
 @Builder
@@ -98,5 +100,5 @@ public class MapView {
 
   private boolean flagged;
 
-  private List<AdditionalCodeColumn> additionalColumns;
+  private List<AdditionalCodeValue> additionalColumns;
 }

@@ -18,15 +18,28 @@ package org.snomed.snap2snomed.model;
 
 import java.util.List;
 
-import javax.persistence.*;
+import javax.persistence.CollectionTable;
+import javax.persistence.Column;
+import javax.persistence.ElementCollection;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Index;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.OrderColumn;
+import javax.persistence.Table;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
+
+import org.springframework.data.annotation.ReadOnlyProperty;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.data.annotation.ReadOnlyProperty;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -76,6 +89,6 @@ public class ImportedCode implements Snap2SnomedEntity {
     name="IMPORTED_CODE_ADDITIONAL_COLUMNS",
     joinColumns=@JoinColumn(name="IMPORTED_CODE_ID")
   )
-  List<AdditionalCodeColumn> additionalColumns;
+  List<AdditionalCodeValue> additionalColumns;
 
 }

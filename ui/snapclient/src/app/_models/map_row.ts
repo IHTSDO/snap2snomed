@@ -207,6 +207,21 @@ export class MappedRowDetailsDto {
 
 }
 
+export enum ColumnType {
+  NUMBER = 'NUMBER',
+  TEXT = 'TEXT',
+}
+
+export class AdditionalColumn {
+  name: string;
+  type: ColumnType;
+
+  constructor(name: string, type: string) {
+    this.name = name;
+    this.type = ColumnType[type as keyof typeof ColumnType];
+  }
+};
+
 export class Page {
   data: MapView[];
   pageIndex: number;
@@ -214,14 +229,17 @@ export class Page {
   totalElements: number;
   totalPages: number;
   sourceDetails: MappedRowDetailsDto[];
+  additionalColumns: AdditionalColumn[];
 
-  constructor(data: MapView[] = [], pageIndex: number = 0, size: number = 0, totalElements: number = 0, totalPages: number = 0, sourceIndexes: MappedRowDetailsDto[] = []) {
+  constructor(data: MapView[] = [], pageIndex: number = 0, size: number = 0, totalElements: number = 0, totalPages: number = 0,
+      sourceIndexes: MappedRowDetailsDto[] = [], additionalColumns: AdditionalColumn[] = []) {
     this.data = data;
     this.pageIndex = pageIndex;
     this.size = size;
     this.totalElements = totalElements;
     this.totalPages = totalPages;
     this.sourceDetails = sourceIndexes;
+    this.additionalColumns = additionalColumns;
   }
 }
 

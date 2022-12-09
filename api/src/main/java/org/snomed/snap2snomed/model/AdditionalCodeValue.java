@@ -19,7 +19,6 @@ package org.snomed.snap2snomed.model;
 import javax.persistence.Embeddable;
 import javax.validation.constraints.NotNull;
 
-import org.snomed.snap2snomed.model.enumeration.ColumnType;
 import org.springframework.data.annotation.ReadOnlyProperty;
 
 import lombok.AllArgsConstructor;
@@ -30,7 +29,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
-public class AdditionalCodeColumn {
+public class AdditionalCodeValue {
 
     // @Id
     // @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -38,10 +37,6 @@ public class AdditionalCodeColumn {
 
     @NotNull
     @ReadOnlyProperty
-    private String name;
-
-    @NotNull
-    @ReadOnlyProperty
-    private ColumnType type;
+    private String value;
 
 }

@@ -53,7 +53,7 @@ import org.snomed.snap2snomed.config.Snap2snomedConfiguration;
 import org.snomed.snap2snomed.controller.dto.ImportDetails;
 import org.snomed.snap2snomed.controller.dto.ImportMappingFileDetails;
 import org.snomed.snap2snomed.controller.dto.MappingImportResponse;
-import org.snomed.snap2snomed.model.AdditionalCodeColumn;
+import org.snomed.snap2snomed.model.AdditionalCodeValue;
 import org.snomed.snap2snomed.model.ImportedCode;
 import org.snomed.snap2snomed.model.ImportedCodeSet;
 import org.snomed.snap2snomed.model.MapRow;
@@ -137,18 +137,16 @@ public class CodeSetImportService {
       }
       statement.executeLargeBatch();
 
-      final PreparedStatement additionalColumnsStatement2 = connection.prepareStatement("insert into imported_code_additional_columns (imported_code_id, name, type, value, collection_order) values (?, ?, ?, ?, ?)");
+      final PreparedStatement additionalColumnsStatement2 = connection.prepareStatement("insert into imported_code_additional_columns (imported_code_id, value, collection_order) values (?, ?, ?)");
       final ResultSet generatedKeys2 = statement.getGeneratedKeys();
 
             for (final ImportedCode code : codes) {
               generatedKeys2.next();
               for (int i=0; i < code.getAdditionalColumns().size(); i++) {
-                final AdditionalCodeColumn additionalColumnVal = code.getAdditionalColumns().get(i);
+                final String additionalColumnVal = code.getAdditionalColumns().get(i).getValue();
                 additionalColumnsStatement2.setLong(1, generatedKeys2.getLong(1));
-                additionalColumnsStatement2.setString(2, additionalColumnVal.getName());
-                additionalColumnsStatement2.setString(3, additionalColumnVal.getType());
-                additionalColumnsStatement2.setString(4, additionalColumnVal.getValue());
-                additionalColumnsStatement2.setInt(5, i);
+                additionalColumnsStatement2.setString(2, additionalColumnVal);
+                additionalColumnsStatement2.setInt(3, i);
                 additionalColumnsStatement2.addBatch();
               }
 
@@ -217,6 +215,10 @@ public class CodeSetImportService {
       // Get Map Row IDs
       final List<String> sourceCodes = new ArrayList<String>();
       mapRowTargetParams.forEach(mapRowTargetParam -> sourceCodes.add(mapRowTargetParam.getSourceCode()));
+      if (sourceCodes.stream().anyMatch(code -> code.contains("'") || code.contains(";"))) {
+        log.warn("Possible SQL injection attempt with codes: " + sourceCodes);
+        throw new MappingImportProblem("invalid-data", "Found invalid code");
+      }
       final String sourceCodeParam = "'" + String.join("','", sourceCodes) + "'";
       // PreparedStatement doesn't allow multiple values for parameters to avoid SQL injection attacks
       // so sourceCodeParam is an actual string here
@@ -291,13 +293,18 @@ public class CodeSetImportService {
       @Validated ImportDetails importDetails,
       MultipartFile file) throws HttpMediaTypeNotAcceptableException {
 
-    final ImportedCodeSet importedCodeSet = importedCodeSetRepository.save(importDetails.toImportedCodeSetEntity());
+    final ImportedCodeSet importedCodeSet;
 
     try (BufferedReader reader = new BufferedReader(new InputStreamReader(file.getInputStream()))) {
       CSVFormat format = detectFileFormat(importDetails.getDelimiter(), file, reader, importDetails.getDisplayColumnIndex());
 
       if (importDetails.getHasHeader()) {
-        format = format.withFirstRecordAsHeader().withAllowMissingColumnNames().withAllowDuplicateHeaderNames();
+        format = CSVFormat.Builder.create(format)
+            .setHeader()
+            .setSkipHeaderRecord(true)
+            .setAllowMissingColumnNames(true)
+            .setAllowDuplicateHeaderNames(true)
+            .build();
       }
 
       final Set<String> importedCodes = new HashSet<>();
@@ -305,6 +312,8 @@ public class CodeSetImportService {
 
       final InsertCodeWork insertCodeWork = new InsertCodeWork();
       try (CSVParser parser = format.parse(reader)) {
+        importedCodeSet = importedCodeSetRepository.save(importDetails.toImportedCodeSetEntity(parser.getHeaderNames()));
+
         for (final CSVRecord csvRecord : parser) {
           if (parser.getRecordNumber() > configuration.getMaximumImportedCodeSetRows()) {
             throw Problem.builder()
@@ -329,8 +338,8 @@ public class CodeSetImportService {
           final String display = csvRecord.get(importDetails.getDisplayColumnIndex());
           final long recordNumber = csvRecord.getRecordNumber();
 
-          final List<String> additionalColumnValues = new ArrayList<String>();
-          final List<AdditionalCodeColumn> additionalCodeColumns = new ArrayList<AdditionalCodeColumn>();
+          final List<AdditionalCodeValue> additionalColumnValues = new ArrayList<>();
+
           if (importDetails.getHasHeader() && null != importDetails.getAdditionalColumnIndexes()) {
             final List<Integer> additionalColumnIndexes = importDetails.getAdditionalColumnIndexes();
             final List<String> additionalColumnTypes = importDetails.getAdditionalColumnTypes();
@@ -358,19 +367,19 @@ public class CodeSetImportService {
                 }
                 if(parser.getHeaderNames().size() < index) {
                   throw new CodeSetImportProblem("additional-column-index-no-header",
+
                           "Additional column index is beyond header size",
                           "Additional column index " + i +
                                   " is " + index + " which is beyond the header size " + parser.getHeaderNames().size());
                 }
-                additionalColumnValues.add(csvRecord.get(index));
-                additionalCodeColumns.add(new AdditionalCodeColumn(parser.getHeaderNames().get(index), additionalColumnTypes.get(i), csvRecord.get(index)));
+                additionalColumnValues.add(new AdditionalCodeValue(csvRecord.get(index)));
               }
             }
           }
 
           validateRecord(importedCodes, code, display, recordNumber);
 
-          final ImportedCode importedCode = new ImportedCode(null, code, importedCodeSet, recordNumber, display, additionalCodeColumns);
+          final ImportedCode importedCode = new ImportedCode(null, code, importedCodeSet, recordNumber, display, additionalColumnValues);
 
           importedCodes.add(code);
           insertCodeWork.add(importedCode);

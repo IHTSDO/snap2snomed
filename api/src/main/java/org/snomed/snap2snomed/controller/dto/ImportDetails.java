@@ -16,12 +16,19 @@
 
 package org.snomed.snap2snomed.controller.dto;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
+
+import org.snomed.snap2snomed.model.AdditionalCodeColumn;
 import org.snomed.snap2snomed.model.ImportedCodeSet;
+import org.snomed.snap2snomed.model.enumeration.ColumnType;
+
 import lombok.Data;
 
 @Data
@@ -41,19 +48,31 @@ public class ImportDetails {
   @NotNull(message = "An index for the display text in a code set import file must be specified")
   Integer displayColumnIndex;
 
-  List<Integer> additionalColumnIndexes;
+  List<Integer> additionalColumnIndexes = new ArrayList<>();
 
-  List<String> additionalColumnTypes;
+  List<String> additionalColumnTypes = new ArrayList<>();
 
   Character delimiter;
 
   Boolean hasHeader = false;
 
-  public ImportedCodeSet toImportedCodeSetEntity() {
-    ImportedCodeSet codeset = new ImportedCodeSet();
+  public ImportedCodeSet toImportedCodeSetEntity(List<String> headerNames) {
+    final ImportedCodeSet codeset = new ImportedCodeSet();
 
     codeset.setName(name);
     codeset.setVersion(version);
+
+    if (null != additionalColumnIndexes) {
+      final List<AdditionalCodeColumn> additionalColumns =
+          IntStream.range(0, additionalColumnIndexes.size())
+          .mapToObj(i -> {
+            final String headerName = headerNames.get(additionalColumnIndexes.get(i));
+            final String typeName = additionalColumnTypes.get(i);
+            return new AdditionalCodeColumn(headerName, ColumnType.valueOf(typeName));
+          })
+          .collect(Collectors.toList());
+      codeset.setAdditionalColumnsMetadata(additionalColumns);
+    }
 
     return codeset;
   }
