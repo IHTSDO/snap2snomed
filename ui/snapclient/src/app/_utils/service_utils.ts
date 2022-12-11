@@ -202,7 +202,7 @@ export class ServiceUtils {
   }
 
   static paramsToFilterEntity(params: any): MapViewFilter {
-    const mapViewFilter = new MapViewFilter(2);
+    const mapViewFilter = new MapViewFilter();
 
     Object.keys(params).forEach(k => {
       const v = params[k];
