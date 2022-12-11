@@ -184,10 +184,10 @@
               <th mat-header-cell *matHeaderCellDef [attr.colspan]="1">
                 <mat-form-field appearance="outline">
                   <input matInput autocapitalize="off" autocomplete="false" list="no_source_code"
-                         [(ngModel)]="filterEntity.sourceCode" [formControl]="sourceCodeFilterControl">
+                         [(ngModel)]="filterEntity.sourceCode" (input)="filterChange()">
                   <datalist id="no_source_code"></datalist><!-- workaround for Edge ignoring autocomplete="false" -->
                   <button *ngIf="filterEntity.sourceCode" matSuffix mat-icon-button aria-label="Clear"
-                          (click)="filterEntity.sourceCode=''">
+                          (click)="filterEntity.sourceCode=''; filterChange()">
                     <mat-icon>cancel</mat-icon>
                   </button>
                 </mat-form-field>
@@ -198,11 +198,11 @@
               <th mat-header-cell *matHeaderCellDef [attr.colspan]="1">
                 <mat-form-field appearance="outline">
                   <input matInput autocapitalize="off" autocomplete="false" list="no_source_display"
-                         [(ngModel)]="filterEntity.sourceDisplay" [formControl]="sourceDisplayFilterControl">
+                         [(ngModel)]="filterEntity.sourceDisplay" (input)="filterChange()">
                   <datalist id="no_source_display"></datalist>
                   <!-- workaround for Edge ignoring autocomplete="false" -->
                   <button *ngIf="filterEntity.sourceDisplay" matSuffix mat-icon-button aria-label="Clear"
-                          (click)="filterEntity.sourceDisplay=''">
+                          (click)="filterEntity.sourceDisplay=''; filterChange()">
                     <mat-icon>cancel</mat-icon>
                   </button>
                 </mat-form-field>
@@ -213,11 +213,11 @@
               <th mat-header-cell *matHeaderCellDef [attr.colspan]="1">
                 <mat-form-field appearance="outline">
                   <input matInput autocapitalize="off" autocomplete="false" [attr.list]="getDataListId(idx)"
-                   [(ngModel)]="filterEntity.additionalColumns[idx]" [formControl]="additionalColumnFilterControls[idx]">
+                   [(ngModel)]="filterEntity.additionalColumns[idx]" (input)="filterChange()">
                   <datalist id="getDataListId(idx)"></datalist>
                   <!-- workaround for Edge ignoring autocomplete="false" -->
                   <button *ngIf="filterEntity.additionalColumns[idx]" matSuffix mat-icon-button aria-label="Clear"
-                          (click)="filterEntity.additionalColumns[idx]=''">
+                          (click)="filterEntity.additionalColumns[idx]=''; filterChange()">
                     <mat-icon>cancel</mat-icon>
                   </button>
                 </mat-form-field>
@@ -240,10 +240,10 @@
               <th mat-header-cell *matHeaderCellDef [attr.colspan]="1">
                 <mat-form-field appearance="outline">
                   <input matInput autocapitalize="off" autocomplete="false" list="no_target_code"
-                         [(ngModel)]="filterEntity.targetCode" [formControl]="targetCodeFilterControl">
+                         [(ngModel)]="filterEntity.targetCode" (input)="filterChange()">
                   <datalist id="no_target_code"></datalist><!-- workaround for Edge ignoring autocomplete="false" -->
                   <button *ngIf="filterEntity.targetCode" matSuffix mat-icon-button aria-label="Clear"
-                          (click)="filterEntity.targetCode=''">
+                          (click)="filterEntity.targetCode=''; filterChange()">
                     <mat-icon>cancel</mat-icon>
                   </button>
                 </mat-form-field>
@@ -254,11 +254,11 @@
               <th mat-header-cell *matHeaderCellDef [attr.colspan]="1">
                 <mat-form-field appearance="outline">
                   <input matInput autocapitalize="off" autocomplete="false" list="no_target_display"
-                         [(ngModel)]="filterEntity.targetDisplay" [formControl]="targetDisplayFilterControl">
+                         [(ngModel)]="filterEntity.targetDisplay" (input)="filterChange()">
                   <datalist id="no_target_display"></datalist>
                   <!-- workaround for Edge ignoring autocomplete="false" -->
                   <button *ngIf="filterEntity.targetDisplay" matSuffix mat-icon-button aria-label="Clear"
-                          (click)="filterEntity.targetDisplay=''">
+                          (click)="filterEntity.targetDisplay=''; filterChange()">
                     <mat-icon>cancel</mat-icon>
                   </button>
                 </mat-form-field>

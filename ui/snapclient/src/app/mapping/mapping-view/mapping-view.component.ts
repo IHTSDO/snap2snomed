@@ -52,7 +52,6 @@ import {MatTableFilter} from 'mat-table-filter';
 import {HttpParams} from '@angular/common/http';
 import {ErrorInfo} from '../../errormessage/errormessage.component';
 import {ServiceUtils} from '../../_utils/service_utils';
-import {FormControl} from '@angular/forms';
 import {LoadMapping, LoadMapView, ViewContext} from 'src/app/store/mapping-feature/mapping.actions';
 import {BulkchangeComponent, BulkChangeDialogData, getResultMessage} from '../bulkchange/bulkchange.component';
 import {MatDialog} from '@angular/material/dialog';
@@ -110,12 +109,6 @@ export class MappingViewComponent implements OnInit, AfterViewInit, OnDestroy {
 
   page: Page = new Page();
   allSourceDetails: MappedRowDetailsDto[] = [];
-
-  sourceCodeFilterControl = new FormControl('');
-  sourceDisplayFilterControl = new FormControl('');
-  targetCodeFilterControl = new FormControl('');
-  targetDisplayFilterControl = new FormControl('');
-  additionalColumnFilterControls : FormControl[] = [];
 
   /** 
    * Columns displayed in the table - specified in html. Columns IDs can be added, removed, or reordered. 
@@ -237,13 +230,6 @@ export class MappingViewComponent implements OnInit, AfterViewInit, OnDestroy {
 
   }
 
-  subscribeFilter(control: FormControl): void {
-    this.subscription.add(control.valueChanges
-      .pipe(debounceTime(this.debounce), distinctUntilChanged())
-      .subscribe(() => this.filterChange()
-      ));
-  }
-
   ngOnInit(): void {
 
     const self = this;
@@ -305,11 +291,6 @@ export class MappingViewComponent implements OnInit, AfterViewInit, OnDestroy {
         ).subscribe();
     }
 
-    // search as you type
-    [
-      this.sourceCodeFilterControl, this.sourceDisplayFilterControl,
-      this.targetCodeFilterControl, this.targetDisplayFilterControl,
-    ].forEach(control => this.subscribeFilter(control));
   }
 
   ngOnDestroy(): void {
@@ -422,7 +403,6 @@ export class MappingViewComponent implements OnInit, AfterViewInit, OnDestroy {
 
         this.additionalDisplayedColumns = [];
         this.additionalFilteredColumns = [];
-        this.additionalColumnFilterControls = [];
         this.additionalHideShowColumns = [];
 
         // NB: additionalDisplayedColumns and displayedColumns must be set together or the table will error
@@ -430,10 +410,8 @@ export class MappingViewComponent implements OnInit, AfterViewInit, OnDestroy {
         for (let i = 0; i <  this.page.additionalColumns.length; i++) {
           this.additionalDisplayedColumns.push({columnId: "additionalColumn" + (i+1), columnDisplay: this.page.additionalColumns[i].name, displayed: true});
           this.additionalFilteredColumns.push("filter-additionalColumn" + (i+1));
-          this.additionalColumnFilterControls.push(new FormControl(''));
           this.additionalHideShowColumns.push("additionalColumn" + (i+1));
         }
-        this.additionalColumnFilterControls.forEach(control => this.subscribeFilter(control));
 
         this.displayedColumns = this.constantColumns.concat(this.additionalDisplayedColumns);
         this.filteredColumns = this.constantFilteredColumns.concat(this.additionalFilteredColumns);
