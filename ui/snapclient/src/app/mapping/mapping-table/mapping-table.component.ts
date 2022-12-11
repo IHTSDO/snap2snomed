@@ -43,7 +43,6 @@ import {ErrorInfo} from 'src/app/errormessage/errormessage.component';
 import {Params} from '@angular/router';
 import {ServiceUtils} from '../../_utils/service_utils';
 import {SelectionService} from 'src/app/_services/selection.service';
-import {FormControl} from '@angular/forms';
 import {MatDialog} from '@angular/material/dialog';
 import {ConfirmDialogComponent, DialogData, DialogType} from 'src/app/dialog/confirm-dialog/confirm-dialog.component';
 import {StatusUtils} from '../../_utils/status_utils';
@@ -167,12 +166,6 @@ export class MappingTableComponent implements OnInit, AfterViewInit, OnDestroy {
 
   private clickedRow?: number;
 
-  sourceCodeFilterControl = new FormControl('');
-  sourceDisplayFilterControl = new FormControl('');
-  targetCodeFilterControl = new FormControl('');
-  targetDisplayFilterControl = new FormControl('');
-  additionalColumnFilterControls : FormControl[] = [new FormControl('')];
-
   constructor(private snackBar: MatSnackBar,
               private store: Store<IAppState>,
               private fhirService: FhirService,
@@ -245,15 +238,6 @@ export class MappingTableComponent implements OnInit, AfterViewInit, OnDestroy {
     this.sort.sortChange.subscribe((event) => this.sortChange.emit(event));
     this.paginator.page.subscribe((event) => this.pagingChange.emit(event));
 
-    // search as you type
-    [this.sourceCodeFilterControl, this.sourceDisplayFilterControl,
-      this.targetCodeFilterControl, this.targetDisplayFilterControl].concat(this.additionalColumnFilterControls).forEach((control) => {
-      this.subscription.add(control.valueChanges
-        .pipe(debounceTime(this.debounce), distinctUntilChanged())
-        .subscribe(() => {
-          this.filterUpdate();
-        }));
-    });
   }
 
   getDataListId(index : number) {

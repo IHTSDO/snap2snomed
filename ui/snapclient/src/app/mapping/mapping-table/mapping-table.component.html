@@ -135,9 +135,9 @@
     <th mat-header-cell *matHeaderCellDef [attr.colspan]="1">
       <mat-form-field appearance="outline">
         <input matInput autocapitalize="off" autocomplete="false" list="no_source_code"
-               [(ngModel)]="filterEntity.sourceCode" [formControl]="sourceCodeFilterControl">
+               [(ngModel)]="filterEntity.sourceCode" (input)="filterUpdate()">
         <datalist id="no_source_code"></datalist><!-- workaround for Edge ignoring autocomplete="false" -->
-        <button *ngIf="filterEntity.sourceCode" matSuffix mat-icon-button aria-label="Clear" (click)="filterEntity.sourceCode=''">
+        <button *ngIf="filterEntity.sourceCode" matSuffix mat-icon-button aria-label="Clear" (click)="filterEntity.sourceCode=''; filterUpdate()">
           <mat-icon>cancel</mat-icon>
         </button>
       </mat-form-field>
@@ -148,9 +148,9 @@
     <th mat-header-cell *matHeaderCellDef [attr.colspan]="1">
       <mat-form-field appearance="outline">
         <input matInput autocapitalize="off" autocomplete="false" list="no_source_display"
-               [(ngModel)]="filterEntity.sourceDisplay" [formControl]="sourceDisplayFilterControl">
+               [(ngModel)]="filterEntity.sourceDisplay" (input)="filterUpdate()">
         <datalist id="no_source_display"></datalist><!-- workaround for Edge ignoring autocomplete="false" -->
-        <button *ngIf="filterEntity.sourceDisplay" matSuffix mat-icon-button aria-label="Clear" (click)="filterEntity.sourceDisplay=''">
+        <button *ngIf="filterEntity.sourceDisplay" matSuffix mat-icon-button aria-label="Clear" (click)="filterEntity.sourceDisplay=''; filterUpdate()">
           <mat-icon>cancel</mat-icon>
         </button>
       </mat-form-field>
@@ -173,9 +173,9 @@
     <th mat-header-cell *matHeaderCellDef [attr.colspan]="1">
       <mat-form-field appearance="outline">
         <input matInput autocapitalize="off" autocomplete="false" list="no_target_code"
-               [(ngModel)]="filterEntity.targetCode" [formControl]="targetCodeFilterControl">
+               [(ngModel)]="filterEntity.targetCode" (input)="filterUpdate()">
         <datalist id="no_target_code"></datalist><!-- workaround for Edge ignoring autocomplete="false" -->
-        <button *ngIf="filterEntity.targetCode" matSuffix mat-icon-button aria-label="Clear" (click)="filterEntity.targetCode=''">
+        <button *ngIf="filterEntity.targetCode" matSuffix mat-icon-button aria-label="Clear" (click)="filterEntity.targetCode=''; filterUpdate()">
           <mat-icon>cancel</mat-icon>
         </button>
       </mat-form-field>
@@ -186,9 +186,9 @@
     <th mat-header-cell *matHeaderCellDef [attr.colspan]="1">
       <mat-form-field appearance="outline">
         <input matInput autocapitalize="off" autocomplete="false" list="no_target_display"
-               [(ngModel)]="filterEntity.targetDisplay" [formControl]="targetDisplayFilterControl">
+               [(ngModel)]="filterEntity.targetDisplay" (input)="filterUpdate()">
         <datalist id="no_target_display"></datalist><!-- workaround for Edge ignoring autocomplete="false" -->
-        <button *ngIf="filterEntity.targetDisplay" matSuffix mat-icon-button aria-label="Clear" (click)="filterEntity.targetDisplay=''">
+        <button *ngIf="filterEntity.targetDisplay" matSuffix mat-icon-button aria-label="Clear" (click)="filterEntity.targetDisplay=''; filterUpdate()">
           <mat-icon>cancel</mat-icon>
         </button>
       </mat-form-field>
@@ -254,11 +254,11 @@
     <th mat-header-cell *matHeaderCellDef [attr.colspan]="1">
       <mat-form-field appearance="outline">
         <input matInput autocapitalize="off" autocomplete="false" [attr.list]="getDataListId(idx)"
-          [(ngModel)]="filterEntity.additionalColumns[idx]" [formControl]="additionalColumnFilterControls[idx]">
+          [(ngModel)]="filterEntity.additionalColumns[idx]" (input)="filterUpdate()">
         <datalist id="getDataListId(idx)"></datalist>
         <!-- workaround for Edge ignoring autocomplete="false" -->
         <button *ngIf="filterEntity.additionalColumns[idx]" matSuffix mat-icon-button aria-label="Clear"
-                (click)="filterEntity.additionalColumns[idx]=''">
+                (click)="filterEntity.additionalColumns[idx]=''; filterUpdate()">
           <mat-icon>cancel</mat-icon>
         </button>
       </mat-form-field>

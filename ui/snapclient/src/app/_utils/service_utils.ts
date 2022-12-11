@@ -243,7 +243,13 @@ export class ServiceUtils {
           break;
         case "additionalColumns":
           if (v !== undefined) {
-            mapViewFilter.additionalColumns = v.split(',');
+            if (Array.isArray(v) && v.length > 0) {
+              mapViewFilter.additionalColumns = v[0].split(',');
+            }
+            else {
+              mapViewFilter.additionalColumns = v.split(',');
+            }
+
           }
           break;
       }
