@@ -31,7 +31,7 @@
         <div class="col-additional">
           <table class="additional-source-table">
             <tr *ngFor="let additionalCol of source.additionalColumnValues; let idx = index; " id="source-index-row">
-              <th>{{'TABLE.ADDITIONAL_SOURCE_COLUMN' | translate}} {{idx+1}}</th>
+              <th>{{source.additionalColumns && source.additionalColumns[idx] ? source.additionalColumns[idx].name : ''}}</th>
               <td>{{additionalCol}}</td>
             </tr>
           </table>

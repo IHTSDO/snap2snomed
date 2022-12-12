@@ -36,7 +36,7 @@ import {MatDialog} from '@angular/material/dialog';
 import {ServiceUtils} from '../../_utils/service_utils';
 import {ConfirmDialogComponent, DialogType} from '../../dialog/confirm-dialog/confirm-dialog.component';
 import {MatCheckboxChange} from '@angular/material/checkbox';
-import {TableParams} from '../mapping-table/mapping-table.component';
+import {TableColumn, TableParams} from '../mapping-table/mapping-table.component';
 import {selectCurrentView} from 'src/app/store/mapping-feature/mapping.selectors';
 import {SourceNavigationService, SourceNavSet} from 'src/app/_services/source-navigation.service';
 import {Subscription} from 'rxjs';
@@ -61,6 +61,7 @@ export type SourceRow = {
   noMap: boolean;
   status: string;
   additionalColumnValues: string[];
+  additionalColumnNames: string[] | undefined;
 };
 
 @Component({
@@ -97,6 +98,7 @@ export class MappingDetailComponent implements OnInit, OnDestroy {
   @Input() task: Task | undefined;
   @Input() paging!: TableParams;
   @Input() filterEntity!: MapViewFilter;
+  @Input() additionalDisplayedColumns: TableColumn[] | undefined;
   @Output() detailClose = new EventEmitter<boolean>();
 
   constructor(private store: Store<IAppState>,
@@ -135,7 +137,8 @@ export class MappingDetailComponent implements OnInit, OnDestroy {
           index: selected.mapRow.sourceIndex,
           noMap: selected.mapRow.noMap,
           status: selected.mapRow.status,
-          additionalColumnValues: selected.mapRow.additionalColumnValues
+          additionalColumnValues: selected.mapRow.additionalColumnValues,
+          additionalColumnNames: this.additionalDisplayedColumns?.map( column => column.columnDisplay)
         };
         self.loadTargets();
       }
