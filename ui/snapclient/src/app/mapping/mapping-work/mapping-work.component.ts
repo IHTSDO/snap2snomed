@@ -179,8 +179,13 @@ export class MappingWorkComponent implements OnInit, OnDestroy {
           this.additionalHideShowColumns.push("additionalColumn" + (i+1));
         }
 
-        this.displayedColumns = this.constantColumns.concat(this.additionalDisplayedColumns);
-        this.hideShowColumns = this.constantHideShowColumns.concat(this.additionalHideShowColumns);
+        // display additional columns at the end of the table
+        // this.displayedColumns = this.constantColumns.concat(this.additionalDisplayedColumns);
+        // this.hideShowColumns = this.constantHideShowColumns.concat(this.additionalHideShowColumns);
+
+        // display additional columns after source columns
+        this.displayedColumns = this.constantColumns.slice(0,4).concat(this.additionalDisplayedColumns).concat(this.constantColumns.slice(4));
+        this.hideShowColumns = this.constantHideShowColumns.slice(0,3).concat(this.additionalHideShowColumns).concat(this.constantHideShowColumns.slice(3));
         
       })
     );

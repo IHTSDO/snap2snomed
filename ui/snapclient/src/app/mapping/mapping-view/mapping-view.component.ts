@@ -413,9 +413,15 @@ export class MappingViewComponent implements OnInit, AfterViewInit, OnDestroy {
           this.additionalHideShowColumns.push("additionalColumn" + (i+1));
         }
 
-        this.displayedColumns = this.constantColumns.concat(this.additionalDisplayedColumns);
-        this.filteredColumns = this.constantFilteredColumns.concat(this.additionalFilteredColumns);
-        this.hideShowColumns = this.constantHideShowColumns.concat(this.additionalHideShowColumns);
+        // display additional columns at the end of the table
+        //this.displayedColumns = this.constantColumns.concat(this.additionalDisplayedColumns);
+        //this.filteredColumns = this.constantFilteredColumns.concat(this.additionalFilteredColumns);
+        //this.hideShowColumns = this.constantHideShowColumns.concat(this.additionalHideShowColumns);
+
+        // display additional columns after source columns
+        this.displayedColumns = this.constantColumns.slice(0,4).concat(this.additionalDisplayedColumns).concat(this.constantColumns.slice(4));
+        this.filteredColumns = this.constantFilteredColumns.slice(0,4).concat(this.additionalFilteredColumns).concat(this.constantFilteredColumns.slice(4));
+        this.hideShowColumns = this.constantHideShowColumns.slice(0,3).concat(this.additionalHideShowColumns).concat(this.constantHideShowColumns.slice(3));
         
         if (page?.sourceDetails) {
           self.allSourceDetails = page.sourceDetails;

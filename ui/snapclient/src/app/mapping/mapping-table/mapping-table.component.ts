@@ -204,8 +204,14 @@ export class MappingTableComponent implements OnInit, AfterViewInit, OnDestroy {
           this.additionalFilteredColumns.push("filter-additionalColumn" + (i+1));
         }
     
-        this.displayedColumns = this.constantColumns.concat(this.additionalDisplayedColumns);
-        this.filteredColumns = this.constantFilteredColumns.concat(this.additionalFilteredColumns);
+        // display additional columns at the end of the table
+        // this.displayedColumns = this.constantColumns.concat(this.additionalDisplayedColumns);
+        // this.filteredColumns = this.constantFilteredColumns.concat(this.additionalFilteredColumns);
+
+        // display additional columns after source columns
+        this.displayedColumns = this.constantColumns.slice(0,4).concat(this.additionalDisplayedColumns).concat(this.constantColumns.slice(4));
+        this.filteredColumns = this.constantFilteredColumns.slice(0,4).concat(this.additionalFilteredColumns).concat(this.constantFilteredColumns.slice(4));
+
       })
     );
     this.subscription.add(
