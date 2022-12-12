@@ -127,12 +127,12 @@
     <th mat-header-cell *matHeaderCellDef [attr.colspan]="1"></th>
   </ng-container>
   <!-- Filter SourceIndex -->
-  <ng-container matColumnDef="filter-source-index">
+  <ng-container matColumnDef="filter-sourceIndex">
     <th mat-header-cell *matHeaderCellDef [attr.colspan]="1"></th>
   </ng-container>
   <!-- Filter SourceCode -->
-  <ng-container matColumnDef="filter-source-code">
-    <th mat-header-cell *matHeaderCellDef [attr.colspan]="1">
+  <ng-container matColumnDef="filter-sourceCode">
+    <th mat-header-cell [ngClass]="{'hide-filter': !isFilterColumnVisible('filter-sourceCode')}" *matHeaderCellDef [attr.colspan]="1">
       <mat-form-field appearance="outline">
         <input matInput autocapitalize="off" autocomplete="false" list="no_source_code"
                [(ngModel)]="filterEntity.sourceCode" (input)="filterUpdate()">
@@ -143,9 +143,9 @@
       </mat-form-field>
     </th>
   </ng-container>
-  <!-- Filter SourceCode -->
-  <ng-container matColumnDef="filter-source-display">
-    <th mat-header-cell *matHeaderCellDef [attr.colspan]="1">
+  <!-- Filter Source Display -->
+  <ng-container matColumnDef="filter-sourceDisplay">
+    <th mat-header-cell [ngClass]="{'hide-filter': !isFilterColumnVisible('filter-sourceDisplay')}" *matHeaderCellDef [attr.colspan]="1">
       <mat-form-field appearance="outline">
         <input matInput autocapitalize="off" autocomplete="false" list="no_source_display"
                [(ngModel)]="filterEntity.sourceDisplay" (input)="filterUpdate()">
@@ -158,7 +158,7 @@
   </ng-container>
   <!-- Filter Relationship -->
   <ng-container matColumnDef="filter-relationship">
-    <th mat-header-cell *matHeaderCellDef [attr.colspan]="1">
+    <th mat-header-cell [ngClass]="{'hide-filter': !isFilterColumnVisible('filter-relationship')}" *matHeaderCellDef [attr.colspan]="1">
       <mat-form-field appearance="outline">
         <mat-select [(ngModel)]="filterEntity.relationship" (selectionChange)="filterUpdate()" multiple
                     id="relationship" name="relationship" #relationship="ngModel">
@@ -169,8 +169,8 @@
     </th>
   </ng-container>
   <!-- Filter Target Code -->
-  <ng-container matColumnDef="filter-target-code">
-    <th mat-header-cell *matHeaderCellDef [attr.colspan]="1">
+  <ng-container matColumnDef="filter-targetCode">
+    <th mat-header-cell [ngClass]="{'hide-filter': !isFilterColumnVisible('filter-targetCode')}" *matHeaderCellDef [attr.colspan]="1">
       <mat-form-field appearance="outline">
         <input matInput autocapitalize="off" autocomplete="false" list="no_target_code"
                [(ngModel)]="filterEntity.targetCode" (input)="filterUpdate()">
@@ -182,8 +182,8 @@
     </th>
   </ng-container>
   <!-- Filter Target Display -->
-  <ng-container matColumnDef="filter-target-display">
-    <th mat-header-cell *matHeaderCellDef [attr.colspan]="1">
+  <ng-container matColumnDef="filter-targetDisplay">
+    <th mat-header-cell [ngClass]="{'hide-filter': !isFilterColumnVisible('filter-targetDisplay')}" *matHeaderCellDef [attr.colspan]="1">
       <mat-form-field appearance="outline">
         <input matInput autocapitalize="off" autocomplete="false" list="no_target_display"
                [(ngModel)]="filterEntity.targetDisplay" (input)="filterUpdate()">
@@ -196,7 +196,7 @@
   </ng-container>
   <!-- Filter NoMap -->
   <ng-container matColumnDef="filter-noMap">
-    <th mat-header-cell *matHeaderCellDef [attr.colspan]="1">
+    <th mat-header-cell [ngClass]="{'hide-filter': !isFilterColumnVisible('filter-noMap')}"*matHeaderCellDef [attr.colspan]="1">
       <mat-form-field appearance="outline">
         <mat-select [(ngModel)]="filterEntity.noMap" (selectionChange)="filterUpdate()"
                     id="noMap" name="noMap" #noMap="ngModel">
@@ -251,7 +251,7 @@
   </ng-container>
   <!-- Filter Additional Source Columns -->
   <ng-container *ngFor="let additionalCol of additionalFilteredColumns; let idx = index" matColumnDef="{{additionalCol}}">
-    <th mat-header-cell *matHeaderCellDef [attr.colspan]="1">
+    <th mat-header-cell [ngClass]="{'hide-filter': !isFilterColumnVisible(additionalCol)}" *matHeaderCellDef [attr.colspan]="1">
       <mat-form-field appearance="outline">
         <input matInput autocapitalize="off" autocomplete="false" [attr.list]="getDataListId(idx)"
           [(ngModel)]="filterEntity.additionalColumns[idx]" (input)="filterUpdate()">

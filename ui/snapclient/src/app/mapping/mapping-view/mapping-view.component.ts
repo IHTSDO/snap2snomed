@@ -152,19 +152,19 @@ export class MappingViewComponent implements OnInit, AfterViewInit, OnDestroy {
   ];
   constantFilteredColumns: string[] = [
     'filter-id',
-    'filter-source-index',
-    'filter-source-code',
-    'filter-source-display',
-    'filter-target-code',
-    'filter-target-display',
+    'filter-sourceIndex',
+    'filter-sourceCode',
+    'filter-sourceDisplay',
+    'filter-targetCode',
+    'filter-targetDisplay',
     'filter-relationship',
     'filter-noMap',
     'filter-status',
     'filter-flagged',
     'filter-notes',
-    'filter-last-author-reviewer',
-    'filter-author',
-    'filter-reviewer'
+    'filter-lastAuthorReviewer',
+    'filter-assignedAuthor',
+    'filter-assignedReviewer'
   ];
   additionalFilteredColumns: string[] = [];
 
@@ -462,6 +462,17 @@ export class MappingViewComponent implements OnInit, AfterViewInit, OnDestroy {
       }
     }
 
+  }
+
+  isFilterColumnVisible(filterId : string) : boolean {
+
+    let visible = true;
+    let foundColumn = this.displayedColumns.find(column => column.columnId === filterId.substring("filter-".length));
+    if (foundColumn) {
+      visible = foundColumn.displayed;
+    }
+
+    return visible; 
   }
 
   getHideShowItemLabel(columnName : string) : string {

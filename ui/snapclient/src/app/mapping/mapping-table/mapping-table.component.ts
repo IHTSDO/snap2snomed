@@ -98,11 +98,11 @@ export class MappingTableComponent implements OnInit, AfterViewInit, OnDestroy {
   ];
   @Input() constantFilteredColumns: string[] = [
     'filter-id',
-    'filter-source-index',
-    'filter-source-code',
-    'filter-source-display',
-    'filter-target-code',
-    'filter-target-display',
+    'filter-sourceIndex',
+    'filter-sourceCode',
+    'filter-sourceDisplay',
+    'filter-targetCode',
+    'filter-targetDisplay',
     'filter-relationship',
     'filter-noMap',
     'filter-status',
@@ -274,6 +274,17 @@ export class MappingTableComponent implements OnInit, AfterViewInit, OnDestroy {
 
   getDisplayedColumns() : string[] {
     return this.displayedColumns?.filter(obj => obj.displayed === true).map((obj) => obj.columnId);
+  }
+
+  isFilterColumnVisible(filterId : string) : boolean {
+
+    let visible = true;
+    let foundColumn = this.displayedColumns.find(column => column.columnId === filterId.substring("filter-".length));
+    if (foundColumn) {
+      visible = foundColumn.displayed;
+    }
+
+    return visible; 
   }
 
   dismiss(): void {
