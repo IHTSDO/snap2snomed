@@ -121,8 +121,8 @@ describe('TargetRelationshipComponent', () => {
       display: sourceDisplay,
       noMap: false,
       status: MapRowStatus.DRAFT,
-      //additionalColumns: undefined,
-      additionalColumnValues: []
+      additionalColumnValues: [],
+      additionalColumnNames: []
     };
     fixture.detectChanges();
   });
