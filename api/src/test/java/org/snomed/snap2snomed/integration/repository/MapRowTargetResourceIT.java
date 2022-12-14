@@ -24,16 +24,14 @@ import static org.hamcrest.core.Is.is;
 
 import io.restassured.specification.RequestSpecification;
 import java.io.IOException;
-import java.util.List;
+import java.util.Collections;
 import java.util.Set;
 import org.apache.commons.lang3.tuple.Pair;
-import org.junit.Before;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.TestInstance.Lifecycle;
 import org.snomed.snap2snomed.integration.IntegrationTestBase;
-import org.snomed.snap2snomed.model.MapRowTarget;
 import org.snomed.snap2snomed.model.enumeration.MapStatus;
 import org.snomed.snap2snomed.model.enumeration.MappingRelationship;
 import org.snomed.snap2snomed.model.enumeration.TaskType;
@@ -175,10 +173,10 @@ public class MapRowTargetResourceIT extends IntegrationTestBase {
       long mapRowId = restClient.getMapRowId(mapId, "map row code 4.");
       long authorTask = restClient.createTask(TaskType.AUTHOR, mapId, MEMBER_TEST_USER, "4");
       long targetId = restClient.createTarget(MEMBER_TEST_USER, mapRowId, "foo", "bar", MappingRelationship.TARGET_NARROWER, false, 201);
-      restClient.updateTarget(MEMBER_TEST_USER, targetId, "foo2", "bar2", MappingRelationship.TARGET_NARROWER, false, 200);
+      restClient.updateTarget(MEMBER_TEST_USER, targetId, "foo2", "bar2", MappingRelationship.TARGET_NARROWER, false, Collections.emptySet(), 200);
       restClient.deleteTask(authorTask);
 
-      restClient.updateTarget(MEMBER_TEST_USER, targetId, "foo3", "bar3", MappingRelationship.TARGET_NARROWER, false, 403);
+      restClient.updateTarget(MEMBER_TEST_USER, targetId, "foo3", "bar3", MappingRelationship.TARGET_NARROWER, false, Collections.emptySet(), 403);
   }
 
   @Test
@@ -189,7 +187,26 @@ public class MapRowTargetResourceIT extends IntegrationTestBase {
       restClient.deleteTask(authorTask);
 
       restClient.updateTargetFlag(DEFAULT_TEST_USER_SUBJECT, targetId, true, 200);
-      restClient.updateTarget(MEMBER_TEST_USER, targetId, "foo2", "bar2", MappingRelationship.TARGET_NARROWER, false, 403);
+      restClient.updateTarget(MEMBER_TEST_USER, targetId, "foo2", "bar2",
+          MappingRelationship.TARGET_NARROWER, false, Collections.emptySet(), 403
+      );
+  }
+
+  @Test
+  public void shouldUpdateAndRetrieveMapRowTargetTags() throws Exception {
+    long mapRowId = restClient.getMapRowId(mapId, "map row code 4.");
+    restClient.createTask(TaskType.AUTHOR, mapId, MEMBER_TEST_USER, "4");
+
+    final String targetCode = "foo";
+    final String targetDisplay = "bar";
+    final MappingRelationship relationship = MappingRelationship.TARGET_NARROWER;
+    final boolean flagged = false;
+
+    long targetId = restClient.createTarget(MEMBER_TEST_USER, mapRowId, targetCode, targetDisplay,
+        relationship, flagged, 201);
+
+    restClient.updateTarget(MEMBER_TEST_USER, targetId, targetCode, targetDisplay, relationship,
+        flagged, Collections.singleton("some-tag"), 200);
   }
 
   @Test

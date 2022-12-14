@@ -673,14 +673,16 @@ public class Snap2snomedRestClient {
     }
   }
 
-  public void updateTarget(String user, long targetId, String targetCode, String targetDisplay, MappingRelationship relationship,
-      boolean flagged, int expectedStatusCode) throws JsonProcessingException {
+  public void updateTarget(String user, long targetId, String targetCode, String targetDisplay,
+      MappingRelationship relationship, boolean flagged, final Set<String> tags,
+      int expectedStatusCode) throws JsonProcessingException {
 
     final java.util.Map<String, Object> map = new HashMap<>();
     map.put("targetCode", targetCode);
     map.put("targetDisplay", targetDisplay);
     map.put("relationship", relationship);
     map.put("flagged", flagged);
+    map.put("tags", tags);
 
     final ValidatableResponse response = givenUser(user)
         .body(objectMapper.writeValueAsString(map))
