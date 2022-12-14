@@ -35,6 +35,11 @@
         <version>7.15.0</version>
         <!-- Version 8 of Flyway community no longer supports MySQL 5.7 but the latest Aurora MySQL LTS version is 5.7 -->
       </dependency>
+      <dependency>
+        <groupId>org.yaml</groupId>
+        <artifactId>snakeyaml</artifactId>
+        <version>1.32</version>
+      </dependency>
     </dependencies>
   </dependencyManagement>
 
