@@ -40,13 +40,13 @@ public class Snap2SnomedMySqlContainer extends MySQLContainer {
 
   @Override
   public String getJdbcUrl() {
-    String additionalUrlParams = this.constructUrlParameters("?", "&");
-    return "jdbc:mariadb://" + this.getHost() + ":" + this.getMappedPort(MYSQL_PORT) + "/" + this.getDatabaseName() + additionalUrlParams;
+    final String additionalUrlParams = this.constructUrlParameters("?", "&");
+    return "jdbc:mysql:aws://" + this.getHost() + ":" + this.getMappedPort(MYSQL_PORT) + "/" + this.getDatabaseName() + additionalUrlParams;
   }
 
   @Override
   public String getDriverClassName() {
-      return "org.mariadb.jdbc.Driver";
+      return "software.aws.rds.jdbc.mysql.Driver";
   }
 
   @Override
