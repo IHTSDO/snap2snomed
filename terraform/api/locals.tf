@@ -1,5 +1,10 @@
 locals {
-  api_ecs_environment = [
+  api_ecs_envi
+  ronment = [
+    {
+      name = "logging.level.org.hibernate.SQL"
+      value = "DEBUG"
+    },
     {
       name = "spring.datasource.url"
       value = "jdbc:mysql:aws:aurora//${aws_rds_cluster_instance.api.endpoint}:${aws_rds_cluster_instance.api.port}/${aws_rds_cluster.api.database_name}?cachePrepStmts=true&useServerPrepStmts=false&rewriteBatchedStatements=true&socketTimeout=480000"
