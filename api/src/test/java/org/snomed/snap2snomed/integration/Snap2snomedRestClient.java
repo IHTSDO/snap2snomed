@@ -25,16 +25,6 @@ import static org.hamcrest.Matchers.hasKey;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import io.jsonwebtoken.JwtBuilder;
-import io.jsonwebtoken.Jwts;
-import io.restassured.RestAssured;
-import io.restassured.filter.log.LogDetail;
-import io.restassured.http.ContentType;
-import io.restassured.response.ResponseBodyExtractionOptions;
-import io.restassured.response.ValidatableResponse;
-import io.restassured.specification.RequestSpecification;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
@@ -52,6 +42,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 import org.hamcrest.Matcher;
@@ -68,6 +59,18 @@ import org.snomed.snap2snomed.security.AuthenticationFacade;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import io.jsonwebtoken.JwtBuilder;
+import io.jsonwebtoken.Jwts;
+import io.restassured.RestAssured;
+import io.restassured.filter.log.LogDetail;
+import io.restassured.http.ContentType;
+import io.restassured.response.ResponseBodyExtractionOptions;
+import io.restassured.response.ValidatableResponse;
+import io.restassured.specification.RequestSpecification;
 
 @Component
 public class Snap2snomedRestClient {
@@ -115,14 +118,14 @@ public class Snap2snomedRestClient {
 
   Set<String> adminUser = new HashSet<>();
 
-  private PrivateKey privateKey;
+  private final PrivateKey privateKey;
 
   public Snap2snomedRestClient() throws InvalidKeySpecException, NoSuchAlgorithmException {
     String rsaPrivateKey = PRIVATE_KEY;
 
     rsaPrivateKey = rsaPrivateKey.replaceAll("\\n", "").replace("-----BEGIN PRIVATE KEY-----", "").replace("-----END PRIVATE KEY-----", "");
 
-    PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(Base64.getDecoder().decode(rsaPrivateKey));
+    final PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(Base64.getDecoder().decode(rsaPrivateKey));
     KeyFactory kf = null;
     kf = KeyFactory.getInstance("RSA");
     privateKey = kf.generatePrivate(keySpec);
@@ -165,12 +168,12 @@ public class Snap2snomedRestClient {
   }
 
   public void createOrUpdateUser(String id, String givenName, String nickname, String familyName, String email) {
-    String group = IntegrationTestBase.USER_GROUP;
+    final String group = IntegrationTestBase.USER_GROUP;
     createOrUpdateUserRequest(id, givenName, nickname, familyName, email, group);
   }
 
   public void createOrUpdateAdminUser(String id, String givenName, String nickname, String familyName, String email) {
-    String group = config.getSecurity().getAdminGroup();
+    final String group = config.getSecurity().getAdminGroup();
     createOrUpdateUserRequest(id, givenName, nickname, familyName, email, group);
   }
 
@@ -200,7 +203,7 @@ public class Snap2snomedRestClient {
 
   public ValidatableResponse expectCreateUserFail(String id, String givenName, String nickname, String familyName, String email,
       boolean emailVerified, int statusCode) {
-    String group = IntegrationTestBase.USER_GROUP;
+    final String group = IntegrationTestBase.USER_GROUP;
     return given()
         .config(RestAssured.config().encoderConfig(encoderConfig().encodeContentTypeAs("application/jwt", ContentType.TEXT)))
         .headers(
@@ -222,7 +225,7 @@ public class Snap2snomedRestClient {
 
   public long createProject(String user, String title, String description, Set<String> owners,
       Set<String> members, Set<String> guests) throws JsonProcessingException {
-    long id = create(givenUser(user), createProjectJson(title, description, owners, members, guests), "/projects");
+    final long id = create(givenUser(user), createProjectJson(title, description, owners, members, guests), "/projects");
 
     givenUser(user)
         .get("/projects/" + id)
@@ -231,7 +234,7 @@ public class Snap2snomedRestClient {
         .body("title", is(title))
         .body("description", is(description));
 
-    int expectedOwnersSize = owners.contains(user) ? owners.size() : owners.size() + 1;
+    final int expectedOwnersSize = owners.contains(user) ? owners.size() : owners.size() + 1;
 
     givenUser(user)
         .queryParam("projection", "listUsers")
@@ -258,7 +261,7 @@ public class Snap2snomedRestClient {
         .put("/project/" + projectId + "/roles")
         .then().statusCode(200);
 
-    ValidatableResponse response = givenUser(owners.iterator().next())
+    final ValidatableResponse response = givenUser(owners.iterator().next())
         .queryParam("projection", "listUsers")
         .get("/projects/" + projectId)
         .then().statusCode(200)
@@ -266,15 +269,15 @@ public class Snap2snomedRestClient {
         .body("members", hasSize(members.size()))
         .body("guests", hasSize(guests.size()));
 
-    for (String owner : owners) {
+    for (final String owner : owners) {
       response.body("owners", hasItem(hasEntry("id", owner)));
     }
 
-    for (String member : members) {
+    for (final String member : members) {
       response.body("members", hasItem(hasEntry("id", member)));
     }
 
-    for (String guest : guests) {
+    for (final String guest : guests) {
       response.body("guests", hasItem(hasEntry("id", guest)));
     }
   }
@@ -295,7 +298,7 @@ public class Snap2snomedRestClient {
   }
 
   private String createProjectRoleUpdateJson(Set<String> owners, Set<String> members, Set<String> guests) throws JsonProcessingException {
-    Map<String, Object> map = new HashMap<>();
+    final Map<String, Object> map = new HashMap<>();
     map.put("owners", owners.stream().map(o -> User.builder().id(o).build()).collect(Collectors.toList()));
     map.put("members", members.stream().map(o -> User.builder().id(o).build()).collect(Collectors.toList()));
     map.put("guests", guests.stream().map(o -> User.builder().id(o).build()).collect(Collectors.toList()));
@@ -330,7 +333,7 @@ public class Snap2snomedRestClient {
 
   public long createImportedCodeSet(String mapRowName, String mapRowDisplay,
       String name, String version, int numberOfCodes, Set<Integer> codesToOmit) throws IOException {
-    File file = File.createTempFile("s2s", "import-test");
+    final File file = File.createTempFile("s2s", "import-test");
 
     try (BufferedWriter writer = new BufferedWriter(new FileWriter(file));
         CSVPrinter csvPrinter = new CSVPrinter(writer, CSVFormat.DEFAULT)) {
@@ -345,22 +348,40 @@ public class Snap2snomedRestClient {
     return createImportedCodeSet(name, version, 0, 1, false, ",", file, "text/csv");
   }
   public long createImportedCodeSet(String name, String version, int codeColumnIndex, int displayColumnIndex, boolean hasHeader,
+      String[] additionalColumnIndexes, String[] additionalColumnTypes,
+      String delimiter, File file, String fileType)
+      throws JsonProcessingException {
+    return createImportedCodeSet(IntegrationTestBase.DEFAULT_TEST_USER_SUBJECT, name, version, codeColumnIndex, displayColumnIndex,
+        hasHeader, additionalColumnIndexes, additionalColumnTypes, delimiter, file, fileType);
+  }
+  public long createImportedCodeSet(String name, String version, int codeColumnIndex, int displayColumnIndex, boolean hasHeader,
       String delimiter, File file, String fileType)
       throws JsonProcessingException {
         return createImportedCodeSet(IntegrationTestBase.DEFAULT_TEST_USER_SUBJECT, name, version, codeColumnIndex, displayColumnIndex,
                                 hasHeader, delimiter, file, fileType);
-      }
+  }
 
   public long createImportedCodeSet(String subject, String name, String version, int codeColumnIndex, int displayColumnIndex, boolean hasHeader,
       String delimiter, File file, String fileType)
+          throws JsonProcessingException {
+    return createImportedCodeSet(subject, name, version, codeColumnIndex, displayColumnIndex, hasHeader, null, null, delimiter, file, fileType);
+  }
+
+  public long createImportedCodeSet(String subject, String name, String version, int codeColumnIndex, int displayColumnIndex, boolean hasHeader,
+      String[] additionalColumnIndexes, String[] additionalColumnTypes,
+      String delimiter, File file, String fileType)
       throws JsonProcessingException {
-    java.util.Map<String, Object> map = new HashMap<>();
+    final java.util.Map<String, Object> map = new HashMap<>();
     map.put("name", name);
     map.put("version", version);
     map.put("codeColumnIndex", codeColumnIndex);
     map.put("displayColumnIndex", displayColumnIndex);
     map.put("hasHeader", hasHeader);
     map.put("delimiter", delimiter);
+    if (null != additionalColumnIndexes) {
+      map.put("additionalColumnIndexes", additionalColumnIndexes);
+      map.put("additionalColumnTypes", additionalColumnTypes);
+    }
 
     return givenUser(subject , ContentType.MULTIPART.getContentTypeStrings()[0], ContentType.JSON)
         .multiPart("file", file, fileType)
@@ -374,7 +395,7 @@ public class Snap2snomedRestClient {
   public void expectCreateImportedCodeSetFail(String name, String version, int codeColumnIndex, int displayColumnIndex, boolean hasHeader,
       String delimiter, File file, String fileType, int status, String errorUri)
       throws JsonProcessingException {
-    java.util.Map<String, Object> map = new HashMap<>();
+    final java.util.Map<String, Object> map = new HashMap<>();
     map.put("name", name);
     map.put("version", version);
     map.put("codeColumnIndex", codeColumnIndex);
@@ -400,17 +421,17 @@ public class Snap2snomedRestClient {
    * @param statusColumnIndex supply -1 for no selection
    */
   public MappingImportResponse createImportedMap(int codeColumnIndex, int targetColumnIndex, int targetDisplayColumnIndex,
-      int relationshipColumnIndex, int noMapFlagColumnIndex, int statusColumnIndex, boolean hasHeader, String delimiter, 
+      int relationshipColumnIndex, int noMapFlagColumnIndex, int statusColumnIndex, boolean hasHeader, String delimiter,
       File file, String fileType, Long mapId)
       throws JsonProcessingException {
-    java.util.Map<String, Object> map = new HashMap<>();
+    final java.util.Map<String, Object> map = new HashMap<>();
 
     map.put("codeColumnIndex", codeColumnIndex);
     map.put("targetCodeColumnIndex", targetColumnIndex);
     map.put("targetDisplayColumnIndex", targetDisplayColumnIndex);
     map.put("relationshipColumnIndex", relationshipColumnIndex);
     if (Integer.valueOf(noMapFlagColumnIndex) == Integer.valueOf(-1)) {
-      map.put("noMapFlagColumnIndex", null); 
+      map.put("noMapFlagColumnIndex", null);
     }
     else {
       map.put("noMapFlagColumnIndex", noMapFlagColumnIndex);
@@ -425,8 +446,8 @@ public class Snap2snomedRestClient {
     map.put("delimiter", delimiter);
     map.put("mapId", mapId);
 
-    MappingImportResponse mappingImportResponse = new MappingImportResponse();
-    ResponseBodyExtractionOptions responseBody = given().headers(
+    final MappingImportResponse mappingImportResponse = new MappingImportResponse();
+    final ResponseBodyExtractionOptions responseBody = given().headers(
       "Authorization", "Bearer " + createAccessToken(IntegrationTestBase.DEFAULT_TEST_USER_SUBJECT, IntegrationTestBase.USER_GROUP),
       "Content-Type", ContentType.MULTIPART,
       "Accept", ContentType.JSON)
@@ -446,17 +467,17 @@ public class Snap2snomedRestClient {
    * @param statusColumnIndex supply -1 for no selection
    */
   public void expectCreateImportedMapFail(int codeColumnIndex, int targetColumnIndex, int targetDisplayColumnIndex,
-      int relationshipColumnIndex, int noMapFlagColumnIndex, int statusColumnIndex, boolean hasHeader, String delimiter, 
+      int relationshipColumnIndex, int noMapFlagColumnIndex, int statusColumnIndex, boolean hasHeader, String delimiter,
       File file, String fileType, Long mapId, int status, String errorUri, String subject)
       throws JsonProcessingException {
-    java.util.Map<String, Object> map = new HashMap<>();
+    final java.util.Map<String, Object> map = new HashMap<>();
 
     map.put("codeColumnIndex", codeColumnIndex);
     map.put("targetCodeColumnIndex", targetColumnIndex);
     map.put("targetDisplayColumnIndex", targetDisplayColumnIndex);
     map.put("relationshipColumnIndex", relationshipColumnIndex);
     if (Integer.valueOf(noMapFlagColumnIndex) == Integer.valueOf(-1)) {
-      map.put("noMapFlagColumnIndex", null); 
+      map.put("noMapFlagColumnIndex", null);
     }
     else {
       map.put("noMapFlagColumnIndex", noMapFlagColumnIndex);
@@ -558,7 +579,7 @@ public class Snap2snomedRestClient {
   }
 
   public void checkLastModified(long mapRowId, String role, String user) {
-    ValidatableResponse response = givenDefaultUser().get("/mapRows/" + mapRowId + "/" + role)
+    final ValidatableResponse response = givenDefaultUser().get("/mapRows/" + mapRowId + "/" + role)
         .then();
 
     if (user != null) {
@@ -596,7 +617,7 @@ public class Snap2snomedRestClient {
   public void updateNoMapAndStatus(String user, long mapRowId, Boolean noMap, MapStatus status, int statusCode, String detail)
       throws JsonProcessingException {
 
-    Map<String, Object> map = new HashMap<>();
+    final Map<String, Object> map = new HashMap<>();
     if (noMap != null) {
       map.put("noMap", noMap);
     }
@@ -625,7 +646,7 @@ public class Snap2snomedRestClient {
 
   public long createTarget(String user, long mapId, String code, String targetCode, String targetDisplay, MappingRelationship relationship,
       boolean flagged) throws JsonProcessingException {
-    long mapRowId = getMapRowId(mapId, code);
+    final long mapRowId = getMapRowId(mapId, code);
 
     return createTarget(user, mapRowId, targetCode, targetDisplay, relationship, flagged, 201);
   }
@@ -633,14 +654,14 @@ public class Snap2snomedRestClient {
   public long createTarget(String user, long mapRowId, String targetCode, String targetDisplay, MappingRelationship relationship,
       boolean flagged, int expectedStatusCode) throws JsonProcessingException {
 
-    java.util.Map<String, Object> map = new HashMap<>();
+    final java.util.Map<String, Object> map = new HashMap<>();
     map.put("row", "/mapRows/" + mapRowId);
     map.put("targetCode", targetCode);
     map.put("targetDisplay", targetDisplay);
     map.put("relationship", relationship);
     map.put("flagged", flagged);
 
-    ValidatableResponse response = givenUser(user)
+    final ValidatableResponse response = givenUser(user)
         .body(objectMapper.writeValueAsString(map))
         .post("/mapRowTargets")
         .then().statusCode(expectedStatusCode);
@@ -655,13 +676,13 @@ public class Snap2snomedRestClient {
   public void updateTarget(String user, long targetId, String targetCode, String targetDisplay, MappingRelationship relationship,
       boolean flagged, int expectedStatusCode) throws JsonProcessingException {
 
-    java.util.Map<String, Object> map = new HashMap<>();
+    final java.util.Map<String, Object> map = new HashMap<>();
     map.put("targetCode", targetCode);
     map.put("targetDisplay", targetDisplay);
     map.put("relationship", relationship);
     map.put("flagged", flagged);
 
-    ValidatableResponse response = givenUser(user)
+    final ValidatableResponse response = givenUser(user)
         .body(objectMapper.writeValueAsString(map))
         .patch("/mapRowTargets/" + targetId)
         .then().statusCode(expectedStatusCode);
@@ -672,7 +693,7 @@ public class Snap2snomedRestClient {
   }
 
   public void updateTargetFlag(String user, long mapRowTargetId, boolean flagged, int statusCode) throws JsonProcessingException {
-      java.util.Map<String, Object> map = new HashMap<>();
+      final java.util.Map<String, Object> map = new HashMap<>();
       map.put("flagged", flagged);
 
       givenUser(user)
@@ -684,7 +705,7 @@ public class Snap2snomedRestClient {
   public String createTaskJson(TaskType type, long mapId, String assignee, String sourceRowSpecification,
       boolean allowAssigneeToBeAuthorAndReviewer, boolean reassignAlreadyAssignedRows, String description)
       throws JsonProcessingException {
-    Map<String, Object> map = new HashMap<>();
+    final Map<String, Object> map = new HashMap<>();
     map.put("type", type);
     map.put("allowAssigneeToBeAuthorAndReviewer", allowAssigneeToBeAuthorAndReviewer);
     map.put("reassignAlreadyAssignedRows", reassignAlreadyAssignedRows);
@@ -709,7 +730,7 @@ public class Snap2snomedRestClient {
 
   public String createProjectJson(String title, String description, Set<String> owners, Set<String> members, Set<String> guests)
       throws JsonProcessingException {
-    java.util.Map<String, Object> map = new HashMap<>();
+    final java.util.Map<String, Object> map = new HashMap<>();
     map.put("title", title);
     map.put("description", description);
     if (owners != null) {
@@ -726,7 +747,7 @@ public class Snap2snomedRestClient {
 
   public String createMapJson(String mapVersion, String toVersion, String toScope, Long projectId, Long importedCodeSetId)
       throws JsonProcessingException {
-    java.util.Map<String, Object> map = new HashMap<>();
+    final java.util.Map<String, Object> map = new HashMap<>();
     map.put("mapVersion", mapVersion);
     map.put("toVersion", toVersion);
     map.put("toScope", toScope);
@@ -737,7 +758,7 @@ public class Snap2snomedRestClient {
 
   public String createMapJson(Long mapId, String mapVersion, String toVersion, String toScope, Long projectId, Long importedCodeSetId)
       throws JsonProcessingException {
-    java.util.Map<String, Object> map = new HashMap<>();
+    final java.util.Map<String, Object> map = new HashMap<>();
     map.put("id", mapId);
     map.put("mapVersion", mapVersion);
     map.put("toVersion", toVersion);
@@ -749,7 +770,7 @@ public class Snap2snomedRestClient {
 
   public String createNoteJson(Long mapRowId, String userId, String noteText)
       throws JsonProcessingException {
-    java.util.Map<String, Object> map = new HashMap<>();
+    final java.util.Map<String, Object> map = new HashMap<>();
     map.put("mapRow", "/mapRows/" + mapRowId);
     map.put("noteBy", "/users/" + userId);
     map.put("noteText", noteText);
@@ -757,10 +778,10 @@ public class Snap2snomedRestClient {
   }
 
   public String createAccessToken(String subject, String group) {
-    Date now = new Date();
+    final Date now = new Date();
 
     //Let's set the JWT Claims
-    JwtBuilder builder = Jwts.builder()
+    final JwtBuilder builder = Jwts.builder()
         .setId("123")
         .setIssuedAt(now)
         .setSubject(subject)
@@ -776,10 +797,10 @@ public class Snap2snomedRestClient {
 
   public String createIdToken(String id, String givenName, String nickname, String familyName, String email,
       boolean emailVerified, String group) {
-    Date now = new Date();
+    final Date now = new Date();
 
     //Let's set the JWT Claims
-    JwtBuilder builder = Jwts.builder()
+    final JwtBuilder builder = Jwts.builder()
         .setId("123")
         .setIssuedAt(now)
         .setSubject(id)
@@ -830,16 +851,16 @@ public class Snap2snomedRestClient {
         .extract().body().jsonPath()
         .getList("content.id", String.class).forEach(id -> {
           try {
-            Long lid = Long.parseLong(id);
+            final Long lid = Long.parseLong(id);
             deleteTask(lid);
-          } catch (NumberFormatException e) {
+          } catch (final NumberFormatException e) {
             // nothing to do
           }
         });
   }
 
   public String createUserJson(String givenName, String familyName, String nickname, String email) throws JsonProcessingException {
-    Map<String, Object> map = new HashMap<>();
+    final Map<String, Object> map = new HashMap<>();
     map.put("givenName", givenName);
     map.put("familyName", familyName);
     map.put("nickname", nickname);

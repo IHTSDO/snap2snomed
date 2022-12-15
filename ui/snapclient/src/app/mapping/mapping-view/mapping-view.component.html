@@ -165,47 +165,69 @@
                                [font_size]="'12px'"></app-user-chip>
               </td>
             </ng-container>
+            <!-- Additional Source Columns -->
+            <ng-container *ngFor="let additionalCol of additionalDisplayedColumns; let idx = index" matColumnDef="{{additionalCol.columnId}}">
+              <th mat-header-cell *matHeaderCellDef="let maprow" [resizeColumn]="true" [index]="idx + 6" [title]="page.additionalColumns[idx].name"></th>
+              <td mat-cell *matCellDef="let maprow">{{maprow.additionalColumnValues[idx]}}</td>
+            </ng-container>
 
             <!-- Filter Id -->
             <ng-container matColumnDef="filter-id">
               <th mat-header-cell *matHeaderCellDef [attr.colspan]="1"></th>
             </ng-container>
             <!-- Filter SourceIndex -->
-            <ng-container matColumnDef="filter-source-index">
+            <ng-container matColumnDef="filter-sourceIndex">
               <th mat-header-cell *matHeaderCellDef [attr.colspan]="1"></th>
             </ng-container>
             <!-- Filter SourceCode -->
-            <ng-container matColumnDef="filter-source-code">
-              <th mat-header-cell *matHeaderCellDef [attr.colspan]="1">
+            <ng-container matColumnDef="filter-sourceCode">
+              <th mat-header-cell [ngClass]="{'hide-filter': !isFilterColumnVisible('filter-sourceCode')}" 
+                  *matHeaderCellDef [attr.colspan]="1">
                 <mat-form-field appearance="outline">
                   <input matInput autocapitalize="off" autocomplete="false" list="no_source_code"
-                         [(ngModel)]="filterEntity.sourceCode" [formControl]="sourceCodeFilterControl">
+                         [(ngModel)]="filterEntity.sourceCode" (input)="filterChange()">
                   <datalist id="no_source_code"></datalist><!-- workaround for Edge ignoring autocomplete="false" -->
                   <button *ngIf="filterEntity.sourceCode" matSuffix mat-icon-button aria-label="Clear"
-                          (click)="filterEntity.sourceCode=''">
+                          (click)="filterEntity.sourceCode=''; filterChange()">
                     <mat-icon>cancel</mat-icon>
                   </button>
                 </mat-form-field>
               </th>
             </ng-container>
             <!-- Filter SourceCode -->
-            <ng-container matColumnDef="filter-source-display">
-              <th mat-header-cell *matHeaderCellDef [attr.colspan]="1">
+            <ng-container matColumnDef="filter-sourceDisplay">
+              <th mat-header-cell [ngClass]="{'hide-filter': !isFilterColumnVisible('filter-sourceDisplay')}" *matHeaderCellDef [attr.colspan]="1">
                 <mat-form-field appearance="outline">
                   <input matInput autocapitalize="off" autocomplete="false" list="no_source_display"
-                         [(ngModel)]="filterEntity.sourceDisplay" [formControl]="sourceDisplayFilterControl">
+                         [(ngModel)]="filterEntity.sourceDisplay" (input)="filterChange()">
                   <datalist id="no_source_display"></datalist>
                   <!-- workaround for Edge ignoring autocomplete="false" -->
                   <button *ngIf="filterEntity.sourceDisplay" matSuffix mat-icon-button aria-label="Clear"
-                          (click)="filterEntity.sourceDisplay=''">
+                          (click)="filterEntity.sourceDisplay=''; filterChange()">
                     <mat-icon>cancel</mat-icon>
                   </button>
                 </mat-form-field>
               </th>
             </ng-container>
+            <!-- Filter Additional Source Columns -->
+            <ng-container *ngFor="let additionalCol of additionalFilteredColumns; let idx = index" matColumnDef="{{additionalCol}}">
+              <th mat-header-cell [ngClass]="{'hide-filter': !isFilterColumnVisible(additionalCol)}" *matHeaderCellDef [attr.colspan]="1">
+                <mat-form-field appearance="outline">
+                  <input matInput autocapitalize="off" autocomplete="false" [attr.list]="getDataListId(idx)"
+                   [(ngModel)]="filterEntity.additionalColumns[idx]" (input)="filterChange()">
+                  <datalist id="getDataListId(idx)"></datalist>
+                  <!-- workaround for Edge ignoring autocomplete="false" -->
+                  <button *ngIf="filterEntity.additionalColumns[idx]" matSuffix mat-icon-button aria-label="Clear"
+                          (click)="filterEntity.additionalColumns[idx]=''; filterChange()">
+                    <mat-icon>cancel</mat-icon>
+                  </button>
+                </mat-form-field>
+              </th>
+            </ng-container>
+
             <!-- Filter Relationship -->
             <ng-container matColumnDef="filter-relationship">
-              <th mat-header-cell *matHeaderCellDef [attr.colspan]="1">
+              <th mat-header-cell [ngClass]="{'hide-filter': !isFilterColumnVisible('filter-relationship')}" *matHeaderCellDef [attr.colspan]="1">
                 <mat-form-field appearance="outline">
                   <mat-select [(ngModel)]="filterEntity.relationship" (selectionChange)="filterChange()" multiple>
                     <mat-option *ngFor="let rel of relationships"
@@ -215,29 +237,29 @@
               </th>
             </ng-container>
             <!-- Filter Target Code -->
-            <ng-container matColumnDef="filter-target-code">
-              <th mat-header-cell *matHeaderCellDef [attr.colspan]="1">
+            <ng-container matColumnDef="filter-targetCode">
+              <th mat-header-cell [ngClass]="{'hide-filter': !isFilterColumnVisible('filter-targetCode')}"  *matHeaderCellDef [attr.colspan]="1">
                 <mat-form-field appearance="outline">
                   <input matInput autocapitalize="off" autocomplete="false" list="no_target_code"
-                         [(ngModel)]="filterEntity.targetCode" [formControl]="targetCodeFilterControl">
+                         [(ngModel)]="filterEntity.targetCode" (input)="filterChange()">
                   <datalist id="no_target_code"></datalist><!-- workaround for Edge ignoring autocomplete="false" -->
                   <button *ngIf="filterEntity.targetCode" matSuffix mat-icon-button aria-label="Clear"
-                          (click)="filterEntity.targetCode=''">
+                          (click)="filterEntity.targetCode=''; filterChange()">
                     <mat-icon>cancel</mat-icon>
                   </button>
                 </mat-form-field>
               </th>
             </ng-container>
             <!-- Filter Target Display -->
-            <ng-container matColumnDef="filter-target-display">
-              <th mat-header-cell *matHeaderCellDef [attr.colspan]="1">
+            <ng-container matColumnDef="filter-targetDisplay">
+              <th mat-header-cell [ngClass]="{'hide-filter': !isFilterColumnVisible('filter-targetDisplay')}" *matHeaderCellDef [attr.colspan]="1">
                 <mat-form-field appearance="outline">
                   <input matInput autocapitalize="off" autocomplete="false" list="no_target_display"
-                         [(ngModel)]="filterEntity.targetDisplay" [formControl]="targetDisplayFilterControl">
+                         [(ngModel)]="filterEntity.targetDisplay" (input)="filterChange()">
                   <datalist id="no_target_display"></datalist>
                   <!-- workaround for Edge ignoring autocomplete="false" -->
                   <button *ngIf="filterEntity.targetDisplay" matSuffix mat-icon-button aria-label="Clear"
-                          (click)="filterEntity.targetDisplay=''">
+                          (click)="filterEntity.targetDisplay=''; filterChange()">
                     <mat-icon>cancel</mat-icon>
                   </button>
                 </mat-form-field>
@@ -245,7 +267,7 @@
             </ng-container>
             <!-- Filter NoMap -->
             <ng-container matColumnDef="filter-noMap">
-              <th mat-header-cell *matHeaderCellDef [attr.colspan]="1">
+              <th mat-header-cell [ngClass]="{'hide-filter': !isFilterColumnVisible('filter-noMap')}" *matHeaderCellDef [attr.colspan]="1">
                 <mat-form-field appearance="outline">
                   <mat-select [(ngModel)]="filterEntity.noMap" (selectionChange)="filterChange()">
                     <mat-option [value]="">---</mat-option>
@@ -280,8 +302,8 @@
               </th>
             </ng-container>
             <!-- Filter Last Author/Reviewer -->
-            <ng-container matColumnDef="filter-last-author-reviewer">
-              <th mat-header-cell *matHeaderCellDef [attr.colspan]="1">
+            <ng-container matColumnDef="filter-lastAuthorReviewer">
+              <th mat-header-cell [ngClass]="{'hide-filter': !isFilterColumnVisible('filter-lastAuthorReviewer')}" *matHeaderCellDef [attr.colspan]="1">
                 <mat-form-field appearance="outline">
                   <mat-select [(ngModel)]="filterEntity.lastAuthorReviewer" (selectionChange)="filterChange()"
                               multiple>
@@ -295,8 +317,8 @@
               </th>
             </ng-container>
             <!-- Filter Author -->
-            <ng-container matColumnDef="filter-author">
-              <th mat-header-cell *matHeaderCellDef [attr.colspan]="1">
+            <ng-container matColumnDef="filter-assignedAuthor">
+              <th mat-header-cell [ngClass]="{'hide-filter': !isFilterColumnVisible('filter-assignedAuthor')}" *matHeaderCellDef [attr.colspan]="1">
                 <mat-form-field appearance="outline">
                   <mat-select [(ngModel)]="filterEntity.assignedAuthor" (selectionChange)="filterChange()" multiple>
                     <mat-option value="none">{{'TASK.UNASSIGNED' | translate}}</mat-option>
@@ -309,8 +331,8 @@
               </th>
             </ng-container>
             <!-- Filter Reviewer -->
-            <ng-container matColumnDef="filter-reviewer">
-              <th mat-header-cell *matHeaderCellDef [attr.colspan]="1">
+            <ng-container matColumnDef="filter-assignedReviewer">
+              <th mat-header-cell [ngClass]="{'hide-filter': !isFilterColumnVisible('filter-assignedReviewer')}" *matHeaderCellDef [attr.colspan]="1">
                 <mat-form-field appearance="outline">
                   <mat-select [(ngModel)]="filterEntity.assignedReviewer" (selectionChange)="filterChange()" multiple>
                     <mat-option value="none">{{'TASK.UNASSIGNED' | translate}}</mat-option>

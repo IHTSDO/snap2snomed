@@ -105,6 +105,8 @@ export class MappingWorkComponent implements OnInit, OnDestroy {
 
   // override so have access to populate show / hide column menu
   displayedColumns : TableColumn[] = [
+  ];
+  constantColumns: TableColumn[] = [
     {columnId: 'id', columnDisplay: '', displayed: true},
     {columnId: 'sourceIndex', columnDisplay: 'TABLE.SOURCE_INDEX', displayed: true},
     {columnId: 'sourceCode', columnDisplay: 'TABLE.SOURCE_CODE', displayed: true},
@@ -118,8 +120,11 @@ export class MappingWorkComponent implements OnInit, OnDestroy {
     {columnId: 'latestNote', columnDisplay: 'SOURCE.TABLE.NOTES', displayed: true},
     {columnId: 'actions', columnDisplay: '', displayed: true}
   ];
+  additionalDisplayedColumns: TableColumn[] = [];
   // columns that are eligable for user controlling the hiding / displaying
   hideShowColumns: string[] = [
+  ];
+  constantHideShowColumns: string[] = [
     'sourceIndex',
     'sourceCode',
     'sourceDisplay',
@@ -127,6 +132,7 @@ export class MappingWorkComponent implements OnInit, OnDestroy {
     'targetDisplay',
     'relationship',
   ];
+  additionalHideShowColumns: string[] = [];
 
   constructor(private router: Router,
               private route: ActivatedRoute,
@@ -163,6 +169,23 @@ export class MappingWorkComponent implements OnInit, OnDestroy {
     self.subscription.add(self.store.select(selectCurrentView).subscribe(
       (page) => {
         self.page = page ?? new Page();
+
+        this.additionalDisplayedColumns = [];
+        this.additionalHideShowColumns = [];
+
+        for (let i = 0; i <  this.page.additionalColumns.length; i++) {
+          this.additionalDisplayedColumns.push({columnId: "additionalColumn" + (i+1), columnDisplay: this.page.additionalColumns[i].name, displayed: true});
+          this.additionalHideShowColumns.push("additionalColumn" + (i+1));
+        }
+
+        // display additional columns at the end of the table
+        // this.displayedColumns = this.constantColumns.concat(this.additionalDisplayedColumns);
+        // this.hideShowColumns = this.constantHideShowColumns.concat(this.additionalHideShowColumns);
+
+        // display additional columns after source columns
+        this.displayedColumns = this.constantColumns.slice(0,4).concat(this.additionalDisplayedColumns).concat(this.constantColumns.slice(4));
+        this.hideShowColumns = this.constantHideShowColumns.slice(0,3).concat(this.additionalHideShowColumns).concat(this.constantHideShowColumns.slice(3));
+        
       })
     );
 

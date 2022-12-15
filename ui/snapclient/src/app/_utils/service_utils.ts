@@ -194,12 +194,16 @@ export class ServiceUtils {
     if (filterEntity.assignedReviewer && filterEntity.assignedReviewer.length > 0) {
       params = params.append('assignedReviewer', filterEntity.assignedReviewer.toString());
     }
+    if (filterEntity.additionalColumns && filterEntity.additionalColumns.length > 0) {
+      params = params.append('additionalColumns', filterEntity.additionalColumns.join(','));
+    }
 
     return params;
   }
 
   static paramsToFilterEntity(params: any): MapViewFilter {
     const mapViewFilter = new MapViewFilter();
+
     Object.keys(params).forEach(k => {
       const v = params[k];
       switch (k) {
@@ -236,6 +240,19 @@ export class ServiceUtils {
           break;
         case 'assignedReviewer':
           mapViewFilter.assignedReviewer = v;
+          break;
+        case "additionalColumns":
+          if (v !== undefined) {
+            if (Array.isArray(v)) {
+              if (v.length > 0) {
+                mapViewFilter.additionalColumns = v[0].split(',');
+              }
+            }
+            else {
+              mapViewFilter.additionalColumns = v.split(',');
+            }
+
+          }
           break;
       }
     });

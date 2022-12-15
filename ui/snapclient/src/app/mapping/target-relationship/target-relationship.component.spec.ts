@@ -58,7 +58,7 @@ describe('TargetRelationshipComponent', () => {
   const targetSystem = 'http://snomed.info/sct/900000000000207008/version/20220228'
   const relationship = MapRowRelationship.EQUIVALENT;
   const target = new MapView('', '', sourceIndex, sourceCode, sourceDisplay, targetCode, targetDisplay, relationship,
-    'DRAFT', false, null, null, null, null, null, false);
+    'DRAFT', false, null, null, null, null, null, false, undefined);
   const parameterValue = [
     {
       name: 'designation',
@@ -120,7 +120,9 @@ describe('TargetRelationshipComponent', () => {
       code: sourceCode,
       display: sourceDisplay,
       noMap: false,
-      status: MapRowStatus.DRAFT
+      status: MapRowStatus.DRAFT,
+      additionalColumnValues: [],
+      additionalColumnNames: []
     };
     fixture.detectChanges();
   });
@@ -183,7 +185,7 @@ describe('TargetRelationshipComponent', () => {
     expect(el).toBeTruthy();
     el.triggerEventHandler('click', null);
     const calledWith = new MapView('', '', sourceIndex, sourceCode, sourceDisplay, code, display, relationship,
-      'DRAFT', false, null, null, null, null, null, false);
+      'DRAFT', false, null, null, null, null, null, false, undefined);
 
     fixture.whenStable().then(() => {
       fixture.detectChanges();
@@ -199,7 +201,7 @@ describe('TargetRelationshipComponent', () => {
     const display = 'This is a test selection';
 
     component.targetRows.push(new MapView('', '', sourceIndex, sourceCode, sourceDisplay, code, display, relationship,
-      'DRAFT', false, null, null, null, null, null, false));
+      'DRAFT', false, null, null, null, null, null, false, undefined));
     selectionService.select({code, display});
 
     spyOn(fhirService, 'getEnglishFsn').and.returnValue(of('Test English FSN'));

@@ -22,6 +22,7 @@ import {Task, TaskType} from '../../_models/task';
 import {ErrorInfo} from '../../errormessage/errormessage.component';
 import {MapService} from '../../_services/map.service';
 import {
+  AdditionalColumn,
   authorStatuses,
   MapRow,
   MapRowStatus,
@@ -35,7 +36,7 @@ import {MatDialog} from '@angular/material/dialog';
 import {ServiceUtils} from '../../_utils/service_utils';
 import {ConfirmDialogComponent, DialogType} from '../../dialog/confirm-dialog/confirm-dialog.component';
 import {MatCheckboxChange} from '@angular/material/checkbox';
-import {TableParams} from '../mapping-table/mapping-table.component';
+import {TableColumn, TableParams} from '../mapping-table/mapping-table.component';
 import {selectCurrentView} from 'src/app/store/mapping-feature/mapping.selectors';
 import {SourceNavigationService, SourceNavSet} from 'src/app/_services/source-navigation.service';
 import {Subscription} from 'rxjs';
@@ -49,6 +50,7 @@ import {StatusUtils} from '../../_utils/status_utils';
 import {WriteDisableUtils} from "../../_utils/write_disable_utils";
 import {debounceTime} from "rxjs/operators";
 import {User} from "../../_models/user";
+import { AdditionalColumnValue } from 'src/app/_models/source';
 
 
 export type SourceRow = {
@@ -58,6 +60,8 @@ export type SourceRow = {
   index: string;
   noMap: boolean;
   status: string;
+  additionalColumnValues: string[];
+  additionalColumnNames: string[] | undefined;
 };
 
 @Component({
@@ -94,6 +98,7 @@ export class MappingDetailComponent implements OnInit, OnDestroy {
   @Input() task: Task | undefined;
   @Input() paging!: TableParams;
   @Input() filterEntity!: MapViewFilter;
+  @Input() additionalDisplayedColumns: TableColumn[] | undefined;
   @Output() detailClose = new EventEmitter<boolean>();
 
   constructor(private store: Store<IAppState>,
@@ -131,7 +136,9 @@ export class MappingDetailComponent implements OnInit, OnDestroy {
           display: selected.mapRow.sourceDisplay,
           index: selected.mapRow.sourceIndex,
           noMap: selected.mapRow.noMap,
-          status: selected.mapRow.status
+          status: selected.mapRow.status,
+          additionalColumnValues: selected.mapRow.additionalColumnValues,
+          additionalColumnNames: this.additionalDisplayedColumns?.map( column => column.columnDisplay)
         };
         self.loadTargets();
       }
@@ -271,7 +278,7 @@ export class MappingDetailComponent implements OnInit, OnDestroy {
             return new MapView(target.row?.id || '', target.id, source.index || '', source.code || '',
               source.display || '', target.targetCode, target.targetDisplay, target.relationship, status,
               false, target.row?.latestNote || null, null, null, null,
-              null, flagged);
+              null, flagged, source.additionalColumnValues);
           });
         } else {
           self.mapRows = [];

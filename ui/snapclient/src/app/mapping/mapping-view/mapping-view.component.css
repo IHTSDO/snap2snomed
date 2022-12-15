@@ -84,46 +84,46 @@ ul.sources-list li {
   text-align: center;
 }
 
-.mat-column-filter-source-index,
+.mat-column-filter-sourceIndex,
 .mat-column-sourceIndex {
   width: 35px;
   text-align: center;
 
 }
 
-.mat-column-filter-author,
+.mat-column-filter-assignedAuthor,
 .mat-column-assignedAuthor,
-.mat-column-filter-reviewer,
+.mat-column-filter-assignedReviewer,
 .mat-column-assignedReviewer,
-.mat-column-filter-last-author-reviewer,
+.mat-column-filter-lastAuthorReviewer,
 .mat-column-lastAuthorReviewer {
   width: 35px;
   text-align: center;
 }
 
-.mat-column-filter-last-author-reviewer,
+.mat-column-filter-lastAuthorReviewer,
 .mat-column-lastAuthorReviewer {
   text-align: left;
 }
 
-.mat-column-filter-source-code, .mat-column-filter-target-code,
-.mat-column-filter-source-code .mat-form-field, .mat-column-filter-target-code .mat-form-field,
+.mat-column-filter-sourceCode, .mat-column-filter-targetCode,
+.mat-column-filter-sourceCode .mat-form-field, .mat-column-filter-targetCode .mat-form-field,
 .mat-column-sourceCode, .mat-column-targetCode {
   width: 100px;
   max-width: 150px; /* wide enough for an 18 digit SNOMED code */
   overflow-wrap: break-word;
 }
 
-.mat-column-filter-source-display, .mat-column-filter-target-display,
+.mat-column-filter-sourceDisplay, .mat-column-filter-targetDisplay,
 .mat-column-sourceDisplay, .mat-column-targetDisplay {
   min-width: 100px;
 }
 
-.mat-column-filter-source-display .mat-form-field-type-mat-input {
+.mat-column-filter-sourceDisplay .mat-form-field-type-mat-input {
   width: 95% !important;
 }
 
-.mat-column-filter-target-display .mat-form-field-type-mat-input {
+.mat-column-filter-targetDisplay .mat-form-field-type-mat-input {
   width: 95% !important;
 }
 
@@ -145,17 +145,17 @@ ul.sources-list li {
   width: 60px;
 }
 
-::ng-deep .mat-column-filter-author .mat-form-field {
+::ng-deep .mat-column-filter-assignedAuthor .mat-form-field {
   width: 60px;
   text-align: center;
 }
 
-::ng-deep .mat-column-filter-reviewer .mat-form-field {
+::ng-deep .mat-column-filter-assignedReviewer .mat-form-field {
   width: 60px;
   text-align: center;
 }
 
-::ng-deep .mat-column-filter-last-author-reviewer .mat-form-field {
+::ng-deep .mat-column-filter-lastAuthorReviewer .mat-form-field {
   width: 60px;
   text-align: center;
 }
@@ -287,4 +287,8 @@ td.mat-cell {
   padding-right: 5px;
   padding-left: 8px;
   margin-right: 5px;
+}
+
+.hide-filter {
+  display: none;
 }

@@ -70,3 +70,16 @@
   float: left;
   margin: 20px 10px;
 }
+
+.additional-column-section {
+  display: flex;
+}
+
+.trailing-space {
+  margin-right: 10px;
+}
+
+.two-form-fields {
+  width: 50%;
+}
+

@@ -43,7 +43,6 @@ import {ErrorInfo} from 'src/app/errormessage/errormessage.component';
 import {Params} from '@angular/router';
 import {ServiceUtils} from '../../_utils/service_utils';
 import {SelectionService} from 'src/app/_services/selection.service';
-import {FormControl} from '@angular/forms';
 import {MatDialog} from '@angular/material/dialog';
 import {ConfirmDialogComponent, DialogData, DialogType} from 'src/app/dialog/confirm-dialog/confirm-dialog.component';
 import {StatusUtils} from '../../_utils/status_utils';
@@ -79,6 +78,8 @@ export class MappingTableComponent implements OnInit, AfterViewInit, OnDestroy {
 
   /** Columns displayed in the table - specified in html. Columns IDs can be added, removed, or reordered. */
   @Input() displayedColumns: TableColumn[] = [
+  ];
+  constantColumns: TableColumn[] = [
     {columnId: 'id', columnDisplay: '', displayed: true},
     {columnId: 'sourceIndex', columnDisplay: 'TABLE.SOURCE_INDEX', displayed: true},
     {columnId: 'sourceCode', columnDisplay: 'TABLE.SOURCE_CODE', displayed: true},
@@ -92,19 +93,24 @@ export class MappingTableComponent implements OnInit, AfterViewInit, OnDestroy {
     {columnId: 'latestNote', columnDisplay: 'SOURCE.TABLE.NOTES', displayed: true},
     {columnId: 'actions', columnDisplay: '', displayed: true}
   ];
-  @Input() filteredColumns: string[] = [
+  additionalDisplayedColumns: TableColumn[] = [];
+  filteredColumns: string[] = [
+  ];
+  @Input() constantFilteredColumns: string[] = [
     'filter-id',
-    'filter-source-index',
-    'filter-source-code',
-    'filter-source-display',
-    'filter-target-code',
-    'filter-target-display',
+    'filter-sourceIndex',
+    'filter-sourceCode',
+    'filter-sourceDisplay',
+    'filter-targetCode',
+    'filter-targetDisplay',
     'filter-relationship',
     'filter-noMap',
     'filter-status',
     'filter-flagged',
-    'filter-notes'
+    'filter-notes',
+    'filter-actions',
   ];
+  additionalFilteredColumns: string[] = [];
 
   @Output() filterChange = new EventEmitter<MapViewFilter>();
   @Output() sortChange = new EventEmitter<Sort>();
@@ -160,11 +166,6 @@ export class MappingTableComponent implements OnInit, AfterViewInit, OnDestroy {
 
   private clickedRow?: number;
 
-  sourceCodeFilterControl = new FormControl('');
-  sourceDisplayFilterControl = new FormControl('');
-  targetCodeFilterControl = new FormControl('');
-  targetDisplayFilterControl = new FormControl('');
-
   constructor(private snackBar: MatSnackBar,
               private store: Store<IAppState>,
               private fhirService: FhirService,
@@ -195,6 +196,22 @@ export class MappingTableComponent implements OnInit, AfterViewInit, OnDestroy {
         if (page?.sourceDetails) {
           self.allSourceDetails = page.sourceDetails;
         }
+
+        this.additionalDisplayedColumns = [];
+        this.additionalFilteredColumns = [];
+        for (let i = 0; i <  this.page.additionalColumns.length; i++) {
+          this.additionalDisplayedColumns.push({columnId: "additionalColumn" + (i+1), columnDisplay:  this.page.additionalColumns[i].name, displayed: true});
+          this.additionalFilteredColumns.push("filter-additionalColumn" + (i+1));
+        }
+    
+        // display additional columns at the end of the table
+        // this.displayedColumns = this.constantColumns.concat(this.additionalDisplayedColumns);
+        // this.filteredColumns = this.constantFilteredColumns.concat(this.additionalFilteredColumns);
+
+        // display additional columns after source columns
+        this.displayedColumns = this.constantColumns.slice(0,4).concat(this.additionalDisplayedColumns).concat(this.constantColumns.slice(4));
+        this.filteredColumns = this.constantFilteredColumns.slice(0,4).concat(this.additionalFilteredColumns).concat(this.constantFilteredColumns.slice(4));
+
       })
     );
     this.subscription.add(
@@ -212,6 +229,10 @@ export class MappingTableComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ngAfterViewInit(): void {
+
+    this.additionalDisplayedColumns = [];
+    this.additionalFilteredColumns = [];
+
     if (this.paging.sortCol) {
       this.sort.active = this.paging.sortCol;
     }
@@ -223,15 +244,10 @@ export class MappingTableComponent implements OnInit, AfterViewInit, OnDestroy {
     this.sort.sortChange.subscribe((event) => this.sortChange.emit(event));
     this.paginator.page.subscribe((event) => this.pagingChange.emit(event));
 
-    // search as you type
-    [this.sourceCodeFilterControl, this.sourceDisplayFilterControl,
-      this.targetCodeFilterControl, this.targetDisplayFilterControl].forEach((control) => {
-      this.subscription.add(control.valueChanges
-        .pipe(debounceTime(this.debounce), distinctUntilChanged())
-        .subscribe(() => {
-          this.filterUpdate();
-        }));
-    });
+  }
+
+  getDataListId(index : number) {
+    return "no_additional_column_display" + index;
   }
 
   clickSourceDisplay(row: MapView): void {
@@ -264,6 +280,17 @@ export class MappingTableComponent implements OnInit, AfterViewInit, OnDestroy {
 
   getDisplayedColumns() : string[] {
     return this.displayedColumns?.filter(obj => obj.displayed === true).map((obj) => obj.columnId);
+  }
+
+  isFilterColumnVisible(filterId : string) : boolean {
+
+    let visible = true;
+    let foundColumn = this.displayedColumns.find(column => column.columnId === filterId.substring("filter-".length));
+    if (foundColumn) {
+      visible = foundColumn.displayed;
+    }
+
+    return visible; 
   }
 
   dismiss(): void {

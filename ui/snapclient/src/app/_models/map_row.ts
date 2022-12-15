@@ -50,6 +50,8 @@ export class MapView {
   latestNote?: Date | null;
   flagged?: boolean;
 
+  additionalColumnValues: string[];
+
   // Previous values
   private prevTargetCode?: string;
   private prevTargetDisplay?: string;
@@ -62,7 +64,7 @@ export class MapView {
               targetCode: string | undefined, targetDisplay: string | undefined, relationship: string | undefined,
               status: string, noMap: boolean, latestNote: Date | null | undefined, assignedAuthor: User | null | undefined,
               assignedReviewer: User | null | undefined, lastAuthor: User | null | undefined,
-              lastReviewer: User | null | undefined, flagged: boolean | undefined) {
+              lastReviewer: User | null | undefined, flagged: boolean | undefined, additionalColumnValues: string[] | undefined) {
     this.rowId = rowId;
     this.targetId = targetId;
     this.sourceIndex = sourceIndex;
@@ -79,22 +81,26 @@ export class MapView {
     this.assignedReviewer = assignedReviewer;
     this.lastAuthor = lastAuthor;
     this.lastReviewer = lastReviewer;
+    this.additionalColumnValues = additionalColumnValues || [];
   }
 
-  static create(mv: MapView): MapView {
+  static create(mv: any): MapView {
     // Need to convert numbers to strings here; mv may (will) have been coerced to a MapView
     const rowId = mv.rowId === null ? '' : mv.rowId.toString();
+    const additionalColumnValues = mv.additionalColumns ?
+      mv.additionalColumns.map((ac: {value: string}) => ac.value) : [];
+
     return new MapView(
       rowId, mv.targetId, mv.sourceIndex, mv.sourceCode, mv.sourceDisplay,
       mv.targetCode, mv.targetDisplay, mv.relationship, mv.status, mv.noMap, mv.latestNote,
-      mv.assignedAuthor, mv.assignedReviewer, mv.lastAuthor, mv.lastReviewer, mv.flagged
+      mv.assignedAuthor, mv.assignedReviewer, mv.lastAuthor, mv.lastReviewer, mv.flagged, additionalColumnValues
     );
   }
 
   convertToMapRow(mapping: Mapping): MapRow {
     return {
       id: this.rowId, map: mapping, noMap: this.noMap,
-      sourceCode: new SourceCode(this.sourceCode, this.sourceDisplay, mapping.source, this.sourceIndex),
+      sourceCode: new SourceCode(this.sourceCode, this.sourceDisplay, mapping.source, this.sourceIndex, this.additionalColumnValues),
       status: this.status, relationship: this.relationship, latestNote: this.latestNote
     } as unknown as MapRow;
   }
@@ -163,11 +169,14 @@ export class MapViewFilter {
   assignedReviewer: string[] | string = '';
   flagged?: boolean | undefined;
   notes?: boolean | undefined;
+  additionalColumns : string[] = [];
 
   hasFilters(): boolean {
+    const filteredAdditionalColumns: string[] = this.additionalColumns.length > 0 ? this.additionalColumns.filter((s): s is string => Boolean(s)) : [];
+
     return this.sourceCode !== '' || this.sourceDisplay !== '' || this.targetCode !== '' || this.targetDisplay !== ''
       || this.relationship !== '' || this.status !== '' || this.noMap !== undefined || this.flagged !== undefined
-      || this.lastAuthorReviewer !== '' || this.assignedAuthor !== '' || this.assignedReviewer !== '' || this.notes !== undefined;
+      || this.lastAuthorReviewer !== '' || this.assignedAuthor !== '' || this.assignedReviewer !== '' || this.notes !== undefined || filteredAdditionalColumns.length > 0;
   }
 }
 
@@ -191,6 +200,21 @@ export class MappedRowDetailsDto {
 
 }
 
+export enum ColumnType {
+  NUMBER = 'NUMBER',
+  TEXT = 'TEXT',
+}
+
+export class AdditionalColumn {
+  name: string;
+  type: ColumnType;
+
+  constructor(name: string, type: string) {
+    this.name = name;
+    this.type = ColumnType[type as keyof typeof ColumnType];
+  }
+};
+
 export class Page {
   data: MapView[];
   pageIndex: number;
@@ -198,14 +222,17 @@ export class Page {
   totalElements: number;
   totalPages: number;
   sourceDetails: MappedRowDetailsDto[];
+  additionalColumns: AdditionalColumn[];
 
-  constructor(data: MapView[] = [], pageIndex: number = 0, size: number = 0, totalElements: number = 0, totalPages: number = 0, sourceIndexes: MappedRowDetailsDto[] = []) {
+  constructor(data: MapView[] = [], pageIndex: number = 0, size: number = 0, totalElements: number = 0, totalPages: number = 0,
+      sourceIndexes: MappedRowDetailsDto[] = [], additionalColumns: AdditionalColumn[] = []) {
     this.data = data;
     this.pageIndex = pageIndex;
     this.size = size;
     this.totalElements = totalElements;
     this.totalPages = totalPages;
     this.sourceDetails = sourceIndexes;
+    this.additionalColumns = additionalColumns;
   }
 }
 

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {AfterViewInit, Component, EventEmitter, OnDestroy, OnInit, Output, ViewChild} from '@angular/core';
+import {AfterViewInit, Component, ElementRef, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {Mapping} from '../../_models/mapping';
 import {ActivatedRoute, Router} from '@angular/router';
 import {IAppState} from '../../store/app.state';
@@ -39,8 +39,8 @@ import {
 } from '../../_models/map_row';
 import {TranslateService} from '@ngx-translate/core';
 import {MapService} from '../../_services/map.service';
-import {from, merge, Observable, Subscription} from 'rxjs';
-import {debounceTime, distinctUntilChanged, last, mergeMap, tap} from 'rxjs/operators';
+import {debounceTime, distinctUntilChanged, tap} from 'rxjs/operators';
+import {merge, Subscription} from 'rxjs';
 import {MatSort} from '@angular/material/sort';
 import {Task, TaskType} from '../../_models/task';
 import {LoadTasksForMap} from '../../store/task-feature/task.actions';
@@ -52,7 +52,6 @@ import {MatTableFilter} from 'mat-table-filter';
 import {HttpParams} from '@angular/common/http';
 import {ErrorInfo} from '../../errormessage/errormessage.component';
 import {ServiceUtils} from '../../_utils/service_utils';
-import {FormControl} from '@angular/forms';
 import {LoadMapping, LoadMapView, ViewContext} from 'src/app/store/mapping-feature/mapping.actions';
 import {BulkchangeComponent, BulkChangeDialogData, getResultMessage} from '../bulkchange/bulkchange.component';
 import {MatDialog} from '@angular/material/dialog';
@@ -61,13 +60,11 @@ import {ResultsdialogComponent} from 'src/app/resultsdialog/resultsdialog.compon
 import {MappingTableSelectorComponent} from '../mapping-table-selector/mapping-table-selector.component';
 import {selectMappingFile, selectMappingFileError, selectMappingFileLoading, selectMappingFileSuccess} from 'src/app/store/source-feature/source.selectors';
 import {ErrorDetail} from 'src/app/_models/error_detail';
-import {FhirService} from 'src/app/_services/fhir.service';
 import {AuthService} from '../../_services/auth.service';
 import {MappingImportSource} from 'src/app/_models/mapping_import_source';
 import {ImportMappingFile, ImportMappingFileParams, InitSelectedMappingFile} from 'src/app/store/source-feature/source.actions';
 import {MappingImportComponent} from '../mapping-import/mapping-import.component';
 import { MappingNotesComponent } from '../mapping-table-notes/mapping-notes.component';
-import { SourceNavigationService } from 'src/app/_services/source-navigation.service';
 import { MatCheckboxChange } from '@angular/material/checkbox';
 import { TableColumn } from '../mapping-table/mapping-table.component';
 
@@ -113,13 +110,12 @@ export class MappingViewComponent implements OnInit, AfterViewInit, OnDestroy {
   page: Page = new Page();
   allSourceDetails: MappedRowDetailsDto[] = [];
 
-  sourceCodeFilterControl = new FormControl('');
-  sourceDisplayFilterControl = new FormControl('');
-  targetCodeFilterControl = new FormControl('');
-  targetDisplayFilterControl = new FormControl('');
-
-  /** Columns displayed in the table. Columns IDs can be added, removed, or reordered. */
-  displayedColumns : TableColumn[] = [
+  /** 
+   * Columns displayed in the table - specified in html. Columns IDs can be added, removed, or reordered. 
+   */
+  displayedColumns: TableColumn[] = [
+  ];
+  constantColumns: TableColumn[] = [
     {columnId: 'id', columnDisplay: '', displayed: true},
     {columnId: 'sourceIndex', columnDisplay: 'TABLE.SOURCE_INDEX', displayed: true},
     {columnId: 'sourceCode', columnDisplay: 'TABLE.SOURCE_CODE', displayed: true},
@@ -137,6 +133,8 @@ export class MappingViewComponent implements OnInit, AfterViewInit, OnDestroy {
   ];
   // columns that are eligable for user controlling the hiding / displaying
   hideShowColumns: string[] = [
+  ];
+  constantHideShowColumns: string[] = [
     'sourceIndex',
     'sourceCode',
     'sourceDisplay',
@@ -147,22 +145,28 @@ export class MappingViewComponent implements OnInit, AfterViewInit, OnDestroy {
     'assignedAuthor',
     'assignedReviewer'
   ];
+  additionalDisplayedColumns: TableColumn[] = [];
+  additionalHideShowColumns: string[] = [];
   filteredColumns: string[] = [
+  ];
+  constantFilteredColumns: string[] = [
     'filter-id',
-    'filter-source-index',
-    'filter-source-code',
-    'filter-source-display',
-    'filter-target-code',
-    'filter-target-display',
+    'filter-sourceIndex',
+    'filter-sourceCode',
+    'filter-sourceDisplay',
+    'filter-targetCode',
+    'filter-targetDisplay',
     'filter-relationship',
     'filter-noMap',
     'filter-status',
     'filter-flagged',
     'filter-notes',
-    'filter-last-author-reviewer',
-    'filter-author',
-    'filter-reviewer'
+    'filter-lastAuthorReviewer',
+    'filter-assignedAuthor',
+    'filter-assignedReviewer'
   ];
+  additionalFilteredColumns: string[] = [];
+
   loading = true;
   mapLoading = true;
   mappingFileLoading = true;
@@ -209,9 +213,7 @@ export class MappingViewComponent implements OnInit, AfterViewInit, OnDestroy {
               private store: Store<IAppState>,
               private translate: TranslateService,
               private mapService: MapService,
-              private fhirService: FhirService,
-              private authService: AuthService,
-              private sourceNavigation: SourceNavigationService,) {
+              private authService: AuthService,) {
     this.translate.get('TASK.SELECT_A_TASK').subscribe((res) => this.selectedLabel = res);
 
     this.paging = new MapViewPaging();
@@ -224,9 +226,11 @@ export class MappingViewComponent implements OnInit, AfterViewInit, OnDestroy {
       ['NO_MAP_TRUE', true],
       ['NO_MAP_FALSE', false]
     ];
+
   }
 
   ngOnInit(): void {
+
     const self = this;
     this.store.dispatch(new InitSelectedMappingFile());
     self.loadParams();
@@ -263,6 +267,7 @@ export class MappingViewComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ngAfterViewInit(): void {
+
     if (this.sort) {
       if (this.paging.sortCol) {
         this.sort.active = this.paging.sortCol;
@@ -285,19 +290,15 @@ export class MappingViewComponent implements OnInit, AfterViewInit, OnDestroy {
         ).subscribe();
     }
 
-    // search as you type
-    [this.sourceCodeFilterControl, this.sourceDisplayFilterControl,
-      this.targetCodeFilterControl, this.targetDisplayFilterControl].forEach((control) => {
-      this.subscription.add(control.valueChanges
-        .pipe(debounceTime(this.debounce), distinctUntilChanged())
-        .subscribe(() => this.filterChange()
-        ));
-    });
   }
 
   ngOnDestroy(): void {
     this.loading = false;
     this.subscription.unsubscribe();
+  }
+
+  getDataListId(index : number) {
+    return "no_additional_column_display" + index;
   }
 
   /**
@@ -316,7 +317,9 @@ export class MappingViewComponent implements OnInit, AfterViewInit, OnDestroy {
 
     this.subscription.add(this.route.queryParams.subscribe(qparams => {
       this.filterEntity = ServiceUtils.paramsToFilterEntity(qparams);
-      this._filterEnabled = this.filterEntity.hasFilters();
+      if (this.filterEntity.hasFilters()) {
+        this._filterEnabled = true;
+      }
       this.filterParams = ServiceUtils.filtersToParam(this.filterEntity);
       this.paging = ServiceUtils.pagingParamsToMapViewPaging(qparams);
       this.refreshPage();
@@ -389,7 +392,36 @@ export class MappingViewComponent implements OnInit, AfterViewInit, OnDestroy {
     );
     self.subscription.add(this.store.select(selectCurrentView).subscribe(
       (page) => {
+
+        // TODO: find out why this triggers with the previously selected map first, and then
+        // the current map
+
+        // This code has been written to cater for this being executed multiple times (which is the case)
+
         self.page = page ?? new Page();
+
+        this.additionalDisplayedColumns = [];
+        this.additionalFilteredColumns = [];
+        this.additionalHideShowColumns = [];
+
+        // NB: additionalDisplayedColumns and displayedColumns must be set together or the table will error
+        // as the html will be out of sync with the model (same applies to additionalFilteredColumns and filteredColumns)
+        for (let i = 0; i <  this.page.additionalColumns.length; i++) {
+          this.additionalDisplayedColumns.push({columnId: "additionalColumn" + (i+1), columnDisplay: this.page.additionalColumns[i].name, displayed: true});
+          this.additionalFilteredColumns.push("filter-additionalColumn" + (i+1));
+          this.additionalHideShowColumns.push("additionalColumn" + (i+1));
+        }
+
+        // display additional columns at the end of the table
+        //this.displayedColumns = this.constantColumns.concat(this.additionalDisplayedColumns);
+        //this.filteredColumns = this.constantFilteredColumns.concat(this.additionalFilteredColumns);
+        //this.hideShowColumns = this.constantHideShowColumns.concat(this.additionalHideShowColumns);
+
+        // display additional columns after source columns
+        this.displayedColumns = this.constantColumns.slice(0,4).concat(this.additionalDisplayedColumns).concat(this.constantColumns.slice(4));
+        this.filteredColumns = this.constantFilteredColumns.slice(0,4).concat(this.additionalFilteredColumns).concat(this.constantFilteredColumns.slice(4));
+        this.hideShowColumns = this.constantHideShowColumns.slice(0,3).concat(this.additionalHideShowColumns).concat(this.constantHideShowColumns.slice(3));
+        
         if (page?.sourceDetails) {
           self.allSourceDetails = page.sourceDetails;
         }
@@ -435,6 +467,17 @@ export class MappingViewComponent implements OnInit, AfterViewInit, OnDestroy {
       }
     }
 
+  }
+
+  isFilterColumnVisible(filterId : string) : boolean {
+
+    let visible = true;
+    let foundColumn = this.displayedColumns.find(column => column.columnId === filterId.substring("filter-".length));
+    if (foundColumn) {
+      visible = foundColumn.displayed;
+    }
+
+    return visible; 
   }
 
   getHideShowItemLabel(columnName : string) : string {
@@ -530,7 +573,9 @@ export class MappingViewComponent implements OnInit, AfterViewInit, OnDestroy {
       const filter: any = this.filterEntity;
       Object.keys(filter).forEach(key => {
         const value = filter[key];
-        if (value !== undefined) {
+        if ('additionalColumns' === key && value.length > 0) {
+          params[key] = value.join(',');
+        } else if (value !== undefined) {
           params[key] = value;
         }
       });
