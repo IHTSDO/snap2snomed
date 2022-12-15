@@ -249,12 +249,6 @@
       <version>${hamcrest-date.version}</version>
       <scope>test</scope>
     </dependency>
-    <dependency>
-      <groupId>org.apache.commons</groupId>
-      <artifactId>commons-text</artifactId>
-      <version>1.10.0</version> <!-- force version for CVE-2022-42889 ; remove when mockserver-netty updates -->
-      <scope>test</scope>
-    </dependency>
 
     <dependency>
       <groupId>ca.uhn.hapi.fhir</groupId>
