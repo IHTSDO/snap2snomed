@@ -1,12 +1,16 @@
 locals {
   api_ecs_environment = [
     {
+      name = "logging.level.org.hibernate.SQL"
+      value = "DEBUG"
+    },
+    {
       name = "spring.datasource.url"
-      value = "jdbc:mariadb:aurora//${aws_rds_cluster_instance.api.endpoint}:${aws_rds_cluster_instance.api.port}/${aws_rds_cluster.api.database_name}?cachePrepStmts=true&useServerPrepStmts=false&rewriteBatchedStatements=true&socketTimeout=480000"
+      value = "jdbc:mysql:aws:aurora//${aws_rds_cluster_instance.api.endpoint}:${aws_rds_cluster_instance.api.port}/${aws_rds_cluster.api.database_name}?cachePrepStmts=true&useServerPrepStmts=false&rewriteBatchedStatements=true&socketTimeout=480000"
     },
     {
       name  = "spring.datasource.driverClassName",
-      value = "org.mariadb.jdbc.Driver"
+      value = "software.aws.rds.jdbc.mysql.Driver"
     },
     {
       name  = "spring.jpa.database-platform",
