@@ -126,7 +126,6 @@ export class MappingWorkComponent implements OnInit, OnDestroy {
     'targetCode',
     'targetDisplay',
     'relationship',
-    'noMap',
   ];
 
   constructor(private router: Router,

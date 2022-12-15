@@ -143,7 +143,6 @@ export class MappingViewComponent implements OnInit, AfterViewInit, OnDestroy {
     'targetCode',
     'targetDisplay',
     'relationship',
-    'noMap',
     'lastAuthorReviewer',
     'assignedAuthor',
     'assignedReviewer'
