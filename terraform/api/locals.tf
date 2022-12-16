@@ -6,7 +6,7 @@ locals {
     },
     {
       name = "spring.datasource.url"
-      value = "jdbc:mysql:aws:aurora//${aws_rds_cluster_instance.api.endpoint}:${aws_rds_cluster_instance.api.port}/${aws_rds_cluster.api.database_name}?cachePrepStmts=true&useServerPrepStmts=false&rewriteBatchedStatements=true&socketTimeout=480000"
+      value = "jdbc:mysql:aws://${aws_rds_cluster_instance.api.endpoint}:${aws_rds_cluster_instance.api.port}/${aws_rds_cluster.api.database_name}?cachePrepStmts=true&useServerPrepStmts=false&rewriteBatchedStatements=true&socketTimeout=480000"
     },
     {
       name  = "spring.datasource.driverClassName",
