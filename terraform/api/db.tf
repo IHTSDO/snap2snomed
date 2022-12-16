@@ -60,7 +60,7 @@ resource "aws_security_group" "jumpbox_db" {
 
 resource "aws_rds_cluster_parameter_group" "snapdbcluster" {
   name     = format("%s-snapdb-aurora-mysql8-0", replace(var.host_name, "/[.]/", "-"))
-  family   = "aurora-mysql5.7"
+  family   = "aurora-mysql8.0"
   parameter {
     name = "character_set_server"
     value = "utf8"
