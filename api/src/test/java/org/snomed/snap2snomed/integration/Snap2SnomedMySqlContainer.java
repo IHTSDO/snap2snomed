@@ -18,9 +18,9 @@ package org.snomed.snap2snomed.integration;
 
 import org.testcontainers.containers.MySQLContainer;
 
-public class Snap2SnomedMySqlContainer extends MySQLContainer {
+public class Snap2SnomedMySqlContainer extends MySQLContainer<Snap2SnomedMySqlContainer> {
 
-  private static final String IMAGE_VERSION = NAME + ":5.7.34";
+  private static final String IMAGE_VERSION = NAME + ":8.0";
   private static Snap2SnomedMySqlContainer container;
 
   private Snap2SnomedMySqlContainer() {
