@@ -208,6 +208,8 @@
     "TARGET_CODE": "Target code",
     "TARGET_DISPLAY": "Target display",
     "STATUS": "Status",
+    "WARN": "Warn",
+    "TARGET_OUT_OF_SCOPE_TOOLTIP": "Target out of scope",
     "NO_MAP": "No map",
     "ACTIONS": "Actions",
     "DETAILS": "Details",
