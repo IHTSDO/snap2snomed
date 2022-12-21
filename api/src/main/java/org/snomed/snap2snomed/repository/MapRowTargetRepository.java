@@ -23,6 +23,7 @@ import com.querydsl.core.types.dsl.SimpleExpression;
 import com.querydsl.core.types.dsl.StringExpression;
 import com.querydsl.core.types.dsl.StringPath;
 import java.time.Instant;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
@@ -44,12 +45,15 @@ import org.springframework.data.repository.query.FluentQuery.FetchableFluentQuer
 import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 import org.springframework.data.rest.core.annotation.RestResource;
 import org.springframework.security.access.prepost.PostFilter;
+import org.springframework.transaction.annotation.Transactional;
 
 // @ PreAuthorize("isValidUser()")
 @RepositoryRestResource
 public interface MapRowTargetRepository
     extends RevisionRepository<MapRowTarget, Long, Integer>, CrudRepository<MapRowTarget, Long>,
     QuerydslPredicateExecutor<MapRowTarget>, QuerydslBinderCustomizer<QMapRowTarget> {
+
+  String TARGET_OUT_OF_SCOPE_TAG = "target-out-of-scope";
 
   // ---------------------------------
   // Exported in REST interface
@@ -141,11 +145,18 @@ public interface MapRowTargetRepository
   @RestResource(exported = false)
   long count();
 
-  @Query(value = "update map_row_target mt set mt.flagged = true, mt.modified = :dateTime, mt.modified_by = :user " +
-          " where mt.id in (:ids)", nativeQuery = true)
+  @Transactional
   @Modifying
   @RestResource(exported = false)
-  int flagMapTargets(List<Long> ids, String user, Instant dateTime);
+  @Query(value = "insert ignore into map_row_target_tags "
+      + "select map_row_target_id, '" + TARGET_OUT_OF_SCOPE_TAG + "' "
+      + "from map_row_target_tags; "
+      + "update map_row_target mrt "
+      + "set mrt.modified = :modifiedAt, "
+      + "mrt.modified_by = :modifiedBy "
+      + "where mrt.id in :ids",
+      nativeQuery = true)
+  int addOutOfScopeTag(Collection<Long> ids, Instant modifiedAt, String modifiedBy);
 
   // Query DSL is used internally, don't want to expose it externally because we'd need to secure it
   // hence disable following methods
