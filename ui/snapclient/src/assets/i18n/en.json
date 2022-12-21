@@ -138,6 +138,7 @@
     "GUESTS": "Guests",
     "MAP_EDIT_BUTTON": "EDIT",
     "MAP_VIEW_BUTTON": "VIEW",
+    "NUM_TARGETS_OUT_OF_SCOPE": "Number targets out of scope",
     "MAPPING": "MAPPING",
     "MARK_MAPPED": "Mark all as MAPPED",
     "MARK_ACCEPTED": "Mark all as ACCEPTED",
