@@ -169,6 +169,7 @@ public interface MapRowTargetRepository
         .map(path::contains)
         .reduce(BooleanExpression::and)
         .orElseThrow());
+    bindings.bind(root.row.map.id).as("mapId").first(SimpleExpression::eq);
   }
 
   @Override
