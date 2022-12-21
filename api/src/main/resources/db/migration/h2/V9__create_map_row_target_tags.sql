@@ -14,5 +14,5 @@
  * limitations under the License.
  */
 
-create table map_row_target_tags_aud (rev integer not null, map_row_target_id bigint not null, tags varchar(255) not null, revtype tinyint, primary key (rev, map_row_target_id, tags)) engine=InnoDB;
-create table map_row_target_tags (map_row_target_id bigint not null, tags varchar(255)) engine=InnoDB;
+create table map_row_target_tags_aud (rev integer not null, map_row_target_id bigint not null, tags varchar(255) not null, revtype tinyint, primary key (rev, map_row_target_id, tags));
+create table map_row_target_tags (map_row_target_id bigint not null, tags varchar(255));

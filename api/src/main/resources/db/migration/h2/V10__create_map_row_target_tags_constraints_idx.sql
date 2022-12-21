@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-alter table map_row_target_tags_aud add constraint FK3v475gipqy1gpqov5ssf816pg foreign key (rev) references revinfo (rev);
-alter table map_row_target_tags add constraint FKf8qe9o6u78cpkogwk5x0bsyui foreign key (map_row_target_id) references map_row_target (id);
+alter table map_row_target_tags_aud add constraint FK3v475gipqy1gpqov5ssf816pg foreign key (rev) references revinfo;
+alter table map_row_target_tags add constraint FKf8qe9o6u78cpkogwk5x0bsyui foreign key (map_row_target_id) references map_row_target;
 
-alter table map_row_target_tags add index map_row_target_id (map_row_target_id);
+CREATE INDEX IF NOT EXISTS map_row_target_id ON map_row_target_tags(map_row_target_id);
