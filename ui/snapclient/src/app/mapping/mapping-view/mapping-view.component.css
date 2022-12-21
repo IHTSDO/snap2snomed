@@ -91,6 +91,7 @@ ul.sources-list li {
 
 }
 
+.mat-column-warn,
 .mat-column-filter-assignedAuthor,
 .mat-column-assignedAuthor,
 .mat-column-filter-assignedReviewer,
@@ -136,6 +137,12 @@ ul.sources-list li {
 ::ng-deep .mat-column-filter-noMap .mat-form-field {
   width: 100px;
 }
+
+
+::ng-deep .mat-column-filter-warn .mat-form-field{
+  width: 60px;
+}
+
 
 ::ng-deep .mat-column-filter-flagged .mat-form-field{
   width: 60px;

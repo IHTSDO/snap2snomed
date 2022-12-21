@@ -59,4 +59,8 @@ export class MappingDetailsCardComponent {
     return this.clicked.observers.length > 0;
   }
 
+  getNumOutOfScopeTargets(): number {
+    //TODO: hook up to api
+    return 0;
+  }
 }

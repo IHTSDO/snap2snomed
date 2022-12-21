@@ -91,6 +91,16 @@
       ><mat-icon>chat_bubble_outline</mat-icon></button>
     </td>
   </ng-container>
+  <!-- Out of Scope Column -->
+  <ng-container matColumnDef="warn">
+    <th mat-header-cell *matHeaderCellDef mat-sort-header>{{'TABLE.WARN' | translate}}</th>
+    <td mat-cell *matCellDef="let maprow; let i = index">
+      <button mat-icon-button *ngIf="maprow.flagged" color="accent" #tooltip="matTooltip" matTooltip="{{'TABLE.TARGET_OUT_OF_SCOPE_TOOLTIP' | translate}}"
+          (click)="detailsView(i)">
+        <mat-icon>warning</mat-icon>
+      </button>
+    </td>
+  </ng-container>
   <!-- Flagged Column -->
   <ng-container matColumnDef="flagged">
     <th mat-header-cell *matHeaderCellDef mat-sort-header>{{'TABLE.FLAG' | translate}}</th>
@@ -214,6 +224,18 @@
         <mat-select [(ngModel)]="filterEntity.status" (selectionChange)="filterUpdate()" multiple
                     id="status" name="status" #status="ngModel">
           <mat-option *ngFor="let rel of statuses" [value]="rel">{{'STATUS.' + rel | translate}}</mat-option>
+        </mat-select>
+      </mat-form-field>
+    </th>
+  </ng-container>
+  <!-- Filter Out of scope -->
+  <ng-container matColumnDef="filter-warn">
+    <th mat-header-cell [ngClass]="{'hide-filter': !isFilterColumnVisible('filter-warn')}" *matHeaderCellDef [attr.colspan]="1">
+      <mat-form-field appearance="outline">
+        <mat-select [(ngModel)]="filterEntity.flagged" (selectionChange)="filterUpdate()">
+          <mat-option [value]="">---</mat-option>
+          <mat-option *ngFor="let opt of yesNoOptions"
+                      [value]="opt[1]">{{'NOMAP.' + opt[0] | translate}}</mat-option>
         </mat-select>
       </mat-form-field>
     </th>

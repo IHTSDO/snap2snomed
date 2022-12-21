@@ -9,6 +9,20 @@
   overflow: hidden;
 }
 
+.col-middle {
+  flex: 2; /* make col-middle content appear in the middle */
+  /* align-content: end; display: grid; aligns to bottom of column */ 
+  align-content: end;
+  display: grid;
+}
+
+.out-of-scope-text {
+  border: 1px solid black;   
+  border-radius: 10px;
+  padding: 20px;
+  width: 200px;
+}
+
 .col-action {
   max-width: 20%;
   flex: 1;

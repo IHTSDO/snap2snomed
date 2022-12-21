@@ -89,6 +89,7 @@ export class MappingTableComponent implements OnInit, AfterViewInit, OnDestroy {
     {columnId: 'relationship', columnDisplay: 'TABLE.RELATIONSHIP', displayed: true},
     {columnId: 'noMap', columnDisplay: 'TABLE.NO_MAP', displayed: true},
     {columnId: 'status', columnDisplay: 'TABLE.STATUS', displayed: true},
+    {columnId: 'warn', columnDisplay: 'TABLE.WARN', displayed: true},
     {columnId: 'flagged', columnDisplay: 'TABLE.FLAG', displayed: true},
     {columnId: 'latestNote', columnDisplay: 'SOURCE.TABLE.NOTES', displayed: true},
     {columnId: 'actions', columnDisplay: '', displayed: true}
@@ -106,6 +107,7 @@ export class MappingTableComponent implements OnInit, AfterViewInit, OnDestroy {
     'filter-relationship',
     'filter-noMap',
     'filter-status',
+    'filter-warn',
     'filter-flagged',
     'filter-notes',
     'filter-actions',

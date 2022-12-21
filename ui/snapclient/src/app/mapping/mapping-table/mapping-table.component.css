@@ -67,11 +67,22 @@
   width: 95% !important;
 }
 
-.mat-column-noMap, mat-column-bulk-noMap, .mat-column-filter-noMap, .mat-column-flagged, .mat-column-filter-flagged, .mat-column-notes, .mat-column-filter-notes {
+.mat-column-warn,
+.mat-column-noMap, 
+mat-column-bulk-noMap, 
+.mat-column-filter-noMap, 
+.mat-column-flagged, 
+.mat-column-filter-flagged, 
+.mat-column-notes, 
+.mat-column-filter-notes {
   width: 60px;
 }
 
 ::ng-deep .mat-column-filter-noMap .mat-form-field{
+  width: 60px;
+}
+
+::ng-deep .mat-column-filter-warn .mat-form-field{
   width: 60px;
 }
 
