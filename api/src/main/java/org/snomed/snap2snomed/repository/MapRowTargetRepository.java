@@ -18,6 +18,7 @@ package org.snomed.snap2snomed.repository;
 
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Predicate;
+import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.SimpleExpression;
 import com.querydsl.core.types.dsl.StringExpression;
 import com.querydsl.core.types.dsl.StringPath;
@@ -25,10 +26,8 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
-import org.snomed.snap2snomed.model.ImportedCode;
 import org.snomed.snap2snomed.model.MapRow;
 import org.snomed.snap2snomed.model.MapRowTarget;
-import org.snomed.snap2snomed.model.QImportedCode;
 import org.snomed.snap2snomed.model.QMapRowTarget;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -152,9 +151,13 @@ public interface MapRowTargetRepository
   // hence disable following methods
 
   @Override
-  default public void customize(QuerydslBindings bindings, QMapRowTarget root) {
+  default void customize(QuerydslBindings bindings, QMapRowTarget root) {
     bindings.bind(String.class).first((SingleValueBinding<StringPath, String>) StringExpression::containsIgnoreCase);
-    bindings.bind(root.row.sourceCode).first((SingleValueBinding<QImportedCode, ImportedCode>) SimpleExpression::eq);
+    bindings.bind(root.row.sourceCode).first(SimpleExpression::eq);
+    bindings.bind(root.tags).first((path, value) -> value.stream()
+        .map(path::contains)
+        .reduce(BooleanExpression::and)
+        .orElseThrow());
   }
 
   @Override
@@ -192,4 +195,5 @@ public interface MapRowTargetRepository
   @Override
   @RestResource(exported = false)
   <S extends MapRowTarget, R> R findBy(Predicate predicate, Function<FetchableFluentQuery<S>, R> queryFunction);
+
 }

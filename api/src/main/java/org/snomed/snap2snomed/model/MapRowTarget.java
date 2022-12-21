@@ -17,7 +17,10 @@
 package org.snomed.snap2snomed.model;
 
 import java.time.Instant;
+import java.util.Collection;
+import java.util.Set;
 import javax.persistence.Column;
+import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
 import javax.persistence.GeneratedValue;
@@ -88,6 +91,12 @@ public class MapRowTarget implements Snap2SnomedEntity {
     @NotNull(message = "A MapRowTarget must always have a relationship type")
     @Builder.Default
     private MappingRelationship relationship = MappingRelationship.TARGET_INEXACT;
+
+    /**
+     * A set of string tag values that can be used for a wide variety of purposes.
+     */
+    @ElementCollection
+    private Set<String> tags;
 
     boolean flagged;
 
