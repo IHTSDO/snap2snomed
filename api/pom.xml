@@ -54,6 +54,16 @@
     <spring-core.version>5.3.21</spring-core.version>
   </properties>
 
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>org.apache.commons</groupId>
+        <artifactId>commons-text</artifactId>
+        <version>1.10.0</version> <!-- force version for CVE-2022-42889 ; remove when mockserver-netty updates -->
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+
   <dependencies>
     <dependency>
       <groupId>org.springframework.boot</groupId>
@@ -400,7 +410,7 @@
                     <limit>
                       <counter>LINE</counter>
                       <value>COVEREDRATIO</value>
-                      <!-- TODO should raise this to something sensible when 
+                      <!-- TODO should raise this to something sensible when
                         it makes sense -->
                       <minimum>0.0</minimum>
                     </limit>

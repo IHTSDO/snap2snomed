@@ -61,6 +61,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 @Slf4j
 public class MappingControllerIT extends IntegrationTestBase {
 
+  public static final String TARGET_OUT_OF_SCOPE_TAG = "target-out-of-scope";
   @Autowired
   ObjectMapper objectMapper;
 
@@ -606,7 +607,7 @@ public class MappingControllerIT extends IntegrationTestBase {
           assertNull(dto.assignedReviewer);
           assertNull(dto.lastAuthor);
           assertNull(dto.lastReviewer);
-          assertFalse(dto.flagged);
+          assertFalse(dto.targetTags.contains(TARGET_OUT_OF_SCOPE_TAG));
         }
       } else {
         List<MapViewDto> originalMapViews = originalMapViewCache.get(code);
@@ -702,7 +703,7 @@ public class MappingControllerIT extends IntegrationTestBase {
       MapViewDto originalRow = originalMap.get(i);
       MapViewDto newRow = newMap.get(i);
 
-      if (originalRow.flagged) {
+      if (originalRow.targetTags.contains(TARGET_OUT_OF_SCOPE_TAG)) {
         originalHasFlagged = true;
       }
 
@@ -888,6 +889,8 @@ public class MappingControllerIT extends IntegrationTestBase {
     private UserDto lastReviewer;
 
     private boolean flagged;
+
+    private Set<String> targetTags;
   }
 
   @Data
