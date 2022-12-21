@@ -290,11 +290,11 @@ public class MapViewService {
 
     final JPAQuery<MappedRowDetailsDto> mappingRowDetailsQuery = getQueryMappedRowDetailsForMap(mapId, task, filter,
             pageable);
-    final QueryResults<MappedRowDetailsDto> sourceIndexResults = mappingRowDetailsQuery.fetchResults();
+    final List<MappedRowDetailsDto> sourceIndexResults = mappingRowDetailsQuery.fetch();
 
     final Page<MapView> page = new PageImpl<>(results.getResults(), pageable, results.getTotal());
     final PagedModel<EntityModel<MapView>> pagedModel = assembler.toModel(page);
-    final Snap2SnomedPagedModel<EntityModel<MapView>> _results = new Snap2SnomedPagedModel<>(pagedModel, sourceIndexResults.getResults(), additionalColumns);
+    final Snap2SnomedPagedModel<EntityModel<MapView>> _results = new Snap2SnomedPagedModel<>(pagedModel, sourceIndexResults, additionalColumns);
     return _results;
   }
 
