@@ -244,3 +244,9 @@ variable "dex_loglevel" {
   type        = string
   default     = "info"
 }
+
+variable "force_dex_deployment" {
+  description = "Force DEX ECS redeployment"
+  type        = bool
+  default     = false
+}

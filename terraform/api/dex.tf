@@ -39,6 +39,7 @@ resource "aws_ecs_service" "dex" {
   cluster               = aws_ecs_cluster.api.id
   launch_type           = "FARGATE"
   wait_for_steady_state = true
+  force_new_deployment  = var.force_dex_deployment
   task_definition       = aws_ecs_task_definition.dex.arn
   desired_count         = 1
   load_balancer {
