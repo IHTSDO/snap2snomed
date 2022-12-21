@@ -380,6 +380,12 @@ export class MapService {
     const body = {flagged};
     return this.http.patch<any>(url, body, header);
   }
+  
+  getTagCount(mapId: string, tag: string): Observable<MapRowTargetResults> {
+    const url = `${this.config.apiBaseUrl}/mapRowTargets?tags=${tag}&mapId=${mapId}`;
+    const header = ServiceUtils.getHTTPHeaders();
+    return this.http.get<MapRowTargetResults>(url, header);
+  }
 
   exportMapView(mapping: string, contentType: string): Observable<Blob> {
     return this.http.get(`${this.config.apiBaseUrl}/mapView/${mapping}`,
