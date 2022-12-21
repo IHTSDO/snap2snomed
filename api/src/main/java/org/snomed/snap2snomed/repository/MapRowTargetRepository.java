@@ -150,11 +150,7 @@ public interface MapRowTargetRepository
   @RestResource(exported = false)
   @Query(value = "insert ignore into map_row_target_tags "
       + "select map_row_target_id, '" + TARGET_OUT_OF_SCOPE_TAG + "' "
-      + "from map_row_target_tags; "
-      + "update map_row_target mrt "
-      + "set mrt.modified = :modifiedAt, "
-      + "mrt.modified_by = :modifiedBy "
-      + "where mrt.id in :ids",
+      + "from map_row_target_tags",
       nativeQuery = true)
   int addOutOfScopeTag(Collection<Long> ids, Instant modifiedAt, String modifiedBy);
 
