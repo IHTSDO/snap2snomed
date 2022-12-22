@@ -14,5 +14,11 @@
  * limitations under the License.
  */
 
-CREATE INDEX IF NOT EXISTS author_task_idx ON map_row(author_task_id);
-CREATE INDEX IF NOT EXISTS review_task_idx ON map_row(review_task_id);
+/* Create the database. */
+CREATE DATABASE snap2snomed;
+
+/* Create a local user. */
+CREATE USER snap2snomed@localhost;
+
+/* Grant all privileges to the local user. */
+GRANT ALL PRIVILEGES ON snap2snomed.* TO snap2snomed@localhost;
