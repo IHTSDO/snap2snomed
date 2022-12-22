@@ -18,9 +18,9 @@ package org.snomed.snap2snomed.integration;
 
 import org.testcontainers.containers.MySQLContainer;
 
-public class Snap2SnomedMySqlContainer extends MySQLContainer {
+public class Snap2SnomedMySqlContainer extends MySQLContainer<Snap2SnomedMySqlContainer> {
 
-  private static final String IMAGE_VERSION = NAME + ":5.7.34";
+  private static final String IMAGE_VERSION = NAME + ":8.0";
   private static Snap2SnomedMySqlContainer container;
 
   private Snap2SnomedMySqlContainer() {
@@ -40,13 +40,13 @@ public class Snap2SnomedMySqlContainer extends MySQLContainer {
 
   @Override
   public String getJdbcUrl() {
-    String additionalUrlParams = this.constructUrlParameters("?", "&");
-    return "jdbc:mariadb://" + this.getHost() + ":" + this.getMappedPort(MYSQL_PORT) + "/" + this.getDatabaseName() + additionalUrlParams;
+    final String additionalUrlParams = this.constructUrlParameters("?", "&");
+    return "jdbc:mysql:aws://" + this.getHost() + ":" + this.getMappedPort(MYSQL_PORT) + "/" + this.getDatabaseName() + additionalUrlParams;
   }
 
   @Override
   public String getDriverClassName() {
-      return "org.mariadb.jdbc.Driver";
+      return "software.aws.rds.jdbc.mysql.Driver";
   }
 
   @Override

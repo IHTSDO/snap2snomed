@@ -18,6 +18,8 @@ package org.snomed.snap2snomed.repository;
 
 import java.util.Optional;
 import java.util.Set;
+
+import org.snomed.snap2snomed.model.ImportedCodeSet;
 import org.snomed.snap2snomed.model.Map;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -57,6 +59,9 @@ public interface MapRepository
   @RestResource(exported = false)
   @Query("select m from Map m where m.project.id = :projectId and m.mapVersion = :version")
   Set<Map> findAllByProjectIdAndVersion(Long projectId, String version);
+
+  @Query("select m.source from Map m where m.id = :id")
+  Optional<ImportedCodeSet> findSourceByMapId(Long id);
 
   @Override
   @RestResource(exported = false)

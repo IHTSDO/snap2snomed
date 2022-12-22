@@ -20,6 +20,7 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+
 import org.snomed.snap2snomed.controller.dto.AutomapRowDto;
 import org.snomed.snap2snomed.model.MapRow;
 import org.snomed.snap2snomed.model.Task;
@@ -66,6 +67,12 @@ public interface MapRowRepository
       + "                        or u member of mr.map.project.members "
       + "                        or u member of mr.map.project.guests)))")
   List<MapRow> findMapRowsByMapId(Long mapId);
+
+
+  @Query("select mr.sourceCode.code, mr.id from MapRow mr " +
+      " where mr.map.id = :mapId and mr.sourceCode.code in (:sourceCodes)")
+  @RestResource(exported = false)
+  List<Object[]> findCodesAndMapRowIdsByMapIdAndSourceCodes(Long mapId, List<String> sourceCodes);
 
   // ---------------------------------
   // Exported in REST interface

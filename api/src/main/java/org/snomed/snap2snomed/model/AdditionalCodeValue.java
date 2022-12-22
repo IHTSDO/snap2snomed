@@ -14,22 +14,25 @@
  * limitations under the License.
  */
 
-import {Source} from './source';
+package org.snomed.snap2snomed.model;
 
-/** Row from Source containing code to be mapped */
-export class SourceCode {
-  id?: string;
-  code: string;
-  display: string;
-  source?: Source;
-  index: string; // imported row index
-  additionalColumnValues: string[];
+import javax.persistence.Embeddable;
+import javax.validation.constraints.NotNull;
 
-  constructor(code: string, display: string, source: Source, index: string, additionalColumnValues: string[]) {
-    this.code = code;
-    this.display = display;
-    this.source = source;
-    this.index = index;
-    this.additionalColumnValues = additionalColumnValues;
-  }
+import org.springframework.data.annotation.ReadOnlyProperty;
+
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Embeddable
+@AllArgsConstructor
+@NoArgsConstructor
+@Data
+public class AdditionalCodeValue {
+
+    @NotNull
+    @ReadOnlyProperty
+    private String value;
+
 }

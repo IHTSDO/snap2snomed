@@ -16,16 +16,13 @@
 
 package org.snomed.snap2snomed.controller;
 
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.enums.ParameterIn;
-import io.swagger.v3.oas.annotations.media.ArraySchema;
-import io.swagger.v3.oas.annotations.media.Schema;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.util.List;
+
 import javax.servlet.http.HttpServletResponse;
+
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 import org.apache.poi.xssf.streaming.SXSSFCell;
@@ -56,9 +53,15 @@ import org.springframework.web.bind.annotation.RestController;
 import org.zalando.problem.Problem;
 import org.zalando.problem.Status;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Schema;
+
 @RestController
 @RequestMapping("/mapView")
-// Removed @RepositoryRestController annotation as per 
+// Removed @RepositoryRestController annotation as per
 // https://stackoverflow.com/questions/43092913/can-i-offer-an-endpoint-in-parallel-to-a-spring-data-rest-get
 public class MapViewRestController {
 
@@ -108,6 +111,8 @@ public class MapViewRestController {
       description = "Filters the results to those that are assigned to an review task assigned to one of the specified user ids.")
   @Parameter(name = "flagged", in = ParameterIn.QUERY, required = false, allowEmptyValue = true,
       description = "Filters the results to those that are flagged or not flagged.")
+  @Parameter(name = "additionalColumns", in = ParameterIn.QUERY, required = false, allowEmptyValue = true,
+      description = "Filters the results to those with an additional column matching one of the specified values.")
   @Parameter(name = "page", in = ParameterIn.QUERY, required = false, allowEmptyValue = false,
       description = "Zero-based page index (0..N)")
   @Parameter(name = "size", in = ParameterIn.QUERY, required = false, allowEmptyValue = false,
@@ -131,6 +136,7 @@ public class MapViewRestController {
       @RequestParam(required = false) List<String> assignedAuthor,
       @RequestParam(required = false) List<String> assignedReviewer,
       @RequestParam(required = false) Boolean flagged,
+      @RequestParam(required = false) List<String> additionalColumns,
       @Parameter(hidden = true) Pageable pageable,
       @Parameter(hidden = true) PagedResourcesAssembler<MapView> assembler) {
 
@@ -140,9 +146,9 @@ public class MapViewRestController {
     if (!webSecurity.isAdminUser() && !webSecurity.hasAnyProjectRoleForMapId(mapId)) {
       throw new NotAuthorisedProblem("Not authorised to view map if the user is not admin or member of an associated project!");
     }
-        
-    MapViewFilter filter = mapViewService.new MapViewFilter(sourceCode, sourceDisplay, noMap, targetCode, targetDisplay, relationship,
-        status, lastAuthor, lastReviewer, lastAuthorReviewer, assignedAuthor, assignedReviewer, flagged);
+
+    final MapViewFilter filter = mapViewService.new MapViewFilter(sourceCode, sourceDisplay, noMap, targetCode, targetDisplay, relationship,
+        status, lastAuthor, lastReviewer, lastAuthorReviewer, assignedAuthor, assignedReviewer, flagged, additionalColumns);
 
     return ResponseEntity.ok(mapViewService.getMapResults(mapId, pageable, assembler, filter));
   }
@@ -178,6 +184,8 @@ public class MapViewRestController {
       description = "Filters the results to those that are assigned to an review task assigned to one of the specified user ids.")
   @Parameter(name = "flagged", in = ParameterIn.QUERY, required = false, allowEmptyValue = true,
       description = "Filters the results to those that are flagged or not flagged.")
+  @Parameter(name = "additionalColumns", in = ParameterIn.QUERY, required = false, allowEmptyValue = true,
+      description = "Filters the results to those with an additional column matching one of the specified values.")
   @Parameter(name = "page", in = ParameterIn.QUERY, required = false, allowEmptyValue = false,
       description = "Zero-based page index (0..N)")
   @Parameter(name = "size", in = ParameterIn.QUERY, required = false, allowEmptyValue = false,
@@ -201,11 +209,12 @@ public class MapViewRestController {
       @RequestParam(required = false) List<String> assignedAuthor,
       @RequestParam(required = false) List<String> assignedReviewer,
       @RequestParam(required = false) Boolean flagged,
+      @RequestParam(required = false) List<String> additionalColumns,
       @Parameter(hidden = true) Pageable pageable,
       @Parameter(hidden = true) PagedResourcesAssembler<MapView> assembler) {
 
-    MapViewFilter filter = mapViewService.new MapViewFilter(sourceCode, sourceDisplay, noMap, targetCode, targetDisplay, relationship,
-        status, lastAuthor, lastReviewer, lastAuthorReviewer, assignedAuthor, assignedReviewer, flagged);
+    final MapViewFilter filter = mapViewService.new MapViewFilter(sourceCode, sourceDisplay, noMap, targetCode, targetDisplay, relationship,
+        status, lastAuthor, lastReviewer, lastAuthorReviewer, assignedAuthor, assignedReviewer, flagged, additionalColumns);
 
     if (!webSecurity.isValidUser()) {
       throw new NoSuchUserProblem();
@@ -230,7 +239,7 @@ public class MapViewRestController {
     }
     if (!webSecurity.isAdminUser() && !webSecurity.hasAnyProjectRoleForMapId(mapId)) {
       throw new NotAuthorisedProblem("Not authorised to view map if the user is not admin or member of an associated project!");
-    }        
+    }
 
     CSVFormat format;
     switch (contentType) {
@@ -259,7 +268,7 @@ public class MapViewRestController {
 
         CSVPrinter csvPrinter = new CSVPrinter(writer,
             format.builder().setHeader(EXPORT_HEADER).build());) {
-      for (MapView mapView : mapViewService.getAllMapViewForMap(mapId)) {
+      for (final MapView mapView : mapViewService.getAllMapViewForMap(mapId)) {
         csvPrinter.printRecord(
             mapView.getSourceCode(), mapView.getSourceDisplay(),
             mapView.getTargetCode(), mapView.getTargetDisplay(),
@@ -269,7 +278,7 @@ public class MapViewRestController {
       }
       csvPrinter.flush();
       writer.flush();
-    } catch (IOException e) {
+    } catch (final IOException e) {
       throw Problem.builder().withDetail("IO error exporting").build();
     }
   }
@@ -294,22 +303,22 @@ public class MapViewRestController {
     response.setHeader("Content-Disposition",
         "attachment; filename=\"" + mapViewService.getFileNameForMapExport(mapId, APPLICATION_XSLX) + "\"");
 
-    List<MapView> mapViewResult = mapViewService.getAllMapViewForMap(mapId);
+    final List<MapView> mapViewResult = mapViewService.getAllMapViewForMap(mapId);
 
     try (SXSSFWorkbook wb = new SXSSFWorkbook(10000)) {
 
-      SXSSFSheet sh = wb.createSheet();
-      SXSSFRow header = sh.createRow(0);
+      final SXSSFSheet sh = wb.createSheet();
+      final SXSSFRow header = sh.createRow(0);
 
       for (int cellNum = 0; cellNum < EXPORT_HEADER.length; cellNum++) {
-        SXSSFCell cell = header.createCell(cellNum);
+        final SXSSFCell cell = header.createCell(cellNum);
         cell.setCellValue(EXPORT_HEADER[cellNum]);
       }
 
       for (int rownum = 1; rownum <= mapViewResult.size(); rownum++) {
-        MapView mapView = mapViewResult.get(rownum - 1);
+        final MapView mapView = mapViewResult.get(rownum - 1);
 
-        SXSSFRow row = sh.createRow(rownum);
+        final SXSSFRow row = sh.createRow(rownum);
 
         SXSSFCell cell = row.createCell(0);
         cell.setCellValue(mapView.getSourceCode());

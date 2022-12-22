@@ -17,11 +17,14 @@
 package org.snomed.snap2snomed.integration.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.greaterThanOrEqualTo;
+import static org.hamcrest.Matchers.hasEntry;
+import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.not;
 import static org.snomed.snap2snomed.service.CodeSetImportService.TOO_LARGE_FILE_PROBLEM_URI;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
@@ -41,6 +44,9 @@ import org.snomed.snap2snomed.integration.IntegrationTestBase;
 import org.snomed.snap2snomed.model.ImportedCode;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
 
 @TestInstance(Lifecycle.PER_CLASS)
 public class ImportedCodeSetResourceIT extends IntegrationTestBase {
@@ -129,6 +135,19 @@ public class ImportedCodeSetResourceIT extends IntegrationTestBase {
   @Test
   public void shouldCreateEntity() throws Exception {
     verifyCreatedImportedCodeSet("AAA Tabs", "1.0", 0, 2, true, "\t", new ClassPathResource("AAA.tsv").getFile(), "text/tsv",
+        AAA_TSV_CODE_LIST, AAA_TSV_COLUMN_2_LIST);
+  }
+
+  /**
+   * Tests valid TSV with content type text/tsv and additional columns
+   */
+  @Test
+  public void shouldCreateEntityWithExtraColumns() throws Exception {
+    final String[] indexes = { "3", "4" };
+    final String[] types = { "NUMBER", "TEXT" };
+    verifyCreatedImportedCodeSet("AAA Tabs Cols", "1.0", 0, 2, true,
+        indexes, types,
+        "\t", new ClassPathResource("AAA-extra-columns.tsv").getFile(), "text/tsv",
         AAA_TSV_CODE_LIST, AAA_TSV_COLUMN_2_LIST);
   }
 
@@ -328,17 +347,17 @@ public class ImportedCodeSetResourceIT extends IntegrationTestBase {
 
   @Test
   public void shouldCreateEntityCsvMixedHeader() throws Exception {
-    String filename = "Pathology Organisms only.csv";
+    final String filename = "Pathology Organisms only.csv";
 
-    Resource fileResource = new ClassPathResource(filename);
+    final Resource fileResource = new ClassPathResource(filename);
 
-    List<String> codes = new ArrayList<>();
-    List<String> labels = new ArrayList<>();
+    final List<String> codes = new ArrayList<>();
+    final List<String> labels = new ArrayList<>();
 
     try (BufferedReader reader = new BufferedReader(new InputStreamReader(fileResource.getInputStream()));
         CSVParser parser = CSVFormat.DEFAULT.withFirstRecordAsHeader().withAllowMissingColumnNames().parse(reader)) {
 
-      for (CSVRecord csvRecord : parser) {
+      for (final CSVRecord csvRecord : parser) {
         codes.add(csvRecord.get(0));
         labels.add(csvRecord.get(1));
       }
@@ -351,17 +370,17 @@ public class ImportedCodeSetResourceIT extends IntegrationTestBase {
 
   @Test
   public void shouldCreateEntitySampleCsv() throws Exception {
-    String filename = "Pathology Organisms 202103.csv";
+    final String filename = "Pathology Organisms 202103.csv";
 
-    Resource fileResource = new ClassPathResource(filename);
+    final Resource fileResource = new ClassPathResource(filename);
 
-    List<String> codes = new ArrayList<>();
-    List<String> labels = new ArrayList<>();
+    final List<String> codes = new ArrayList<>();
+    final List<String> labels = new ArrayList<>();
 
     try (BufferedReader reader = new BufferedReader(new InputStreamReader(fileResource.getInputStream()));
         CSVParser parser = CSVFormat.DEFAULT.withFirstRecordAsHeader().withAllowMissingColumnNames().parse(reader)) {
 
-      for (CSVRecord csvRecord : parser) {
+      for (final CSVRecord csvRecord : parser) {
         codes.add(csvRecord.get(0));
         labels.add(csvRecord.get(1));
       }
@@ -410,9 +429,9 @@ public class ImportedCodeSetResourceIT extends IntegrationTestBase {
 
   @Test
   public void givenAdminUser_whenNotProjectMember_thenShouldNotSeeImportedCodeSystem() throws Exception {
-    long projectId = restClient.createProject("ProjectDemo", "Demo Project", Set.of(DEFAULT_TEST_USER_SUBJECT, PROJECT_USER), Set.of(), Set.of());
+    final long projectId = restClient.createProject("ProjectDemo", "Demo Project", Set.of(DEFAULT_TEST_USER_SUBJECT, PROJECT_USER), Set.of(), Set.of());
     final String codeSetName = "AAA semicolon - adminUser - projecttest";
-    long codesetId = verifyCreatedImportedCodeSet(codeSetName, "1.0", 0, 2, true, ";", new ClassPathResource("AAA-semi.csv").getFile(), "text/tsv");
+    final long codesetId = verifyCreatedImportedCodeSet(codeSetName, "1.0", 0, 2, true, ";", new ClassPathResource("AAA-semi.csv").getFile(), "text/tsv");
 
     restClient.createMap("Testing Map Version", "http://snomed.info/sct/32506021000036107/version/20210531",
             "http://map.test.toscope", projectId, codesetId);
@@ -423,9 +442,9 @@ public class ImportedCodeSetResourceIT extends IntegrationTestBase {
 
   @Test
   public void givenSourceCreator_whenNotProjectMember_thenShouldNotSeeImportedCodeSystem() throws Exception {
-    long projectId = restClient.createProject("ProjectDemo", "Demo Project", Set.of(DEFAULT_TEST_USER_SUBJECT, PROJECT_USER), Set.of(), Set.of());
+    final long projectId = restClient.createProject("ProjectDemo", "Demo Project", Set.of(DEFAULT_TEST_USER_SUBJECT, PROJECT_USER), Set.of(), Set.of());
     final String codeSetName = "AAA semicolon - defaultuser - projecttest2";
-    long codesetId = verifyCreatedImportedCodeSet(codeSetName, "1.0", 0, 2, true, ";", new ClassPathResource("AAA-semi.csv").getFile(), "text/tsv");
+    final long codesetId = verifyCreatedImportedCodeSet(codeSetName, "1.0", 0, 2, true, ";", new ClassPathResource("AAA-semi.csv").getFile(), "text/tsv");
 
     restClient.createMap("Testing Map Version", "http://snomed.info/sct/32506021000036107/version/20210531",
             "http://map.test.toscope", projectId, codesetId);
@@ -439,7 +458,7 @@ public class ImportedCodeSetResourceIT extends IntegrationTestBase {
    */
   @Test
   public void otherUserShouldNotSeeImportedCodeSystem() throws Exception {
-    long id = immportCodeSetForUser(DEFAULT_TEST_USER_SUBJECT, "AAA semicolon - defaultuser", "1.0", 0, 2, true, ";", new ClassPathResource("AAA-semi.csv").getFile(), "text/tsv");
+    final long id = immportCodeSetForUser(DEFAULT_TEST_USER_SUBJECT, "AAA semicolon - defaultuser", "1.0", 0, 2, true, ";", new ClassPathResource("AAA-semi.csv").getFile(), "text/tsv");
     restClient.givenUser(ANOTHER_USER).get("/importedCodeSets/search/byIdForOwner?id=" + id)
         .then().statusCode(404);
     restClient.givenUser(DEFAULT_TEST_ADMIN_USER_SUBJECT).get("/importedCodeSets/search/byIdForOwner?id=" + id)
@@ -457,28 +476,38 @@ public class ImportedCodeSetResourceIT extends IntegrationTestBase {
    */
   @Test
   public void nonProjectUserShouldNotBeAbleToSearchByImportedCodeSet() throws Exception {
-    final long id = verifyCreatedImportedCodeSet("AAA semicolon version 2", "2.0", 0, 2, true, ";", new ClassPathResource("AAA-semi.csv").getFile(), "text/tsv");
+    final long id = verifyCreatedImportedCodeSet("AAA semicolon version 2", "2.0", 0, 2, true, null, null, ";", new ClassPathResource("AAA-semi.csv").getFile(), "text/tsv");
     restClient.givenUser(ANOTHER_USER).queryParam("importedCodeSet", "/importedCodeSets/" + id)
-        .get("/importedCodes/search/findByImportedCodeSet")
-        .then().statusCode(200)
-        .body("content", hasSize(1))
-        .body("content[0].value", hasSize(0));
-    }
+    .get("/importedCodes/search/findByImportedCodeSet")
+    .then().statusCode(200)
+    .body("content", hasSize(1))
+    .body("content[0].value", hasSize(0));
+  }
 
   private void verifyCreatedImportedCodeSet(String name, String version, int codeColumnIndex, int displayColumnIndex, boolean hasHeader,
       String delimiter, File file, String fileType, String[] codes, String[] displayTerms)
       throws JsonProcessingException, JsonMappingException, UnsupportedEncodingException, Exception {
+    verifyCreatedImportedCodeSet(name, version, codeColumnIndex, displayColumnIndex, hasHeader, null, null, delimiter, file, fileType, codes, displayTerms);
+  }
 
-    final long id = verifyCreatedImportedCodeSet(name, version, codeColumnIndex, displayColumnIndex, hasHeader, delimiter, file, fileType);
+  private void verifyCreatedImportedCodeSet(String name, String version, int codeColumnIndex, int displayColumnIndex, boolean hasHeader,
+      String[] additionalColumnIndexes, String[] additionalColumnTypes,
+      String delimiter, File file, String fileType, String[] codes, String[] displayTerms)
+      throws JsonProcessingException, JsonMappingException, UnsupportedEncodingException, Exception {
 
-    List<ImportedCode> importedCodes = restClient.givenDefaultUser().queryParam("importedCodeSet", "/importedCodeSets/" + id)
+    final long id = verifyCreatedImportedCodeSet(name, version, codeColumnIndex, displayColumnIndex, hasHeader, additionalColumnIndexes, additionalColumnTypes, delimiter, file, fileType);
+
+    System.err.println(restClient.givenDefaultUser().queryParam("importedCodeSet", "/importedCodeSets/" + id)
+    .get("/importedCodes/search/findByImportedCodeSet").asString());
+
+    final List<ImportedCode> importedCodes = restClient.givenDefaultUser().queryParam("importedCodeSet", "/importedCodeSets/" + id)
         .get("/importedCodes/search/findByImportedCodeSet")
         .then().statusCode(200)
         .body("content", hasSize(codes.length))
         .extract().jsonPath().getList("content", ImportedCode.class);
 
-    for (ImportedCode code : importedCodes) {
-      int index = Math.toIntExact(code.getIndex());
+    for (final ImportedCode code : importedCodes) {
+      final int index = Math.toIntExact(code.getIndex());
       assertThat(code.getCode()).isEqualTo(codes[index - 1]);
       assertThat(code.getDisplay()).isEqualTo(displayTerms[index - 1]);
     }
@@ -486,7 +515,13 @@ public class ImportedCodeSetResourceIT extends IntegrationTestBase {
 
   private long verifyCreatedImportedCodeSet(String name, String version, int codeColumnIndex, int displayColumnIndex, boolean hasHeader,
       String delimiter, File file, String fileType) throws Exception {
-    long id = restClient.createImportedCodeSet(name, version, codeColumnIndex, displayColumnIndex, hasHeader, delimiter, file, fileType);
+    return verifyCreatedImportedCodeSet(name, version, codeColumnIndex, displayColumnIndex, hasHeader, null, null, delimiter, file, fileType);
+  }
+
+  private long verifyCreatedImportedCodeSet(String name, String version, int codeColumnIndex, int displayColumnIndex, boolean hasHeader,
+      String[] additionalColumnIndexes, String[] additionalColumnTypes,
+      String delimiter, File file, String fileType) throws Exception {
+    final long id = restClient.createImportedCodeSet(name, version, codeColumnIndex, displayColumnIndex, hasHeader, additionalColumnIndexes, additionalColumnTypes, delimiter, file, fileType);
 
     restClient.givenDefaultUser().get("/importedCodeSets/search/byIdForOwner?id=" + id)
         .then().statusCode(200)
@@ -497,10 +532,10 @@ public class ImportedCodeSetResourceIT extends IntegrationTestBase {
     return id;
   }
 
-  
+
   private long immportCodeSetForUser(String subject, String name, String version, int codeColumnIndex, int displayColumnIndex, boolean hasHeader,
       String delimiter, File file, String fileType) throws Exception {
-    long id = restClient.createImportedCodeSet(subject, name, version, codeColumnIndex, displayColumnIndex, hasHeader, delimiter, file, fileType);
+    final long id = restClient.createImportedCodeSet(subject, name, version, codeColumnIndex, displayColumnIndex, hasHeader, delimiter, file, fileType);
 
     restClient.givenUser(subject).get("/importedCodeSets/search/byIdForOwner?id=" + id)
         .then().statusCode(200)
