@@ -149,10 +149,11 @@ public interface MapRowTargetRepository
   @Modifying
   @RestResource(exported = false)
   @Query(value = "insert ignore into map_row_target_tags "
-      + "select map_row_target_id, '" + TARGET_OUT_OF_SCOPE_TAG + "' "
-      + "from map_row_target_tags",
+      + "select id, '" + TARGET_OUT_OF_SCOPE_TAG + "' "
+      + "from map_row_target "
+      + "where id in :ids",
       nativeQuery = true)
-  int addOutOfScopeTag(Collection<Long> ids, Instant modifiedAt, String modifiedBy);
+  int addOutOfScopeTag(Collection<Long> ids);
 
   // Query DSL is used internally, don't want to expose it externally because we'd need to secure it
   // hence disable following methods
