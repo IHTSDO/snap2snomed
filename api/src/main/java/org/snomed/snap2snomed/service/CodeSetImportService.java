@@ -38,6 +38,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.persistence.EntityManager;
 import javax.transaction.Transactional;
@@ -66,6 +67,7 @@ import org.snomed.snap2snomed.problem.Snap2SnomedProblem;
 import org.snomed.snap2snomed.problem.auth.NotAuthorisedProblem;
 import org.snomed.snap2snomed.repository.ImportedCodeSetRepository;
 import org.snomed.snap2snomed.repository.MapRepository;
+import org.snomed.snap2snomed.repository.MapRowRepository;
 import org.snomed.snap2snomed.security.WebSecurity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -91,6 +93,9 @@ public class CodeSetImportService {
 
   @Autowired
   private MapRepository mapRepository;
+
+  @Autowired
+  private MapRowRepository mapRowRepository;
 
   @Autowired
   EntityManager entityManager;
@@ -151,7 +156,7 @@ public class CodeSetImportService {
     }
   }
 
-  private static class InsertMappingCodeWork implements Work {
+  private  class InsertMappingCodeWork implements Work {
 
     private final List<MapRowTargetParams> mapRowTargetParams = new ArrayList<>();
     private Long mapId;
@@ -198,54 +203,44 @@ public class CodeSetImportService {
       statement.setLong(4, mapId);
       statement.executeUpdate();
 
-      // This import implementation reduces import time from 2.8 minutes to 23 seconds
-      // Instead of using
-      //     "insert into map_row_target (relationship, target_code, target_display, row_id, flagged) " +
-      //     "select ?, ?, ?, mr.id, false from map_row as mr " +
-      //     "join imported_code ic on ic.id = mr.source_code_id AND ic.code = ? " +
-      //     "where map_id = ?"
+
       // Now we prepare the values for the insert into commands
       // Get Map Row IDs
-      final List<String> sourceCodes = new ArrayList<String>();
-      mapRowTargetParams.forEach(mapRowTargetParam -> sourceCodes.add(mapRowTargetParam.getSourceCode()));
-      if (sourceCodes.stream().anyMatch(code -> code.contains("'") || code.contains(";"))) {
-        log.warn("Possible SQL injection attempt with codes: " + sourceCodes);
-        throw new MappingImportProblem("invalid-data", "Found invalid code");
-      }
-      final String sourceCodeParam = "'" + String.join("','", sourceCodes) + "'";
-      // PreparedStatement doesn't allow multiple values for parameters to avoid SQL injection attacks
-      // so sourceCodeParam is an actual string here
-      statement = connection.prepareStatement("select ic.code, mr.id from map_row as mr " +
-        "join imported_code ic on ic.id = mr.source_code_id AND ic.code in ("  + sourceCodeParam + ") " +
-        "where map_id = ?");
-      statement.setLong(1, mapId);
-      final ResultSet rs = statement.executeQuery();
+      final List<String> sourceCodes = mapRowTargetParams.stream()
+          .map(MapRowTargetParams::getSourceCode)
+          .collect(Collectors.toList());
+
       // Allow 1:x mapping to happen - 1 source row for multiple mapping
       final Map<String, Long> rowIds = new HashMap<String, Long>();
-      while (rs.next()) {
-        rowIds.put(rs.getString("code"), rs.getLong("id"));
-      }
-      final Long rowsToMapCount = mapRowTargetParams.stream().map(params -> params.getSourceCode()).distinct().count();
+      mapRowRepository.findCodesAndMapRowIdsByMapIdAndSourceCodes(mapId, sourceCodes).forEach(rs -> {
+        rowIds.put((String) rs[0], (Long) rs[1]);
+      });
+      final Long rowsToMapCount = mapRowTargetParams.stream()
+          .map(MapRowTargetParams::getSourceCode)
+          .distinct()
+          .count();
       if(rowIds.size() != rowsToMapCount) {
         throw new MappingImportProblem("invalid-data", "The import result record count does not match " +
         "the number of source codes supplied to it [" + rowIds.size() + " vs " +rowsToMapCount + "] " +
         "Check that the source code column has correct codes.");
       }
       mapRowTargetParams.forEach(param -> {
-        param.getMapRowTarget().setRow(new MapRow());
-        param.getMapRowTarget().getRow().setId(rowIds.get(param.getSourceCode()));
+        final MapRow row = new MapRow();
+        row.setId(rowIds.get(param.getSourceCode()));
+        param.getMapRowTarget().setRow(row);
       });
       // Prepare and execute inserts to import mapping for the map
       statement = connection.prepareStatement(
         "insert into map_row_target (relationship, target_code, target_display, row_id, flagged) " +
         "values(?, ?, ?, ?, ?)");
       for (final MapRowTargetParams mapRowTargetParam : mapRowTargetParams) {
-        if (mapRowTargetParam.getMapRowTarget().getTargetCode() != null && !mapRowTargetParam.getMapRowTarget().getTargetCode().isEmpty()) {
-          statement.setInt(1, mapRowTargetParam.getMapRowTarget().getRelationship().ordinal());
-          statement.setString(2, mapRowTargetParam.getMapRowTarget().getTargetCode());
-          statement.setString(3, mapRowTargetParam.getMapRowTarget().getTargetDisplay());
-          statement.setLong(4, mapRowTargetParam.getMapRowTarget().getRow().getId());
-          statement.setBoolean(5, mapRowTargetParam.getMapRowTarget().isFlagged());
+        final MapRowTarget mapRowTarget = mapRowTargetParam.getMapRowTarget();
+        if (mapRowTarget.getTargetCode() != null && !mapRowTarget.getTargetCode().isEmpty()) {
+          statement.setInt(1, mapRowTarget.getRelationship().ordinal());
+          statement.setString(2, mapRowTarget.getTargetCode());
+          statement.setString(3, mapRowTarget.getTargetDisplay());
+          statement.setLong(4, mapRowTarget.getRow().getId());
+          statement.setBoolean(5, mapRowTarget.isFlagged());
           statement.addBatch();
         }
       }

@@ -186,3 +186,8 @@ variable "dex_loglevel" {
   description = "Log level for DEX"
   type        = string
 }
+
+variable "force_dex_deployment" {
+  description = "Force DEX ECS service redeployment"
+  type        = bool
+}

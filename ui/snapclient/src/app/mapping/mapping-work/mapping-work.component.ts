@@ -131,7 +131,6 @@ export class MappingWorkComponent implements OnInit, OnDestroy {
     'targetCode',
     'targetDisplay',
     'relationship',
-    'noMap',
   ];
   additionalHideShowColumns: string[] = [];
 
