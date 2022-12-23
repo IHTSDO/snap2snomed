@@ -123,5 +123,7 @@ public class MapRowTarget implements Snap2SnomedEntity {
 
         boolean getFlagged();
 
+        Set<String> getTags();
+
     }
 }
