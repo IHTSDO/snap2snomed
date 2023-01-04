@@ -285,6 +285,20 @@
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-help-plugin</artifactId>
+        <version>3.2.0</version>
+        <executions>
+          <execution>
+            <id>show-profiles</id>
+            <phase>compile</phase>
+            <goals>
+              <goal>active-profiles</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-failsafe-plugin</artifactId>
         <executions>
           <execution>
@@ -325,19 +339,11 @@
           <to>
             <image>${docker.registry.host}/${docker.repository}</image>
             <tags>
-              <tag>${project.version}</tag>
-              <tag>latest</tag>
+              <tag>${project.version}-${env.USER}</tag>
+              <tag>latest-${env.USER}</tag>
             </tags>
           </to>
         </configuration>
-        <executions>
-          <execution>
-            <phase>package</phase>
-            <goals>
-              <goal>dockerBuild</goal>
-            </goals>
-          </execution>
-        </executions>
       </plugin>
 
       <plugin>
@@ -436,6 +442,97 @@
           <scope>compile</scope>
         </dependency>
       </dependencies>
+    </profile>
+
+    <profile>
+      <id>docker</id>
+      <activation>
+        <property><name>!multi</name></property>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>com.google.cloud.tools</groupId>
+            <artifactId>jib-maven-plugin</artifactId>
+            <version>${jib.version}</version>
+            <executions>
+              <execution>
+                <phase>package</phase>
+                <goals>
+                  <goal>dockerBuild</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+
+    <profile>
+      <id>arm</id>
+      <activation>
+        <property><name>!multi</name></property>
+        <os>
+          <arch>aarch64</arch>
+        </os>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>com.google.cloud.tools</groupId>
+            <artifactId>jib-maven-plugin</artifactId>
+            <version>${jib.version}</version>
+            <configuration>
+              <from>
+                <platforms>
+                  <platform>
+                    <architecture>arm64</architecture>
+                    <os>linux</os>
+                  </platform>
+                </platforms>
+              </from>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+
+    <profile>
+      <id>multi</id>
+      <activation>
+        <property><name>multi</name></property>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>com.google.cloud.tools</groupId>
+            <artifactId>jib-maven-plugin</artifactId>
+            <version>${jib.version}</version>
+            <configuration>
+              <from>
+                <platforms>
+                  <platform>
+                    <architecture>arm64</architecture>
+                    <os>linux</os>
+                  </platform>
+                  <platform>
+                    <architecture>amd64</architecture>
+                    <os>linux</os>
+                  </platform>
+                </platforms>
+              </from>
+            </configuration>
+            <executions>
+              <execution>
+                <phase>package</phase>
+                <goals>
+                  <goal>build</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
     </profile>
   </profiles>
 

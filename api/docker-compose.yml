@@ -16,7 +16,7 @@ services:
     depends_on:
       - db
     container_name: snap2snomed_api
-    image: quay.io/aehrc/snap2snomed:latest
+    image: quay.io/aehrc/snap2snomed:latest-${USER}
     environment:
       - snap2snomed.cors.allowedOriginPatterns=*
       - snap2snomed.cors.allowedHeaders=*
