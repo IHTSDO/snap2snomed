@@ -119,7 +119,7 @@ export class TargetRelationshipComponent implements OnInit {
       if (self.source) {
         const targetRow = new MapView('', '', self.source.index, self.source.code,
           self.source.display, code, displayTerm, relationship, MapRowStatus.DRAFT,
-          false, null, null, null, null, null, false, self.source.additionalColumnValues);
+          false, null, null, null, null, null, false, false, self.source.additionalColumnValues);
         const duplicate = self.targetRows.find((row: any) => row.targetCode === targetRow.targetCode);
         if (!duplicate) {
           self.newTargetEvent.emit(targetRow);
