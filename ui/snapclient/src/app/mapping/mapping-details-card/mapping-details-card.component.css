@@ -17,10 +17,7 @@
 }
 
 .out-of-scope-text {
-  border: 1px solid black;   
-  border-radius: 10px;
-  padding: 20px;
-  width: 200px;
+  padding: 12px;
 }
 
 .col-action {

@@ -116,7 +116,7 @@ export class MappingWorkComponent implements OnInit, OnDestroy {
     {columnId: 'relationship', columnDisplay: 'TABLE.RELATIONSHIP', displayed: true},
     {columnId: 'noMap', columnDisplay: 'TABLE.NO_MAP', displayed: true},
     {columnId: 'status', columnDisplay: 'TABLE.STATUS', displayed: true},
-    {columnId: 'warn', columnDisplay: 'TABLE.WARN', displayed: true},
+    {columnId: 'targetOutOfScope', columnDisplay: 'TABLE.TARGET_OUT_OF_SCOPE', displayed: true},
     {columnId: 'flagged', columnDisplay: 'TABLE.FLAG', displayed: true},
     {columnId: 'latestNote', columnDisplay: 'SOURCE.TABLE.NOTES', displayed: true},
     {columnId: 'actions', columnDisplay: '', displayed: true}

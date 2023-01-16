@@ -182,6 +182,9 @@ export class ServiceUtils {
         params = params.append('status', value.toString());
       });
     }
+    if (filterEntity.targetOutOfScope !== undefined) {
+      params = params.append('targetOutOfScope', filterEntity.targetOutOfScope.toString());
+    }
     if (filterEntity.flagged !== undefined) {
       params = params.append('flagged', filterEntity.flagged.toString());
     }
@@ -210,6 +213,9 @@ export class ServiceUtils {
         // filter
         case 'noMap':
           mapViewFilter.noMap = typeof v === 'string' ? v.toUpperCase() === 'TRUE' : v[0].toUpperCase() === 'TRUE';
+          break;
+        case 'targetOutOfScope':
+          mapViewFilter.targetOutOfScope = typeof v === 'string' ? v.toUpperCase() === 'TRUE' : v[0].toUpperCase() === 'TRUE';
           break;
         case 'flagged':
           mapViewFilter.flagged = typeof v === 'string' ? v.toUpperCase() === 'TRUE' : v[0].toUpperCase() === 'TRUE';

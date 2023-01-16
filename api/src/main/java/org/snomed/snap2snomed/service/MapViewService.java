@@ -79,6 +79,7 @@ import lombok.extern.slf4j.Slf4j;
 public class MapViewService {
 
   private static final String ADDITIONAL_COLUMN_NAME = "additionalColumn";
+  private static final String TARGET_OUT_OF_SCOPE_TAG = "target-out-of-scope";
 
   public class MapViewFilter {
 
@@ -94,13 +95,14 @@ public class MapViewService {
     private final List<String> lastAuthorReviewer;
     private final List<String> assignedAuthor;
     private final List<String> assignedReviewer;
+    private final Boolean targetOutOfScope;
     private final Boolean flagged;
     private final List<String> additionalColumns;
 
     public MapViewFilter(List<String> sourceCodes, List<String> sourceDisplays, Boolean noMap, List<String> targetCodes,
         List<String> targetDisplays, List<MappingRelationship> relationshipTypes, List<MapStatus> statuses, List<String> lastAuthor,
         List<String> lastReviewer, List<String> lastAuthorReviewer, List<String> assignedAuthor, List<String> assignedReviewer,
-        Boolean flagged, List<String> additionalColumns) {
+        Boolean targetOutOfScope, Boolean flagged, List<String> additionalColumns) {
       this.sourceCodes = sourceCodes;
       this.sourceDisplays = sourceDisplays;
       this.noMap = noMap;
@@ -113,6 +115,7 @@ public class MapViewService {
       this.lastAuthorReviewer = lastAuthorReviewer;
       this.assignedAuthor = assignedAuthor;
       this.assignedReviewer = assignedReviewer;
+      this.targetOutOfScope = targetOutOfScope;
       this.flagged = flagged;
       this.additionalColumns  = additionalColumns;
     }
@@ -184,6 +187,15 @@ public class MapViewService {
 
         expression = collectAndStatement(expression, collectOrStatement(QMapRow.mapRow.reviewTask.assignee.id.in(assignedReviewer),
             noneMatch));
+      }
+
+      if (targetOutOfScope != null) {
+        if (targetOutOfScope) {
+          expression = collectAndStatement(expression, QMapRowTarget.mapRowTarget.tags.contains(TARGET_OUT_OF_SCOPE_TAG));
+        }
+        else {
+          expression = collectAndStatement(expression, QMapRowTarget.mapRowTarget.tags.contains(TARGET_OUT_OF_SCOPE_TAG).not());
+        }
       }
 
       if (flagged != null) {
@@ -359,6 +371,11 @@ public class MapViewService {
             field = Arrays.asList(
                 getUserSortComparison(mapRow.lastAuthor),
                 getUserSortComparison(mapRow.lastReviewer));
+            break;
+          case "targetOutOfScope":
+            field = null;
+            // it does not make sense to sort by this flag so it is not supported
+            log.warn("Unsupported MapView sort field '" + s.getProperty() + "' - ignored");
             break;
           case "flagged":
             field = Arrays.asList(mapTarget.flagged);

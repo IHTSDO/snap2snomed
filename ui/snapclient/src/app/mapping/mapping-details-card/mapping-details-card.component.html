@@ -15,8 +15,8 @@
           </li>
         </ul>
       </div>
-      <div class="col-middle">
-        <span class="out-of-scope-text">{{'MAP.NUM_TARGETS_OUT_OF_SCOPE' | translate}}: {{getNumOutOfScopeTargets()}}</span>
+      <div *ngIf="outOfScopeTargetCount > 0" class="col-middle">
+        <span class="out-of-scope-text">{{'MAP.NUM_TARGETS_OUT_OF_SCOPE' | translate}}: {{outOfScopeTargetCount}}</span>
       </div>
       <div class="col-action">
         <mat-form-field>

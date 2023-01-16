@@ -91,7 +91,12 @@ ul.sources-list li {
 
 }
 
-.mat-column-warn,
+.mat-column-targetOutOfScope,
+.mat-column-filter-targetOutOfScope {
+  width: 60px;
+  text-align: center;
+}
+
 .mat-column-filter-assignedAuthor,
 .mat-column-assignedAuthor,
 .mat-column-filter-assignedReviewer,
@@ -139,7 +144,7 @@ ul.sources-list li {
 }
 
 
-::ng-deep .mat-column-filter-warn .mat-form-field{
+::ng-deep .mat-column-filter-targetOutOfScope .mat-form-field{
   width: 60px;
 }
 

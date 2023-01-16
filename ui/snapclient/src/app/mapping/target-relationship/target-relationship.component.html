@@ -23,7 +23,7 @@
                     class="row-target">
                 <span class="selection-text">{{row.targetDisplay}}</span>
                 <span>
-                  <button mat-icon-button *ngIf="row.flagged" color="accent" #tooltip="matTooltip"
+                  <button mat-icon-button *ngIf="row.targetOutOfScope" color="accent" #tooltip="matTooltip"
                           matTooltip="{{'TABLE.TARGET_OUT_OF_SCOPE_TOOLTIP' | translate}}"
                           ><mat-icon>warning</mat-icon></button>
                   <button mat-icon-button (click)="updateFlag(row)" [disabled]="disableFlagging"

@@ -123,10 +123,10 @@
               <td mat-cell *matCellDef="let maprow">{{maprow.status}}</td>
             </ng-container>
             <!-- Out of Scope Column -->
-            <ng-container matColumnDef="warn">
-              <th mat-header-cell *matHeaderCellDef mat-sort-header>{{'TABLE.WARN' | translate}}</th>
+            <ng-container matColumnDef="targetOutOfScope">
+              <th mat-header-cell *matHeaderCellDef>{{'TABLE.TARGET_OUT_OF_SCOPE' | translate}}</th>
               <td mat-cell *matCellDef="let maprow">
-                <mat-icon *ngIf="maprow.flagged" color="accent" matTooltip="{{'TABLE.TARGET_OUT_OF_SCOPE_TOOLTIP' | translate}}">
+                <mat-icon *ngIf="maprow.targetOutOfScope" color="accent" matTooltip="{{'TABLE.TARGET_OUT_OF_SCOPE_TOOLTIP' | translate}}">
                   warning
                 </mat-icon>
               </td>
@@ -298,10 +298,11 @@
               </th>
             </ng-container>
             <!-- Filter Out of scope -->
-            <ng-container matColumnDef="filter-warn">
-              <th mat-header-cell [ngClass]="{'hide-filter': !isFilterColumnVisible('filter-warn')}" *matHeaderCellDef [attr.colspan]="1">
+            <ng-container matColumnDef="filter-targetOutOfScope">
+              <th mat-header-cell [ngClass]="{'hide-filter': !isFilterColumnVisible('filter-targetOutOfScope')}" *matHeaderCellDef [attr.colspan]="1">
                 <mat-form-field appearance="outline">
-                  <mat-select [(ngModel)]="filterEntity.flagged" (selectionChange)="filterChange()">
+                  <mat-select [(ngModel)]="filterEntity.targetOutOfScope" (selectionChange)="filterChange()"
+                              id="targetOutOfScope" name="targetOutOfScope" #targetOutOfScope="ngModel">
                     <mat-option [value]="">---</mat-option>
                     <mat-option *ngFor="let opt of noMapOptions"
                                 [value]="opt[1]">{{'NOMAP.' + opt[0] | translate}}</mat-option>

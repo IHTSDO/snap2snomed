@@ -49,6 +49,7 @@ export class MapView {
   noMap: boolean;
   latestNote?: Date | null;
   flagged?: boolean;
+  targetOutOfScope?: boolean;
 
   additionalColumnValues: string[];
 
@@ -64,7 +65,7 @@ export class MapView {
               targetCode: string | undefined, targetDisplay: string | undefined, relationship: string | undefined,
               status: string, noMap: boolean, latestNote: Date | null | undefined, assignedAuthor: User | null | undefined,
               assignedReviewer: User | null | undefined, lastAuthor: User | null | undefined,
-              lastReviewer: User | null | undefined, flagged: boolean | undefined, additionalColumnValues: string[] | undefined) {
+              lastReviewer: User | null | undefined, flagged: boolean | undefined, targetOutOfScope: boolean | undefined, additionalColumnValues: string[] | undefined) {
     this.rowId = rowId;
     this.targetId = targetId;
     this.sourceIndex = sourceIndex;
@@ -76,6 +77,8 @@ export class MapView {
     this.prevStatus = this.status = status;
     this.prevNoMap = this.noMap = noMap;
     this.prevFlagged = this.flagged = flagged;
+    this.targetOutOfScope = targetOutOfScope;
+
     this.latestNote = latestNote;
     this.assignedAuthor = assignedAuthor;
     this.assignedReviewer = assignedReviewer;
@@ -89,11 +92,12 @@ export class MapView {
     const rowId = mv.rowId === null ? '' : mv.rowId.toString();
     const additionalColumnValues = mv.additionalColumns ?
       mv.additionalColumns.map((ac: {value: string}) => ac.value) : [];
+    const targetOutOfScope = mv.targetTags?.includes('target-out-of-scope');
 
     return new MapView(
       rowId, mv.targetId, mv.sourceIndex, mv.sourceCode, mv.sourceDisplay,
       mv.targetCode, mv.targetDisplay, mv.relationship, mv.status, mv.noMap, mv.latestNote,
-      mv.assignedAuthor, mv.assignedReviewer, mv.lastAuthor, mv.lastReviewer, mv.flagged, additionalColumnValues
+      mv.assignedAuthor, mv.assignedReviewer, mv.lastAuthor, mv.lastReviewer, mv.flagged, targetOutOfScope, additionalColumnValues
     );
   }
 
@@ -124,6 +128,7 @@ export class MapView {
     this.prevTargetDisplay = this.targetDisplay = targetRow.targetDisplay;
     this.prevRelationship = this.relationship = targetRow.relationship;
     this.prevFlagged = this.flagged = targetRow.flagged;
+    this.targetOutOfScope = targetRow.targetOutOfScope;
   }
 
   reset(): void {
@@ -168,6 +173,7 @@ export class MapViewFilter {
   assignedAuthor: string[] | string = '';
   assignedReviewer: string[] | string = '';
   flagged?: boolean | undefined;
+  targetOutOfScope?: boolean | undefined;
   notes?: boolean | undefined;
   additionalColumns : string[] = [];
 
@@ -175,7 +181,7 @@ export class MapViewFilter {
     const filteredAdditionalColumns: string[] = this.additionalColumns.length > 0 ? this.additionalColumns.filter((s): s is string => Boolean(s)) : [];
 
     return this.sourceCode !== '' || this.sourceDisplay !== '' || this.targetCode !== '' || this.targetDisplay !== ''
-      || this.relationship !== '' || this.status !== '' || this.noMap !== undefined || this.flagged !== undefined
+      || this.relationship !== '' || this.status !== '' || this.noMap !== undefined || this.flagged !== undefined || this.targetOutOfScope !== undefined
       || this.lastAuthorReviewer !== '' || this.assignedAuthor !== '' || this.assignedReviewer !== '' || this.notes !== undefined || filteredAdditionalColumns.length > 0;
   }
 }

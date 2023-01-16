@@ -109,6 +109,8 @@ public class MapViewRestController {
       description = "Filters the results to those that are assigned to an author task assigned to one of the specified user ids.")
   @Parameter(name = "assignedReviewer", in = ParameterIn.QUERY, required = false, allowEmptyValue = true,
       description = "Filters the results to those that are assigned to an review task assigned to one of the specified user ids.")
+  @Parameter(name = "targetOutOfScope", in = ParameterIn.QUERY, required = false, allowEmptyValue = true,
+      description = "Filters the results to those that have a target out of scope or not.")
   @Parameter(name = "flagged", in = ParameterIn.QUERY, required = false, allowEmptyValue = true,
       description = "Filters the results to those that are flagged or not flagged.")
   @Parameter(name = "additionalColumns", in = ParameterIn.QUERY, required = false, allowEmptyValue = true,
@@ -135,6 +137,7 @@ public class MapViewRestController {
       @RequestParam(required = false) List<String> lastAuthorReviewer,
       @RequestParam(required = false) List<String> assignedAuthor,
       @RequestParam(required = false) List<String> assignedReviewer,
+      @RequestParam(required = false) Boolean targetOutOfScope,
       @RequestParam(required = false) Boolean flagged,
       @RequestParam(required = false) List<String> additionalColumns,
       @Parameter(hidden = true) Pageable pageable,
@@ -148,7 +151,7 @@ public class MapViewRestController {
     }
 
     final MapViewFilter filter = mapViewService.new MapViewFilter(sourceCode, sourceDisplay, noMap, targetCode, targetDisplay, relationship,
-        status, lastAuthor, lastReviewer, lastAuthorReviewer, assignedAuthor, assignedReviewer, flagged, additionalColumns);
+        status, lastAuthor, lastReviewer, lastAuthorReviewer, assignedAuthor, assignedReviewer, targetOutOfScope, flagged, additionalColumns);
 
     return ResponseEntity.ok(mapViewService.getMapResults(mapId, pageable, assembler, filter));
   }
@@ -182,6 +185,8 @@ public class MapViewRestController {
       description = "Filters the results to those that are assigned to an author task assigned to one of the specified user ids.")
   @Parameter(name = "assignedReviewer", in = ParameterIn.QUERY, required = false, allowEmptyValue = true,
       description = "Filters the results to those that are assigned to an review task assigned to one of the specified user ids.")
+  @Parameter(name = "targetOutOfScope", in = ParameterIn.QUERY, required = false, allowEmptyValue = true,
+      description = "Filters the results to those that have a target out of scope or not.")
   @Parameter(name = "flagged", in = ParameterIn.QUERY, required = false, allowEmptyValue = true,
       description = "Filters the results to those that are flagged or not flagged.")
   @Parameter(name = "additionalColumns", in = ParameterIn.QUERY, required = false, allowEmptyValue = true,
@@ -208,13 +213,14 @@ public class MapViewRestController {
       @RequestParam(required = false) List<String> lastAuthorReviewer,
       @RequestParam(required = false) List<String> assignedAuthor,
       @RequestParam(required = false) List<String> assignedReviewer,
+      @RequestParam(required = false) Boolean targetOutOfScope,      
       @RequestParam(required = false) Boolean flagged,
       @RequestParam(required = false) List<String> additionalColumns,
       @Parameter(hidden = true) Pageable pageable,
       @Parameter(hidden = true) PagedResourcesAssembler<MapView> assembler) {
 
     final MapViewFilter filter = mapViewService.new MapViewFilter(sourceCode, sourceDisplay, noMap, targetCode, targetDisplay, relationship,
-        status, lastAuthor, lastReviewer, lastAuthorReviewer, assignedAuthor, assignedReviewer, flagged, additionalColumns);
+        status, lastAuthor, lastReviewer, lastAuthorReviewer, assignedAuthor, assignedReviewer, targetOutOfScope, flagged, additionalColumns);
 
     if (!webSecurity.isValidUser()) {
       throw new NoSuchUserProblem();

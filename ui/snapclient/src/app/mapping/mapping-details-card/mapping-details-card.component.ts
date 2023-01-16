@@ -20,6 +20,7 @@ import { Router } from '@angular/router';
 import {TranslateService} from '@ngx-translate/core';
 import {Mapping} from 'src/app/_models/mapping';
 import { MapService } from 'src/app/_services/map.service';
+import { TargetChangedService } from 'src/app/_services/target-changed.service';
 
 const TARGET_OUT_OF_SCOPE_TAG = "target-out-of-scope";
 
@@ -39,12 +40,21 @@ export class MappingDetailsCardComponent {
 
   constructor(private translate: TranslateService,
               private router: Router,
-              private mapService: MapService) {
+              private mapService: MapService,
+              private targetChangedService: TargetChangedService) {
   }
 
   ngOnInit() {
 
-    //TODO rerun query on mapping target change
+    this.targetChangedService.targetChanged$.subscribe(row => {
+      this.updateNumOutOfScopeTargets();
+    })
+
+    this.updateNumOutOfScopeTargets();
+
+  }
+
+  updateNumOutOfScopeTargets() {
     if (this.mapping.id) {
       this.mapService.getTagCount(this.mapping.id, TARGET_OUT_OF_SCOPE_TAG).subscribe((result) => {
         if (result._embedded && result._embedded.mapRowTargets) {
@@ -52,7 +62,6 @@ export class MappingDetailsCardComponent {
         }
       });
     }
-
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -78,7 +87,4 @@ export class MappingDetailsCardComponent {
     return this.clicked.observers.length > 0;
   }
 
-  getNumOutOfScopeTargets(): number | string {
-    return this.outOfScopeTargetCount;
-  }
 }
