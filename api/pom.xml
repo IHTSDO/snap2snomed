@@ -52,6 +52,7 @@
     <hapi.version>6.0.2</hapi.version>
     <spring-security-core.version>5.7.5</spring-security-core.version>
     <spring-core.version>5.3.21</spring-core.version>
+    <spring-boot-starter-web.version>3.0.1</spring-boot-starter-web.version> <!-- force version for CVE-2016-1000027 to get 6.0.0 and above spring-web -->
   </properties>
 
   <dependencyManagement>
@@ -80,6 +81,7 @@
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-web</artifactId>
+      <version>${spring-boot-starter-web.version}</version>
     </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>
