@@ -52,7 +52,6 @@
     <hapi.version>6.0.2</hapi.version>
     <spring-security-core.version>5.7.5</spring-security-core.version>
     <spring-core.version>5.3.21</spring-core.version>
-    <spring-boot-starter-web.version>3.0.1</spring-boot-starter-web.version> <!-- force version for CVE-2016-1000027 to get 6.0.0 and above spring-web -->
   </properties>
 
   <dependencyManagement>
@@ -79,9 +78,16 @@
       <artifactId>spring-boot-starter-data-rest</artifactId>
     </dependency>
     <dependency>
+    <!-- force version for CVE-2016-1000027 to get 6.0.0 and above spring-web.
+         otherwise spring-boot-starter-web uses 5.3.23 .. remove when spring-boot-starter-web updates
+         dependency  -->
+    <groupId>org.springframework</groupId>
+      <artifactId>spring-web</artifactId>
+      <version>6.0.4</version>
+    </dependency>
+    <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-web</artifactId>
-      <version>${spring-boot-starter-web.version}</version>
     </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>
