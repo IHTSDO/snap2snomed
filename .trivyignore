@@ -10,4 +10,7 @@ CVE-2022-42003
 CVE-2022-42004
 
 # Accept the risk as a transitive dependency of mockserver and so only used for tests remove when upgrade mockserver > 5.14.0 (as yet unrelease)
-CVE-2022-42889 
+CVE-2022-42889
+
+# remove when spring-web (dependency of spring-boot-starter-web) is 6.0.0 or above
+CVE-2016-1000027
