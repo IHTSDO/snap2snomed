@@ -67,6 +67,7 @@ import {MappingImportComponent} from '../mapping-import/mapping-import.component
 import { MappingNotesComponent } from '../mapping-table-notes/mapping-notes.component';
 import { MatCheckboxChange } from '@angular/material/checkbox';
 import { TableColumn } from '../mapping-table/mapping-table.component';
+import { TargetChangedService } from 'src/app/_services/target-changed.service';
 
 @Component({
   selector: 'app-mapping-view',
@@ -215,7 +216,8 @@ export class MappingViewComponent implements OnInit, AfterViewInit, OnDestroy {
               private store: Store<IAppState>,
               private translate: TranslateService,
               private mapService: MapService,
-              private authService: AuthService,) {
+              private authService: AuthService,
+              private targetChangedService: TargetChangedService) {
     this.translate.get('TASK.SELECT_A_TASK').subscribe((res) => this.selectedLabel = res);
 
     this.paging = new MapViewPaging();
@@ -647,6 +649,7 @@ export class MappingViewComponent implements OnInit, AfterViewInit, OnDestroy {
       this.mapService.validateTargetCodes(this.mapping_id).subscribe(validationResult => {
         if ((validationResult.inactive.length + validationResult.absent.length + validationResult.invalid.length) > 0) {
           this.refreshTable('validated');
+          this.targetChangedService.changeTarget({});
         }
         this.clearLoading();
       }, err => {
