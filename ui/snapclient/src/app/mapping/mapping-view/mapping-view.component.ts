@@ -649,8 +649,8 @@ export class MappingViewComponent implements OnInit, AfterViewInit, OnDestroy {
       this.mapService.validateTargetCodes(this.mapping_id).subscribe(validationResult => {
         if ((validationResult.inactive.length + validationResult.absent.length + validationResult.invalid.length) > 0) {
           this.refreshTable('validated');
-          this.targetChangedService.changeTarget({});
         }
+        this.targetChangedService.changeTarget({}); // needs to update on a zero count
         this.clearLoading();
       }, err => {
         this.validateError(err);
