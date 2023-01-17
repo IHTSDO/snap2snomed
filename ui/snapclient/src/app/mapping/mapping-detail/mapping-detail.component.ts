@@ -50,6 +50,7 @@ import {debounceTime} from "rxjs/operators";
 import {User} from "../../_models/user";
 import { TargetChangedService } from 'src/app/_services/target-changed.service';
 
+const TARGET_OUT_OF_SCOPE_TAG = "target-out-of-scope";
 
 export type SourceRow = {
   id: string;
@@ -274,11 +275,11 @@ export class MappingDetailComponent implements OnInit, OnDestroy {
           self.mapRows = rows._embedded.mapRowTargets.map((target) => {
             const status = target.row?.status ?? MapRowStatus.UNMAPPED;
             const flagged = target.row?.id ? target.flagged : undefined;
-            const targetOutOfScope = target.tags ? target.tags.includes('target-out-of-scope') : undefined;
+            const targetOutOfScope = target.tags ? target.tags.includes(TARGET_OUT_OF_SCOPE_TAG) : undefined;
             return new MapView(target.row?.id || '', target.id, source.index || '', source.code || '',
               source.display || '', target.targetCode, target.targetDisplay, target.relationship, status,
               false, target.row?.latestNote || null, null, null, null,
-              null, flagged, targetOutOfScope, source.additionalColumnValues);
+              null, flagged, targetOutOfScope, target.tags, source.additionalColumnValues);
           });
         } else {
           self.mapRows = [];
@@ -296,7 +297,8 @@ export class MappingDetailComponent implements OnInit, OnDestroy {
       const targetRow = new TargetRow(
         mapView.rowId,
         mapView.targetId, mapView.targetCode, mapView.targetDisplay,
-        mapView.relationship, mapView.flagged, mapView.targetOutOfScope);
+        mapView.relationship, mapView.flagged, mapView.targetOutOfScope,
+        mapView.targetOutOfScope ? [TARGET_OUT_OF_SCOPE_TAG]: undefined);
       this.mapService.createTarget(targetRow).subscribe((result) => {
           const targetId = ServiceUtils.extractIdFromHref(result._links.self.href, null);
           mapView.updateNoMap(mapView.noMap);

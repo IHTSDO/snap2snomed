@@ -19,6 +19,8 @@ import {SourceCode} from './source_code';
 import {Mapping} from './mapping';
 import {User} from './user';
 
+const TARGET_OUT_OF_SCOPE_TAG = "target-out-of-scope";
+
 export interface MapRow {
   id: string | null;
   map?: Mapping;
@@ -50,6 +52,7 @@ export class MapView {
   latestNote?: Date | null;
   flagged?: boolean;
   targetOutOfScope?: boolean;
+  tags?: string[];
 
   additionalColumnValues: string[];
 
@@ -65,7 +68,7 @@ export class MapView {
               targetCode: string | undefined, targetDisplay: string | undefined, relationship: string | undefined,
               status: string, noMap: boolean, latestNote: Date | null | undefined, assignedAuthor: User | null | undefined,
               assignedReviewer: User | null | undefined, lastAuthor: User | null | undefined,
-              lastReviewer: User | null | undefined, flagged: boolean | undefined, targetOutOfScope: boolean | undefined, additionalColumnValues: string[] | undefined) {
+              lastReviewer: User | null | undefined, flagged: boolean | undefined, targetOutOfScope: boolean | undefined, tags: string[] | undefined, additionalColumnValues: string[] | undefined) {
     this.rowId = rowId;
     this.targetId = targetId;
     this.sourceIndex = sourceIndex;
@@ -78,6 +81,7 @@ export class MapView {
     this.prevNoMap = this.noMap = noMap;
     this.prevFlagged = this.flagged = flagged;
     this.targetOutOfScope = targetOutOfScope;
+    this.tags = tags;
 
     this.latestNote = latestNote;
     this.assignedAuthor = assignedAuthor;
@@ -92,12 +96,12 @@ export class MapView {
     const rowId = mv.rowId === null ? '' : mv.rowId.toString();
     const additionalColumnValues = mv.additionalColumns ?
       mv.additionalColumns.map((ac: {value: string}) => ac.value) : [];
-    const targetOutOfScope = mv.targetTags?.includes('target-out-of-scope');
+    const targetOutOfScope = mv.targetTags?.includes(TARGET_OUT_OF_SCOPE_TAG);
 
     return new MapView(
       rowId, mv.targetId, mv.sourceIndex, mv.sourceCode, mv.sourceDisplay,
       mv.targetCode, mv.targetDisplay, mv.relationship, mv.status, mv.noMap, mv.latestNote,
-      mv.assignedAuthor, mv.assignedReviewer, mv.lastAuthor, mv.lastReviewer, mv.flagged, targetOutOfScope, additionalColumnValues
+      mv.assignedAuthor, mv.assignedReviewer, mv.lastAuthor, mv.lastReviewer, mv.flagged, targetOutOfScope, mv.targetTags, additionalColumnValues
     );
   }
 

@@ -340,7 +340,8 @@ export class MapService {
       mapView.targetDisplay,
       getValidRelationship(mapView),
       mapView.flagged,
-      mapView.targetOutOfScope
+      mapView.targetOutOfScope,
+      mapView.tags
     );
     const targetUrl = `${this.config.apiBaseUrl}/mapRowTargets`;
 
@@ -518,5 +519,5 @@ function getValidRelationship(mapView: MapView): string | undefined {
 function toTargetRow(result: any): TargetRow {
   const id = ServiceUtils.extractIdFromHref(result._links?.self.href, null);
   return new TargetRow(undefined, id, result.targetCode, result.targetDisplay,
-    result.relationship, result.flagged, result.targetOutOfScope);
+    result.relationship, result.flagged, result.targetOutOfScope, result.tags);
 }
