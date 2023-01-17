@@ -57,9 +57,7 @@ export class MappingDetailsCardComponent {
   updateNumOutOfScopeTargets() {
     if (this.mapping.id) {
       this.mapService.getTagCount(this.mapping.id, TARGET_OUT_OF_SCOPE_TAG).subscribe((result) => {
-        if (result._embedded && result._embedded.mapRowTargets) {
-          this.outOfScopeTargetCount = result._embedded.mapRowTargets.length;
-        }
+        this.outOfScopeTargetCount = result.page.totalElements;
       });
     }
   }
