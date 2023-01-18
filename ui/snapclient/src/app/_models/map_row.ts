@@ -19,7 +19,7 @@ import {SourceCode} from './source_code';
 import {Mapping} from './mapping';
 import {User} from './user';
 
-const TARGET_OUT_OF_SCOPE_TAG = "target-out-of-scope";
+export const TARGET_OUT_OF_SCOPE_TAG = "target-out-of-scope";
 
 export interface MapRow {
   id: string | null;

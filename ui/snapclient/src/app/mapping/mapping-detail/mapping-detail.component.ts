@@ -27,6 +27,7 @@ import {
   mapRowStatusToIconName,
   MapView,
   MapViewFilter,
+  TARGET_OUT_OF_SCOPE_TAG,
   toMapRowStatus
 } from '../../_models/map_row';
 import {TargetRow} from '../../_models/target_row';
@@ -49,8 +50,6 @@ import {WriteDisableUtils} from "../../_utils/write_disable_utils";
 import {debounceTime} from "rxjs/operators";
 import {User} from "../../_models/user";
 import { TargetChangedService } from 'src/app/_services/target-changed.service';
-
-const TARGET_OUT_OF_SCOPE_TAG = "target-out-of-scope";
 
 export type SourceRow = {
   id: string;

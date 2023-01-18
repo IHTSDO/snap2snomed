@@ -19,10 +19,9 @@ import { MatSelectChange } from '@angular/material/select';
 import { Router } from '@angular/router';
 import {TranslateService} from '@ngx-translate/core';
 import {Mapping} from 'src/app/_models/mapping';
+import { TARGET_OUT_OF_SCOPE_TAG } from 'src/app/_models/map_row';
 import { MapService } from 'src/app/_services/map.service';
 import { TargetChangedService } from 'src/app/_services/target-changed.service';
-
-const TARGET_OUT_OF_SCOPE_TAG = "target-out-of-scope";
 
 @Component({
   selector: 'app-mapping-details-card',

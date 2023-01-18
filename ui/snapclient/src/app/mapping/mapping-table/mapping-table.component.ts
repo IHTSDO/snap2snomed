@@ -25,7 +25,8 @@ import {
   mapRowStatuses,
   MapView,
   MapViewFilter,
-  Page
+  Page,
+  TARGET_OUT_OF_SCOPE_TAG
 } from '../../_models/map_row';
 import {MatPaginator, PageEvent} from '@angular/material/paginator';
 import {MatSort, Sort, SortDirection} from '@angular/material/sort';
@@ -422,6 +423,13 @@ export class MappingTableComponent implements OnInit, AfterViewInit, OnDestroy {
             row.targetDisplay = displayTerm;
             row.status = MapRowStatus.DRAFT;
             row.relationship = MapRowRelationship.INEXACT;
+            row.targetOutOfScope = false;
+
+            const tagIndex = row.tags?.indexOf(TARGET_OUT_OF_SCOPE_TAG, 0);
+            if (tagIndex !== undefined && tagIndex > -1) {
+              row.tags?.splice(tagIndex, 1);
+            }
+            
             self.updateMapRowTarget(row, index);
           });
         }
