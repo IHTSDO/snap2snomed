@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { AfterViewInit, ChangeDetectorRef, Component, Input, OnDestroy, OnInit, Optional, ViewChild } from '@angular/core';
+import { AfterViewInit, ChangeDetectorRef, Component, EventEmitter, Input, OnDestroy, OnInit, Optional, Output, ViewChild } from '@angular/core';
 import { MatColumnDef, MatTable } from '@angular/material/table';
 import { Store } from '@ngrx/store';
 import { Subscription } from 'rxjs';
@@ -47,6 +47,7 @@ export class MappingTableSelectorComponent implements OnInit, OnDestroy, AfterVi
         this.columnDef.name = name;
       }
   }
+  @Output() allSelectedEvent = new EventEmitter<boolean>();
   selectedRows: MappedRowDetailsDto[] = [];
 
   isAllSelected = false;
@@ -84,10 +85,6 @@ export class MappingTableSelectorComponent implements OnInit, OnDestroy, AfterVi
 
   ngAfterViewInit(): void {
     this.isAnySelected = false;
-    if (this.selectedRows && this.selectedRows.length > 0 && this.selectedRows.length === this.allSourceDetails.length) {
-      this.isAllSelected = true;
-      this.isAnySelected = true;
-    }
     let foundOnPage = 0;
     this.page.data.forEach(row => {
       if (this.isSelectedPageRow(row.rowId, row.targetId, row.sourceIndex)) {
@@ -169,17 +166,23 @@ export class MappingTableSelectorComponent implements OnInit, OnDestroy, AfterVi
       this.isAnySelected = true;
       this.lastSelected = 0;
       this.store.dispatch(new SelectMapRow({selectedrows: this.selectedRows}));
+      this.allSelectedEvent.emit(true);
     } else {
       this.clearAllSelectedRows();
       this.isAllSelected = false;
       this.isAnySelected = false;
       this.lastSelected = 0;
       this.store.dispatch(new SelectMapRow({selectedrows: []}));
+      this.allSelectedEvent.emit(false);
     }
     this.ngAfterViewInit();
   }
 
   selectPageToggle(event: any): void {
+    if (this.isAllSelected) {
+      this.isAllSelected = false;
+      this.allSelectedEvent.emit(false);
+    }
     if (event.checked) {
       this.page.data.forEach(row => {
         const newSelectedRow = new MappedRowDetailsDto(
@@ -252,6 +255,7 @@ export class MappingTableSelectorComponent implements OnInit, OnDestroy, AfterVi
   clearAllSelectedRows(): void {
     this.selectedRows = [];
     this.isAllSelected = false;
+    this.allSelectedEvent.emit(false);
     this.isPageSelected = false;
     this.store.dispatch(new SelectMapRow({selectedrows: []}));
   }
@@ -268,7 +272,11 @@ export class MappingTableSelectorComponent implements OnInit, OnDestroy, AfterVi
     if (this.selectedRows) {
       if (this.selectedRows.length > 9999) {
         return '9999+';
-      } else {
+      } 
+      else if (this.isAllSelected) {
+        return this.page.totalElements.toString();
+      }
+      else {
         return String(this.selectedRows.length);
       }
     }

@@ -97,14 +97,23 @@ public class MappingRestController {
   @Parameter(name = "mappingUpdates", in = ParameterIn.QUERY, required = true, allowEmptyValue = false,
       description = "Details of the bulk change to make")
   @PostMapping(value = "/updateMapping/map/{mapId}", consumes = "application/json")
-  MappingResponse updateMappingForMap(@PathVariable("mapId") Long mapId, @RequestBody MappingDto mappingUpdates) {
+  MappingResponse updateMappingForMap(@PathVariable("mapId") Long mapId, @RequestBody MappingUpdateDto mappingUpdates) {
+
     if (!webSecurity.isValidUser()) {
       throw new NoSuchUserProblem();
     }
     if (!(webSecurity.isAdminUser() || webSecurity.hasAnyProjectRoleForMapId(mapId))) {
       throw new NotAuthorisedProblem("Not authorised to bulk update mapping if the user is not admin or member of an associated project!");
     }
-    return mappingService.updateMappingForMap(mapId, mappingUpdates);
+    // Associated Project role checking happens in the service
+    return mappingService.updateMappingForAll(mapId, mappingUpdates);
+
+    // 20/01/2023 DU Below is the previous implementation which was never called by the UI.  I needed similar functionality, but this implementation
+    // does not update the target and it goes about things in a very different way so I have decided to take over /updateMapping/map/{mapId}
+    // so as to not have to create new DTOs to package up a mapId and a MappingUpdateDto together. The new method mimics the approach of
+    // updateMappingForSelection.
+    // TODO: clean up updateMappingForMap / updateMappingForTask
+    // return mappingService.updateMappingForMap(mapId, mappingUpdates);
   }
 
   @Operation(description = "Applies a bulk change to a task specified by a MappingDto, "

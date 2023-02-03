@@ -33,6 +33,7 @@ export interface BulkChangeDialogData {
   map: Mapping | null | undefined;
   isMapView: boolean | null | undefined;
   selectedRows: MappedRowDetailsDto[] | null | undefined;
+  allSelected: boolean;
 }
 
 export function getErrorMessage(translateService: TranslateService, err: any): string {
@@ -94,6 +95,7 @@ export class BulkchangeComponent implements OnInit {
   hasSearchValue: boolean;
   isMapView: boolean;
   processing: boolean;
+  allSelected: boolean;
 
   @ViewChild('searchComponent') searchComponent: ConceptSearchComponent | undefined;
 
@@ -115,6 +117,7 @@ export class BulkchangeComponent implements OnInit {
     this.hasSearchValue = false;
     this.isMapView = false;
     this.processing = false;
+    this.allSelected = this.data.allSelected;
   }
   getStatuses(task: Task | null | undefined): MapRowStatus[] {
     let authStatuses = authorStatuses.filter(stat => stat !== MapRowStatus.UNMAPPED);
@@ -185,7 +188,15 @@ export class BulkchangeComponent implements OnInit {
     const mappingUpdateDto: MappingUpdateDto = {
       mappingDetails: mappingDetails
     }
-    this.doBulkChange(this.mapService.bulkUpdate(mappingUpdateDto));
+  
+    if (this.allSelected) {
+      if (this.data.map && this.data.map.id !== null) {
+        this.doBulkChange(this.mapService.bulkUpdateAllRowsForMap(this.data.map.id, mappingUpdateDto));
+      }
+    }
+    else {
+      this.doBulkChange(this.mapService.bulkUpdate(mappingUpdateDto));
+    }
   }
 
   doBulkChange(serviceFunction: any): void {

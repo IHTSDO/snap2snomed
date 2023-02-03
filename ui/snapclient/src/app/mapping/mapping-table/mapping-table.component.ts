@@ -122,6 +122,7 @@ export class MappingTableComponent implements OnInit, AfterViewInit, OnDestroy {
   @Output() showNotes = new EventEmitter<number>();
   @Output() updateTableEvent = new EventEmitter();
   @Output() targetConceptSearchString = new EventEmitter<string>();
+  @Output() allSelectedEvent = new EventEmitter<boolean>();
 
   mappingTableSelector: MappingTableSelectorComponent | null | undefined;
 
@@ -142,6 +143,8 @@ export class MappingTableComponent implements OnInit, AfterViewInit, OnDestroy {
   page: Page = new Page();
   allSourceDetails: MappedRowDetailsDto[] = [];
   writeDisableUtils = WriteDisableUtils;
+  
+  allSelected = false;
 
   private subscription = new Subscription();
   private debounce = 200;
@@ -517,6 +520,11 @@ export class MappingTableComponent implements OnInit, AfterViewInit, OnDestroy {
 
   getStatuses(mapRow: MapView): MapRowStatus[] {
     return this.task ? StatusUtils.getAvailableStatusOptions(this.task.type as TaskType, mapRow.status as MapRowStatus) : mapRowStatuses;
+  }
+
+    onAllSelected(allSelected: boolean) {
+    this.allSelected = allSelected
+    this.allSelectedEvent.emit(allSelected);
   }
 
 }

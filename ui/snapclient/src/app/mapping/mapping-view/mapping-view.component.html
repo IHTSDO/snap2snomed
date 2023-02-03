@@ -76,7 +76,8 @@
             <app-mapping-table-selector
               name="id"
               [allSourceDetails]="allSourceDetails"
-              [page]="page">
+              [page]="page"
+              (allSelectedEvent)="onAllSelected($event)">
             </app-mapping-table-selector>
             <!-- Source index Column -->
             <ng-container matColumnDef="sourceIndex">

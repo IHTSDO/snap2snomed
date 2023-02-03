@@ -100,6 +100,7 @@ export class MappingWorkComponent implements OnInit, OnDestroy {
   automapping = false;
   isAdmin = false;
   private navigationSubscription: Subscription;
+  allSelected = false;
 
   targetConceptSearchText = '';
 
@@ -448,6 +449,10 @@ export class MappingWorkComponent implements OnInit, OnDestroy {
     this.targetConceptSearchText = text;
   }
 
+  allSelectedChange(allSelected: boolean) {
+    this.allSelected = allSelected;
+  }
+
   sortChange(event: Sort): void {
     this.tableParams.sortDirection = event.direction;
     if (event.direction === '') {
@@ -525,9 +530,10 @@ export class MappingWorkComponent implements OnInit, OnDestroy {
   getBulkChangeDialogData(): BulkChangeDialogData {
     return {
       task: this.task,
-      map: null,
+      map: this.mapping,
       isMapView: false,
-      selectedRows: this.mapTable?.mappingTableSelector?.selectedRows
+      selectedRows: this.mapTable?.mappingTableSelector?.selectedRows,
+      allSelected: this.allSelected
     };
   }
 
