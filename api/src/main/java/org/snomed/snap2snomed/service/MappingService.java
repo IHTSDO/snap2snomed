@@ -225,20 +225,23 @@ public class MappingService {
   public MappingResponse updateMappingForAll(Long mapId, MappingUpdateDto mappings) {
     MappingUpdateDto mapUpdate = new MappingUpdateDto();
     List<MappingDetails> mappingDetails = new ArrayList<>();
-    mappings.getMappingDetails().forEach(mappingDetail -> {
-      TargetDto targetDto = mappingDetail.getMappingUpdate().getTarget();
-      Collection<MapRow> mapRows = mapRowRepository.findMapRowsByMapId(mapId);
-      mapRows.forEach(mapRow -> {
-        if (mapRow.getMapRowTargets().size() <= 0) {
-          processMapRowUpdate(targetDto, mapRow, mappingDetail, mappingDetails, null);
-        }
-        mapRow.getMapRowTargets().forEach(subSelection -> {
-          processMapRowUpdate(targetDto, mapRow, mappingDetail, mappingDetails, subSelection.getId());
+    if (mappings.getMappingDetails() == null || mappings.getMappingDetails().isEmpty()) {
+      mappings.getMappingDetails().forEach(mappingDetail -> {
+        TargetDto targetDto = mappingDetail.getMappingUpdate().getTarget();
+        Collection<MapRow> mapRows = mapRowRepository.findMapRowsByMapId(mapId);
+        mapRows.forEach(mapRow -> {
+          if (mapRow.getMapRowTargets().size() <= 0) {
+            processMapRowUpdate(targetDto, mapRow, mappingDetail, mappingDetails, null);
+          }
+          mapRow.getMapRowTargets().forEach(subSelection -> {
+            processMapRowUpdate(targetDto, mapRow, mappingDetail, mappingDetails, subSelection.getId());
+          });
         });
       });
-    });
-    mapUpdate.setMappingDetails(mappingDetails);
+      mapUpdate.setMappingDetails(mappingDetails);
+    }
     return this.updateMapping(mapUpdate);
+
   }
 
   @Transactional
