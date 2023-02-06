@@ -81,9 +81,12 @@ export class TaskAddComponent implements OnInit, AfterViewInit, OnDestroy {
     self.subscription.add(self.store.select(selectSelectedRows).subscribe(
       (selectedRows) => {
         if (self.task) {
-          if (selectedRows.length > 0) {
-            const sourceIndexes = selectedRows.map(selected => selected.sourceIndex);
-            self.task.sourceRowSpecification = ServiceUtils.convertNumberArrayToRangeString(sourceIndexes);
+          if (this.mappingTableSelector?.isAllSelected) {
+            self.task.sourceRowSpecification = '*';
+          }
+          else if (selectedRows.length > 0) {
+              const sourceIndexes = selectedRows.map(selected => selected.sourceIndex);
+              self.task.sourceRowSpecification = ServiceUtils.convertNumberArrayToRangeString(sourceIndexes);
           } else {
             self.assignRows = '';
             self.task.sourceRowSpecification = '';
@@ -132,8 +135,13 @@ export class TaskAddComponent implements OnInit, AfterViewInit, OnDestroy {
   updateSelectedRows(): void {
     if (this.mappingTableSelector && this.mappingTableSelector.selectedRows && this.task) {
       if (this.mappingTableSelector.selectedRows.length > 0) {
-        const sourceIndexes = this.mappingTableSelector.selectedRows.map(selected => selected.sourceIndex);
-        this.task.sourceRowSpecification = ServiceUtils.convertNumberArrayToRangeString(sourceIndexes);
+        if (this.mappingTableSelector.isAllSelected) {
+          this.task.sourceRowSpecification = '*';
+        }
+        else {
+          const sourceIndexes = this.mappingTableSelector.selectedRows.map(selected => selected.sourceIndex);
+          this.task.sourceRowSpecification = ServiceUtils.convertNumberArrayToRangeString(sourceIndexes);
+        }
       } else {
         this.assignRows = '';
         this.task.sourceRowSpecification = '';
