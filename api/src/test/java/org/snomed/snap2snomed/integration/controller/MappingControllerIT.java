@@ -141,7 +141,12 @@ public class MappingControllerIT extends IntegrationTestBase {
 
   @Test
   public void failNoMapAndStatusChangeAllRows() throws Exception {
+
     MappingDto nomapDto = MappingDto.builder().noMap(true).status(MapStatus.UNMAPPED).build();
+    MappingUpdateDto mappingUpdate = new MappingUpdateDto();
+    List<MappingDetails> mappingDetails = new ArrayList<MappingDetails>();
+    mappingDetails.add(MappingDetails.builder().mappingUpdate(nomapDto).build());
+    mappingUpdate.setMappingDetails(mappingDetails);
     expectFail("/updateMapping/map/" + mapId, nomapDto, 400,
         "Invalid combination of changes. Clear/set 'no map' and clearing targets must be done independently of any other changes");
     expectFail("/updateMapping/task/" + taskId, nomapDto, 400,
@@ -411,7 +416,7 @@ public class MappingControllerIT extends IntegrationTestBase {
     mappingUpdate.setMappingDetails(mappingDetails);
     expectFail("/updateMapping", mappingUpdate, 400, expectedDetail);
 
-    expectFail("/updateMapping/map/" + mapId, mappingDto, 400, expectedDetail);
+    expectFail("/updateMapping/map/" + mapId, mappingUpdate, 400, expectedDetail);
     expectFail("/updateMapping/task/" + taskId, mappingDto, 400, expectedDetail);
   }
 
