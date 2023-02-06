@@ -225,7 +225,7 @@ public class MappingService {
   public MappingResponse updateMappingForAll(Long mapId, MappingUpdateDto mappings) {
     MappingUpdateDto mapUpdate = new MappingUpdateDto();
     List<MappingDetails> mappingDetails = new ArrayList<>();
-    if (mappings.getMappingDetails() == null || mappings.getMappingDetails().isEmpty()) {
+    if (!(mappings.getMappingDetails() == null || mappings.getMappingDetails().isEmpty())) {
       mappings.getMappingDetails().forEach(mappingDetail -> {
         TargetDto targetDto = mappingDetail.getMappingUpdate().getTarget();
         Collection<MapRow> mapRows = mapRowRepository.findMapRowsByMapId(mapId);
