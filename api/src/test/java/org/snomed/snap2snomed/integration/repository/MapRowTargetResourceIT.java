@@ -119,7 +119,7 @@ public class MapRowTargetResourceIT extends IntegrationTestBase {
     restClient.givenDefaultUser()
         .queryParam("projection", "targetView")
         .queryParam("row.sourceCode.index", "10")
-        .queryParam("row.map.id", mapId).log().all()
+        .queryParam("mapId", mapId).log().all()
         .get("/mapRowTargets")
         .then().log().body().statusCode(200)
         .body("content", hasSize(1))
