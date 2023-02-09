@@ -73,7 +73,7 @@ data "archive_file" "promptail" {
 }
 
 resource "aws_lambda_function" "lambda_promtail" {
-  filename      = "lambda-promtail.zip"
+  filename      = "${path.module}/lambda-promtail.zip"
   function_name = "lambda_promtail"
   runtime       = "go1.x"
   handler       = "main"
