@@ -68,7 +68,7 @@ resource "aws_cloudwatch_log_group" "lambda_promtail" {
 
 data "archive_file" "promptail" {
   type        = "zip"
-  source_dir  = "${path.module}/lambda-promtail-sources"
+  source_file  = "${path.module}/main"
   output_path = "${path.module}/lambda-promtail.zip"
 }
 
