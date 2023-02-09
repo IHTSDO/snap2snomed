@@ -89,3 +89,14 @@ module "cognito" {
   dex_client_secret    = var.dex_client_secret
   prodlogin            = var.prodlogin
 }
+
+module "lambda-promtail" {
+  source = "./lambda-promtail"
+  kms_key_arn  = module.api.kms_key_arn
+  host_name    = var.ui_host_name
+  aws_region   = var.aws_region
+  username     = var.loki_username
+  password     = var.loki_password
+  log_groups   = [module.api.dex_log_group_name, module.api.api_log_group_name]
+}
+
