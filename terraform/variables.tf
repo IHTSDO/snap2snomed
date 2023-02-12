@@ -250,3 +250,21 @@ variable "force_dex_deployment" {
   type        = bool
   default     = false
 }
+
+variable "loki_username" {
+  description = "Loki service username"
+  type        = string
+  sensitive   = true
+}
+
+variable "loki_password" {
+  description = "Loki service password"
+  type        = string
+  sensitive   = true
+}
+
+variable "loki_url" {
+  description = "Loki service url"
+  type        = string
+  sensitive   = true
+}
