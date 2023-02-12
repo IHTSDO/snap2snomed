@@ -11,3 +11,7 @@ CVE-2022-42004
 
 # Accept the risk as a transitive dependency of mockserver and so only used for tests remove when upgrade mockserver > 5.14.0 (as yet unrelease)
 CVE-2022-42889 
+
+# Even the latest version of springboot-starter-web 3.0.2 have transitive dependencies: tomcat-embed-core-9.0.68.jar and spring-web-5.3.23.jar with these issues
+CVE-2022-45143
+CVE-2016-1000027
