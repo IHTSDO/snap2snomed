@@ -82,7 +82,7 @@ export class MappingAddComponent implements OnInit {
     if (value) {
       this.mappingModel = cloneDeep(value);
       // if target version no longer available - need to clear model
-      if (!this.hasAvailableTargetVersion(this.mappingModel.toVersion) && this.editionToVersionsMapLoaded) {
+      if (this.mappingModel.toVersion !== null && !this.hasAvailableTargetVersion(this.mappingModel.toVersion) && this.editionToVersionsMapLoaded) {
         this.mappingModel.toVersion = '';
         this.mappingModel.toScope = '';
       }
@@ -235,6 +235,22 @@ export class MappingAddComponent implements OnInit {
     this.warnDelete = false;
     this.closed.emit();
     this.error = {};
+
+    if (this.mode === 'FORM.CREATE') {
+
+      // reset everything so the next time the user attempts to create a map, old data isn't showing
+      // if they happened to press cancel instead of save
+      
+      this.mappingModel = new Mapping();
+      // would like to use form reset here, but there seems to be some bug
+      // preventing toSource from displaying after a reset
+      // so using 3 resets instead to remove error messages on a re-enter
+      // complaining that fields are mandatory
+      form.controls['title'].reset();
+      form.controls['mapVersion'].reset();
+      form.controls['sourceId'].reset();
+    }
+
   }
 
   addSource($event: MouseEvent): void {
