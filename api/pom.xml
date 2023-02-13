@@ -348,8 +348,8 @@
           <to>
             <image>${docker.registry.host}/${docker.repository}</image>
             <tags>
-              <tag>${project.version}-${env.USER}</tag>
-              <tag>latest-${env.USER}</tag>
+              <tag>${project.version}-${user.name}</tag>
+              <tag>latest-${user.name}</tag>
             </tags>
           </to>
         </configuration>
