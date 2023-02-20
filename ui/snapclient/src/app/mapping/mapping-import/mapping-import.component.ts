@@ -44,7 +44,7 @@ const SOURCE_CODE_OPTION_LABEL = 'Source code';
 const TARGET_CODE_OPTION_LABEL = 'Target code';
 const TARGET_DISPLAY_OPTION_LABEL = 'Target display';
 const RELATIONSHIP_TYPE_CODE_OPTION_LABEL = 'Relationship type code';
-const NO_MAP_FLAG_OPTION_LABEL = "No map flag";
+const NO_MAP_FLAG_OPTION_LABEL = "No map";
 const STATUS_OPTION_LABEL = "Status";
 
 const ALT_SOURCE_CODE_OPTION_LABEL = 'source_code';

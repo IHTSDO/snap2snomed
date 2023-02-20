@@ -20,13 +20,15 @@
   </ng-container>
   <!-- Source code Column -->
   <ng-container matColumnDef="sourceCode">
-    <th mat-header-cell *matHeaderCellDef mat-sort-header>{{'TABLE.SOURCE_CODE' | translate}}</th>
+    <th mat-header-cell *matHeaderCellDef [resizeColumn]="true" [index]="1" [title]="'TABLE.SOURCE_CODE' | translate"></th>
     <td mat-cell *matCellDef="let maprow">{{maprow.sourceCode}}</td>
   </ng-container>
   <!-- Source display Column -->
   <ng-container matColumnDef="sourceDisplay">
-    <th mat-header-cell *matHeaderCellDef mat-sort-header>{{'TABLE.SOURCE_DISPLAY' | translate}}</th>
-    <td mat-cell *matCellDef="let maprow">{{maprow.sourceDisplay}}</td>
+    <th mat-header-cell *matHeaderCellDef [resizeColumn]="true" [index]="2" [title]="'TABLE.SOURCE_DISPLAY' | translate"></th>
+    <td mat-cell *matCellDef="let maprow" 
+        #tooltip="matTooltip" matTooltip="{{'MAP.SEARCH_SOURCE_DISPLAY' | translate}}" 
+        (click)="clickSourceDisplay(maprow)" [appDraggable]="{data: maprow.sourceDisplay, zones: ['searchZone']}">{{maprow.sourceDisplay}}</td>
   </ng-container>
   <!-- Relationship Column -->
   <ng-container matColumnDef="relationship">
@@ -44,14 +46,14 @@
   </ng-container>
   <!-- Target code Column -->
   <ng-container matColumnDef="targetCode">
-    <th mat-header-cell *matHeaderCellDef mat-sort-header>{{'TABLE.TARGET_CODE' | translate}}</th>
+    <th mat-header-cell *matHeaderCellDef [resizeColumn]="true" [index]="4" [title]="'TABLE.TARGET_CODE' | translate"></th>
     <td mat-cell *matCellDef="let maprow; let i = index" (click)="clickRow(i, maprow)">
       <span *ngIf="!maprow.noMap">{{maprow.targetCode}}</span>
     </td>
   </ng-container>
   <!-- Target display Column -->
   <ng-container matColumnDef="targetDisplay">
-    <th mat-header-cell *matHeaderCellDef mat-sort-header>{{'TABLE.TARGET_DISPLAY' | translate}}</th>
+    <th mat-header-cell *matHeaderCellDef [resizeColumn]="true" [index]="5" [title]="'TABLE.TARGET_DISPLAY' | translate"></th>
     <td mat-cell *matCellDef="let maprow; let i = index" (click)="clickRow(i, maprow)">
       <span *ngIf="!maprow.noMap">{{maprow.targetDisplay}}</span>
     </td>
@@ -84,9 +86,19 @@
     <th mat-header-cell *matHeaderCellDef mat-sort-header>{{'TABLE.NOTES' | translate}}</th>
     <td mat-cell *matCellDef="let maprow; let i = index">
       <button *ngIf="maprow.latestNote" mat-icon-button
-              #tooltip="matTooltip" matTooltip="View Notes"
+              #tooltip="matTooltip" matTooltip="{{'MAP.VIEW_NOTES' | translate}}"
               (click)="notesView(i, maprow)"
       ><mat-icon>chat_bubble_outline</mat-icon></button>
+    </td>
+  </ng-container>
+  <!-- Out of Scope Column -->
+  <ng-container matColumnDef="targetOutOfScope">
+    <th mat-header-cell *matHeaderCellDef>{{'TABLE.TARGET_OUT_OF_SCOPE' | translate}}</th>
+    <td mat-cell *matCellDef="let maprow; let i = index">
+      <button mat-icon-button *ngIf="maprow.targetOutOfScope" color="accent" #tooltip="matTooltip" matTooltip="{{'TABLE.TARGET_OUT_OF_SCOPE_TOOLTIP' | translate}}"
+          (click)="detailsView(i)">
+        <mat-icon>warning</mat-icon>
+      </button>
     </td>
   </ng-container>
   <!-- Flagged Column -->
@@ -105,6 +117,7 @@
       </button>
     </td>
   </ng-container>
+  <!-- Actions Column -->
   <ng-container matColumnDef="actions">
     <th mat-header-cell *matHeaderCellDef>{{'TABLE.ACTIONS' | translate}}</th>
     <td mat-cell *matCellDef="let maprow; let i = index">
@@ -113,36 +126,41 @@
       ><mat-icon>loupe</mat-icon></button>
     </td>
   </ng-container>
+    <!-- Additional Source Columns -->
+    <ng-container *ngFor="let additionalCol of additionalDisplayedColumns; let idx = index" matColumnDef="{{additionalCol.columnId}}">
+      <th mat-header-cell *matHeaderCellDef [resizeColumn]="true" [index]="idx + 6" [title]="page.additionalColumns[idx].name"></th>
+      <td mat-cell *matCellDef="let maprow">{{maprow.additionalColumnValues[idx]}}</td>
+    </ng-container>
 
   <!-- Filter Id -->
   <ng-container matColumnDef="filter-id">
     <th mat-header-cell *matHeaderCellDef [attr.colspan]="1"></th>
   </ng-container>
   <!-- Filter SourceIndex -->
-  <ng-container matColumnDef="filter-source-index">
+  <ng-container matColumnDef="filter-sourceIndex">
     <th mat-header-cell *matHeaderCellDef [attr.colspan]="1"></th>
   </ng-container>
   <!-- Filter SourceCode -->
-  <ng-container matColumnDef="filter-source-code">
-    <th mat-header-cell *matHeaderCellDef [attr.colspan]="1">
+  <ng-container matColumnDef="filter-sourceCode">
+    <th mat-header-cell [ngClass]="{'hide-filter': !isFilterColumnVisible('filter-sourceCode')}" *matHeaderCellDef [attr.colspan]="1">
       <mat-form-field appearance="outline">
         <input matInput autocapitalize="off" autocomplete="false" list="no_source_code"
-               [(ngModel)]="filterEntity.sourceCode" [formControl]="sourceCodeFilterControl">
+               [(ngModel)]="filterEntity.sourceCode" (input)="filterUpdate()">
         <datalist id="no_source_code"></datalist><!-- workaround for Edge ignoring autocomplete="false" -->
-        <button *ngIf="filterEntity.sourceCode" matSuffix mat-icon-button aria-label="Clear" (click)="filterEntity.sourceCode=''">
+        <button *ngIf="filterEntity.sourceCode" matSuffix mat-icon-button aria-label="Clear" (click)="filterEntity.sourceCode=''; filterUpdate()">
           <mat-icon>cancel</mat-icon>
         </button>
       </mat-form-field>
     </th>
   </ng-container>
-  <!-- Filter SourceCode -->
-  <ng-container matColumnDef="filter-source-display">
-    <th mat-header-cell *matHeaderCellDef [attr.colspan]="1">
+  <!-- Filter Source Display -->
+  <ng-container matColumnDef="filter-sourceDisplay">
+    <th mat-header-cell [ngClass]="{'hide-filter': !isFilterColumnVisible('filter-sourceDisplay')}" *matHeaderCellDef [attr.colspan]="1">
       <mat-form-field appearance="outline">
         <input matInput autocapitalize="off" autocomplete="false" list="no_source_display"
-               [(ngModel)]="filterEntity.sourceDisplay" [formControl]="sourceDisplayFilterControl">
+               [(ngModel)]="filterEntity.sourceDisplay" (input)="filterUpdate()">
         <datalist id="no_source_display"></datalist><!-- workaround for Edge ignoring autocomplete="false" -->
-        <button *ngIf="filterEntity.sourceDisplay" matSuffix mat-icon-button aria-label="Clear" (click)="filterEntity.sourceDisplay=''">
+        <button *ngIf="filterEntity.sourceDisplay" matSuffix mat-icon-button aria-label="Clear" (click)="filterEntity.sourceDisplay=''; filterUpdate()">
           <mat-icon>cancel</mat-icon>
         </button>
       </mat-form-field>
@@ -150,7 +168,7 @@
   </ng-container>
   <!-- Filter Relationship -->
   <ng-container matColumnDef="filter-relationship">
-    <th mat-header-cell *matHeaderCellDef [attr.colspan]="1">
+    <th mat-header-cell [ngClass]="{'hide-filter': !isFilterColumnVisible('filter-relationship')}" *matHeaderCellDef [attr.colspan]="1">
       <mat-form-field appearance="outline">
         <mat-select [(ngModel)]="filterEntity.relationship" (selectionChange)="filterUpdate()" multiple
                     id="relationship" name="relationship" #relationship="ngModel">
@@ -161,26 +179,26 @@
     </th>
   </ng-container>
   <!-- Filter Target Code -->
-  <ng-container matColumnDef="filter-target-code">
-    <th mat-header-cell *matHeaderCellDef [attr.colspan]="1">
+  <ng-container matColumnDef="filter-targetCode">
+    <th mat-header-cell [ngClass]="{'hide-filter': !isFilterColumnVisible('filter-targetCode')}" *matHeaderCellDef [attr.colspan]="1">
       <mat-form-field appearance="outline">
         <input matInput autocapitalize="off" autocomplete="false" list="no_target_code"
-               [(ngModel)]="filterEntity.targetCode" [formControl]="targetCodeFilterControl">
+               [(ngModel)]="filterEntity.targetCode" (input)="filterUpdate()">
         <datalist id="no_target_code"></datalist><!-- workaround for Edge ignoring autocomplete="false" -->
-        <button *ngIf="filterEntity.targetCode" matSuffix mat-icon-button aria-label="Clear" (click)="filterEntity.targetCode=''">
+        <button *ngIf="filterEntity.targetCode" matSuffix mat-icon-button aria-label="Clear" (click)="filterEntity.targetCode=''; filterUpdate()">
           <mat-icon>cancel</mat-icon>
         </button>
       </mat-form-field>
     </th>
   </ng-container>
   <!-- Filter Target Display -->
-  <ng-container matColumnDef="filter-target-display">
-    <th mat-header-cell *matHeaderCellDef [attr.colspan]="1">
+  <ng-container matColumnDef="filter-targetDisplay">
+    <th mat-header-cell [ngClass]="{'hide-filter': !isFilterColumnVisible('filter-targetDisplay')}" *matHeaderCellDef [attr.colspan]="1">
       <mat-form-field appearance="outline">
         <input matInput autocapitalize="off" autocomplete="false" list="no_target_display"
-               [(ngModel)]="filterEntity.targetDisplay" [formControl]="targetDisplayFilterControl">
+               [(ngModel)]="filterEntity.targetDisplay" (input)="filterUpdate()">
         <datalist id="no_target_display"></datalist><!-- workaround for Edge ignoring autocomplete="false" -->
-        <button *ngIf="filterEntity.targetDisplay" matSuffix mat-icon-button aria-label="Clear" (click)="filterEntity.targetDisplay=''">
+        <button *ngIf="filterEntity.targetDisplay" matSuffix mat-icon-button aria-label="Clear" (click)="filterEntity.targetDisplay=''; filterUpdate()">
           <mat-icon>cancel</mat-icon>
         </button>
       </mat-form-field>
@@ -188,7 +206,7 @@
   </ng-container>
   <!-- Filter NoMap -->
   <ng-container matColumnDef="filter-noMap">
-    <th mat-header-cell *matHeaderCellDef [attr.colspan]="1">
+    <th mat-header-cell [ngClass]="{'hide-filter': !isFilterColumnVisible('filter-noMap')}"*matHeaderCellDef [attr.colspan]="1">
       <mat-form-field appearance="outline">
         <mat-select [(ngModel)]="filterEntity.noMap" (selectionChange)="filterUpdate()"
                     id="noMap" name="noMap" #noMap="ngModel">
@@ -210,6 +228,19 @@
       </mat-form-field>
     </th>
   </ng-container>
+  <!-- Filter Out of scope -->
+  <ng-container matColumnDef="filter-targetOutOfScope">
+    <th mat-header-cell [ngClass]="{'hide-filter': !isFilterColumnVisible('filter-targetOutOfScope')}" *matHeaderCellDef [attr.colspan]="1">
+      <mat-form-field appearance="outline">
+        <mat-select [(ngModel)]="filterEntity.targetOutOfScope" (selectionChange)="filterUpdate()"
+                    id="targetOutOfScope" name="targetOutOfScope" #targetOutOfScope="ngModel">
+          <mat-option [value]="">---</mat-option>
+          <mat-option *ngFor="let opt of yesNoOptions"
+                      [value]="opt[1]">{{'NOMAP.' + opt[0] | translate}}</mat-option>
+        </mat-select>
+      </mat-form-field>
+    </th>
+  </ng-container>
   <!-- Filter Flagged -->
   <ng-container matColumnDef="filter-flagged">
     <th mat-header-cell *matHeaderCellDef [attr.colspan]="1">
@@ -223,24 +254,44 @@
       </mat-form-field>
     </th>
   </ng-container>
-    <!-- Filter Notes -->
-    <ng-container matColumnDef="filter-notes">
-      <th mat-header-cell *matHeaderCellDef [attr.colspan]="1">
-        <mat-form-field appearance="outline">
-          <mat-select [(ngModel)]="filterEntity.notes" (selectionChange)="filterUpdate()"
-                      id="notes" name="notes" #noMap="ngModel">
-            <mat-option [value]="">---</mat-option>
-            <mat-option *ngFor="let opt of yesNoOptions"
-                        [value]="opt[1]">{{'NOMAP.' + opt[0] | translate}}</mat-option>
-          </mat-select>
-        </mat-form-field>
-      </th>
-    </ng-container>
+  <!-- Filter Notes -->
+  <ng-container matColumnDef="filter-notes">
+    <th mat-header-cell *matHeaderCellDef [attr.colspan]="1">
+      <mat-form-field appearance="outline">
+        <mat-select [(ngModel)]="filterEntity.notes" (selectionChange)="filterUpdate()"
+                    id="notes" name="notes" #noMap="ngModel">
+          <mat-option [value]="">---</mat-option>
+          <mat-option *ngFor="let opt of yesNoOptions"
+                      [value]="opt[1]">{{'NOMAP.' + opt[0] | translate}}</mat-option>
+        </mat-select>
+      </mat-form-field>
+    </th>
+  </ng-container>
+  <!-- Filter Actions-->
+  <ng-container matColumnDef="filter-actions">
+    <th mat-header-cell *matHeaderCellDef [attr.colspan]="1">
+    </th>
+  </ng-container>
+  <!-- Filter Additional Source Columns -->
+  <ng-container *ngFor="let additionalCol of additionalFilteredColumns; let idx = index" matColumnDef="{{additionalCol}}">
+    <th mat-header-cell [ngClass]="{'hide-filter': !isFilterColumnVisible(additionalCol)}" *matHeaderCellDef [attr.colspan]="1">
+      <mat-form-field appearance="outline">
+        <input matInput autocapitalize="off" autocomplete="false" [attr.list]="getDataListId(idx)"
+          [(ngModel)]="filterEntity.additionalColumns[idx]" (input)="filterUpdate()">
+        <datalist id="getDataListId(idx)"></datalist>
+        <!-- workaround for Edge ignoring autocomplete="false" -->
+        <button *ngIf="filterEntity.additionalColumns[idx]" matSuffix mat-icon-button aria-label="Clear"
+                (click)="filterEntity.additionalColumns[idx]=''; filterUpdate()">
+          <mat-icon>cancel</mat-icon>
+        </button>
+      </mat-form-field>
+    </th>
+  </ng-container>
 
-  <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
+  <tr mat-header-row *matHeaderRowDef="getDisplayedColumns(); sticky: true"></tr>
   <tr mat-header-row *matHeaderRowDef="filteredColumns" [attr.hidden]="filterEnabled? null : true"></tr>
 
-  <tr mat-row *matRowDef="let row; columns: displayedColumns; let idx = index"
+  <tr mat-row *matRowDef="let row; columns: getDisplayedColumns(); let idx = index"
       [appDroppable]="{zone: 'conceptZone'}"
       [dropDisabled]="row.noMap || writeDisableUtils.isEditDisabled(this.task?.type, row.status)"
       [class.clicked-row]="isClicked(idx)"

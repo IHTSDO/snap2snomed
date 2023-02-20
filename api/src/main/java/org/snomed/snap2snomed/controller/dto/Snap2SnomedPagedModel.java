@@ -19,6 +19,7 @@ package org.snomed.snap2snomed.controller.dto;
 import java.util.Collection;
 import java.util.List;
 
+import org.snomed.snap2snomed.model.AdditionalCodeColumn;
 import org.springframework.hateoas.Links;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.hateoas.PagedModel.PageMetadata;
@@ -32,11 +33,13 @@ public class Snap2SnomedPagedModel<T> {
   private Links links;
   private Collection<T> content;
   private PageMetadata page;
+  private List<AdditionalCodeColumn> additionalColumns;
 
-  public Snap2SnomedPagedModel(PagedModel<T> pagedModel, List<MappedRowDetailsDto> sourceDetails) {
+  public Snap2SnomedPagedModel(PagedModel<T> pagedModel, List<MappedRowDetailsDto> sourceDetails, List<AdditionalCodeColumn> additionalColumns) {
     this.page = pagedModel.getMetadata();
     this.content = pagedModel.getContent();
     this.links = pagedModel.getLinks();
     this.sourceDetails = sourceDetails;
+    this.additionalColumns = additionalColumns;
   }
 }

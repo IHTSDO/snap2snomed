@@ -96,6 +96,21 @@ export class SourceImportComponent implements OnInit, OnDestroy, AfterViewChecke
     self.store.select(selectSourceList).subscribe((res) => this.initialSourceList = res).unsubscribe();
   }
 
+  // required because this.data.additionalColumnIndexes is a primative type
+  trackByIdx(index: number, obj: any): any {
+    return index;
+  }
+
+  onAddAdditionalColumn() {
+    this.data.additionalColumnIndexes.push(null);
+    this.data.additionalColumnTypes.push(null);
+  }
+
+  onRemoveAdditionalColumn(index : number) {
+    this.data.additionalColumnIndexes.splice(index, 1);
+    this.data.additionalColumnTypes.splice(index, 1);
+  }
+
   onFileSelected(event: any): void {
     const fileUpload = document.getElementById('fileUpload') as HTMLInputElement;
     this.csvHeaders = undefined;
@@ -199,8 +214,22 @@ export class SourceImportComponent implements OnInit, OnDestroy, AfterViewChecke
     }
   }
 
+  /**
+   * If an additional column is supplied, check that a type is also supplied
+   */
+  allTypeFieldsSupplied() : boolean {
+    for (let i=0; i< this.data.additionalColumnIndexes.length; i++) {
+      if (this.data.additionalColumnIndexes[i] !== undefined) {
+        if (this.data.additionalColumnTypes[i] === undefined) {
+          return false;
+        }
+      }
+    };
+    return true
+  }
+
   disableSubmit(): boolean {
-    return !(this.data.name && this.data.version && this.data.source_file) || this.error.message !== undefined;
+    return !(this.data.name && this.data.version && this.data.source_file && this.allTypeFieldsSupplied()) || this.error.message !== undefined;
   }
 
   changeDelimiter(event: any): void {

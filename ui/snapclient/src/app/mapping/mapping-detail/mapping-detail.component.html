@@ -28,6 +28,14 @@
             </tr>
           </table>
         </div>
+        <div class="col-additional">
+          <table class="additional-source-table">
+            <tr *ngFor="let additionalCol of source.additionalColumnValues; let idx = index; " id="source-index-row">
+              <th>{{source.additionalColumnNames && source.additionalColumnNames[idx] ? source.additionalColumnNames[idx] : ''}}</th>
+              <td>{{additionalCol}}</td>
+            </tr>
+          </table>
+        </div>
         <div class="col-status">
           <button mat-button color="any" type="button" title="Previous code" (click)="loadPrevious()"
                   [disabled]="!hasPrevious()">

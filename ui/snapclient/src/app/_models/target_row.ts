@@ -28,15 +28,19 @@ export class TargetRow {
   targetDisplay?: string;
   relationship?: string;
   flagged?: boolean;
+  targetOutOfScope?: boolean;
+  tags?: string[];
 
   constructor(row: string | undefined, id: string | undefined, targetCode: string | undefined, targetDisplay: string | undefined,
-              relationship: string | undefined, flagged: boolean | undefined) {
+              relationship: string | undefined, flagged: boolean | undefined, targetOutOfScope: boolean | undefined, tags: string[] | undefined) {
     this.row = row;
     this.id = id;
     this.targetCode = targetCode;
     this.targetDisplay = targetDisplay;
     this.relationship = relationship;
     this.flagged = flagged;
+    this.targetOutOfScope = targetOutOfScope;
+    this.tags = tags;
   }
 
   static replacer(key: string, value: any): any {
@@ -52,12 +56,14 @@ export class JSONTargetRow extends TargetRow {
   mapping?: Mapping;
   // @ts-ignore
   row?: MapRow;
+  tags?: string[];
 
-  constructor(row: MapRow | undefined, id: string | undefined, targetCode: string | undefined, targetDisplay: string | undefined,
-              relationship: string | undefined, flagged: boolean, source: SourceCode | undefined, mapping: Mapping | undefined) {
-    super(row?.id || '', id, targetCode, targetDisplay, relationship, flagged);
+  constructor(row: MapRow | undefined, id: string | undefined, targetCode: string | undefined, tags: string[] | undefined, targetDisplay: string | undefined,
+              relationship: string | undefined, flagged: boolean, targetOutOfScope: boolean, source: SourceCode | undefined, mapping: Mapping | undefined) {
+    super(row?.id || '', id, targetCode, targetDisplay, relationship, flagged, targetOutOfScope, tags);
     this.source = source;
     this.mapping = mapping;
     this.row = row;
+    this.tags = tags;
   }
 }

@@ -17,13 +17,18 @@
 package org.snomed.snap2snomed.model;
 
 import java.time.Instant;
+import java.util.List;
+
+import java.util.Set;
 import javax.validation.constraints.NotNull;
+
+import org.snomed.snap2snomed.model.enumeration.MapStatus;
+import org.snomed.snap2snomed.model.enumeration.MappingRelationship;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.snomed.snap2snomed.model.enumeration.MapStatus;
-import org.snomed.snap2snomed.model.enumeration.MappingRelationship;
 
 @Data
 @Builder
@@ -53,7 +58,12 @@ public class MapView {
       this.targetDisplay = target.getTargetDisplay();
       this.relationship = target.getRelationship();
       this.flagged = target.isFlagged();
+      this.targetTags = target.getTags();
     }
+    if (row.getSourceCode().getAdditionalColumns().size() > 0) {
+      this.additionalColumns = row.getSourceCode().getAdditionalColumns();
+    }
+
   }
 
   @NotNull
@@ -92,4 +102,7 @@ public class MapView {
 
   private boolean flagged;
 
+  private Set<String> targetTags;
+
+  private List<AdditionalCodeValue> additionalColumns;
 }

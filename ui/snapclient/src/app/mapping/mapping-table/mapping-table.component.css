@@ -8,7 +8,7 @@
   overflow: auto;
 }
 
-.mat-column-targetDisplay, .mat-column-targetCode {
+.mat-column-sourceDisplay, .mat-column-targetDisplay, .mat-column-targetCode {
   cursor: pointer;
 }
 
@@ -37,37 +37,45 @@
   text-align: center;
 }
 
-.mat-column-filter-source-index,
+.mat-column-filter-sourceIndex,
 .mat-column-bulk-source-index,
 .mat-column-sourceIndex {
   width: 35px;
   text-align: center;
 }
 
-.mat-column-filter-source-code, .mat-column-filter-target-code,
+.mat-column-filter-sourceCode, .mat-column-filter-targetCode,
 .mat-column-bulk-source-code, .mat-column-bulk-target-code,
-.mat-column-filter-source-code .mat-form-field, .mat-column-filter-target-code .mat-form-field,
+.mat-column-filter-sourceCode .mat-form-field, .mat-column-filter-targetCode .mat-form-field,
 .mat-column-sourceCode, .mat-column-targetCode {
   width: 100px;
   max-width: 150px; /* wide enough for an 18 digit SNOMED code */
   overflow-wrap: break-word;
 }
 
-.mat-column-filter-source-display, .mat-column-filter-target-display,
+.mat-column-filter-sourceDisplay, .mat-column-filter-targetDisplay,
 .mat-column-bulk-source-display,
 .mat-column-sourceDisplay, .mat-column-targetDisplay {
   min-width: 120px;
 }
 
-.mat-column-filter-source-display .mat-form-field-type-mat-input {
+.mat-column-filter-sourceDisplay .mat-form-field-type-mat-input {
   width: 95% !important;
 }
 
-.mat-column-filter-target-display .mat-form-field-type-mat-input {
+.mat-column-filter-targetDisplay .mat-form-field-type-mat-input {
   width: 95% !important;
 }
 
-.mat-column-noMap, mat-column-bulk-noMap, .mat-column-filter-noMap, .mat-column-flagged, .mat-column-filter-flagged, .mat-column-notes, .mat-column-filter-notes {
+.mat-column-targetOutOfScope,
+.mat-column-filter-targetOutOfScope,
+.mat-column-noMap, 
+mat-column-bulk-noMap, 
+.mat-column-filter-noMap, 
+.mat-column-flagged, 
+.mat-column-filter-flagged, 
+.mat-column-notes, 
+.mat-column-filter-notes {
   width: 60px;
 }
 
@@ -75,7 +83,15 @@
   width: 60px;
 }
 
+::ng-deep .mat-column-filter-targetOutOfScope .mat-form-field{
+  width: 60px;
+}
+
 ::ng-deep .mat-column-filter-flagged .mat-form-field{
+  width: 60px;
+}
+
+::ng-deep .mat-column-filter-notes .mat-form-field{
   width: 60px;
 }
 
@@ -128,4 +144,14 @@ td.mat-cell {
 
 .mat-stroked-button {
   color: #4a4a4a;
+}
+
+.mat-icon-button {
+  width:30px !important;
+  height:30px !important;
+  line-height: 30px !important;
+}
+
+.hide-filter {
+  display: none;
 }

@@ -14,7 +14,11 @@
 }
 
 .col-main {
-  flex: 3;
+  flex: 2;
+}
+
+.col-additional {
+  flex: 2;
 }
 
 .col-right {
@@ -41,6 +45,7 @@ h2 {
 
 .col-main h2 {
   color: #434a55;
+  margin-top: 0px;
 }
 
 /* Search and target panels */
@@ -141,6 +146,10 @@ h2 {
 }
 
 .source-table th {
+  text-align: left;
+}
+
+.additional-source-table th {
   text-align: left;
 }
 

@@ -19,9 +19,8 @@ import {HttpClient, HttpParams} from '@angular/common/http';
 import {Observable} from 'rxjs';
 import {Mapping} from '../_models/mapping';
 import {Project} from '../_models/project';
-import {Task} from '../_models/task';
 import {ServiceUtils} from '../_utils/service_utils';
-import {MappedRowDetailsDto, MapRow, MapRowRelationship, MapRowStatus, MapView} from '../_models/map_row';
+import {AdditionalColumn, MappedRowDetailsDto, MapRow, MapRowRelationship, MapRowStatus, MapView} from '../_models/map_row';
 import {JSONTargetRow, TargetRow} from '../_models/target_row';
 import {Note} from '../_models/note';
 import {APP_CONFIG, AppConfig} from '../app.config';
@@ -50,6 +49,7 @@ export interface MapViewResults {
     number: number;
   };
   sourceDetails: MappedRowDetailsDto[];
+  additionalColumns: AdditionalColumn[] | undefined;
 }
 
 export interface MapRowResults {
@@ -255,7 +255,6 @@ export class MapService {
              filter: HttpParams | null): Observable<MapViewResults> {
 
     const url = `${this.config.apiBaseUrl}/mapView/${mapping}`;
-
     return this.getView(url, pageIndex, pageSize, sortColumn, sortDir, filter);
   }
 
@@ -340,7 +339,9 @@ export class MapService {
       mapView.targetCode,
       mapView.targetDisplay,
       getValidRelationship(mapView),
-      mapView.flagged
+      mapView.flagged,
+      mapView.targetOutOfScope,
+      mapView.tags
     );
     const targetUrl = `${this.config.apiBaseUrl}/mapRowTargets`;
 
@@ -381,6 +382,12 @@ export class MapService {
     const body = {flagged};
     return this.http.patch<any>(url, body, header);
   }
+  
+  getTagCount(mapId: string, tag: string): Observable<MapRowTargetResults> {
+    const url = `${this.config.apiBaseUrl}/mapRowTargets?tags=${tag}&mapId=${mapId}`;
+    const header = ServiceUtils.getHTTPHeaders();
+    return this.http.get<MapRowTargetResults>(url, header);
+  }
 
   exportMapView(mapping: string, contentType: string): Observable<Blob> {
     return this.http.get(`${this.config.apiBaseUrl}/mapView/${mapping}`,
@@ -411,7 +418,7 @@ export class MapService {
     const header = ServiceUtils.getHTTPHeaders();
     header.params = new HttpParams()
       .set('projection', 'targetView')
-      .set('row.map.id', map_id)
+      .set('mapId', map_id)
       .set('row.sourceCode.index', source_idx);
     return this.http.get<MapRowTargetResults>(url, header);
   }
@@ -512,5 +519,5 @@ function getValidRelationship(mapView: MapView): string | undefined {
 function toTargetRow(result: any): TargetRow {
   const id = ServiceUtils.extractIdFromHref(result._links?.self.href, null);
   return new TargetRow(undefined, id, result.targetCode, result.targetDisplay,
-    result.relationship, result.flagged);
+    result.relationship, result.flagged, result.targetOutOfScope, result.tags);
 }

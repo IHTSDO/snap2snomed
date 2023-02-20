@@ -16,8 +16,35 @@
 
 package org.snomed.snap2snomed.service;
 
-import com.google.common.base.Utf8;
-import lombok.extern.slf4j.Slf4j;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.URI;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.sql.Timestamp;
+import java.sql.Types;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.InputMismatchException;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import javax.persistence.EntityManager;
+import javax.transaction.Transactional;
+import javax.validation.Validator;
+import javax.xml.bind.DatatypeConverter;
+
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
@@ -27,17 +54,20 @@ import org.snomed.snap2snomed.config.Snap2snomedConfiguration;
 import org.snomed.snap2snomed.controller.dto.ImportDetails;
 import org.snomed.snap2snomed.controller.dto.ImportMappingFileDetails;
 import org.snomed.snap2snomed.controller.dto.MappingImportResponse;
-import org.snomed.snap2snomed.model.*;
+import org.snomed.snap2snomed.model.AdditionalCodeValue;
+import org.snomed.snap2snomed.model.ImportedCode;
+import org.snomed.snap2snomed.model.ImportedCodeSet;
+import org.snomed.snap2snomed.model.MapRow;
+import org.snomed.snap2snomed.model.MapRowTarget;
 import org.snomed.snap2snomed.model.enumeration.MapStatus;
 import org.snomed.snap2snomed.model.enumeration.MappingRelationship;
 import org.snomed.snap2snomed.problem.CodeSetImportProblem;
 import org.snomed.snap2snomed.problem.MappingImportProblem;
 import org.snomed.snap2snomed.problem.Snap2SnomedProblem;
-import org.snomed.snap2snomed.problem.auth.NoSuchUserProblem;
 import org.snomed.snap2snomed.problem.auth.NotAuthorisedProblem;
 import org.snomed.snap2snomed.repository.ImportedCodeSetRepository;
 import org.snomed.snap2snomed.repository.MapRepository;
-import org.snomed.snap2snomed.security.AuthenticationFacade;
+import org.snomed.snap2snomed.repository.MapRowRepository;
 import org.snomed.snap2snomed.security.WebSecurity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -47,19 +77,9 @@ import org.springframework.web.multipart.MultipartFile;
 import org.zalando.problem.Problem;
 import org.zalando.problem.Status;
 
-import javax.persistence.EntityManager;
-import javax.transaction.Transactional;
-import javax.validation.Validator;
-import javax.xml.bind.DatatypeConverter;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.URI;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.sql.*;
-import java.util.Map;
-import java.util.*;
+import com.google.common.base.Utf8;
+
+import lombok.extern.slf4j.Slf4j;
 
 @Component
 @Slf4j
@@ -75,10 +95,7 @@ public class CodeSetImportService {
   private MapRepository mapRepository;
 
   @Autowired
-  private AuthenticationFacade authenticationFacade;
-
-  @Autowired
-  private FhirService fhirService;
+  private MapRowRepository mapRowRepository;
 
   @Autowired
   EntityManager entityManager;
@@ -99,7 +116,7 @@ public class CodeSetImportService {
 
   private static class InsertCodeWork implements Work {
 
-    private List<ImportedCode> codes = new ArrayList<>();
+    private final List<ImportedCode> codes = new ArrayList<>();
 
     public void add(ImportedCode code) {
       codes.add(code);
@@ -107,9 +124,9 @@ public class CodeSetImportService {
 
     @Override
     public void execute(Connection connection) throws SQLException {
-      PreparedStatement statement = connection.prepareStatement(
-          "insert into imported_code (code, display, _index, imported_codeset_id) values (?, ?, ?, ?)");
-      for (ImportedCode code : codes) {
+      final PreparedStatement statement = connection.prepareStatement(
+          "insert into imported_code (code, display, _index, imported_codeset_id) values (?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
+      for (final ImportedCode code : codes) {
         statement.setString(1, code.getCode());
         statement.setString(2, code.getDisplay());
         statement.setLong(3, code.getIndex());
@@ -117,12 +134,31 @@ public class CodeSetImportService {
         statement.addBatch();
       }
       statement.executeLargeBatch();
+
+      final PreparedStatement additionalColumnsStatement2 = connection.prepareStatement("insert into imported_code_additional_columns (imported_code_id, value, collection_order) values (?, ?, ?)");
+      final ResultSet generatedKeys2 = statement.getGeneratedKeys();
+
+            for (final ImportedCode code : codes) {
+              generatedKeys2.next();
+              for (int i=0; i < code.getAdditionalColumns().size(); i++) {
+                final String additionalColumnVal = code.getAdditionalColumns().get(i).getValue();
+                additionalColumnsStatement2.setLong(1, generatedKeys2.getLong(1));
+                additionalColumnsStatement2.setString(2, additionalColumnVal);
+                additionalColumnsStatement2.setInt(3, i);
+                additionalColumnsStatement2.addBatch();
+              }
+
+            }
+        //}
+
+      additionalColumnsStatement2.executeLargeBatch();
+
     }
   }
 
-  private static class InsertMappingCodeWork implements Work {
+  private  class InsertMappingCodeWork implements Work {
 
-    private List<MapRowTargetParams> mapRowTargetParams = new ArrayList<>();
+    private final List<MapRowTargetParams> mapRowTargetParams = new ArrayList<>();
     private Long mapId;
 
     /**
@@ -138,7 +174,7 @@ public class CodeSetImportService {
 
       if (noMapFlagArg != null)  {
         noMapFlag = noMapFlagArg;
-      }      
+      }
 
       if (mapStatusArg != null) {
         mapStatus = mapStatusArg.ordinal();
@@ -167,50 +203,44 @@ public class CodeSetImportService {
       statement.setLong(4, mapId);
       statement.executeUpdate();
 
-      // This import implementation reduces import time from 2.8 minutes to 23 seconds
-      // Instead of using
-      //     "insert into map_row_target (relationship, target_code, target_display, row_id, flagged) " +
-      //     "select ?, ?, ?, mr.id, false from map_row as mr " +
-      //     "join imported_code ic on ic.id = mr.source_code_id AND ic.code = ? " +
-      //     "where map_id = ?"
+
       // Now we prepare the values for the insert into commands
       // Get Map Row IDs
-      List<String> sourceCodes = new ArrayList<String>();
-      mapRowTargetParams.forEach(mapRowTargetParam -> sourceCodes.add(mapRowTargetParam.getSourceCode()));
-      String sourceCodeParam = "'" + String.join("','", sourceCodes) + "'";
-      // PreparedStatement doesn't allow multiple values for parameters to avoid SQL injection attacks
-      // so sourceCodeParam is an actual string here
-      statement = connection.prepareStatement("select ic.code, mr.id from map_row as mr " +
-        "join imported_code ic on ic.id = mr.source_code_id AND ic.code in ("  + sourceCodeParam + ") " +
-        "where map_id = ?");
-      statement.setLong(1, mapId);
-      ResultSet rs = statement.executeQuery();
+      final List<String> sourceCodes = mapRowTargetParams.stream()
+          .map(MapRowTargetParams::getSourceCode)
+          .collect(Collectors.toList());
+
       // Allow 1:x mapping to happen - 1 source row for multiple mapping
-      Map<String, Long> rowIds = new HashMap<String, Long>();
-      while (rs.next()) {
-        rowIds.put(rs.getString("code"), rs.getLong("id"));
-      }
-      Long rowsToMapCount = mapRowTargetParams.stream().map(params -> params.getSourceCode()).distinct().count();
+      final Map<String, Long> rowIds = new HashMap<String, Long>();
+      mapRowRepository.findCodesAndMapRowIdsByMapIdAndSourceCodes(mapId, sourceCodes).forEach(rs -> {
+        rowIds.put((String) rs[0], (Long) rs[1]);
+      });
+      final Long rowsToMapCount = mapRowTargetParams.stream()
+          .map(MapRowTargetParams::getSourceCode)
+          .distinct()
+          .count();
       if(rowIds.size() != rowsToMapCount) {
         throw new MappingImportProblem("invalid-data", "The import result record count does not match " +
         "the number of source codes supplied to it [" + rowIds.size() + " vs " +rowsToMapCount + "] " +
         "Check that the source code column has correct codes.");
       }
       mapRowTargetParams.forEach(param -> {
-        param.getMapRowTarget().setRow(new MapRow());
-        param.getMapRowTarget().getRow().setId(rowIds.get(param.getSourceCode()));
+        final MapRow row = new MapRow();
+        row.setId(rowIds.get(param.getSourceCode()));
+        param.getMapRowTarget().setRow(row);
       });
       // Prepare and execute inserts to import mapping for the map
       statement = connection.prepareStatement(
         "insert into map_row_target (relationship, target_code, target_display, row_id, flagged) " +
         "values(?, ?, ?, ?, ?)");
-      for (MapRowTargetParams mapRowTargetParam : mapRowTargetParams) {
-        if (mapRowTargetParam.getMapRowTarget().getTargetCode() != null && !mapRowTargetParam.getMapRowTarget().getTargetCode().isEmpty()) {
-          statement.setInt(1, mapRowTargetParam.getMapRowTarget().getRelationship().ordinal());
-          statement.setString(2, mapRowTargetParam.getMapRowTarget().getTargetCode());
-          statement.setString(3, mapRowTargetParam.getMapRowTarget().getTargetDisplay());
-          statement.setLong(4, mapRowTargetParam.getMapRowTarget().getRow().getId());
-          statement.setBoolean(5, mapRowTargetParam.getMapRowTarget().isFlagged());
+      for (final MapRowTargetParams mapRowTargetParam : mapRowTargetParams) {
+        final MapRowTarget mapRowTarget = mapRowTargetParam.getMapRowTarget();
+        if (mapRowTarget.getTargetCode() != null && !mapRowTarget.getTargetCode().isEmpty()) {
+          statement.setInt(1, mapRowTarget.getRelationship().ordinal());
+          statement.setString(2, mapRowTarget.getTargetCode());
+          statement.setString(3, mapRowTarget.getTargetDisplay());
+          statement.setLong(4, mapRowTarget.getRow().getId());
+          statement.setBoolean(5, mapRowTarget.isFlagged());
           statement.addBatch();
         }
       }
@@ -231,7 +261,7 @@ public class CodeSetImportService {
       // update the status and no_map flag for all rows with a target or a no_map
       statement = connection.prepareStatement(
         "UPDATE map_row SET status = ?, no_map = ?, modified = ? WHERE id = ?");
-      for (MapRowTargetParams mapRowTargetParam : mapRowTargetParams) {
+      for (final MapRowTargetParams mapRowTargetParam : mapRowTargetParams) {
         statement.setInt(1, mapRowTargetParam.getStatus());
         statement.setInt(2, mapRowTargetParam.getNoMapFlag().intValue());
         statement.setTimestamp(3, new Timestamp(System.currentTimeMillis()));
@@ -244,28 +274,35 @@ public class CodeSetImportService {
     int getInsertCount() {
       return this.mapRowTargetParams.size();
     }
-  }  
+  }
 
   @Transactional
   public ImportedCodeSet importCodeSet(
       @Validated ImportDetails importDetails,
       MultipartFile file) throws HttpMediaTypeNotAcceptableException {
 
-    ImportedCodeSet importedCodeSet = importedCodeSetRepository.save(importDetails.toImportedCodeSetEntity());
+    final ImportedCodeSet importedCodeSet;
 
     try (BufferedReader reader = new BufferedReader(new InputStreamReader(file.getInputStream()))) {
       CSVFormat format = detectFileFormat(importDetails.getDelimiter(), file, reader, importDetails.getDisplayColumnIndex());
 
       if (importDetails.getHasHeader()) {
-        format = format.withFirstRecordAsHeader().withAllowMissingColumnNames().withAllowDuplicateHeaderNames();
+        format = CSVFormat.Builder.create(format)
+            .setHeader()
+            .setSkipHeaderRecord(true)
+            .setAllowMissingColumnNames(true)
+            .setAllowDuplicateHeaderNames(true)
+            .build();
       }
 
-      Set<String> importedCodes = new HashSet<>();
-      MessageDigest md = MessageDigest.getInstance("MD5");
+      final Set<String> importedCodes = new HashSet<>();
+      final MessageDigest md = MessageDigest.getInstance("MD5");
 
-      InsertCodeWork insertCodeWork = new InsertCodeWork();
+      final InsertCodeWork insertCodeWork = new InsertCodeWork();
       try (CSVParser parser = format.parse(reader)) {
-        for (CSVRecord csvRecord : parser) {
+        importedCodeSet = importedCodeSetRepository.save(importDetails.toImportedCodeSetEntity(parser.getHeaderNames()));
+
+        for (final CSVRecord csvRecord : parser) {
           if (parser.getRecordNumber() > configuration.getMaximumImportedCodeSetRows()) {
             throw Problem.builder()
                 .withStatus(Status.BAD_REQUEST)
@@ -286,26 +323,65 @@ public class CodeSetImportService {
           } else {
             code = csvRecord.get(importDetails.getCodeColumnIndex());
           }
-          String display = csvRecord.get(importDetails.getDisplayColumnIndex());
-          long recordNumber = csvRecord.getRecordNumber();
+          final String display = csvRecord.get(importDetails.getDisplayColumnIndex());
+          final long recordNumber = csvRecord.getRecordNumber();
+
+          final List<AdditionalCodeValue> additionalColumnValues = new ArrayList<>();
+
+          if (importDetails.getHasHeader() && null != importDetails.getAdditionalColumnIndexes()) {
+            final List<Integer> additionalColumnIndexes = importDetails.getAdditionalColumnIndexes();
+            final List<String> additionalColumnTypes = importDetails.getAdditionalColumnTypes();
+            if (additionalColumnIndexes.size() < additionalColumnTypes.size()) {
+              throw new CodeSetImportProblem("additional-column-mismatch",
+                      "Number of specified additional columns and their types do not match",
+                      "Additional column indexes specified were " + additionalColumnIndexes +
+                              " and additional column types were " + additionalColumnTypes +
+                              " - size of these collections must match");
+            }
+            if (additionalColumnIndexes != null && additionalColumnTypes != null) {
+              for (int i = 0; i < additionalColumnIndexes.size(); i++) {
+                final Integer index = additionalColumnIndexes.get(i);
+                if (index == null) {
+                  throw new CodeSetImportProblem("additional-column-index-null",
+                          "Null additional column index",
+                          "Additional column index " + i +
+                                  " is null");
+                }
+                if(csvRecord.size() < index) {
+                  throw new CodeSetImportProblem("additional-column-index-too-large",
+                          "Additional column index is beyond CSV size",
+                          "Additional column index " + i +
+                                  " is " + index + " which is beyond the CSV record size " + csvRecord.size());
+                }
+                if(parser.getHeaderNames().size() < index) {
+                  throw new CodeSetImportProblem("additional-column-index-no-header",
+
+                          "Additional column index is beyond header size",
+                          "Additional column index " + i +
+                                  " is " + index + " which is beyond the header size " + parser.getHeaderNames().size());
+                }
+                additionalColumnValues.add(new AdditionalCodeValue(csvRecord.get(index)));
+              }
+            }
+          }
 
           validateRecord(importedCodes, code, display, recordNumber);
 
-          ImportedCode importedCode = new ImportedCode(null, code, importedCodeSet, recordNumber, display);
+          final ImportedCode importedCode = new ImportedCode(null, code, importedCodeSet, recordNumber, display, additionalColumnValues);
 
           importedCodes.add(code);
           insertCodeWork.add(importedCode);
         }
       }
       entityManager.unwrap(Session.class).doWork(insertCodeWork);
-    } catch (InputMismatchException e) {
+    } catch (final InputMismatchException e) {
       throw new CodeSetImportProblem("invalid-delimiter", "Invalid delimiter specfied, the first line does not contain the delimiter", e.getLocalizedMessage());
-    } catch (IndexOutOfBoundsException e) {
+    } catch (final IndexOutOfBoundsException e) {
       throw new CodeSetImportProblem("invalid-column", "Invalid column specfied", e.getLocalizedMessage());
-    } catch (NoSuchAlgorithmException e ) {
+    } catch (final NoSuchAlgorithmException e ) {
       log.error("Unecpected error creating MD5 hash for code", e);
       throw Problem.valueOf(Status.INTERNAL_SERVER_ERROR, "Unecpected error creating MD5 hash for code");
-    } catch (IOException e) {
+    } catch (final IOException e) {
       log.error("Failed reading code set from an import request", e);
       throw Problem.valueOf(Status.INTERNAL_SERVER_ERROR, "Unable to read the file in the request due to an I/O error");
     } catch (IllegalStateException|IllegalArgumentException e) {
@@ -399,7 +475,7 @@ public class CodeSetImportService {
               + ImportedCode.DISPLAY_SIZE_LIMIT);
     }
   }
-  
+
   private void checkNoMapFlag(String targetCode, Integer noMapFlag) {
 
     // cannot have a row with a target and the noMap flag ticked
@@ -411,7 +487,7 @@ public class CodeSetImportService {
   }
 
   private void checkStatus(String targetCode, MapStatus status) {
-    
+
     // cannot have a row with a target and be in the "unmapped" state
     if ((status != null) && (status.equals(MapStatus.UNMAPPED) == true) && (targetCode != null && !(targetCode.isBlank()))) {
       throw new CodeSetImportProblem("map-with-unmapped-status", "The import file contains rows with a target and an unmapped status",
@@ -419,7 +495,7 @@ public class CodeSetImportService {
     }
   }
 
-  protected CSVFormat detectFileFormat(Character delimiter, MultipartFile file, BufferedReader reader, Integer columnIndex) 
+  protected CSVFormat detectFileFormat(Character delimiter, MultipartFile file, BufferedReader reader, Integer columnIndex)
             throws IOException, HttpMediaTypeNotAcceptableException {
     final CSVFormat format = CSVFormat.DEFAULT;
     final String contentType = file.getContentType();
@@ -428,7 +504,7 @@ public class CodeSetImportService {
     if (delimiter != null && line.indexOf(delimiter) == -1) {
       throw new InputMismatchException("Invalid delimiter! The first line does not contain the delimiter character: '" + delimiter + "'");
     }
-    
+
     if (!supportedContentTypes.contains(contentType)) {
       throw new HttpMediaTypeNotAcceptableException("Unsupported content type: " + contentType);
     }
@@ -436,7 +512,7 @@ public class CodeSetImportService {
     if (delimiter != null) {
       return format.withDelimiter(delimiter);
     }
-    
+
     return format.withDelimiter('\0');
   }
 
@@ -462,9 +538,9 @@ public class CodeSetImportService {
     @Validated ImportMappingFileDetails importDetails,
     MultipartFile file) throws HttpMediaTypeNotAcceptableException {
 
-    Long start = System.currentTimeMillis();
+    final Long start = System.currentTimeMillis();
     log.info("Mapping file import started...");
-    Optional<org.snomed.snap2snomed.model.Map> map = mapRepository.findById(Long.valueOf(importDetails.getMapId()));
+    final Optional<org.snomed.snap2snomed.model.Map> map = mapRepository.findById(Long.valueOf(importDetails.getMapId()));
     if (!map.isPresent()) {
       throw new MappingImportProblem("invalid-map-id", "Invalid map id provided");
     }
@@ -486,7 +562,7 @@ public class CodeSetImportService {
       throw new MappingImportProblem("no-header", "Import file does not have a header! Please include the correct headers.");
     }
 
-    MappingImportResponse importResponse = new MappingImportResponse();
+    final MappingImportResponse importResponse = new MappingImportResponse();
     try (BufferedReader reader = new BufferedReader(new InputStreamReader(file.getInputStream()))) {
       CSVFormat format = detectFileFormat(importDetails.getDelimiter(), file, reader, importDetails.getTargetCodeColumnIndex());
 
@@ -495,11 +571,11 @@ public class CodeSetImportService {
         format = format.withFirstRecordAsHeader().withAllowMissingColumnNames().withAllowDuplicateHeaderNames();
       }
 
-      Set<String> importedCodes = new HashSet<>();
+      final Set<String> importedCodes = new HashSet<>();
 
       try (CSVParser parser = format.parse(reader)) {
-        InsertMappingCodeWork insertMappingCodeWork = new InsertMappingCodeWork();
-        for (CSVRecord csvRecord : parser) {
+        final InsertMappingCodeWork insertMappingCodeWork = new InsertMappingCodeWork();
+        for (final CSVRecord csvRecord : parser) {
           if (parser.getRecordNumber() > configuration.getMaximumImportedCodeSetRows()) {
             throw Problem.builder()
                     .withStatus(Status.BAD_REQUEST)
@@ -510,25 +586,25 @@ public class CodeSetImportService {
           }
           validateColumnIndexes(importDetails, csvRecord);
           testLineForBinary(csvRecord.toString());
-          String code = csvRecord.get(importDetails.getCodeColumnIndex());
-          String targetCode = csvRecord.get(importDetails.getTargetCodeColumnIndex());
-          String targetDisplay = csvRecord.get(importDetails.getTargetDisplayColumnIndex());
-          String relationship = csvRecord.get(importDetails.getRelationshipColumnIndex());
+          final String code = csvRecord.get(importDetails.getCodeColumnIndex());
+          final String targetCode = csvRecord.get(importDetails.getTargetCodeColumnIndex());
+          final String targetDisplay = csvRecord.get(importDetails.getTargetDisplayColumnIndex());
+          final String relationship = csvRecord.get(importDetails.getRelationshipColumnIndex());
           // optional
           Integer noMap = null;
           if (importDetails.getNoMapFlagColumnIndex() != null) {
-            String noMapString = csvRecord.get(importDetails.getNoMapFlagColumnIndex());
+            final String noMapString = csvRecord.get(importDetails.getNoMapFlagColumnIndex());
             noMap = Boolean.parseBoolean(noMapString) ? 1 : 0;
           }
           MapStatus status = null;
           if (importDetails.getStatusColumnIndex() != null) {
-            String stringStatus = csvRecord.get(importDetails.getStatusColumnIndex());
+            final String stringStatus = csvRecord.get(importDetails.getStatusColumnIndex());
             status = MapStatus.valueOf(stringStatus);
           }
-          long recordNumber = csvRecord.getRecordNumber();
+          final long recordNumber = csvRecord.getRecordNumber();
           if (targetCode != null && !targetCode.isEmpty()) {
             validateRecord(importedCodes, code, targetCode, targetDisplay, recordNumber, noMap, status);
-            MapRowTarget mapRowTarget = MapRowTarget.builder()
+            final MapRowTarget mapRowTarget = MapRowTarget.builder()
                     .targetCode(targetCode)
                     .targetDisplay(targetDisplay)
                     .relationship(MappingRelationship.valueOf(relationship))
@@ -551,11 +627,11 @@ public class CodeSetImportService {
         importResponse.setInsertCount(insertMappingCodeWork.getInsertCount());
       }
       importResponse.setTargetValidation(mappingService.validateMapTargets(Long.valueOf(importDetails.getMapId())));
-    } catch (InputMismatchException e) {
+    } catch (final InputMismatchException e) {
       throw new MappingImportProblem("invalid-delimiter", "Invalid delimiter specfied, the first line does not contain the delimiter", e.getLocalizedMessage());
-    } catch (IndexOutOfBoundsException e) {
+    } catch (final IndexOutOfBoundsException e) {
       throw new MappingImportProblem("invalid-column", "Invalid column specfied", e.getLocalizedMessage());
-    } catch (IOException e) {
+    } catch (final IOException e) {
       log.error("Failed reading mapping details from import request", e);
       throw Problem.valueOf(Status.INTERNAL_SERVER_ERROR, "Unable to read the file in the request due to an I/O error");
     } catch (IllegalStateException|IllegalArgumentException e) {
@@ -563,7 +639,7 @@ public class CodeSetImportService {
     }
     entityManager.flush();
     entityManager.clear();
-    Long end = System.currentTimeMillis();
+    final Long end = System.currentTimeMillis();
     log.info("Executed mapping import for " + importResponse.getRecordCount() + " lines in " +  Long.valueOf(end - start) + " ms");
     return importResponse;
   }
