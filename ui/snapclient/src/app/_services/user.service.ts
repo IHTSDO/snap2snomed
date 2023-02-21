@@ -50,7 +50,7 @@ export class UserService {
 
   getUsers(): Observable<User[]> {
     // TODO this really should be handled by paging, or having the control that uses this data paged
-    return this.getUsersFromUrl(`${this.config.apiBaseUrl}/users?size=400`);
+    return this.getUsersFromUrl(`${this.config.apiBaseUrl}/users?size=10000`);
   }
 
   getUsersAssignedToTask(projectId: string): Observable<User[]> {
