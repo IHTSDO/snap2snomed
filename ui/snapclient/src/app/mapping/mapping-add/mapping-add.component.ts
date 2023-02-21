@@ -140,6 +140,13 @@ export class MappingAddComponent implements OnInit {
       this.error = {};
       this.store.dispatch(new ClearErrors());
     }
+    if (changes.drawerOpen && changes.drawerOpen.currentValue === true && changes.drawerOpen.previousValue === false) {
+      // clearing form on drawer open takes care of all the reset requirements
+      // 1. clear after CANCEL button selected
+      // 2. clear after click OFF drawer (and drawer closes)
+      // 3. clear after NEW VERSION clicked before CREATE MAP clicked
+      this.clearForm(this.form!);
+    }
   }
 
   private newMapping(): void {
@@ -235,6 +242,9 @@ export class MappingAddComponent implements OnInit {
     this.warnDelete = false;
     this.closed.emit();
     this.error = {};
+  }
+
+  clearForm(form: NgForm): void {
 
     if (this.mode === 'FORM.CREATE') {
 
@@ -250,7 +260,6 @@ export class MappingAddComponent implements OnInit {
       form.controls['mapVersion'].reset();
       form.controls['sourceId'].reset();
     }
-
   }
 
   addSource($event: MouseEvent): void {
