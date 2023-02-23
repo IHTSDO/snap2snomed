@@ -78,7 +78,7 @@ export class MappingAddComponent implements OnInit {
   previousVersionSource: Source | undefined;
   warnDelete = false;
 
-  @Input() set mapping(value: Mapping) {
+  @Input() set mapping(value: Mapping | undefined) {
     if (value) {
       this.mappingModel = cloneDeep(value);
       // if target version no longer available - need to clear model
@@ -140,13 +140,6 @@ export class MappingAddComponent implements OnInit {
       this.error = {};
       this.store.dispatch(new ClearErrors());
     }
-    if (changes.drawerOpen && changes.drawerOpen.currentValue === true && changes.drawerOpen.previousValue === false) {
-      // clearing form on drawer open takes care of all the reset requirements
-      // 1. clear after CANCEL button selected
-      // 2. clear after click OFF drawer (and drawer closes)
-      // 3. clear after NEW VERSION clicked before CREATE MAP clicked
-      this.clearForm(this.form!);
-    }
   }
 
   private newMapping(): void {
@@ -195,7 +188,7 @@ export class MappingAddComponent implements OnInit {
     });
     self.store.select(selectAddEditMappingSuccess).subscribe(res => {
       if (res && !self.error.detail) {
-        this.closed.emit();
+        //this.closed.emit();
       }
     });
   }
@@ -244,23 +237,6 @@ export class MappingAddComponent implements OnInit {
     this.error = {};
   }
 
-  clearForm(form: NgForm): void {
-
-    if (this.mode === 'FORM.CREATE') {
-
-      // reset everything so the next time the user attempts to create a map, old data isn't showing
-      // if they happened to press cancel instead of save
-      
-      this.mappingModel = new Mapping();
-      // would like to use form reset here, but there seems to be some bug
-      // preventing toSource from displaying after a reset
-      // so using 3 resets instead to remove error messages on a re-enter
-      // complaining that fields are mandatory
-      form.controls['title'].reset();
-      form.controls['mapVersion'].reset();
-      form.controls['sourceId'].reset();
-    }
-  }
 
   addSource($event: MouseEvent): void {
     $event.preventDefault();

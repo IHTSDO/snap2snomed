@@ -65,7 +65,7 @@ export class MappingListComponent implements OnInit, AfterViewInit, OnDestroy {
   componentLoaded = false;
 
   selectedMapping: { [key: string]: Mapping | null } = {};
-  newMapping!: Mapping;
+  newMapping: Mapping | undefined;
   mode = 'FORM.CREATE';
 
   opened = false;
@@ -209,6 +209,7 @@ export class MappingListComponent implements OnInit, AfterViewInit, OnDestroy {
 
   createMap(): void {
     this.mode = 'FORM.CREATE';
+    this.newMapping = undefined; // just in case "new version" is clicked before "create map"
     this.opened = true;
   }
 
