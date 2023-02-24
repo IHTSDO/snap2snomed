@@ -75,7 +75,8 @@ public class UserInterfaceConfigurationRestController {
         .userRegistrationUrl(config.getUserRegistrationUrl())
         .registrationText(config.getRegistrationText())
         .mainPageText(config.getMainPageText())
-        .currentTermsVersion(config.getCurrentTermsVersion());
+        .currentTermsVersion(config.getCurrentTermsVersion())
+        .identityProvider(config.getIdentityProvider());
 
     version.getShortGitCommit().ifPresent(builder::sentryRelease);
 

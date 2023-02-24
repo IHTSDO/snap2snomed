@@ -61,6 +61,7 @@ module "api" {
   force_dex_deployment             = var.force_dex_deployment
   database_backup_retention_period = var.database_backup_retention_period
   jumpbox_ami_id                   = var.jumpbox_ami_id
+  identity_provider                = var.identity_provider
 }
 
 module "ui" {
