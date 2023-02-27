@@ -569,7 +569,7 @@ public class MappingService {
               .filter(target -> targetsToFlag.contains(target.getTargetCode()))
               .map(MapRowTarget::getId)
               .collect(Collectors.toList());
-      mapRowTargetRepository.flagMapTargets(targetIds, userId, Instant.now());
+      mapRowTargetRepository.addOutOfScopeTag(targetIds);
     }
     return validationResult;
   }

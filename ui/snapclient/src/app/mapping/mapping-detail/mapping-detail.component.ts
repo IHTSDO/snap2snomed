@@ -22,12 +22,12 @@ import {Task, TaskType} from '../../_models/task';
 import {ErrorInfo} from '../../errormessage/errormessage.component';
 import {MapService} from '../../_services/map.service';
 import {
-  authorStatuses,
   MapRow,
   MapRowStatus,
   mapRowStatusToIconName,
   MapView,
   MapViewFilter,
+  TARGET_OUT_OF_SCOPE_TAG,
   toMapRowStatus
 } from '../../_models/map_row';
 import {TargetRow} from '../../_models/target_row';
@@ -35,7 +35,7 @@ import {MatDialog} from '@angular/material/dialog';
 import {ServiceUtils} from '../../_utils/service_utils';
 import {ConfirmDialogComponent, DialogType} from '../../dialog/confirm-dialog/confirm-dialog.component';
 import {MatCheckboxChange} from '@angular/material/checkbox';
-import {TableParams} from '../mapping-table/mapping-table.component';
+import {TableColumn, TableParams} from '../mapping-table/mapping-table.component';
 import {selectCurrentView} from 'src/app/store/mapping-feature/mapping.selectors';
 import {SourceNavigationService, SourceNavSet} from 'src/app/_services/source-navigation.service';
 import {Subscription} from 'rxjs';
@@ -49,7 +49,7 @@ import {StatusUtils} from '../../_utils/status_utils';
 import {WriteDisableUtils} from "../../_utils/write_disable_utils";
 import {debounceTime} from "rxjs/operators";
 import {User} from "../../_models/user";
-
+import { TargetChangedService } from 'src/app/_services/target-changed.service';
 
 export type SourceRow = {
   id: string;
@@ -58,6 +58,8 @@ export type SourceRow = {
   index: string;
   noMap: boolean;
   status: string;
+  additionalColumnValues: string[];
+  additionalColumnNames: string[] | undefined;
 };
 
 @Component({
@@ -94,6 +96,7 @@ export class MappingDetailComponent implements OnInit, OnDestroy {
   @Input() task: Task | undefined;
   @Input() paging!: TableParams;
   @Input() filterEntity!: MapViewFilter;
+  @Input() additionalDisplayedColumns: TableColumn[] | undefined;
   @Output() detailClose = new EventEmitter<boolean>();
 
   constructor(private store: Store<IAppState>,
@@ -101,7 +104,8 @@ export class MappingDetailComponent implements OnInit, OnDestroy {
               private selectionService: SelectionService,
               private mapService: MapService,
               private sourceNavigation: SourceNavigationService,
-              public dialog: MatDialog) {
+              public dialog: MatDialog,
+              private targetChangedService: TargetChangedService) {
     this.translate.get('DIALOG.OK').subscribe((msg) => this.savedOK = msg);
     this.translate.get('DIALOG.CANCEL').subscribe((msg) => this.cancel = msg);
     this.translate.get('DIALOG.TITLE_CONFIRM').subscribe((msg) => this.confirmTitle = msg);
@@ -131,7 +135,9 @@ export class MappingDetailComponent implements OnInit, OnDestroy {
           display: selected.mapRow.sourceDisplay,
           index: selected.mapRow.sourceIndex,
           noMap: selected.mapRow.noMap,
-          status: selected.mapRow.status
+          status: selected.mapRow.status,
+          additionalColumnValues: selected.mapRow.additionalColumnValues,
+          additionalColumnNames: this.additionalDisplayedColumns?.map( column => column.columnDisplay)
         };
         self.loadTargets();
       }
@@ -268,10 +274,11 @@ export class MappingDetailComponent implements OnInit, OnDestroy {
           self.mapRows = rows._embedded.mapRowTargets.map((target) => {
             const status = target.row?.status ?? MapRowStatus.UNMAPPED;
             const flagged = target.row?.id ? target.flagged : undefined;
+            const targetOutOfScope = target.tags ? target.tags.includes(TARGET_OUT_OF_SCOPE_TAG) : undefined;
             return new MapView(target.row?.id || '', target.id, source.index || '', source.code || '',
               source.display || '', target.targetCode, target.targetDisplay, target.relationship, status,
               false, target.row?.latestNote || null, null, null, null,
-              null, flagged);
+              null, flagged, targetOutOfScope, target.tags, source.additionalColumnValues);
           });
         } else {
           self.mapRows = [];
@@ -289,7 +296,8 @@ export class MappingDetailComponent implements OnInit, OnDestroy {
       const targetRow = new TargetRow(
         mapView.rowId,
         mapView.targetId, mapView.targetCode, mapView.targetDisplay,
-        mapView.relationship, mapView.flagged);
+        mapView.relationship, mapView.flagged, mapView.targetOutOfScope,
+        mapView.targetOutOfScope ? [TARGET_OUT_OF_SCOPE_TAG]: undefined);
       this.mapService.createTarget(targetRow).subscribe((result) => {
           const targetId = ServiceUtils.extractIdFromHref(result._links.self.href, null);
           mapView.updateNoMap(mapView.noMap);
@@ -297,6 +305,7 @@ export class MappingDetailComponent implements OnInit, OnDestroy {
           self.loadTargets();
           self.updateSelectedRowSet(true);
           self.updateStatus(mapView.status as MapRowStatus);
+          this.targetChangedService.changeTarget(targetRow);
         },
         (err) => this.translate.get('ERROR.TARGETS_NOT_SAVED').subscribe((msg) => {
           this.error.message = msg;

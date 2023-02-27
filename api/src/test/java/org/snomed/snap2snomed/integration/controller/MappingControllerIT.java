@@ -61,6 +61,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 @Slf4j
 public class MappingControllerIT extends IntegrationTestBase {
 
+  public static final String TARGET_OUT_OF_SCOPE_TAG = "target-out-of-scope";
   @Autowired
   ObjectMapper objectMapper;
 
@@ -606,7 +607,7 @@ public class MappingControllerIT extends IntegrationTestBase {
           assertNull(dto.assignedReviewer);
           assertNull(dto.lastAuthor);
           assertNull(dto.lastReviewer);
-          assertFalse(dto.flagged);
+          assertFalse(dto.containsTargetTag(TARGET_OUT_OF_SCOPE_TAG));
         }
       } else {
         List<MapViewDto> originalMapViews = originalMapViewCache.get(code);
@@ -702,7 +703,7 @@ public class MappingControllerIT extends IntegrationTestBase {
       MapViewDto originalRow = originalMap.get(i);
       MapViewDto newRow = newMap.get(i);
 
-      if (originalRow.flagged) {
+      if (originalRow.containsTargetTag(TARGET_OUT_OF_SCOPE_TAG)) {
         originalHasFlagged = true;
       }
 
@@ -756,7 +757,8 @@ public class MappingControllerIT extends IntegrationTestBase {
     assertEquals(originalRow.lastReviewer, newRow.lastReviewer, "Last reviewer be equal - row " + i);
     boolean expectToBeFlagged = newRow.targetCode != null && !newRow.targetCode.trim().isEmpty() &&
             !isValidSctId(newRow.targetCode, RF2SchemaConstants.PartionIdentifier.CONCEPT);
-    assertEquals(expectToBeFlagged, newRow.flagged, "Flagged should be " + expectToBeFlagged + " - row " + i);
+    assertEquals(expectToBeFlagged, newRow.containsTargetTag(TARGET_OUT_OF_SCOPE_TAG),
+        "Flagged should be " + expectToBeFlagged + " - row " + i);
   }
 
   @Test
@@ -888,6 +890,12 @@ public class MappingControllerIT extends IntegrationTestBase {
     private UserDto lastReviewer;
 
     private boolean flagged;
+
+    private Set<String> targetTags;
+
+    public boolean containsTargetTag(String tag) {
+      return targetTags != null && targetTags.contains(tag);
+    }
   }
 
   @Data

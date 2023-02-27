@@ -102,10 +102,21 @@
 }
 
 .table-actions {
-  display: flex;
+  /* display: flex;
   align-items: flex-end;
   background-color: white;
+  padding: 10px; */
+  display: flex;
+  align-items: center;
+  margin-bottom: 0px;
+  justify-content: flex-end;
+  background-color: white;
   padding: 10px;
+}
+
+.mat-slide-toggle {
+  margin-top: 1px;
+  margin-right: 10px;
 }
 
 .table-actions-columns {

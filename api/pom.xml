@@ -33,12 +33,12 @@
     <java.version>11</java.version>
     <docker.repository>aehrc/snap2snomed</docker.repository>
     <docker.registry.host>quay.io</docker.registry.host>
-    <sentry.version>6.1.4</sentry.version>
+    <sentry.version>6.4.2</sentry.version>
     <jacoco.version>0.8.8</jacoco.version>
     <commons-csv.version>1.9.0</commons-csv.version>
-    <mariadb-java-client.version>2.7.4</mariadb-java-client.version>
-    <org.springdoc.version>1.6.9</org.springdoc.version>
-    <jib.version>3.2.1</jib.version>
+    <aws-mysql-jdbc.version>1.1.2</aws-mysql-jdbc.version>
+    <org.springdoc.version>1.6.12</org.springdoc.version>
+    <jib.version>3.3.1</jib.version>
     <apt-maven-plugin.version>1.1.3</apt-maven-plugin.version>
     <problem-spring-web.version>0.27.0</problem-spring-web.version>
     <swagger-request-validator.version>2.28.2</swagger-request-validator.version>
@@ -46,13 +46,23 @@
     <rest-assured.version>4.4.0</rest-assured.version>
     <jjwt.version>0.11.5</jjwt.version>
     <tc-mysql.version>1.17.2</tc-mysql.version>
-    <mockserver.version>5.13.2</mockserver.version>
+    <mockserver.version>5.14.0</mockserver.version>
     <hamcrest-test.version>1.3</hamcrest-test.version>
     <hamcrest-date.version>2.0.8</hamcrest-date.version>
     <hapi.version>6.0.2</hapi.version>
-    <spring-security-core.version>5.7.3</spring-security-core.version>
+    <spring-security-core.version>5.7.5</spring-security-core.version>
     <spring-core.version>5.3.21</spring-core.version>
   </properties>
+
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>org.apache.commons</groupId>
+        <artifactId>commons-text</artifactId>
+        <version>1.10.0</version> <!-- force version for CVE-2022-42889 ; remove when mockserver-netty updates -->
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
 
   <dependencies>
     <dependency>
@@ -88,9 +98,9 @@
       <artifactId>flyway-core</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.mariadb.jdbc</groupId>
-      <artifactId>mariadb-java-client</artifactId>
-      <version>${mariadb-java-client.version}</version>
+      <groupId>software.aws.rds</groupId>
+      <artifactId>aws-mysql-jdbc</artifactId>
+      <version>${aws-mysql-jdbc.version}</version>
       <scope>runtime</scope>
     </dependency>
     <dependency>
@@ -155,16 +165,15 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>com.h2database</groupId>
-      <artifactId>h2</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-configuration-processor</artifactId>
       <optional>true</optional>
     </dependency>
-
+    <dependency>
+      <groupId>org.mariadb.jdbc</groupId>
+      <artifactId>mariadb-java-client</artifactId>
+      <version>2.1.2</version>
+    </dependency>
     <dependency>
       <groupId>org.apache.commons</groupId>
       <artifactId>commons-csv</artifactId>
@@ -285,6 +294,20 @@
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-help-plugin</artifactId>
+        <version>3.2.0</version>
+        <executions>
+          <execution>
+            <id>show-profiles</id>
+            <phase>compile</phase>
+            <goals>
+              <goal>active-profiles</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-failsafe-plugin</artifactId>
         <executions>
           <execution>
@@ -325,19 +348,11 @@
           <to>
             <image>${docker.registry.host}/${docker.repository}</image>
             <tags>
-              <tag>${project.version}</tag>
-              <tag>latest</tag>
+              <tag>${project.version}-${user.name}</tag>
+              <tag>latest-${user.name}</tag>
             </tags>
           </to>
         </configuration>
-        <executions>
-          <execution>
-            <phase>package</phase>
-            <goals>
-              <goal>dockerBuild</goal>
-            </goals>
-          </execution>
-        </executions>
       </plugin>
 
       <plugin>
@@ -400,7 +415,7 @@
                     <limit>
                       <counter>LINE</counter>
                       <value>COVEREDRATIO</value>
-                      <!-- TODO should raise this to something sensible when 
+                      <!-- TODO should raise this to something sensible when
                         it makes sense -->
                       <minimum>0.0</minimum>
                     </limit>
@@ -425,17 +440,96 @@
     </plugins>
 
   </build>
-
   <profiles>
     <profile>
-      <id>h2</id>
-      <dependencies>
-        <dependency>
-          <groupId>com.h2database</groupId>
-          <artifactId>h2</artifactId>
-          <scope>compile</scope>
-        </dependency>
-      </dependencies>
+      <id>docker</id>
+      <activation>
+        <property><name>!multi</name></property>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>com.google.cloud.tools</groupId>
+            <artifactId>jib-maven-plugin</artifactId>
+            <version>${jib.version}</version>
+            <executions>
+              <execution>
+                <phase>package</phase>
+                <goals>
+                  <goal>dockerBuild</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+
+    <profile>
+      <id>arm</id>
+      <activation>
+        <property><name>!multi</name></property>
+        <os>
+          <arch>aarch64</arch>
+        </os>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>com.google.cloud.tools</groupId>
+            <artifactId>jib-maven-plugin</artifactId>
+            <version>${jib.version}</version>
+            <configuration>
+              <from>
+                <platforms>
+                  <platform>
+                    <architecture>arm64</architecture>
+                    <os>linux</os>
+                  </platform>
+                </platforms>
+              </from>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+
+    <profile>
+      <id>multi</id>
+      <activation>
+        <property><name>multi</name></property>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>com.google.cloud.tools</groupId>
+            <artifactId>jib-maven-plugin</artifactId>
+            <version>${jib.version}</version>
+            <configuration>
+              <from>
+                <platforms>
+                  <platform>
+                    <architecture>arm64</architecture>
+                    <os>linux</os>
+                  </platform>
+                  <platform>
+                    <architecture>amd64</architecture>
+                    <os>linux</os>
+                  </platform>
+                </platforms>
+              </from>
+            </configuration>
+            <executions>
+              <execution>
+                <phase>package</phase>
+                <goals>
+                  <goal>build</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
     </profile>
   </profiles>
 

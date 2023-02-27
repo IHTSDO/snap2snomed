@@ -9,5 +9,8 @@ CVE-2022-25857
 CVE-2022-42003
 CVE-2022-42004
 
-# arbitrary code execution issue - low risk as a dependency of mockserver-netty which is only used in testing the api. Fix should come in the next version of mockserver-netty as the update to 1.10 is already included in the code base
+# Accept the risk as a transitive dependency of mockserver and so only used for tests remove when upgrade mockserver > 5.14.0 (as yet unrelease)
 CVE-2022-42889
+
+# remove when spring-web (dependency of spring-boot-starter-web) is 6.0.0 or above
+CVE-2016-1000027

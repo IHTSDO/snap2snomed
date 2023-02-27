@@ -182,6 +182,9 @@ export class ServiceUtils {
         params = params.append('status', value.toString());
       });
     }
+    if (filterEntity.targetOutOfScope !== undefined) {
+      params = params.append('targetOutOfScope', filterEntity.targetOutOfScope.toString());
+    }
     if (filterEntity.flagged !== undefined) {
       params = params.append('flagged', filterEntity.flagged.toString());
     }
@@ -194,18 +197,25 @@ export class ServiceUtils {
     if (filterEntity.assignedReviewer && filterEntity.assignedReviewer.length > 0) {
       params = params.append('assignedReviewer', filterEntity.assignedReviewer.toString());
     }
+    if (filterEntity.additionalColumns && filterEntity.additionalColumns.length > 0) {
+      params = params.append('additionalColumns', filterEntity.additionalColumns.join(','));
+    }
 
     return params;
   }
 
   static paramsToFilterEntity(params: any): MapViewFilter {
     const mapViewFilter = new MapViewFilter();
+
     Object.keys(params).forEach(k => {
       const v = params[k];
       switch (k) {
         // filter
         case 'noMap':
           mapViewFilter.noMap = typeof v === 'string' ? v.toUpperCase() === 'TRUE' : v[0].toUpperCase() === 'TRUE';
+          break;
+        case 'targetOutOfScope':
+          mapViewFilter.targetOutOfScope = typeof v === 'string' ? v.toUpperCase() === 'TRUE' : v[0].toUpperCase() === 'TRUE';
           break;
         case 'flagged':
           mapViewFilter.flagged = typeof v === 'string' ? v.toUpperCase() === 'TRUE' : v[0].toUpperCase() === 'TRUE';
@@ -236,6 +246,19 @@ export class ServiceUtils {
           break;
         case 'assignedReviewer':
           mapViewFilter.assignedReviewer = v;
+          break;
+        case "additionalColumns":
+          if (v !== undefined) {
+            if (Array.isArray(v)) {
+              if (v.length > 0) {
+                mapViewFilter.additionalColumns = v[0].split(',');
+              }
+            }
+            else {
+              mapViewFilter.additionalColumns = v.split(',');
+            }
+
+          }
           break;
       }
     });

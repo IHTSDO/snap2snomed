@@ -48,6 +48,7 @@ export interface AppConfig {
   termsOfServiceUrl: string;
   privacyPolicyUrl: string;
   currentTermsVersion: string;
+  identityProvider: string;
 }
 
 export let APP_CONFIG = new InjectionToken<AppConfig>('APP_CONFIG');

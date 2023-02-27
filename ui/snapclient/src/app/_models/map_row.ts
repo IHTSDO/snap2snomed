@@ -19,6 +19,8 @@ import {SourceCode} from './source_code';
 import {Mapping} from './mapping';
 import {User} from './user';
 
+export const TARGET_OUT_OF_SCOPE_TAG = "target-out-of-scope";
+
 export interface MapRow {
   id: string | null;
   map?: Mapping;
@@ -49,6 +51,10 @@ export class MapView {
   noMap: boolean;
   latestNote?: Date | null;
   flagged?: boolean;
+  targetOutOfScope?: boolean;
+  tags?: string[];
+
+  additionalColumnValues: string[];
 
   // Previous values
   private prevTargetCode?: string;
@@ -62,7 +68,7 @@ export class MapView {
               targetCode: string | undefined, targetDisplay: string | undefined, relationship: string | undefined,
               status: string, noMap: boolean, latestNote: Date | null | undefined, assignedAuthor: User | null | undefined,
               assignedReviewer: User | null | undefined, lastAuthor: User | null | undefined,
-              lastReviewer: User | null | undefined, flagged: boolean | undefined) {
+              lastReviewer: User | null | undefined, flagged: boolean | undefined, targetOutOfScope: boolean | undefined, tags: string[] | undefined, additionalColumnValues: string[] | undefined) {
     this.rowId = rowId;
     this.targetId = targetId;
     this.sourceIndex = sourceIndex;
@@ -74,27 +80,35 @@ export class MapView {
     this.prevStatus = this.status = status;
     this.prevNoMap = this.noMap = noMap;
     this.prevFlagged = this.flagged = flagged;
+    this.targetOutOfScope = targetOutOfScope;
+    this.tags = tags;
+
     this.latestNote = latestNote;
     this.assignedAuthor = assignedAuthor;
     this.assignedReviewer = assignedReviewer;
     this.lastAuthor = lastAuthor;
     this.lastReviewer = lastReviewer;
+    this.additionalColumnValues = additionalColumnValues || [];
   }
 
-  static create(mv: MapView): MapView {
+  static create(mv: any): MapView {
     // Need to convert numbers to strings here; mv may (will) have been coerced to a MapView
     const rowId = mv.rowId === null ? '' : mv.rowId.toString();
+    const additionalColumnValues = mv.additionalColumns ?
+      mv.additionalColumns.map((ac: {value: string}) => ac.value) : [];
+    const targetOutOfScope = mv.targetTags?.includes(TARGET_OUT_OF_SCOPE_TAG);
+
     return new MapView(
       rowId, mv.targetId, mv.sourceIndex, mv.sourceCode, mv.sourceDisplay,
       mv.targetCode, mv.targetDisplay, mv.relationship, mv.status, mv.noMap, mv.latestNote,
-      mv.assignedAuthor, mv.assignedReviewer, mv.lastAuthor, mv.lastReviewer, mv.flagged
+      mv.assignedAuthor, mv.assignedReviewer, mv.lastAuthor, mv.lastReviewer, mv.flagged, targetOutOfScope, mv.targetTags, additionalColumnValues
     );
   }
 
   convertToMapRow(mapping: Mapping): MapRow {
     return {
       id: this.rowId, map: mapping, noMap: this.noMap,
-      sourceCode: new SourceCode(this.sourceCode, this.sourceDisplay, mapping.source, this.sourceIndex),
+      sourceCode: new SourceCode(this.sourceCode, this.sourceDisplay, mapping.source, this.sourceIndex, this.additionalColumnValues),
       status: this.status, relationship: this.relationship, latestNote: this.latestNote
     } as unknown as MapRow;
   }
@@ -118,6 +132,7 @@ export class MapView {
     this.prevTargetDisplay = this.targetDisplay = targetRow.targetDisplay;
     this.prevRelationship = this.relationship = targetRow.relationship;
     this.prevFlagged = this.flagged = targetRow.flagged;
+    this.targetOutOfScope = targetRow.targetOutOfScope;
   }
 
   reset(): void {
@@ -162,12 +177,16 @@ export class MapViewFilter {
   assignedAuthor: string[] | string = '';
   assignedReviewer: string[] | string = '';
   flagged?: boolean | undefined;
+  targetOutOfScope?: boolean | undefined;
   notes?: boolean | undefined;
+  additionalColumns : string[] = [];
 
   hasFilters(): boolean {
+    const filteredAdditionalColumns: string[] = this.additionalColumns.length > 0 ? this.additionalColumns.filter((s): s is string => Boolean(s)) : [];
+
     return this.sourceCode !== '' || this.sourceDisplay !== '' || this.targetCode !== '' || this.targetDisplay !== ''
-      || this.relationship !== '' || this.status !== '' || this.noMap !== undefined || this.flagged !== undefined
-      || this.lastAuthorReviewer !== '' || this.assignedAuthor !== '' || this.assignedReviewer !== '' || this.notes !== undefined;
+      || this.relationship !== '' || this.status !== '' || this.noMap !== undefined || this.flagged !== undefined || this.targetOutOfScope !== undefined
+      || this.lastAuthorReviewer !== '' || this.assignedAuthor !== '' || this.assignedReviewer !== '' || this.notes !== undefined || filteredAdditionalColumns.length > 0;
   }
 }
 
@@ -191,6 +210,21 @@ export class MappedRowDetailsDto {
 
 }
 
+export enum ColumnType {
+  NUMBER = 'NUMBER',
+  TEXT = 'TEXT',
+}
+
+export class AdditionalColumn {
+  name: string;
+  type: ColumnType;
+
+  constructor(name: string, type: string) {
+    this.name = name;
+    this.type = ColumnType[type as keyof typeof ColumnType];
+  }
+};
+
 export class Page {
   data: MapView[];
   pageIndex: number;
@@ -198,14 +232,17 @@ export class Page {
   totalElements: number;
   totalPages: number;
   sourceDetails: MappedRowDetailsDto[];
+  additionalColumns: AdditionalColumn[];
 
-  constructor(data: MapView[] = [], pageIndex: number = 0, size: number = 0, totalElements: number = 0, totalPages: number = 0, sourceIndexes: MappedRowDetailsDto[] = []) {
+  constructor(data: MapView[] = [], pageIndex: number = 0, size: number = 0, totalElements: number = 0, totalPages: number = 0,
+      sourceIndexes: MappedRowDetailsDto[] = [], additionalColumns: AdditionalColumn[] = []) {
     this.data = data;
     this.pageIndex = pageIndex;
     this.size = size;
     this.totalElements = totalElements;
     this.totalPages = totalPages;
     this.sourceDetails = sourceIndexes;
+    this.additionalColumns = additionalColumns;
   }
 }
 

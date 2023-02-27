@@ -88,4 +88,6 @@ public class UserInterfaceConfigurationDetails {
 
   @NotBlank
   String currentTermsVersion;
+
+  String identityProvider;
 }
