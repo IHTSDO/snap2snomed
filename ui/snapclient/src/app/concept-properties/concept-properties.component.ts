@@ -117,6 +117,7 @@ export class ConceptPropertiesComponent implements OnInit, OnDestroy {
       (props) => {
         self.propertiesView = [];
         self.attributeRelationshipsView = [];
+        let parentRelationships: { firstValue: boolean; roleGroup: boolean; key: string; value: any; }[] = [];
         if (props) {
           this.displayedProps.concat(this.displayedAttributeRelationshipProps).forEach(p => {
             props[p]?.forEach(v => {
@@ -155,12 +156,13 @@ export class ConceptPropertiesComponent implements OnInit, OnDestroy {
                   }
                   else {
                     ({attributeCode, attributeValue} = this.processSubproperty(v));
-                    this.attributeRelationshipsView.push({firstValue: true, roleGroup: false, key: attributeCode, value: [attributeValue]})
+                    // SNOMED CT diagramming guidelines specify ungrouped attributes should be displayed before grouped attributes
+                    this.attributeRelationshipsView.unshift({firstValue: true, roleGroup: false, key: attributeCode, value: [attributeValue]})
                   }
 
                   break;
                 case "parent":
-                  this.attributeRelationshipsView.push({firstValue: false, roleGroup: false, key: "parent", value: v});
+                  parentRelationships.push({firstValue: false, roleGroup: false, key: "parent", value: v});
                   break;
                 default: 
                   this.propertiesView.push({ key: p, value: v });
@@ -169,6 +171,8 @@ export class ConceptPropertiesComponent implements OnInit, OnDestroy {
 
             });
           });
+          // SNOMED CT diagramming guidelines specify is-a relationships should be displayed first 
+          this.attributeRelationshipsView = parentRelationships.concat(this.attributeRelationshipsView);
         }
       },
       (_error) => this.translate.get('ERROR.CONCEPT_LOOKUP').subscribe((res) => this.error.message = res)
