@@ -117,7 +117,6 @@ export class ConceptPropertiesComponent implements OnInit, OnDestroy {
       (props) => {
         self.propertiesView = [];
         self.attributeRelationshipsView = [];
-        let parentRelationships: { firstValue: boolean; roleGroup: boolean; key: string; value: any; }[] = [];
         if (props) {
           this.displayedProps.concat(this.displayedAttributeRelationshipProps).forEach(p => {
             props[p]?.forEach(v => {
@@ -161,9 +160,10 @@ export class ConceptPropertiesComponent implements OnInit, OnDestroy {
                   }
 
                   break;
-                case "parent":
-                  parentRelationships.push({firstValue: false, roleGroup: false, key: "parent", value: v});
-                  break;
+                // Removed 28/02/23 due to duplication with tree view and space limitations
+                // case "parent":
+                //   this.attributeRelationshipView.push({firstValue: false, roleGroup: false, key: "parent", value: v});
+                //   break;
                 default: 
                   this.propertiesView.push({ key: p, value: v });
                   break;
@@ -171,8 +171,6 @@ export class ConceptPropertiesComponent implements OnInit, OnDestroy {
 
             });
           });
-          // SNOMED CT diagramming guidelines specify is-a relationships should be displayed first 
-          this.attributeRelationshipsView = parentRelationships.concat(this.attributeRelationshipsView);
         }
       },
       (_error) => this.translate.get('ERROR.CONCEPT_LOOKUP').subscribe((res) => this.error.message = res)
