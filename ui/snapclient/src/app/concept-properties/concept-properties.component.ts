@@ -171,6 +171,11 @@ export class ConceptPropertiesComponent implements OnInit, OnDestroy {
 
             });
           });
+          // first entry does not have a line above it to separate attributes
+          if (this.attributeRelationshipsView.length > 0) {
+            this.attributeRelationshipsView[0]['firstValue'] = false;
+          }
+
         }
       },
       (_error) => this.translate.get('ERROR.CONCEPT_LOOKUP').subscribe((res) => this.error.message = res)
