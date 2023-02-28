@@ -417,6 +417,10 @@
     "NO_MATCHES": "No search results",
     "INPUT_LABEL": "Text search"
   },
+  "PROPERTIES": {
+    "TARGET_PROPERTIES": "Target Properties",
+    "ATTRIBUTE_RELATIONSHIPS": "Attribute Relationships"
+  },
   "AUTOMAP": {
     "AUTOMAP": "AUTOMAP",
     "AUTOMAP_RUNNING": "Running automap",

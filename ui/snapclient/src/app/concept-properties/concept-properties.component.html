@@ -1,6 +1,6 @@
 <mat-card class="tab-view card-col">
   <mat-tab-group animationDuration="0ms">
-    <mat-tab label="Target Properties">
+    <mat-tab label="{{'PROPERTIES.TARGET_PROPERTIES' | translate }}">
       <div class="properties-view card-col">
         <mat-card class="properties-control" *ngIf="propertiesView.length; else noProperties">
           <mat-card-content>
@@ -51,7 +51,7 @@
         </ng-template>
       </div>
     </mat-tab>
-    <mat-tab label="Attribute Relationships">
+    <mat-tab label="{{'PROPERTIES.ATTRIBUTE_RELATIONSHIPS' | translate }}"> 
       <div class="properties-view card-col">
         <mat-card> 
           <mat-card-content>
