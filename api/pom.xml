@@ -30,7 +30,7 @@
   <description>API Backend for the Snap2Snomed mapping tool</description>
 
   <properties>
-    <java.version>11</java.version>
+    <java.version>17</java.version>
     <docker.repository>aehrc/snap2snomed</docker.repository>
     <docker.registry.host>quay.io</docker.registry.host>
     <sentry.version>6.4.2</sentry.version>
