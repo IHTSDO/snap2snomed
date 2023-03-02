@@ -517,6 +517,11 @@ export class MappingViewComponent implements OnInit, AfterViewInit, OnDestroy {
         extension = '.xlsx';
         break;
 
+      case 'fhir-json':
+        contentType = 'application/fhir+json';
+        extension = '.json';
+        break;
+  
       case 'csv':
       default:
         contentType = 'text/csv';

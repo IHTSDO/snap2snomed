@@ -16,11 +16,6 @@
 
 package org.snomed.snap2snomed;
 
-import io.swagger.v3.oas.models.Components;
-import io.swagger.v3.oas.models.OpenAPI;
-import io.swagger.v3.oas.models.info.Contact;
-import io.swagger.v3.oas.models.info.Info;
-import io.swagger.v3.oas.models.info.License;
 import org.snomed.snap2snomed.config.Snap2snomedConfiguration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
@@ -30,6 +25,13 @@ import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 import org.springframework.context.annotation.Bean;
 import org.springframework.data.envers.repository.support.EnversRevisionRepositoryFactoryBean;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import org.springframework.web.filter.CommonsRequestLoggingFilter;
+
+import io.swagger.v3.oas.models.Components;
+import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.info.Contact;
+import io.swagger.v3.oas.models.info.Info;
+import io.swagger.v3.oas.models.info.License;
 
 @SpringBootApplication(exclude = ErrorMvcAutoConfiguration.class)
 @EnableJpaRepositories(repositoryFactoryBeanClass = EnversRevisionRepositoryFactoryBean.class)
@@ -42,7 +44,7 @@ public class Snap2snomedApplication {
   public static void main(String[] args) {
     SpringApplication.run(Snap2snomedApplication.class, args);
   }
-  
+
   /**
    * Swagger ui customisation
    */
@@ -60,6 +62,18 @@ public class Snap2snomedApplication {
                       .license(new License()
                         .name(configuration.getSwagger().getLicenseName())
                         .url(configuration.getSwagger().getLicenseUrl())));
+  }
+
+  @Bean
+  public CommonsRequestLoggingFilter logFilter() {
+      final CommonsRequestLoggingFilter filter
+        = new CommonsRequestLoggingFilter();
+      filter.setIncludeQueryString(true);
+      filter.setIncludePayload(true);
+      filter.setMaxPayloadLength(10000);
+      filter.setIncludeHeaders(false);
+      filter.setAfterMessagePrefix("REQUEST DATA: ");
+      return filter;
   }
 
 }
