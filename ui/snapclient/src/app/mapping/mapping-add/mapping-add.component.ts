@@ -140,10 +140,6 @@ export class MappingAddComponent implements OnInit {
     self.error = {};
     self.load();
 
-    self.formGroup.statusChanges.subscribe((value) => {
-      console.log('STATUS', value, self.formGroup.invalid);
-    })
-
     self.formGroup.controls.title.setValue(this.mappingModel.project.title);
     if (self.mode === 'FORM.COPY') {
       self.formGroup.controls.title.disable()
