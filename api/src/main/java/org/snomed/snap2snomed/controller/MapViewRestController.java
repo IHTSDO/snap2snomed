@@ -19,6 +19,7 @@ package org.snomed.snap2snomed.controller;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -36,13 +37,19 @@ import org.hl7.fhir.r4.model.ConceptMap.ConceptMapGroupComponent;
 import org.hl7.fhir.r4.model.ConceptMap.SourceElementComponent;
 import org.hl7.fhir.r4.model.ConceptMap.TargetElementComponent;
 import org.hl7.fhir.r4.model.Enumerations.ConceptMapEquivalence;
+import org.hl7.fhir.r4.model.Enumerations.PublicationStatus;
+import org.hl7.fhir.r4.model.UriType;
 import org.snomed.snap2snomed.controller.dto.Snap2SnomedPagedModel;
+import org.snomed.snap2snomed.model.ImportedCodeSet;
 import org.snomed.snap2snomed.model.MapView;
+import org.snomed.snap2snomed.model.Project;
 import org.snomed.snap2snomed.model.enumeration.MapStatus;
 import org.snomed.snap2snomed.model.enumeration.MappingRelationship;
 import org.snomed.snap2snomed.problem.auth.NoSuchUserProblem;
 import org.snomed.snap2snomed.problem.auth.NotAuthorisedProblem;
+import org.snomed.snap2snomed.repository.MapRepository;
 import org.snomed.snap2snomed.security.WebSecurity;
+import org.snomed.snap2snomed.service.FhirService;
 import org.snomed.snap2snomed.service.MapViewService;
 import org.snomed.snap2snomed.service.MapViewService.MapViewFilter;
 import org.snomed.snap2snomed.service.TerminologyProvider;
@@ -391,16 +398,53 @@ public class MapViewRestController {
           throw new NotAuthorisedProblem("Not authorised to view map if the user is not admin or member of an associated project!");
       }
 
+      response.setContentType(FHIR_JSON);
       response.setHeader("Content-Disposition",
-              "attachment; filename=\"" + mapViewService.getFileNameForMapExport(mapId, contentType)
+              "attachment; filename=\"" + mapViewService.getFileNameForMapExport(mapId, FHIR_JSON)
               + "\"");
 
 
+      final ConceptMap cm = convertToConceptMap(mapId);
+
+      try (final BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(response.getOutputStream()))) {
+          final IParser parser = terminology.getFhirContext().newJsonParser();
+          parser.encodeResourceToWriter(cm, writer);
+          writer.flush();
+      } catch (final IOException e) {
+          throw Problem.builder().withDetail("IO error exporting").build();
+      }
+  }
+
+  @Autowired
+  private MapRepository mapRepo;
+
+  private ConceptMap convertToConceptMap(Long mapId) {
       final Map<Long, SourceElementComponent> mapEntry = new HashMap<>();
       final ConceptMap cm = new ConceptMap();
-      // TODO initialise metadata
-
       final ConceptMapGroupComponent group = cm.addGroup();
+
+      // TODO initialise metadata
+      mapRepo.findById(mapId).ifPresent(map -> {
+          final Project project = map.getProject();
+          final String title = project.getTitle();
+          cm.setStatus(PublicationStatus.UNKNOWN);
+          cm.setDate(Date.from(map.getModified()));
+          cm.setTitle(title);
+          cm.setName(title.replaceAll("[^\\w\\d]", "_"));
+          cm.setDescription(project.getDescription());
+          cm.setVersion(map.getMapVersion());
+
+          final ImportedCodeSet source = map.getSource();
+          cm.setSource(new UriType("s2s:/vs/" + source.getId()));
+          final String ecl = map.getToScope();
+          cm.setTarget(new UriType(FhirService.DEFAULT_CODE_SYSTEM + "?fhir_vs=ecl/" + ecl));
+
+          group.setSource("s2s:/cs/" + source.getId());
+          group.setSourceVersion(source.getVersion());
+          group.setTarget(FhirService.DEFAULT_CODE_SYSTEM);
+          group.setTargetVersion(map.getToVersion());
+      });
+
 
       for (final MapView mapView : mapViewService.getAllMapViewForMap(mapId)) {
           final Long key = mapView.getSourceIndex();
@@ -421,32 +465,30 @@ public class MapViewRestController {
           } else {
               tgt.setCode(mapView.getTargetCode());
               tgt.setDisplay(mapView.getTargetDisplay());
-              switch (mapView.getRelationship()) {
-              case TARGET_EQUIVALENT:
-                  tgt.setEquivalence(ConceptMapEquivalence.EQUIVALENT);
-                  break;
-              case TARGET_BROADER:
-                  tgt.setEquivalence(ConceptMapEquivalence.WIDER);
-                  break;
-              case TARGET_NARROWER:
-                  tgt.setEquivalence(ConceptMapEquivalence.NARROWER);
-                  break;
-              case TARGET_INEXACT:
-                  tgt.setEquivalence(ConceptMapEquivalence.RELATEDTO);
-                  break;
+              if (null != mapView.getRelationship()) {
+                  switch (mapView.getRelationship()) {
+                  case TARGET_EQUIVALENT:
+                      tgt.setEquivalence(ConceptMapEquivalence.EQUIVALENT);
+                      break;
+                  case TARGET_BROADER:
+                      tgt.setEquivalence(ConceptMapEquivalence.WIDER);
+                      break;
+                  case TARGET_NARROWER:
+                      tgt.setEquivalence(ConceptMapEquivalence.NARROWER);
+                      break;
+                  case TARGET_INEXACT:
+                      tgt.setEquivalence(ConceptMapEquivalence.RELATEDTO);
+                      break;
+                  }
               }
 
-              tgt.setComment(mapView.getStatus().toString());
+              if (mapView.getNoMap()) {
+                  tgt.setEquivalence(ConceptMapEquivalence.UNMATCHED);
+              }
+
           }
       }
-
-      try (final BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(response.getOutputStream()))) {
-          final IParser parser = terminology.getFhirContext().newJsonParser();
-          parser.encodeResourceToWriter(cm, writer);
-          writer.flush();
-      } catch (final IOException e) {
-          throw Problem.builder().withDetail("IO error exporting").build();
-      }
+      return cm;
   }
 
 

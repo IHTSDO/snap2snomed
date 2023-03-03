@@ -152,11 +152,11 @@ export class AutomapComponent implements OnInit {
               errorCount: context.fhirErrors + context.backendErrors,
             }).subscribe(msgs => {
               if (self.automapDialog && self.automapDialog.componentInstance) {
-                const errormsg = (context.fhirErrors || context.backendErrors) && ` ${msgs['AUTOMAP.AUTOMAP_ERRORS']}`;
+                const errormsg = (context.fhirErrors || context.backendErrors) ? ` ${msgs['AUTOMAP.AUTOMAP_ERRORS']}` : null;
                 self.automapDialog.componentInstance.data = {
                   ...self.automapDialog.componentInstance.data,
                   message: msgs['AUTOMAP.AUTOMAP_COMPLETED'],
-                  error: errormsg !== 0 ? errormsg.toString() : null
+                  error: errormsg,
                 };
               }
             });

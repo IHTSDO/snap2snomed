@@ -68,6 +68,7 @@ import { MappingNotesComponent } from '../mapping-table-notes/mapping-notes.comp
 import { MatCheckboxChange } from '@angular/material/checkbox';
 import { TableColumn } from '../mapping-table/mapping-table.component';
 import { TargetChangedService } from 'src/app/_services/target-changed.service';
+import { cloneDeep } from 'lodash';
 
 @Component({
   selector: 'app-mapping-view',

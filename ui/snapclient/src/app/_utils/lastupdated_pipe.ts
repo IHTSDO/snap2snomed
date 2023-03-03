@@ -22,7 +22,7 @@ const min = 1000 * 60;
 export class LastupdatedPipe implements PipeTransform {
   transform(datefield?: Date | null): string | null {
     if (!datefield) {
-      return datefield ?? null;
+      return null;
     }
     const today = new Date();
     const diff = Math.floor(today.getTime() - new Date(datefield).getTime());
@@ -32,7 +32,7 @@ export class LastupdatedPipe implements PipeTransform {
     const months = Math.floor(days / 31);
     const years = Math.floor(days / 365.25);
 
-    let interval = [];
+    let interval: string[] = [];
     if (days == 0) {
       if (hours > 0) {
         interval.push(hours%24 + ' hours');

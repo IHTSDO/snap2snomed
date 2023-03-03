@@ -279,8 +279,12 @@ public class MapViewService {
         extension = ".xlsx";
         break;
 
+      case MapViewRestController.FHIR_JSON:
+        extension = ".json";
+        break;
+
       default:
-        throw Problem.valueOf(Status.UNSUPPORTED_MEDIA_TYPE, "Content type " + contentType + " is not supported");
+        throw Problem.valueOf(Status.UNSUPPORTED_MEDIA_TYPE, "Content type " + contentType + " is not supported for map export");
     }
 
     return "map-" + map.getProject().getTitle() + "_" + map.getMapVersion() + extension;
