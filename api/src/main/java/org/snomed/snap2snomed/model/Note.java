@@ -56,7 +56,7 @@ public class Note implements Comparable<Note>, Snap2SnomedEntity {
     @CreatedDate
     private Instant created;
 
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSSSZ")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSXXX", timezone = "UTC")
     @Column(name = "modified")
     @LastModifiedDate
     private Instant modified;
