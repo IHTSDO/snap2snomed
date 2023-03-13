@@ -18,7 +18,6 @@ package org.snomed.snap2snomed.model;
 
 import static org.hibernate.envers.RelationTargetAuditMode.NOT_AUDITED;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.time.Instant;
 import java.util.List;
@@ -151,7 +150,6 @@ public class MapRow implements Snap2SnomedEntity {
 
     Task getReviewTask();
 
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSSSSSSZ")
     default Instant getLatestNote() {
       Note note = getNotes().stream().filter(n -> !n.isDeleted()).findFirst().orElse(null);
       if (note != null) {
