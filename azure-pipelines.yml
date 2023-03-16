@@ -47,7 +47,7 @@ stages:
               mavenFeedAuthenticate: true
               mavenOptions: ' $(mavenOptions)'
               javaHomeOption: 'JDKVersion'
-              jdkVersionOption: '1.11'
+              jdkVersionOption: '1.17'
               jdkArchitectureOption: 'x64'
               publishJUnitResults: true
               testResultsFiles: '**/*/TEST*-*.xml'
