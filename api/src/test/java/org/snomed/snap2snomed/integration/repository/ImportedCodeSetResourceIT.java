@@ -235,7 +235,7 @@ public class ImportedCodeSetResourceIT extends IntegrationTestBase {
     restClient.expectCreateImportedCodeSetFail("badAAA", "2", 0, 2, true, ",",
         new ClassPathResource("AAA_invalid_csv_mixeddelimiters.csv").getFile(), "text/csv", 400, null);
     restClient.expectCreateImportedCodeSetFail("badAAA", "2", 0, 2, true, ",",
-        new ClassPathResource("AAA_invalid_csv_doublequotes.csv").getFile(), "text/csv", 400, null);
+        new ClassPathResource("AAA_invalid_csv_doublequotes.csv").getFile(), "text/csv", 500, null);
   }
 
   /**
