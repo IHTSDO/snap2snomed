@@ -17,6 +17,7 @@
 package org.snomed.snap2snomed.service;
 
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.BiFunction;
@@ -284,6 +285,26 @@ public class MapViewService {
     }
 
     return "map-" + map.getProject().getTitle() + "_" + map.getMapVersion() + extension;
+  }
+
+  public List<AdditionalCodeColumn> getAdditionalColumnsMetadata(Long mapId) {
+    return mapRepository.findSourceByMapId(mapId).get().getAdditionalColumnsMetadata();
+  }
+
+  public String[] getExportHeader(Long mapId) {
+    
+    ArrayList<String> exportHeader = new ArrayList<String>(Arrays.asList("\uFEFF" + "Source code", "Source display"));
+
+    final List<AdditionalCodeColumn> additionalCodeColumnList = this.getAdditionalColumnsMetadata(mapId);      
+    if (additionalCodeColumnList != null && additionalCodeColumnList.size() > 0) {
+      for (AdditionalCodeColumn additionalColumn : additionalCodeColumnList) {
+        exportHeader.add(additionalColumn.getName());
+      }
+    }
+    exportHeader.addAll(Arrays.asList("Target code", "Target display", "Relationship type code", "Relationship type display", "No map flag", "Status"));
+
+    return exportHeader.toArray(new String[0]);
+
   }
 
   public List<MapView> getAllMapViewForMap(Long mapId) {
