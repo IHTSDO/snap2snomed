@@ -11,3 +11,6 @@ CVE-2022-42889
 
 # remove when spring-web (dependency of spring-boot-starter-web) is 6.0.0 or above
 CVE-2016-1000027
+
+# remove when spring boot > 3 .. risk seems to be of crashing rather than security
+CVE-2023-1370
