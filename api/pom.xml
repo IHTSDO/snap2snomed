@@ -335,7 +335,7 @@
         <artifactId>jib-maven-plugin</artifactId>
         <version>${jib.version}</version>
         <configuration>
-          <from><image>aehrc/jre:openjdk-11-fontconfig</image></from>
+          <from><image>aehrc/jre:openjdk-17-fontconfig</image></from>
           <container>
             <ports>
               <port>8080</port>
