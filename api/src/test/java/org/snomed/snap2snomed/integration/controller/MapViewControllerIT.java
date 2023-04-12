@@ -616,7 +616,7 @@ public class MapViewControllerIT extends IntegrationTestBase {
   @Test
   public void testExportCsv() throws Exception {
     byte[] result = exportMapViewFile(MapViewRestController.TEXT_CSV);
-    assertCsvContent(result);
+    assertCsvContent(result, false);
   }
 
   private byte[] exportMapViewFile(String accept, Pair<String, Object>... qs) {
@@ -660,7 +660,7 @@ public class MapViewControllerIT extends IntegrationTestBase {
   @Test
   public void testExportCsvExtended() throws Exception {
     byte[] result = exportMapViewFile(MapViewRestController.TEXT_CSV, Pair.of("extraColumns", "lastAuthor,lastReviewer,assignedAuthor,assignedReviewer"));
-    assertCsvContent(result);
+    assertCsvContent(result, true);
   }
 
   @Test
@@ -668,7 +668,7 @@ public class MapViewControllerIT extends IntegrationTestBase {
     // Assert that adding size/sort parameters doesn't affect export
     byte[] result = exportMapViewFile(MapViewRestController.TEXT_CSV, Pair.of("size", 5), Pair.of("sort", "sourceDisplay"));
 
-    assertCsvContent(result);
+    assertCsvContent(result, false);
   }
 
 
@@ -694,20 +694,24 @@ public class MapViewControllerIT extends IntegrationTestBase {
       fileName = "test_export_extended.tsv";
     }
 
-      // byte[] to string
-  String s = new String(Files.toByteArray(new ClassPathResource(fileName).getFile()));
-  System.err.println("read in file is[]" +  s + "]");
-  String s2 = new String(result);
-  System.err.println("result [" + s2 + "]");
-
     assertThat(result)
         .isEqualTo(Files.toByteArray(new ClassPathResource(fileName).getFile()));
   }
 
 
-  private void assertCsvContent(byte[] result) throws IOException {
+  private void assertCsvContent(byte[] result, boolean extended) throws IOException {
 
-    assertThat(result).isEqualTo(Files.toByteArray(new ClassPathResource("test_export.csv").getFile()));
+    String fileName = "test_export.csv";
+    if (extended) {
+      fileName = "test_export_extended.csv";
+    }
+          // byte[] to string
+  String s = new String(Files.toByteArray(new ClassPathResource(fileName).getFile()));
+  System.err.println("read in file is[]" +  s + "]");
+  String s2 = new String(result);
+  System.err.println("result [" + s2 + "]");
+
+    assertThat(result).isEqualTo(Files.toByteArray(new ClassPathResource(fileName).getFile()));
   }
 
   private void assertXlsxContent(byte[] result) throws IOException, FileNotFoundException {
