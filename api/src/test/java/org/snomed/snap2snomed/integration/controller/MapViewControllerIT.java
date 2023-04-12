@@ -645,6 +645,23 @@ public class MapViewControllerIT extends IntegrationTestBase {
     assertXlsxContent(result);
   }
 
+  @Test
+  public void testExportXlsxExtended() throws Exception {
+    byte[] result = exportMapViewFile(MapViewRestController.APPLICATION_XSLX, Pair.of("extraColumns", "notes"), Pair.of("extraColumns", "author"), Pair.of("extraColumns", "reviewer"));
+    assertXlsxContent(result);
+  }
+
+  @Test
+  public void testExportTsvExtended() throws Exception {
+    byte[] result = exportMapViewFile(MapViewRestController.TEXT_TSV, Pair.of("extraColumns", "notes"), Pair.of("extraColumns", "author"), Pair.of("extraColumns", "reviewer"));
+    assertTsvContent(result);
+  }
+
+  @Test
+  public void testExportCsvExtended() throws Exception {
+    byte[] result = exportMapViewFile(MapViewRestController.TEXT_CSV, Pair.of("extraColumns", "notes"), Pair.of("extraColumns", "author"), Pair.of("extraColumns", "reviewer"));
+    assertCsvContent(result);
+  }
 
   @Test
   public void testExportIgnoresSortAndSizeParametersCsv() throws Exception {

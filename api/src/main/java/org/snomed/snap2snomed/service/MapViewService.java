@@ -291,7 +291,7 @@ public class MapViewService {
     return mapRepository.findSourceByMapId(mapId).get().getAdditionalColumnsMetadata();
   }
 
-  public String[] getExportHeader(Long mapId) {
+  public String[] getExportHeader(Long mapId, List<String> extraColumns) {
     
     ArrayList<String> exportHeader = new ArrayList<String>(Arrays.asList("\uFEFF" + "Source code", "Source display"));
 
@@ -302,6 +302,28 @@ public class MapViewService {
       }
     }
     exportHeader.addAll(Arrays.asList("Target code", "Target display", "Relationship type code", "Relationship type display", "No map flag", "Status"));
+
+    if (extraColumns != null) {
+      for (String extraColumn : extraColumns) {
+        switch(extraColumn.toUpperCase()) {
+          case "NOTES":
+            exportHeader.add("Notes");
+            break;
+          case "ASSIGNEDAUTHOR":
+            exportHeader.add("Assigned author");
+            break;
+          case "ASSIGNEDREVIEWER":
+            exportHeader.add("Assigned reviewer");
+            break;
+          case "LASTAUTHOR":
+            exportHeader.add("Last author");
+            break;
+          case "LASTREVIEWER":
+            exportHeader.add("Last reviewer");
+            break;
+        }
+      }
+    }
 
     return exportHeader.toArray(new String[0]);
 

@@ -191,6 +191,8 @@
     "EXPORT_CSV": "Comma separated",
     "EXPORT_TSV": "Tab separated",
     "EXPORT_XLSX": "Excel (xlsx)",
+    "EXPORT_XLSX_EXTENDED": "Excel (xlsx) extended",
+    "EXPORT_FHIR_JSON": "FHIR JSON",
     "CODE_SYSTEMS": "Code systems",
     "LAST_UPDATED": "Last updated",
     "UNSAVED_CHANGES": "Warning: you have unsaved changes",
