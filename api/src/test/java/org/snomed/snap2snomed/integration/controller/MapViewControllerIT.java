@@ -635,7 +635,7 @@ public class MapViewControllerIT extends IntegrationTestBase {
   @Test
   public void testExportTsv() throws Exception {
     byte[] result = exportMapViewFile(MapViewRestController.TEXT_TSV);
-    assertTsvContent(result);
+    assertTsvContent(result, false);
   }
 
 
@@ -647,19 +647,19 @@ public class MapViewControllerIT extends IntegrationTestBase {
 
   @Test
   public void testExportXlsxExtended() throws Exception {
-    byte[] result = exportMapViewFile(MapViewRestController.APPLICATION_XSLX, Pair.of("extraColumns", "notes"), Pair.of("extraColumns", "author"), Pair.of("extraColumns", "reviewer"));
+    byte[] result = exportMapViewFile(MapViewRestController.APPLICATION_XSLX, Pair.of("extraColumns", "lastAuthor,lastReviewer,assignedAuthor,assignedReviewer"));
     assertXlsxContent(result);
   }
 
   @Test
   public void testExportTsvExtended() throws Exception {
-    byte[] result = exportMapViewFile(MapViewRestController.TEXT_TSV, Pair.of("extraColumns", "notes"), Pair.of("extraColumns", "author"), Pair.of("extraColumns", "reviewer"));
-    assertTsvContent(result);
+    byte[] result = exportMapViewFile(MapViewRestController.TEXT_TSV, Pair.of("extraColumns", "lastAuthor,lastReviewer,assignedAuthor,assignedReviewer"));
+    assertTsvContent(result, true);
   }
 
   @Test
   public void testExportCsvExtended() throws Exception {
-    byte[] result = exportMapViewFile(MapViewRestController.TEXT_CSV, Pair.of("extraColumns", "notes"), Pair.of("extraColumns", "author"), Pair.of("extraColumns", "reviewer"));
+    byte[] result = exportMapViewFile(MapViewRestController.TEXT_CSV, Pair.of("extraColumns", "lastAuthor,lastReviewer,assignedAuthor,assignedReviewer"));
     assertCsvContent(result);
   }
 
@@ -676,7 +676,7 @@ public class MapViewControllerIT extends IntegrationTestBase {
   public void testExportIgnoresSortAndSizeParametersTsv() throws Exception {
     // Assert that adding size/sort parameters doesn't affect export
     byte[] result = exportMapViewFile(MapViewRestController.TEXT_TSV, Pair.of("size", 5), Pair.of("sort", "sourceDisplay"));
-    assertTsvContent(result);
+    assertTsvContent(result, false);
   }
 
 
@@ -687,13 +687,26 @@ public class MapViewControllerIT extends IntegrationTestBase {
     assertXlsxContent(result);
   }
 
-  private void assertTsvContent(byte[] result) throws IOException {
+  private void assertTsvContent(byte[] result, boolean extended) throws IOException {
+
+    String fileName = "test_export.tsv";
+    if (extended) {
+      fileName = "test_export_extended.tsv";
+    }
+
+      // byte[] to string
+  String s = new String(Files.toByteArray(new ClassPathResource(fileName).getFile()));
+  System.err.println("read in file is[]" +  s + "]");
+  String s2 = new String(result);
+  System.err.println("result [" + s2 + "]");
+
     assertThat(result)
-        .isEqualTo(Files.toByteArray(new ClassPathResource("test_export.tsv").getFile()));
+        .isEqualTo(Files.toByteArray(new ClassPathResource(fileName).getFile()));
   }
 
 
   private void assertCsvContent(byte[] result) throws IOException {
+
     assertThat(result).isEqualTo(Files.toByteArray(new ClassPathResource("test_export.csv").getFile()));
   }
 
