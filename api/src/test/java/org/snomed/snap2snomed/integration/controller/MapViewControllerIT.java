@@ -709,6 +709,9 @@ public class MapViewControllerIT extends IntegrationTestBase {
   String s2 = new String(result);
   System.err.println("result [" + s2 + "]");
 
+    assertThat(new String(result))
+      .isEqualTo(new String(Files.toByteArray(new ClassPathResource(fileName).getFile())));
+
     assertThat(result)
         .isEqualTo(Files.toByteArray(new ClassPathResource(fileName).getFile()));
   }
