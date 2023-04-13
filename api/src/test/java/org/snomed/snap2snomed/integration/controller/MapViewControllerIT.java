@@ -32,12 +32,20 @@ import com.google.common.io.Files;
 import io.restassured.http.ContentType;
 import io.restassured.response.ValidatableResponse;
 import io.restassured.specification.RequestSpecification;
+
+import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.nio.file.FileSystems;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Iterator;
 import java.util.Set;
+
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
@@ -692,7 +700,14 @@ public class MapViewControllerIT extends IntegrationTestBase {
     String fileName = "test_export.tsv";
     if (extended) {
       fileName = "test_export_extended.tsv";
+      // Path path = Paths.get("C:\\temp\\export_file.tsv");
+      // java.nio.file.Files.write(path, result);
     }
+
+  String s = new String(Files.toByteArray(new ClassPathResource(fileName).getFile()));
+  System.err.println("read in file is[" +  s + "]");
+  String s2 = new String(result);
+  System.err.println("result [" + s2 + "]");
 
     assertThat(result)
         .isEqualTo(Files.toByteArray(new ClassPathResource(fileName).getFile()));
@@ -704,15 +719,46 @@ public class MapViewControllerIT extends IntegrationTestBase {
     String fileName = "test_export.csv";
     if (extended) {
       fileName = "test_export_extended.csv";
+      // Path path = Paths.get("C:\\temp\\export_file.csv");
+      // java.nio.file.Files.write(path, result);
+  
     }
-          // byte[] to string
-  String s = new String(Files.toByteArray(new ClassPathResource(fileName).getFile()));
-  System.err.println("read in file is[]" +  s + "]");
-  String s2 = new String(result);
-  System.err.println("result [" + s2 + "]");
 
+    String s = new String(Files.toByteArray(new ClassPathResource(fileName).getFile()));
+    System.err.println("read in file is[" +  s + "]");
+    String s2 = new String(result);
+    System.err.println("result [" + s2 + "]");
+
+    //FileUtils.writeByteArrayToFile(new File("pathname"), result)
+    // Path path1 = FileSystems.getDefault().getPath(".", "access.log");
+    // Path path2 = FileSystems.getDefault().getPath("logs", "access.log");
+    // filesCompareByLine()
     assertThat(result).isEqualTo(Files.toByteArray(new ClassPathResource(fileName).getFile()));
   }
+
+//   public static long filesCompareByLine(Path path1, Path path2) throws IOException {
+//     try (BufferedReader bf1 = java.nio.file.Files.newBufferedReader(path1);
+//          BufferedReader bf2 = java.nio.file.Files.newBufferedReader(path2)) {
+        
+//         long lineNumber = 1;
+//         String line1 = "", line2 = "";
+//         while ((line1 = bf1.readLine()) != null) {
+//             line2 = bf2.readLine();
+//             if (line2 == null || !line1.equals(line2)) {
+//               System.err.println("line1" + line1);
+//               System.err.println("line2" + line2);
+//                 return lineNumber;
+//             }
+//             lineNumber++;
+//         }
+//         if (bf2.readLine() == null) {
+//             return -1;
+//         }
+//         else {
+//             return lineNumber;
+//         }
+//     }
+// }
 
   private void assertXlsxContent(byte[] result) throws IOException, FileNotFoundException {
     try (ByteArrayInputStream export = new ByteArrayInputStream(result);
