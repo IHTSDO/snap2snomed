@@ -293,7 +293,7 @@ public class MapViewService {
 
   public String[] getExportHeader(Long mapId, List<String> extraColumns) {
     
-    ArrayList<String> exportHeader = new ArrayList<String>(Arrays.asList("\uFEFF" + "Source code", "Source display"));
+    ArrayList<String> exportHeader = new ArrayList<String>(Arrays.asList("\ufeff" + "Source code", "Source display"));
 
     final List<AdditionalCodeColumn> additionalCodeColumnList = this.getAdditionalColumnsMetadata(mapId);      
     if (additionalCodeColumnList != null && additionalCodeColumnList.size() > 0) {
