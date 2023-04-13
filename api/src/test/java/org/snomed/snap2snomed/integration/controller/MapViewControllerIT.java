@@ -650,13 +650,13 @@ public class MapViewControllerIT extends IntegrationTestBase {
   @Test
   public void testExportXlsx() throws Exception {
     byte[] result = exportMapViewFile(MapViewRestController.APPLICATION_XSLX);
-    assertXlsxContent(result);
+    assertXlsxContent(result, false);
   }
 
   @Test
   public void testExportXlsxExtended() throws Exception {
     byte[] result = exportMapViewFile(MapViewRestController.APPLICATION_XSLX, Pair.of("extraColumns", "lastAuthor,lastReviewer,assignedAuthor,assignedReviewer"));
-    assertXlsxContent(result);
+    assertXlsxContent(result, true);
   }
 
   @Test
@@ -692,7 +692,7 @@ public class MapViewControllerIT extends IntegrationTestBase {
   public void testExportIgnoresSortAndSizeParametersXlsx() throws Exception {
     // Assert that adding size/sort parameters doesn't affect export
     byte[] result = exportMapViewFile(MapViewRestController.APPLICATION_XSLX, Pair.of("size", 5), Pair.of("sort", "sourceDisplay"));
-    assertXlsxContent(result);
+    assertXlsxContent(result, false);
   }
 
   private void assertTsvContent(byte[] result, boolean extended) throws IOException {
@@ -760,12 +760,19 @@ public class MapViewControllerIT extends IntegrationTestBase {
 //     }
 // }
 
-  private void assertXlsxContent(byte[] result) throws IOException, FileNotFoundException {
+  private void assertXlsxContent(byte[] result, boolean extended) throws IOException, FileNotFoundException {
+        
     try (ByteArrayInputStream export = new ByteArrayInputStream(result);
         Workbook exportedWorkbook = new XSSFWorkbook(export);) {
       Iterator<Row> exportedIterator = exportedWorkbook.getSheetAt(0).iterator();
 
-      try (FileInputStream expected = new FileInputStream(new ClassPathResource("test_export.xlsx").getFile());
+      String fileName = "test_export.xlsx";
+      if (extended) {
+        fileName = "test_export_extended.xlsx";
+  
+      }
+
+      try (FileInputStream expected = new FileInputStream(new ClassPathResource(fileName).getFile());
           Workbook expectedWorkbook = new XSSFWorkbook(expected);) {
         Iterator<Row> expectedIterator = expectedWorkbook.getSheetAt(0).iterator();
 
