@@ -8,7 +8,7 @@ map row code 5.,map row display 5,narrower,Narrower,TARGET_NARROWER,Target is na
 map row code 6.,map row display 6,equivalent,Equivalent,TARGET_EQUIVALENT,Target is equivalent to source,false,DRAFT,Test User,,,
 map row code 7.,map row display 7,equivalent,Equivalent,TARGET_INEXACT,Target is an inexact match to source,false,DRAFT,Test User,,Bob Smith,Bob2 Smith
 map row code 8.,map row display 8,utf8,ሰማይ አይታረስ ንጉሥ አይከሰስ።,TARGET_EQUIVALENT,Target is equivalent to source,false,DRAFT,Test User,,,
-map row code 9.,map row display 9,quotes,"This is a bit of text that has ""quotes"", as well as some commas to stir things up",TARGET_EQUIVALENT,Target is equivalent to source,false,DRAFT,Test User
+map row code 9.,map row display 9,quotes,"This is a bit of text that has ""quotes"", as well as some commas to stir things up",TARGET_EQUIVALENT,Target is equivalent to source,false,DRAFT,Test User,,,
 map row code 10.,map row display 10,tabby,This display has a tab 	 to ensure this is handled,TARGET_EQUIVALENT,Target is equivalent to source,false,DRAFT,Test User,,Bob Smith,Bob2 Smith
 map row code 11.,map row display 11,inreview,in review row,TARGET_EQUIVALENT,Target is equivalent to source,false,INREVIEW,Test User,Test User,Bob Smith,Bob2 Smith
 map row code 12.,map row display 12,,,,,false,UNMAPPED,,,Bob Smith,Bob2 Smith
