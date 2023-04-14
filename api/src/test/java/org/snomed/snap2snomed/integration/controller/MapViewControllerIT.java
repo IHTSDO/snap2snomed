@@ -705,12 +705,9 @@ public class MapViewControllerIT extends IntegrationTestBase {
     }
 
   String s = new String(Files.toByteArray(new ClassPathResource(fileName).getFile()));
-  System.err.println("read in file is[" +  s + "]");
-  String s2 = new String(result);
-  System.err.println("result [" + s2 + "]");
-
-    assertThat(new String(result))
-      .isEqualTo(new String(Files.toByteArray(new ClassPathResource(fileName).getFile())));
+  // System.err.println("read in file is[" +  s + "]");
+  // String s2 = new String(result);
+  // System.err.println("result [" + s2 + "]");
 
     assertThat(result)
         .isEqualTo(Files.toByteArray(new ClassPathResource(fileName).getFile()));
@@ -727,10 +724,10 @@ public class MapViewControllerIT extends IntegrationTestBase {
   
     }
 
-    String s = new String(Files.toByteArray(new ClassPathResource(fileName).getFile()));
-    System.err.println("read in file is[" +  s + "]");
-    String s2 = new String(result);
-    System.err.println("result [" + s2 + "]");
+    // String s = new String(Files.toByteArray(new ClassPathResource(fileName).getFile()));
+    // System.err.println("read in file is[" +  s + "]");
+    // String s2 = new String(result);
+    // System.err.println("result [" + s2 + "]");
 
     //FileUtils.writeByteArrayToFile(new File("pathname"), result)
     // Path path1 = FileSystems.getDefault().getPath(".", "access.log");
