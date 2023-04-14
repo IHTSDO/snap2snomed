@@ -718,7 +718,7 @@ public class MapViewControllerIT extends IntegrationTestBase {
 
     String fileName = "test_export.csv";
     if (extended) {
-      fileName = "test_export_extended.csv";
+      fileName = "test_export_extended2.csv";
       // Path path = Paths.get("C:\\temp\\export_file.csv");
       // java.nio.file.Files.write(path, result);
   
