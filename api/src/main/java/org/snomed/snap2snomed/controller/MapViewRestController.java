@@ -239,7 +239,7 @@ public class MapViewRestController {
       description = "Sorting criteria in the format: property(,asc|desc). Default sort order is ascending. Multiple sort criteria are supported.",
       array = @ArraySchema(schema = @Schema(type = "string")))
   @Parameter(name="extraColumns", in = ParameterIn.QUERY, required = false, allowEmptyValue = false,
-      description = "Additional columns to include. Options are ( notes | author | reviewer ).")
+      description = "Additional columns to include. Options are ( notes | lastAuthor | lastReviewer | assignedAuthor | assignedReviewer ).")
   @GetMapping(path = "/{mapId}", produces = {TEXT_CSV, TEXT_TSV})
   public void getMapViewCsv(HttpServletResponse response, @RequestHeader(name = "Accept", required = false) String contentType,
       @PathVariable("mapId") Long mapId,
@@ -337,7 +337,7 @@ public class MapViewRestController {
       description = "Sorting criteria in the format: property(,asc|desc). Default sort order is ascending. Multiple sort criteria are supported.",
       array = @ArraySchema(schema = @Schema(type = "string")))
   @Parameter(name="extraColumns", in = ParameterIn.QUERY, required = false, allowEmptyValue = false,
-      description = "Additional columns to include. Options are ( notes | author | reviewer ).")
+      description = "Additional columns to include. Options are ( notes | lastAuthor | lastReviewer | assignedAuthor | assignedReviewer ).")
   @GetMapping(path = "/{mapId}", produces = APPLICATION_XSLX)
   public void getMapViewExcel(HttpServletResponse response, 
         @PathVariable("mapId") Long mapId,
