@@ -282,6 +282,7 @@ function toMapping(mapDto: any, project?: Project): Mapping {
     mapping.project = project;
   } else {
     mapping.project = toProject(mapDto.project);
+    mapping.project.dualMapMode = mapDto.project.dualMapMode;
     mapping.project.owners = mapDto.owners.map(toUser);
     mapping.project.members = mapDto.members?.map(toUser) ?? [];
     mapping.project.guests = mapDto.guests?.map(toUser) ?? [];

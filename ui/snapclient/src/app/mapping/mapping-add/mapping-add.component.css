@@ -119,3 +119,7 @@ table.details-table td {
 button#delete {
   float: right;
 }
+
+.dual-author-toggle {
+  margin-top: 20px;
+}

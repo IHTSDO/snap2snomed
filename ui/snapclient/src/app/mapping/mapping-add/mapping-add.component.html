@@ -151,6 +151,12 @@
             </table>
           </div>
         </div>
+        <div>
+          Dual Author Mode &nbsp;&nbsp; OFF
+          <mat-slide-toggle class="dual-author-toggle" [(ngModel)]="mappingModel.project.dualMapMode" #tooltip="matTooltip" matTooltip="Enables two authors to blind author" [disabled]="mode !== 'FORM.CREATE'">
+          </mat-slide-toggle>
+          ON
+        </div>
         <div *ngIf="mode !== 'FORM.COPY'" class="project-roles">
           <h3>{{'PROJECT.PROJECT_ROLES' | translate}}</h3>
           <app-project-roles (errorEvent)="errorUpdate($event)" [readonly]="mode === 'FORM.VIEW'" [project]="mappingModel.project"></app-project-roles>

@@ -28,6 +28,7 @@ export class Project {
   modified: Date;
   maps: Mapping[];
   mapcount: number | null;
+  dualMapMode: Boolean;
   owners: User[];
   members: User[];
   guests: User[];
@@ -38,6 +39,7 @@ export class Project {
     this.description = null;
     this.created = new Date();
     this.modified = new Date();
+    this.dualMapMode = false;
     this.maps = [];
     this.owners = [];
     this.members = [];
