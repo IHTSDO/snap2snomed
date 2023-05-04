@@ -18,13 +18,10 @@ package org.snomed.snap2snomed.controller;
 
 import org.snomed.snap2snomed.controller.dto.ImportDetails;
 import org.snomed.snap2snomed.model.ImportedCodeSet;
-import org.snomed.snap2snomed.model.Project;
 import org.snomed.snap2snomed.problem.auth.NoSuchUserProblem;
 import org.snomed.snap2snomed.security.WebSecurity;
 import org.snomed.snap2snomed.service.CodeSetImportService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.rest.webmvc.RepositoryRestController;
-import org.springframework.hateoas.server.ExposesResourceFor;
 import org.springframework.http.MediaType;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.HttpMediaTypeNotAcceptableException;

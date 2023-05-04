@@ -31,6 +31,26 @@
             <mat-hint align="end">{{version.value?.length || 0}}/{{MAX_VERSION}}</mat-hint>
             <mat-error *ngIf="version.invalid">{{ 'SOURCE.VERSION_ERROR' | translate }}</mat-error>
           </mat-form-field>
+          <mat-form-field class="field-full-width" hintLabel="{{'FORM.MAX_CHARS' | translate}} {{MAX_CODESYSTEM}}">
+            <mat-label>{{ 'SOURCE.CODESYSTEM' | translate }}</mat-label>
+            <input id="source-codesystem" name="source-codesystem"
+                   matInput placeholder="{{'SOURCE.CODESYSTEM_PLACEHOLDER' | translate}}"
+                   [(ngModel)]="data.codesystemUri" #codesystem="ngModel"
+                   [maxLength]="MAX_CODESYSTEM"
+                   [ngModelOptions]="ngModelOptions">
+            <mat-hint align="end">{{codesystem.value?.length || 0}}/{{MAX_CODESYSTEM}}</mat-hint>
+            <mat-error *ngIf="codesystem.invalid">{{ 'SOURCE.CODESYSTEM_ERROR' | translate }}</mat-error>
+          </mat-form-field>
+          <mat-form-field class="field-full-width" hintLabel="{{'FORM.MAX_CHARS' | translate}} {{MAX_VALUESET}}">
+            <mat-label>{{ 'SOURCE.VALUESET' | translate }}</mat-label>
+            <input id="source-valueset" name="source-valueset"
+                   matInput placeholder="{{'SOURCE.VALUESET_PLACEHOLDER' | translate}}"
+                   [(ngModel)]="data.valuesetUri" #valueset="ngModel"
+                   [maxLength]="MAX_VALUESET"
+                   [ngModelOptions]="ngModelOptions">
+            <mat-hint align="end">{{valueset.value?.length || 0}}/{{MAX_VALUESET}}</mat-hint>
+            <mat-error *ngIf="valueset.invalid">{{ 'SOURCE.VALUESET_ERROR' | translate }}</mat-error>
+          </mat-form-field>
           <div class="field-full-width source-file mat-elevation-z2">
             <div class="file">
               <label>{{ 'SOURCE.FILE' | translate }}</label>

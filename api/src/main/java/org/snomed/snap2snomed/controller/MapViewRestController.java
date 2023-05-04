@@ -456,7 +456,6 @@ public class MapViewRestController {
       final ConceptMap cm = new ConceptMap();
       final ConceptMapGroupComponent group = cm.addGroup();
 
-      // TODO initialise metadata
       mapRepo.findById(mapId).ifPresent(map -> {
           final Project project = map.getProject();
           final String title = project.getTitle();
@@ -468,11 +467,18 @@ public class MapViewRestController {
           cm.setVersion(map.getMapVersion());
 
           final ImportedCodeSet source = map.getSource();
-          cm.setSource(new UriType("s2s:/vs/" + source.getId()));
+          String valuesetUri = source.getValuesetUri();
+          if (null != valuesetUri) {
+              cm.setSource(new UriType(valuesetUri));
+          }
+
           final String ecl = map.getToScope();
           cm.setTarget(new UriType(FhirService.DEFAULT_CODE_SYSTEM + "?fhir_vs=ecl/" + ecl));
 
-          group.setSource("s2s:/cs/" + source.getId());
+          String systemUri = source.getSystemUri();
+          if (null != valuesetUri) {
+              group.setSource(systemUri);
+          }
           group.setSourceVersion(source.getVersion());
           group.setTarget(FhirService.DEFAULT_CODE_SYSTEM);
           group.setTargetVersion(map.getToVersion());
