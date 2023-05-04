@@ -20,10 +20,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 #### Changed
 
-- 
+- SNOMED-457: streamline login process (DEX)
 
 #### Fixed
 
-- 
-
-
+- SNOMED-496: Hiding index column causes filters to be misaligned
+- SNOMED-475: Import error never goes away
+- SNOMED-470: pre-filled fields in "create map" dialog when they should be empty
+- SNOMED-408: Member list in the edit/create map dialogue is only returning X number of users
+- SNOMED-489: Select all toggle only selects items on page

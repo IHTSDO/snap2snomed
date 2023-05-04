@@ -21,6 +21,8 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -41,6 +43,7 @@ import org.hl7.fhir.r4.model.Enumerations.PublicationStatus;
 import org.hl7.fhir.r4.model.UriType;
 import org.snomed.snap2snomed.controller.dto.Snap2SnomedPagedModel;
 import org.snomed.snap2snomed.model.ImportedCodeSet;
+import org.snomed.snap2snomed.model.AdditionalCodeValue;
 import org.snomed.snap2snomed.model.MapView;
 import org.snomed.snap2snomed.model.Project;
 import org.snomed.snap2snomed.model.enumeration.MapStatus;
@@ -88,9 +91,6 @@ public class MapViewRestController {
   public static final String TEXT_CSV = "text/csv";
 
   public static final String FHIR_JSON = "application/fhir+json";
-
-  public static final String[] EXPORT_HEADER = {"\ufeff" + "Source code", "Source display", "Target code", "Target display", "Relationship type code",
-      "Relationship type display", "No map flag", "Status"};
 
   @Autowired
   MapViewService mapViewService;
@@ -294,14 +294,28 @@ public class MapViewRestController {
         new OutputStreamWriter(response.getOutputStream()));
 
         CSVPrinter csvPrinter = new CSVPrinter(writer,
-            format.builder().setHeader(EXPORT_HEADER).build());) {
+            format.builder().setHeader(mapViewService.getExportHeader(mapId)).build());) {
+      
       for (final MapView mapView : mapViewService.getAllMapViewForMap(mapId)) {
-        csvPrinter.printRecord(
-            mapView.getSourceCode(), mapView.getSourceDisplay(),
-            mapView.getTargetCode(), mapView.getTargetDisplay(),
+
+        ArrayList<Object> printRow = new ArrayList<Object>(Arrays.asList(mapView.getSourceCode(), mapView.getSourceDisplay()));
+
+        // additional source columns
+        if (mapView.getAdditionalColumns() != null) {
+            if (mapView.getAdditionalColumns().size() > 0) {
+                for (int i = 0; i < mapView.getAdditionalColumns().size(); i++) {
+                    final AdditionalCodeValue additionalColumn = mapView.getAdditionalColumns().get(i);
+                    printRow.add(additionalColumn.getValue());
+                }
+            }
+        }
+
+        printRow.addAll(Arrays.asList(mapView.getTargetCode(), mapView.getTargetDisplay(),
             mapView.getRelationship(), mapView.getRelationship() == null ? "" : mapView.getRelationship().getLabel(),
             mapView.getNoMap() == null ? "" : mapView.getNoMap(),
-            mapView.getStatus());
+            mapView.getStatus()));
+
+        csvPrinter.printRecord(printRow);
       }
       csvPrinter.flush();
       writer.flush();
@@ -337,9 +351,11 @@ public class MapViewRestController {
       final SXSSFSheet sh = wb.createSheet();
       final SXSSFRow header = sh.createRow(0);
 
-      for (int cellNum = 0; cellNum < EXPORT_HEADER.length; cellNum++) {
+      final String[] exportHeader = mapViewService.getExportHeader(mapId);
+
+      for (int cellNum = 0; cellNum < exportHeader.length; cellNum++) {
         final SXSSFCell cell = header.createCell(cellNum);
-        cell.setCellValue(EXPORT_HEADER[cellNum]);
+        cell.setCellValue(exportHeader[cellNum]);
       }
 
       for (int rownum = 1; rownum <= mapViewResult.size(); rownum++) {
@@ -353,25 +369,42 @@ public class MapViewRestController {
         cell = row.createCell(1);
         cell.setCellValue(mapView.getSourceDisplay());
 
-        cell = row.createCell(2);
+        int cellCount = 2;
+        // additional source columns
+        if (mapView.getAdditionalColumns() != null) {
+            for (int i = 0; i < mapView.getAdditionalColumns().size(); i++) {
+                cell = row.createCell(cellCount);
+                final AdditionalCodeValue additionalColumn = mapView.getAdditionalColumns().get(i);
+                cell.setCellValue(additionalColumn.getValue());
+                cellCount++;
+            }
+        }
+
+        cell = row.createCell(cellCount);
         cell.setCellValue(mapView.getTargetCode());
+        cellCount++;
 
-        cell = row.createCell(3);
+        cell = row.createCell(cellCount);
         cell.setCellValue(mapView.getTargetDisplay());
+        cellCount++;
 
-        cell = row.createCell(4);
+        cell = row.createCell(cellCount);
         cell.setCellValue(mapView.getRelationship() == null ? "" : mapView.getRelationship().toString());
+        cellCount++;
 
-        cell = row.createCell(5);
+        cell = row.createCell(cellCount);
         cell.setCellValue(mapView.getRelationship() == null ? "" : mapView.getRelationship().getLabel());
+        cellCount++;
 
-        cell = row.createCell(6);
+        cell = row.createCell(cellCount);
         if (mapView.getNoMap() != null) {
           cell.setCellValue(mapView.getNoMap());
         }
+        cellCount++;
 
-        cell = row.createCell(7);
+        cell = row.createCell(cellCount);
         cell.setCellValue(mapView.getStatus() == null ? "" : mapView.getStatus().toString());
+        cellCount++;
 
       }
       wb.write(response.getOutputStream());
