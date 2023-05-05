@@ -23,15 +23,15 @@
 
   <parent>
     <groupId>org.snomed.snap2snomed</groupId>
-    <artifactId>snap2snomed</artifactId>
-    <version>0.1.0-SNAPSHOT</version>
+    <artifactId>snapagogo</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
   </parent>
 
   <artifactId>ui</artifactId>
   <version>0.1.0-SNAPSHOT</version>
   <packaging>jar</packaging>
 
-  <name>SNAP-2-SNOMED UI</name>
+  <name>snapagogo ui</name>
 
   <properties>
     <prodEnvFile>env.prod</prodEnvFile>
