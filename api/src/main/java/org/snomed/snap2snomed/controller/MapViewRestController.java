@@ -295,7 +295,7 @@ public class MapViewRestController {
 
         CSVPrinter csvPrinter = new CSVPrinter(writer,
             format.builder().setHeader(mapViewService.getExportHeader(mapId)).build());) {
-      
+
       for (final MapView mapView : mapViewService.getAllMapViewForMap(mapId)) {
 
         ArrayList<Object> printRow = new ArrayList<Object>(Arrays.asList(mapView.getSourceCode(), mapView.getSourceDisplay()));

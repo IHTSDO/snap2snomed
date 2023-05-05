@@ -64,16 +64,4 @@ public class Snap2snomedApplication {
                         .url(configuration.getSwagger().getLicenseUrl())));
   }
 
-  @Bean
-  public CommonsRequestLoggingFilter logFilter() {
-      final CommonsRequestLoggingFilter filter
-        = new CommonsRequestLoggingFilter();
-      filter.setIncludeQueryString(true);
-      filter.setIncludePayload(true);
-      filter.setMaxPayloadLength(10000);
-      filter.setIncludeHeaders(false);
-      filter.setAfterMessagePrefix("REQUEST DATA: ");
-      return filter;
-  }
-
 }
