@@ -44,11 +44,11 @@
   </dependencyManagement>
 
   <groupId>org.snomed.snap2snomed</groupId>
-  <artifactId>snap2snomed</artifactId>
-  <version>0.1.0-SNAPSHOT</version>
+  <artifactId>snapagogo</artifactId>
+  <version>1.0.0-SNAPSHOT</version>
   <packaging>pom</packaging>
 
-  <name>SNAP-2-SNOMED</name>
+  <name>snapagogo</name>
   <description>A tool for mapping clinical terminology concepts to SNOMED CT.</description>
 
   <modules>
