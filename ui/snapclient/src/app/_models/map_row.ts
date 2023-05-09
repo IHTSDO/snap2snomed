@@ -38,7 +38,7 @@ export class MapView {
   sourceIndex: string;
   sourceCode: string;
   sourceDisplay: string;
-  assignedAuthor?: User | null;
+  assignedAuthor?: User[] | null;
   assignedReviewer?: User | null;
   lastAuthor?: User | null;
   lastReviewer?: User | null;
@@ -66,7 +66,7 @@ export class MapView {
 
   constructor(rowId: string, targetId: string | undefined, sourceIndex: string, sourceCode: string, sourceDisplay: string,
               targetCode: string | undefined, targetDisplay: string | undefined, relationship: string | undefined,
-              status: string, noMap: boolean, latestNote: Date | null | undefined, assignedAuthor: User | null | undefined,
+              status: string, noMap: boolean, latestNote: Date | null | undefined, assignedAuthor: User[] | null | undefined,
               assignedReviewer: User | null | undefined, lastAuthor: User | null | undefined,
               lastReviewer: User | null | undefined, flagged: boolean | undefined, targetOutOfScope: boolean | undefined, tags: string[] | undefined, additionalColumnValues: string[] | undefined) {
     this.rowId = rowId;

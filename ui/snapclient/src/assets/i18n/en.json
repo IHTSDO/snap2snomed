@@ -199,7 +199,9 @@
     "FAILED_TO_IMPORT_MAPPING_FILE_ERROR": "Details of error: {{error}}",
     "VALIDATE_TARGETS": "VALIDATE",
     "VALIDATE_TARGETS_TOOLTIP": "Flag all rows where the target code is outside the target scope",
-    "VALIDATE_TARGETS_ERROR": "Unexpected error occurred during validation of target scope"
+    "VALIDATE_TARGETS_ERROR": "Unexpected error occurred during validation of target scope",
+    "SINGLE_AUTHOR_MODE": "Single Author Mode",
+    "DUAL_AUTHOR_MODE": "Dual Author Mode"
   },
   "TABLE": {
     "SOURCE_CODE": "Source code",

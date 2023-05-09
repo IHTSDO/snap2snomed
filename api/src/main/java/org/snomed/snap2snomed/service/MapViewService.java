@@ -46,6 +46,7 @@ import org.snomed.snap2snomed.model.enumeration.TaskType;
 import org.snomed.snap2snomed.problem.auth.NotAuthorisedProblem;
 import org.snomed.snap2snomed.repository.MapRepository;
 import org.snomed.snap2snomed.repository.TaskRepository;
+import org.snomed.snap2snomed.security.AuthenticationFacade;
 import org.snomed.snap2snomed.security.WebSecurity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -63,6 +64,8 @@ import org.zalando.problem.Problem;
 import org.zalando.problem.Status;
 
 import com.querydsl.core.QueryResults;
+import com.querydsl.core.types.ConstantImpl;
+import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.ExpressionUtils;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
@@ -240,6 +243,9 @@ public class MapViewService {
 
   @Autowired
   WebSecurity webSecurity;
+
+  @Autowired 
+  AuthenticationFacade authenticationFacade;
 
   private final QMapRow mapRow = QMapRow.mapRow;
   private final QMapRowTarget mapTarget = QMapRowTarget.mapRowTarget;
@@ -445,11 +451,14 @@ public class MapViewService {
   }
 
   protected JPAQuery<MapView> getQueryForMap(Long mapId, Task task, MapViewFilter filter) {
+    
+    String principalSubject = authenticationFacade.getPrincipalSubject();
+    Expression<String> loggedInUser = ConstantImpl.create(principalSubject);
 
     return new JPAQuery<MapView>(entityManager)
         .select(Projections.constructor(MapView.class, mapRow, mapTarget,
             ExpressionUtils.as(JPAExpressions.select(note.modified.max()).from(note)
-                .where(note.mapRow.eq(mapRow).and(note.deleted.isFalse())), "latestNote")))
+                .where(note.mapRow.eq(mapRow).and(note.deleted.isFalse())), "latestNote"), loggedInUser))
         .from(mapRow)
         .leftJoin(mapTarget).on(mapTarget.row.eq(mapRow))
         .leftJoin(mapRow.authorTask)
@@ -460,7 +469,8 @@ public class MapViewService {
   }
 
   protected JPAQuery<MappedRowDetailsDto> getQueryMappedRowDetailsForMap(Long mapId, Task task, MapViewFilter filter,
-                                                                         Pageable pageable                                                                      ) {
+                                                                         Pageable pageable) {
+
     final JPAQuery<MappedRowDetailsDto> query = new JPAQuery<MapView>(entityManager)
             .select(Projections.constructor(MappedRowDetailsDto.class, mapRow.id, mapRow.sourceCode.index, mapTarget.id))
             .from(mapRow)
@@ -485,6 +495,21 @@ public class MapViewService {
       } else {
         whereClause = whereClause.and(mapRow.reviewTask.eq(task));
       }
+    }
+
+    final Map map = mapRepository.findById(mapId).orElseThrow(() -> Problem.valueOf(Status.NOT_FOUND, "No Map found with id " + mapId));
+    Boolean dualMapMode = map.getProject().getDualMapMode();
+
+    if (dualMapMode) {
+      if (task != null) {
+        // task view 
+        //TODO?
+      }
+      else {
+        // map view
+        whereClause = whereClause.and(mapRow.masterMapRow.isNull());
+      }
+
     }
 
     if (filter != null) {

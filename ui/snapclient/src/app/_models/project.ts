@@ -28,7 +28,7 @@ export class Project {
   modified: Date;
   maps: Mapping[];
   mapcount: number | null;
-  dualMapMode: Boolean;
+  dualMapMode: boolean;
   owners: User[];
   members: User[];
   guests: User[];

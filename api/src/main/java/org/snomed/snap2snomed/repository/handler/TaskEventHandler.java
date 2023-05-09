@@ -268,7 +268,7 @@ public class TaskEventHandler {
           .and(mapRow.reviewTask.id.ne(task.getId()));
     }
     whereClause = getSourceIndexWhereClause(task, whereClause).and(expression);
-
+    //TODO change to work for single map mode too
     return new JPAQuery<User>(entityManager)
         .select(mapRow.sourceCode.index).distinct()
         .from(mapRow)
@@ -277,6 +277,8 @@ public class TaskEventHandler {
         .leftJoin(mapRow.authorTask)
         .leftJoin(mapRow.reviewTask)
         .where(whereClause)
+        .groupBy(mapRow.sourceCode.index)
+        .having(mapRow.sourceCode.index.count().gt(Integer.valueOf(2)))
         .fetch();
   }
 
@@ -330,7 +332,11 @@ public class TaskEventHandler {
      * By reassigning rows to different tasks, it is possible for a task to become "empty" i.e. have no rows associated with it. This case
      * will be handled by deleting these tasks.
      */
-    taskRepository.deleteTasksWithNoMapRows();
+    if (!task.getMap().getProject().getDualMapMode()) {
+      /*TODO: Change logic so permits two authors .. earlier need to prevent the removal of source 
+      indexes from existing */
+      taskRepository.deleteTasksWithNoMapRows();
+    }
   }
 
   private void associateMapRows(Task task, RangeSet<Long> rangeSet) {

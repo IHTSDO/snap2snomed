@@ -162,8 +162,8 @@
             <ng-container matColumnDef="assignedAuthor">
               <th mat-header-cell *matHeaderCellDef mat-sort-header>{{'TABLE.AUTHOR' | translate}}</th>
               <td mat-cell *matCellDef="let maprow">
-                <app-user-chip *ngIf="maprow.assignedAuthor" [user]="maprow.assignedAuthor"
-                               [font_size]="'12px'"></app-user-chip>
+                  <app-user-chip *ngFor="let user of maprow.assignedAuthor" [user]="user" 
+                                 [font_size]="'12px'"></app-user-chip>
               </td>
             </ng-container>
             <!-- Reviewer Column -->

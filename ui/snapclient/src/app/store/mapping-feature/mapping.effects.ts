@@ -74,7 +74,7 @@ export class MappingEffects {
 
       return forkJoin([pid, sid]).pipe(
         switchMap(([projectid, sourceid]) => {
-          return this.mapService.createMapping(new_mapping.mapping, projectid, sourceid).pipe(
+          return this.mapService.createMapping(new_mapping.mapping, projectid, sourceid, new_mapping.dualMapMode).pipe(
             map((m) => {
               new_mapping.mapping.id = ServiceUtils.extractIdFromHref(m._links.self.href, null);
               new_mapping.mapping.source = m.source as Source;

@@ -90,6 +90,13 @@ public interface MapRowRepository
    * update statement is not permitted outside a subselect in a where clause in JPQL */
   @Query("update MapRow mr set mr.authorTask = :task, mr.modifiedBy = :user, mr.modified = :date"
       + " where mr.map.id = :#{#task.map.id} "
+      + " and ((mr.masterMapRow is null and mr.authorTask.id is null) "
+      + "       or "
+      + "       (mr.childMapRow is null and mr.authorTask.id is null"
+      + "       and exists "
+      + "        (select id from MapRow mr2 "
+      + "         where id = mr.masterMapRow "
+      + "        and mr2.authorTask.id is not null)))"
       + " and mr.sourceCode.id in "
       + "  (select code.id from ImportedCode code "
       + "   where code.importedCodeSet.id = :#{#task.map.source.id} "
@@ -162,6 +169,16 @@ public interface MapRowRepository
   @Modifying
   @RestResource(exported = false)
   int createMapRows(long mapId, long sourceCodeSetId, Instant date, String user);
+
+  @Query(value = "insert into map_row (status, map_id, source_code_id, created, created_by, master_map_row_id) select 0, :mapId, source_code_id, created, created_by, id from map_row where map_id = :mapId ORDER BY source_code_id", nativeQuery = true)
+  @Modifying
+  @RestResource(exported = false)
+  int createMapRowsDualMap(long mapId);
+
+  @Query(value = "update map_row mr1 set child_map_row_id = (select id from map_row mr2 where mr2.source_code_id = mr1.source_code_id and mr2.map_id = :mapId and master_map_row_id is not null) where mr1.map_id = :mapId and mr1.master_map_row_id is null", nativeQuery = true)
+  @Modifying
+  @RestResource(exported = false)
+  int updateMasterMapRowWithChildDualMap(long mapId);
 
   /**
    * INSERT into map_row (created, created_by, modified, modified_by,

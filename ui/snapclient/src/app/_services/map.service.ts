@@ -124,6 +124,7 @@ export interface MappingUpdateDto {
 export interface CreateMappingParams {
   mapping: Mapping;
   importFile: ImportMappingFileParams | undefined | null;
+  dualMapMode: boolean;
 }
 
 @Injectable({
@@ -143,11 +144,12 @@ export class MapService {
     return this.http.post(url, body, header);
   }
 
-  createMapping(mapping: Mapping, projectid: string, sourceid: string): Observable<any> {
+  createMapping(mapping: Mapping, projectid: string, sourceid: string, dualMapMode: boolean): Observable<any> {
     const url = `${this.config.apiBaseUrl}/maps?projection=listView`;
     const header = ServiceUtils.getHTTPHeaders();
     mapping.project.id = projectid;
     mapping.source.id = sourceid;
+    mapping.project.dualMapMode = dualMapMode;
     const body = JSON.stringify(mapping, Mapping.replacer);
     return this.http.post(url, body, header);
   }

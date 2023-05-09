@@ -10,6 +10,16 @@
           <app-loading-spinner></app-loading-spinner>
         </div>
         <app-errormessage [error]="error"></app-errormessage>
+        <div>
+          <mat-button-toggle-group class="author-mode-toggle-group" [(ngModel)]="mappingModel.project.dualMapMode" [disabled]="mode !== 'FORM.CREATE'">
+            <mat-button-toggle class="mat-primary" [value]="false">
+              {{'MAP.SINGLE_AUTHOR_MODE' | translate }}
+            </mat-button-toggle>
+            <mat-button-toggle [value]="true">
+              {{'MAP.DUAL_AUTHOR_MODE' | translate }}
+            </mat-button-toggle>
+          </mat-button-toggle-group>
+        </div>
         <mat-form-field class="field-full-width" hintLabel="{{'FORM.MAX_CHARS' | translate}} {{MAX_TITLE}}">
           <mat-label>{{ 'MAP.TITLE' | translate }}</mat-label>
           <input matInput [(ngModel)]="mappingModel.project.title"
@@ -150,12 +160,6 @@
               </tr>
             </table>
           </div>
-        </div>
-        <div>
-          Dual Author Mode &nbsp;&nbsp; OFF
-          <mat-slide-toggle class="dual-author-toggle" [(ngModel)]="mappingModel.project.dualMapMode" #tooltip="matTooltip" matTooltip="Enables two authors to blind author" [disabled]="mode !== 'FORM.CREATE'">
-          </mat-slide-toggle>
-          ON
         </div>
         <div *ngIf="mode !== 'FORM.COPY'" class="project-roles">
           <h3>{{'PROJECT.PROJECT_ROLES' | translate}}</h3>

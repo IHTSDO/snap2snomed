@@ -201,7 +201,8 @@ export class MappingAddComponent implements OnInit {
           if (this.mode === 'FORM.CREATE') {
             this.store.dispatch(new AddMapping({
               mapping: this.mappingModel,
-              importFile: this.mappingFile
+              importFile: this.mappingFile,
+              dualMapMode: this.mappingModel.project.dualMapMode
             }));
           } else if (this.mode === 'FORM.EDIT') {
             this.store.dispatch(new UpdateMapping(this.mappingModel));

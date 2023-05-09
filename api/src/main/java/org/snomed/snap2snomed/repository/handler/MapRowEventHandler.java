@@ -92,6 +92,16 @@ public class MapRowEventHandler {
       log.debug("noMap has been change to true, removing dangling MapRowTargets");
       // Clean up MapRowTargets if and only if noMap is true and was previously false
       mapRowTargetRepository.deleteAllByRow(mapRow);
+
+      if (mapRow.getMap().getProject().getDualMapMode()) {
+        //TODO implement
+        //1. Check if dual row is mapped
+        //(consider multiple rows)
+        //2. if it is, set both row flags to false
+        //3. determine if equal, if not, set to reconcile state
+        //mapRow.setBlindMapFlag(false);
+      }
+
     }
     mapRow.setNoMapPrevious(mapRow.isNoMap());
   }

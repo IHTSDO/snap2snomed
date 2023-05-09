@@ -17,6 +17,8 @@
 package org.snomed.snap2snomed.model;
 
 import java.time.Instant;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 
 import java.util.Set;
@@ -24,6 +26,8 @@ import javax.validation.constraints.NotNull;
 
 import org.snomed.snap2snomed.model.enumeration.MapStatus;
 import org.snomed.snap2snomed.model.enumeration.MappingRelationship;
+import org.snomed.snap2snomed.security.AuthenticationFacade;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 
@@ -38,23 +42,97 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class MapView {
 
-  public MapView(MapRow row, MapRowTarget target, Instant latestNote) {
+  private boolean isMasterAuthorTaskLoggedInUser(MapRow row, String loggedInUser) {
+    if (row.getAuthorTask() != null && row.getAuthorTask().getAssignee().getId().equals(loggedInUser)) {
+      return true;
+    }
+    return false;
+  }
+
+  private boolean isChildAuthorTaskLoggedInUser(MapRow row, String loggedInUser) {
+    if (row.getChildMapRow() != null &&
+        row.getChildMapRow().getAuthorTask() != null && 
+        row.getChildMapRow().getAuthorTask().getAssignee().getId().equals(loggedInUser)) {
+      return true;
+    }
+    return false;
+  }
+
+  private boolean isDualMap(MapRow row) {
+    return row.getMap().getProject().getDualMapMode();
+  }
+
+  @Autowired private AuthenticationFacade authenticationFacade;
+
+  public MapView(MapRow row, MapRowTarget target, Instant latestNote, String loggedInUser) {
+
     this.rowId = row.getId();
     this.sourceIndex = row.getSourceCode().getIndex();
     this.sourceCode = row.getSourceCode().getCode();
     this.sourceDisplay = row.getSourceCode().getDisplay();
-    this.noMap = row.isNoMap();
-    this.latestNote = latestNote;
-    this.status = row.getStatus();
-    this.lastAuthor = row.getLastAuthor();
-    this.lastReviewer = row.getLastReviewer();
-    if (row.getAuthorTask() != null) {
-      this.assignedAuthor = row.getAuthorTask().getAssignee();
+
+    // --- NO MAP FLAG
+    if (!isDualMap(row) || (isDualMap(row) && isMasterAuthorTaskLoggedInUser(row, loggedInUser))) {
+      this.noMap = row.isNoMap();
     }
+    else if (isDualMap(row) && isChildAuthorTaskLoggedInUser(row, loggedInUser)) {
+      this.noMap = row.getChildMapRow().isNoMap();
+    }
+
+    // --- NOTE 
+    if (!isDualMap(row) || (isDualMap(row) && isMasterAuthorTaskLoggedInUser(row, loggedInUser))) {
+      this.latestNote = latestNote;
+    }
+    else if (isDualMap(row) && isChildAuthorTaskLoggedInUser(row, loggedInUser)) {
+      this.latestNote = latestNote;
+    }
+
+    // --- STATUS .. logic could be condensed but left this way to assist with understanding for now
+    if (!isDualMap(row)) { 
+      this.status = row.getStatus();
+    }
+    else if (isMasterAuthorTaskLoggedInUser(row, loggedInUser)) {
+      this.status = row.getStatus();
+    }
+    else if (isChildAuthorTaskLoggedInUser(row, loggedInUser)) {
+      this.status = row.getChildMapRow().getStatus();
+    }
+    else if (row.getChildMapRow() != null && row.getStatus() != row.getChildMapRow().getStatus()) { 
+      // dual map but not an author .. show as draft if the rows are now in agreement
+      this.status = MapStatus.DRAFT;
+    }
+    else {
+      this.status = row.getStatus();
+    }
+
+
+    // --- LAST AUTHOR
+    if (!isDualMap(row) || (isDualMap(row) && isMasterAuthorTaskLoggedInUser(row, loggedInUser))) {
+      // for dualMap the last author only makes sense in blind map mode when the last user is currently logged in
+      // (i.e. consistency with single author mode)
+      this.lastAuthor = row.getLastAuthor();
+    }
+    else if (isDualMap(row) && isChildAuthorTaskLoggedInUser(row, loggedInUser)) {
+      this.lastAuthor = row.getChildMapRow().getLastAuthor();
+    }
+
+    // --- LAST REVIEWER
+    this.lastReviewer = row.getLastReviewer();
+
+    // --- ASSIGNED AUTHOR
+    if (row.getAuthorTask() != null) {
+      this.assignedAuthor =  new HashSet<>(Arrays.asList(row.getAuthorTask().getAssignee()));
+      if (isDualMap(row) && row.getChildMapRow() != null && row.getChildMapRow().getAuthorTask() != null) {
+        // for dual map mode, there are two authors
+        this.assignedAuthor.add(row.getChildMapRow().getAuthorTask().getAssignee());
+      }
+    }
+
     if (row.getReviewTask() != null) {
       this.assignedReviewer = row.getReviewTask().getAssignee();
     }
-    if (null != target) {
+
+    if (null != target && (!isDualMap(row) || (isDualMap(row) && (isMasterAuthorTaskLoggedInUser(row, loggedInUser) || isChildAuthorTaskLoggedInUser(row, loggedInUser))))) {
       this.targetId = target.getId();
       this.targetCode = target.getTargetCode();
       this.targetDisplay = target.getTargetDisplay();
@@ -62,6 +140,7 @@ public class MapView {
       this.flagged = target.isFlagged();
       this.targetTags = target.getTags();
     }
+
     if (row.getSourceCode().getAdditionalColumns().size() > 0) {
       this.additionalColumns = row.getSourceCode().getAdditionalColumns();
     }
@@ -95,7 +174,7 @@ public class MapView {
   @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSXXX", timezone = "UTC")
   private Instant latestNote;
 
-  private User assignedAuthor;
+  private Set<User> assignedAuthor;
 
   private User assignedReviewer;
 
