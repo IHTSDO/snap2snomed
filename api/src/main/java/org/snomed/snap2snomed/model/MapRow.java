@@ -121,6 +121,9 @@ public class MapRow implements Snap2SnomedEntity {
   private Task reviewTask;
 
   @ManyToOne
+  private Task reconcileTask;
+
+  @ManyToOne
   private User lastAuthor;
 
   @ManyToOne

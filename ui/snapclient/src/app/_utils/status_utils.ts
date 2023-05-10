@@ -42,6 +42,10 @@ export class StatusUtils {
   static isStatusOptionDisabled(taskType: TaskType | string, mapView: MapView, statusOption: MapRowStatus): boolean {
     let disableStatus = false;
     switch (taskType) {
+      case TaskType.RECONCILE:
+        //TODO
+        console.log("isStatusOptionDisabled: implement for review");
+        break;
       case TaskType.REVIEW:
         if (mapView.status === MapRowStatus.UNMAPPED || mapView.status === MapRowStatus.DRAFT) {
           disableStatus = true;
@@ -91,6 +95,10 @@ export class StatusUtils {
           statusList = reviewStatuses;
         }
         break;
+        case TaskType.REVIEW:
+          //TODO
+          console.log("getAvailableStatusOptions: implement for review");
+          break;
     }
     return statusList;
   }

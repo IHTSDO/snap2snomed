@@ -19,7 +19,8 @@ import {User} from './user';
 
 export const enum TaskType {
   AUTHOR = 'AUTHOR',
-  REVIEW = 'REVIEW'
+  REVIEW = 'REVIEW',
+  RECONCILE = 'RECONCILE'
 }
 
 export const enum TaskConflictType {
@@ -79,6 +80,10 @@ export class Task {
 
   public isReview(): boolean {
     return this.type === TaskType.REVIEW;
+  }
+
+  public isReconcile(): boolean {
+    return this.type == TaskType.RECONCILE;
   }
 }
 

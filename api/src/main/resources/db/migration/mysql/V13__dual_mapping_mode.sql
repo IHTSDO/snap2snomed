@@ -30,3 +30,10 @@ ALTER TABLE map_row_aud ADD child_map_row_id BIGINT;
 
 ALTER TABLE map_row ADD blind_map_flag BOOLEAN NOT NULL DEFAULT FALSE;
 ALTER TABLE map_row_aud ADD blind_map_flag BOOLEAN NOT NULL DEFAULT FALSE;
+
+/* Stage 2 */
+
+ALTER TABLE map_row ADD reconcile_task_id BIGINT;
+ALTER TABLE map_row_aud ADD reconcile_task_id BIGINT;
+
+ALTER TABLE map_row ADD INDEX reconcile_task_idx (reconcile_task_id);

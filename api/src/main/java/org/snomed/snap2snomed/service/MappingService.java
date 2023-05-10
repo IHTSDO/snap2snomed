@@ -412,6 +412,7 @@ public class MappingService {
    * other changes result in DRAFT/UNMAPPED so test that transition.
    */
   private boolean validChange(MapStatus currentStatus, MappingDto mappingUpd, Task task) {
+    //TODO reconcile task?
     if (task != null) {
       if (task.getType().equals(TaskType.AUTHOR) && currentStatus.isAuthorState()) {
         return mappingUpd.getStatus() == null ? true
@@ -487,6 +488,8 @@ public class MappingService {
         return mapRow.getAuthorTask() != null && mapRow.getAuthorTask().getId().equals(task.getId());
       case REVIEW:
         return mapRow.getReviewTask() != null && mapRow.getReviewTask().getId().equals(task.getId());
+      case RECONCILE:
+        return mapRow.getReconcileTask() != null && mapRow.getReconcileTask().getId().equals(task.getId());
       default:
         throw new IllegalArgumentException("Unknown task type " + task.getType());
     }

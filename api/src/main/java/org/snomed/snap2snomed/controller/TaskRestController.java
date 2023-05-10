@@ -134,6 +134,8 @@ public class TaskRestController {
       statuses = MapStatus.getCompletedAuthorStatuses();
     } else if (task.getType().equals(TaskType.REVIEW)) {
       statuses = MapStatus.getCompletedReviewStatuses();
+    } else if (task.getType().equals(TaskType.RECONCILE)) {
+      statuses = MapStatus.getCompletedReconcileStatuses();
     } else {
       throw new IllegalArgumentException("Unexpected task type " + task.getType());
     }

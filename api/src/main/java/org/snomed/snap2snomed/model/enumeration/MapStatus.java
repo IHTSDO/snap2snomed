@@ -144,6 +144,7 @@ public enum MapStatus {
 
   private static final List<MapStatus> authorCompleteStatuses = List.of(MapStatus.MAPPED, MapStatus.INREVIEW, MapStatus.ACCEPTED);
   private static final List<MapStatus> reviewCompleteStatuses = List.of(MapStatus.ACCEPTED, MapStatus.REJECTED);
+  private static final List<MapStatus> reconcileCompleteStatuses = List.of(MapStatus.MAPPED); //TODO review
 
   public boolean isAuthorState() {
     return this.equals(UNMAPPED) || this.equals(DRAFT) || this.equals(MAPPED);
@@ -163,6 +164,10 @@ public enum MapStatus {
 
   public static List<MapStatus> getCompletedReviewStatuses() {
     return reviewCompleteStatuses;
+  }
+
+  public static List<MapStatus> getCompletedReconcileStatuses() {
+    return reconcileCompleteStatuses;
   }
 }
 

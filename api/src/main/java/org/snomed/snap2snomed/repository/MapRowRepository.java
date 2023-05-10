@@ -135,6 +135,26 @@ public interface MapRowRepository
   @RestResource(exported = false)
   void setReviewTaskBySourceCode(Task task, Set<Long> singleIndexes, Instant date, String user);
 
+  @Query("update MapRow mr set mr.reconcileTask = :task, mr.modifiedBy = :user, mr.modified = :date "
+      + " where mr.map.id = :#{#task.map.id} "
+      + " and mr.sourceCode.id in "
+      + "  (select code.id from ImportedCode code "
+      + "   where code.importedCodeSet.id = :#{#task.map.source.id} "
+      + "   and code.index between :lowerEndpoint and :upperEndpoint)")
+  @Modifying
+  @RestResource(exported = false)
+  void setReconcileTaskBySourceCodeRange(Task task, Long lowerEndpoint, Long upperEndpoint, Instant date, String user);
+
+  @Query("update MapRow mr set mr.reconcileTask = :task, mr.modifiedBy = :user, mr.modified = :date "
+      + " where mr.map.id = :#{#task.map.id} "
+      + " and mr.sourceCode.id in "
+      + "  (select code.id from ImportedCode code "
+      + "  where code.importedCodeSet.id = :#{#task.map.source.id} "
+      + "  and code.index in :singleIndexes)")
+  @Modifying
+  @RestResource(exported = false)
+  void setReconcileTaskBySourceCode(Task task, Set<Long> singleIndexes, Instant date, String user);
+
   @Query("update MapRow mr set mr.authorTask = null, mr.modifiedBy = :user, mr.modified = :date  where mr.authorTask = :task")
   @Modifying
   @RestResource(exported = false)

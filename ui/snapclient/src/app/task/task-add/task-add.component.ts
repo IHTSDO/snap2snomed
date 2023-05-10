@@ -48,7 +48,7 @@ export class TaskAddComponent implements OnInit, AfterViewInit, OnDestroy {
   error: ErrorInfo = {};
   task: Task | undefined = undefined;
   members: User[] = [];
-  type_options = [TaskType.AUTHOR, TaskType.REVIEW];
+  type_options = [TaskType.AUTHOR, TaskType.RECONCILE, TaskType.REVIEW];
   row_options = ['ALL', 'SELECTED'];
   assignRows = '';
   isMember = false;

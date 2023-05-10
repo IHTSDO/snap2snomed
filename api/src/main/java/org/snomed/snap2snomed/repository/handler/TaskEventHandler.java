@@ -234,6 +234,13 @@ public class TaskEventHandler {
           indexesWithRoleConflict.addAll(
               findIndexesIncompatiblyAssigned(task,
                   mapRow.authorTask.assignee.id.eq(assigneeId).or(mapRow.lastAuthor.id.eq(assigneeId))));
+        } else if (task.getType().equals(TaskType.RECONCILE)) {
+          // cannot have an author task for any of the rows
+          // cannot have been the most recent author for any of the rows
+          // TODO: any resrictions
+          // indexesWithRoleConflict.addAll(
+          //     findIndexesIncompatiblyAssigned(task,
+          //         mapRow.authorTask.assignee.id.eq(assigneeId).or(mapRow.lastAuthor.id.eq(assigneeId))));
         }
       }
 
@@ -249,6 +256,10 @@ public class TaskEventHandler {
           // cannot assign rows already assigned to a review task
           indexesWithExistingTask.addAll(
               findIndexesIncompatiblyAssigned(task, mapRow.reviewTask.isNotNull()));
+        } else if (task.getType().equals(TaskType.RECONCILE)) {
+          // cannot assign rows already assigned to a reconcile task
+          indexesWithExistingTask.addAll(
+              findIndexesIncompatiblyAssigned(task, mapRow.reconcileTask.isNotNull()));
         }
       }
 
@@ -354,6 +365,11 @@ public class TaskEventHandler {
           mapRowRepository.setReviewTaskBySourceCodeRange(task, lower, upper, modified, user);
       addCollection = (ids) ->
           mapRowRepository.setReviewTaskBySourceCode(task, ids, modified, user);
+    } else if (task.getType().equals(TaskType.RECONCILE)) {
+      addRange = (lower, upper) ->
+        mapRowRepository.setReconcileTaskBySourceCodeRange(task, lower, upper, modified, user);
+      addCollection = (ids) ->
+        mapRowRepository.setReconcileTaskBySourceCode(task, ids, modified, user);
     } else {
       throw Problem.builder().withTitle("Unknown task type " + task.getType()).withStatus(
           Status.INTERNAL_SERVER_ERROR).build();
