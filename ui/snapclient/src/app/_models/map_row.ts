@@ -263,7 +263,8 @@ export const enum MapRowStatus {
   MAPPED = 'MAPPED',
   INREVIEW = 'INREVIEW',
   ACCEPTED = 'ACCEPTED',
-  REJECTED = 'REJECTED'
+  REJECTED = 'REJECTED',
+  RECONCILE = 'RECONCILE'
 }
 
 export function toMapRowStatus(statusString?: string): MapRowStatus | null {
@@ -284,6 +285,8 @@ export function mapRowStatusToIconName(status: MapRowStatus): string {
       return 'done_all';
     case MapRowStatus.REJECTED:
       return 'cancel';
+    case MapRowStatus.RECONCILE:
+      return 'reconcile';
     default:
       return 'circle';
   }
@@ -301,7 +304,12 @@ export const reviewStatuses = [
   MapRowStatus.REJECTED
 ];
 
-export const mapRowStatuses: MapRowStatus[] = authorStatuses.concat(reviewStatuses);
+export const reconcileStatuses = [
+  MapRowStatus.RECONCILE,
+  MapRowStatus.MAPPED
+]
+
+export const mapRowStatuses: MapRowStatus[] = authorStatuses.concat(reviewStatuses).concat(reconcileStatuses);
 
 export const mapRowRelationships = [
   MapRowRelationship.EQUIVALENT,

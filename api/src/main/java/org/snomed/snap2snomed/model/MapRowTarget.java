@@ -54,7 +54,7 @@ import org.springframework.data.rest.core.config.Projection;
 @Audited
 @EntityListeners(AuditingEntityListener.class)
 @Table(name = "map_row_target")
-public class MapRowTarget implements Snap2SnomedEntity {
+public class MapRowTarget implements Snap2SnomedEntity, java.lang.Comparable<MapRowTarget> {
     @Column(name = "created", nullable = false, updatable = false)
     @CreatedDate
     private Instant created;
@@ -125,5 +125,10 @@ public class MapRowTarget implements Snap2SnomedEntity {
 
         Set<String> getTags();
 
+    }
+
+    @Override
+    public int compareTo(MapRowTarget o) {
+        return targetCode.compareTo(o.getTargetCode());
     }
 }

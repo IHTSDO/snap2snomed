@@ -19,6 +19,8 @@ package org.snomed.snap2snomed.model;
 import static org.hibernate.envers.RelationTargetAuditMode.NOT_AUDITED;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+
+import java.io.Serializable;
 import java.time.Instant;
 import java.util.List;
 import java.util.SortedSet;
@@ -66,7 +68,8 @@ import org.springframework.data.rest.core.config.Projection;
 //TODO get this working + unique
 // @Table(name = "map_row", uniqueConstraints = {
 //     @UniqueConstraint(name = "UniqueIdAndMasterMapRowId", columnNames = {"map_id", "master_map_row_id"})})
-public class MapRow implements Snap2SnomedEntity {
+public class MapRow implements Snap2SnomedEntity, Serializable {
+
   @Column(name = "created", nullable = false, updatable = false)
   @CreatedDate
   private Instant created;
@@ -132,12 +135,6 @@ public class MapRow implements Snap2SnomedEntity {
   @OneToMany(mappedBy = "row", fetch = FetchType.EAGER, cascade = CascadeType.REMOVE)
   @Exclude
   List<MapRowTarget> mapRowTargets;
-
-  @ManyToOne(fetch = FetchType.LAZY)
-  private MapRow masterMapRow;
-
-  @ManyToOne(fetch = FetchType.LAZY)
-  private MapRow childMapRow;
 
   @Column(name = "blind_map_flag")
   @NotNull

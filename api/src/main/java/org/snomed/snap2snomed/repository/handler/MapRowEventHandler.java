@@ -16,6 +16,9 @@
 
 package org.snomed.snap2snomed.repository.handler;
 
+import java.util.Collections;
+import java.util.List;
+
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import lombok.extern.slf4j.Slf4j;
@@ -93,17 +96,76 @@ public class MapRowEventHandler {
       // Clean up MapRowTargets if and only if noMap is true and was previously false
       mapRowTargetRepository.deleteAllByRow(mapRow);
 
-      if (mapRow.getMap().getProject().getDualMapMode()) {
-        //TODO implement
-        //1. Check if dual row is mapped
-        //(consider multiple rows)
-        //2. if it is, set both row flags to false
-        //3. determine if equal, if not, set to reconcile state
-        //mapRow.setBlindMapFlag(false);
-      }
-
     }
     mapRow.setNoMapPrevious(mapRow.isNoMap());
+
+    if (mapRow.getMap().getProject().getDualMapMode()) {
+      MapRow siblingMapRow = mapRowRepository.findDualMapSiblingRow(mapRow.getMap().getId(), mapRow.getSourceCode().getId(), mapRow.getId());
+      // 1. check if both dual map rows have been mapped
+      if (mapRow.getStatus() == MapStatus.MAPPED && siblingMapRow.getStatus() == MapStatus.MAPPED) {
+
+        // 2. check if both dual map rows agree
+        if (isEquivalentTarget(mapRow, siblingMapRow)) {
+          // TODO determine equality over multiple rows
+          mapRow.setAuthorTask(null);
+          mapRow.setBlindMapFlag(Boolean.FALSE);
+          mapRowRepository.deleteById(siblingMapRow.getId());
+          mapRowRepository.save(mapRow);
+          siblingMapRow = null;
+        }
+        else {
+          // 3b. Put the dual map rows into the reconcile state
+          mapRow.setStatus(MapStatus.RECONCILE);
+          mapRow.setAuthorTask(null);
+          mapRow.setBlindMapFlag(Boolean.FALSE);
+          siblingMapRow.setStatus(MapStatus.RECONCILE);
+          siblingMapRow.setAuthorTask(null);
+          siblingMapRow.setBlindMapFlag(Boolean.FALSE);
+          mapRowRepository.save(mapRow);
+          mapRowRepository.save(siblingMapRow);
+        }
+
+        // TODO check if author task no longer has any tasks and delete the task - ML said framework should take care of this
+      }
+    }
+  }
+
+  /*
+   * A target is considered equal if the targetCode, relationship, noMap, and status match
+   */
+  private boolean isEquivalentTarget(MapRow mapRow1, MapRow mapRow2) {
+
+    if (!mapRow1.isNoMap() == mapRow2.isNoMap()) {
+      return false;
+    }
+    else if (mapRow1.getStatus().equals(mapRow2.getStatus())) {
+      return false;
+    }
+    else {
+      List<MapRowTarget> mapRowTargets1 = mapRow1.getMapRowTargets();
+      List<MapRowTarget> mapRowTargets2 = mapRow2.getMapRowTargets();
+      if (mapRowTargets1.size() != mapRowTargets2.size()) {
+        return false;
+      }
+      else {
+        if (mapRowTargets1.size() > 1) { // size will be identical here, only test one
+          Collections.sort(mapRowTargets1);
+          Collections.sort(mapRowTargets2);
+        }
+
+        for (int i = 0; i < mapRowTargets1.size(); i++) {
+          if (!mapRowTargets1.get(i).getTargetCode().equals(mapRowTargets2.get(i).getTargetCode())) {
+            return false;
+          }
+          else if (!mapRowTargets1.get(i).getRelationship().equals(mapRowTargets2.get(i).getRelationship())) {
+            return false;
+          }
+        }
+
+      }
+    }
+
+    return true;
   }
 
   private void validateRequestedChange(MapRow mapRow, User currentUser, MapRow mapRowFromDatabase) {

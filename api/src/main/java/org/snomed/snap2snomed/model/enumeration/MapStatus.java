@@ -118,11 +118,26 @@ public enum MapStatus {
       }
       return false;
     }
+  },
+  RECONCILE {
+    //TODO review
+    @Override
+    public Boolean isValidTransition(MapStatus mapStatus) {
+      if ( mapStatus == MAPPED || mapStatus == RECONCILE) {
+        return true;
+      }
+      return false;
+    }    
+    @Override
+    public Boolean isValidTransitionForRole(MapStatus mapStatus, Role role) {
+      return (role == Role.REVIEWER) && isValidTransition(mapStatus);
+    }
   };
 
   public static enum Role {
     AUTHOR("Author", "authoring"),
-    REVIEWER("Reviewer", "review");
+    REVIEWER("Reviewer", "review"),
+    RECONCILER("Reconciler", "reconcile");
 
     private String name;
     private String stateName;
@@ -144,7 +159,7 @@ public enum MapStatus {
 
   private static final List<MapStatus> authorCompleteStatuses = List.of(MapStatus.MAPPED, MapStatus.INREVIEW, MapStatus.ACCEPTED);
   private static final List<MapStatus> reviewCompleteStatuses = List.of(MapStatus.ACCEPTED, MapStatus.REJECTED);
-  private static final List<MapStatus> reconcileCompleteStatuses = List.of(MapStatus.MAPPED); //TODO review
+  private static final List<MapStatus> reconcileCompleteStatuses = List.of(MapStatus.MAPPED);
 
   public boolean isAuthorState() {
     return this.equals(UNMAPPED) || this.equals(DRAFT) || this.equals(MAPPED);
