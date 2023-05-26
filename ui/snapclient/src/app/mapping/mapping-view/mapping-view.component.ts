@@ -131,7 +131,8 @@ export class MappingViewComponent implements OnInit, AfterViewInit, OnDestroy {
     {columnId: 'latestNote', columnDisplay: 'SOURCE.TABLE.NOTES', displayed: true},
     {columnId: 'lastAuthorReviewer', columnDisplay: 'TABLE.LAST_AUTHOR_REVIEWER', displayed: true},
     {columnId: 'assignedAuthor', columnDisplay: 'TABLE.AUTHOR', displayed: true},
-    {columnId: 'assignedReviewer', columnDisplay: 'TABLE.REVIEWER', displayed: true},
+    {columnId: 'assignedReconciler', columnDisplay: 'TABLE.RECONCILER', displayed: true},
+    {columnId: 'assignedReviewer', columnDisplay: 'TABLE.REVIEWER', displayed: true}
   ];
   // columns that are eligable for user controlling the hiding / displaying
   hideShowColumns: string[] = [
@@ -145,6 +146,7 @@ export class MappingViewComponent implements OnInit, AfterViewInit, OnDestroy {
     'relationship',
     'lastAuthorReviewer',
     'assignedAuthor',
+    'assignedReconciler',
     'assignedReviewer'
   ];
   additionalDisplayedColumns: TableColumn[] = [];
@@ -166,6 +168,7 @@ export class MappingViewComponent implements OnInit, AfterViewInit, OnDestroy {
     'filter-notes',
     'filter-lastAuthorReviewer',
     'filter-assignedAuthor',
+    'filter-assignedReconciler',
     'filter-assignedReviewer'
   ];
   additionalFilteredColumns: string[] = [];

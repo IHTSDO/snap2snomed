@@ -22,28 +22,28 @@ import {TaskType} from '../_models/task';
 describe('StatusUtils', () => {
   const unmappedSource = new MapView('', undefined, '1', 'abc',
     'abc', undefined, undefined, undefined, MapRowStatus.UNMAPPED,
-    false, null, null, null, null, null, undefined, false, undefined, []);
+    false, null, null, null, null, null, null, undefined, false, undefined, []);
   const draftSource = new MapView('', undefined, '1', 'abc',
     'abc', '1234', 'target', MapRowRelationship.EQUIVALENT, MapRowStatus.DRAFT,
-    false, null, null, null, null, null, false, false, undefined, []);
+    false, null, null, null, null, null, null, false, false, undefined, []);
   const mappedSource = new MapView('', undefined, '1', 'abc',
     'abc', '1234', 'target', MapRowRelationship.EQUIVALENT, MapRowStatus.MAPPED,
-    false, null, null, null, null, null, false, false, undefined, []);
+    false, null, null, null, null, null, null, false, false, undefined, []);
   const draftSource_noMap = new MapView('', undefined, '1', 'abc',
     'abc', undefined, undefined, undefined, MapRowStatus.DRAFT,
-    true, null, null, null, null, null, undefined, false, undefined, []);
+    true, null, null, null, null, null, null, undefined, false, undefined, []);
   const mappedSource_noMap = new MapView('', undefined, '1', 'abc',
     'abc', undefined, undefined, undefined, MapRowStatus.MAPPED,
-    true, null, null, null, null, null, undefined, false, undefined, []);
+    true, null, null, null, null, null, null, undefined, false, undefined, []);
   const inreviewSource = new MapView('', undefined, '1', 'abc',
     'abc', '1234', 'target', MapRowRelationship.EQUIVALENT, MapRowStatus.INREVIEW,
-    false, null, null, null, null, null, false, false, undefined, []);
+    false, null, null, null, null, null, null, false, false, undefined, []);
   const acceptedSource = new MapView('', undefined, '1', 'abc',
     'abc', '1234', 'target', MapRowRelationship.EQUIVALENT, MapRowStatus.ACCEPTED,
-    false, null, null, null, null, null, false, false, undefined, []);
+    false, null, null, null, null, null, null, false, false, undefined, []);
   const rejectedSource = new MapView('', undefined, '1', 'abc',
     'abc', '1234', 'target', MapRowRelationship.EQUIVALENT, MapRowStatus.REJECTED,
-    false, null, null, null, null, null, false, false, undefined, []);
+    false, null, null, null, null, null, null, false, false, undefined, []);
 
   beforeEach(() => {
     TestBed.configureTestingModule({});

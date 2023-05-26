@@ -39,6 +39,7 @@ export class MapView {
   sourceCode: string;
   sourceDisplay: string;
   assignedAuthor?: User[] | null;
+  assignedReconciler?: User | null;
   assignedReviewer?: User | null;
   lastAuthor?: User | null;
   lastReviewer?: User | null;
@@ -67,7 +68,7 @@ export class MapView {
   constructor(rowId: string, targetId: string | undefined, sourceIndex: string, sourceCode: string, sourceDisplay: string,
               targetCode: string | undefined, targetDisplay: string | undefined, relationship: string | undefined,
               status: string, noMap: boolean, latestNote: Date | null | undefined, assignedAuthor: User[] | null | undefined,
-              assignedReviewer: User | null | undefined, lastAuthor: User | null | undefined,
+              assignedReconciler: User | null | undefined, assignedReviewer: User | null | undefined, lastAuthor: User | null | undefined,
               lastReviewer: User | null | undefined, flagged: boolean | undefined, targetOutOfScope: boolean | undefined, tags: string[] | undefined, additionalColumnValues: string[] | undefined) {
     this.rowId = rowId;
     this.targetId = targetId;
@@ -85,6 +86,7 @@ export class MapView {
 
     this.latestNote = latestNote;
     this.assignedAuthor = assignedAuthor;
+    this.assignedReconciler = assignedReconciler;
     this.assignedReviewer = assignedReviewer;
     this.lastAuthor = lastAuthor;
     this.lastReviewer = lastReviewer;
@@ -101,7 +103,8 @@ export class MapView {
     return new MapView(
       rowId, mv.targetId, mv.sourceIndex, mv.sourceCode, mv.sourceDisplay,
       mv.targetCode, mv.targetDisplay, mv.relationship, mv.status, mv.noMap, mv.latestNote,
-      mv.assignedAuthor, mv.assignedReviewer, mv.lastAuthor, mv.lastReviewer, mv.flagged, targetOutOfScope, mv.targetTags, additionalColumnValues
+      mv.assignedAuthor, mv.assiginedReconciler, mv.assignedReviewer, mv.lastAuthor, mv.lastReviewer, 
+      mv.flagged, targetOutOfScope, mv.targetTags, additionalColumnValues
     );
   }
 
@@ -175,6 +178,7 @@ export class MapViewFilter {
   noMap?: boolean | undefined;
   lastAuthorReviewer: string[] | string = '';
   assignedAuthor: string[] | string = '';
+  assignedReconciler: string[] | string = '';
   assignedReviewer: string[] | string = '';
   flagged?: boolean | undefined;
   targetOutOfScope?: boolean | undefined;
@@ -186,7 +190,8 @@ export class MapViewFilter {
 
     return this.sourceCode !== '' || this.sourceDisplay !== '' || this.targetCode !== '' || this.targetDisplay !== ''
       || this.relationship !== '' || this.status !== '' || this.noMap !== undefined || this.flagged !== undefined || this.targetOutOfScope !== undefined
-      || this.lastAuthorReviewer !== '' || this.assignedAuthor !== '' || this.assignedReviewer !== '' || this.notes !== undefined || filteredAdditionalColumns.length > 0;
+      || this.lastAuthorReviewer !== '' || this.assignedAuthor !== '' || this.assignedReconciler !== '' || this.assignedReviewer !== '' 
+      || this.notes !== undefined || filteredAdditionalColumns.length > 0;
   }
 }
 

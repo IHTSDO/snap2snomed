@@ -277,7 +277,7 @@ export class MappingDetailComponent implements OnInit, OnDestroy {
             const targetOutOfScope = target.tags ? target.tags.includes(TARGET_OUT_OF_SCOPE_TAG) : undefined;
             return new MapView(target.row?.id || '', target.id, source.index || '', source.code || '',
               source.display || '', target.targetCode, target.targetDisplay, target.relationship, status,
-              false, target.row?.latestNote || null, null, null, null,
+              false, target.row?.latestNote || null, null, null, null, null,
               null, flagged, targetOutOfScope, target.tags, source.additionalColumnValues);
           });
         } else {

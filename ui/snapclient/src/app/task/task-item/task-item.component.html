@@ -1,6 +1,7 @@
 <span *ngIf="task" class="task-item {{task.type}}">
   <span class="task-description" #tooltip="matTooltip" matTooltip="{{task.description}}">
     <mat-icon *ngIf="task.type==='AUTHOR'">edit</mat-icon>
+    <mat-icon *ngIf="task.type==='RECONCILE'">compare_arrows</mat-icon>
     <mat-icon *ngIf="task.type==='REVIEW'">checklist</mat-icon>
     {{task.description | trim}}
   </span>

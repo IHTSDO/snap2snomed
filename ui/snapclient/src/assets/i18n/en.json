@@ -219,6 +219,7 @@
     "FLAG": "Flag",
     "NOTES": "Notes",
     "AUTHOR": "Assigned author",
+    "RECONCILER": "Assigned reconciler",
     "REVIEWER": "Assigned reviewer",
     "BULK_CHANGE": "BULK EDIT",
     "LAST_AUTHOR_REVIEWER": "Last author/ reviewer"

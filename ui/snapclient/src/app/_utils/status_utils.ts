@@ -96,8 +96,9 @@ export class StatusUtils {
         }
         break;
         case TaskType.REVIEW:
-          //TODO
-          console.log("getAvailableStatusOptions: implement for review");
+          if (status === MapRowStatus.RECONCILE) {
+            statusList = [MapRowStatus.MAPPED]
+          }
           break;
     }
     return statusList;
