@@ -88,7 +88,7 @@ public class MapRow implements Snap2SnomedEntity, Serializable {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long id;
+  protected Long id;
 
   @NotNull
   @ManyToOne

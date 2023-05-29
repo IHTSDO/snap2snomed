@@ -33,6 +33,7 @@ import org.snomed.snap2snomed.controller.dto.Snap2SnomedPagedModel;
 import org.snomed.snap2snomed.model.AdditionalCodeColumn;
 import org.snomed.snap2snomed.model.Map;
 import org.snomed.snap2snomed.model.MapView;
+import org.snomed.snap2snomed.model.QDbMapView;
 import org.snomed.snap2snomed.model.QImportedCode;
 import org.snomed.snap2snomed.model.QMapRow;
 import org.snomed.snap2snomed.model.QMapRowTarget;
@@ -44,6 +45,7 @@ import org.snomed.snap2snomed.model.enumeration.MapStatus;
 import org.snomed.snap2snomed.model.enumeration.MappingRelationship;
 import org.snomed.snap2snomed.model.enumeration.TaskType;
 import org.snomed.snap2snomed.problem.auth.NotAuthorisedProblem;
+import org.snomed.snap2snomed.repository.DbMapViewRepository;
 import org.snomed.snap2snomed.repository.MapRepository;
 import org.snomed.snap2snomed.repository.TaskRepository;
 import org.snomed.snap2snomed.security.AuthenticationFacade;
@@ -247,6 +249,10 @@ public class MapViewService {
   @Autowired 
   AuthenticationFacade authenticationFacade;
 
+  @Autowired
+  DbMapViewRepository mapViewRepository;
+
+  private final QDbMapView mapView = QDbMapView.dbMapView;
   private final QMapRow mapRow = QMapRow.mapRow;
   private final QMapRowTarget mapTarget = QMapRowTarget.mapRowTarget;
   private final QNote note = QNote.note;
@@ -451,14 +457,11 @@ public class MapViewService {
   }
 
   protected JPAQuery<MapView> getQueryForMap(Long mapId, Task task, MapViewFilter filter) {
-    
-    String principalSubject = authenticationFacade.getPrincipalSubject();
-    Expression<String> loggedInUser = ConstantImpl.create(principalSubject);
 
     return new JPAQuery<MapView>(entityManager)
         .select(Projections.constructor(MapView.class, mapRow, mapTarget,
             ExpressionUtils.as(JPAExpressions.select(note.modified.max()).from(note)
-                .where(note.mapRow.eq(mapRow).and(note.deleted.isFalse())), "latestNote"), loggedInUser))
+                .where(note.mapRow.eq(mapRow).and(note.deleted.isFalse())), "latestNote")))
         .from(mapRow)
         .leftJoin(mapTarget).on(mapTarget.row.eq(mapRow))
         .leftJoin(mapRow.authorTask)
@@ -495,21 +498,6 @@ public class MapViewService {
       } else {
         whereClause = whereClause.and(mapRow.reviewTask.eq(task));
       }
-    }
-
-    final Map map = mapRepository.findById(mapId).orElseThrow(() -> Problem.valueOf(Status.NOT_FOUND, "No Map found with id " + mapId));
-    Boolean dualMapMode = map.getProject().getDualMapMode();
-
-    if (dualMapMode) {
-      if (task != null) {
-        // task view 
-        //TODO?
-      }
-      else {
-        // map view
-        whereClause = whereClause.and(mapRow.masterMapRow.isNull());
-      }
-
     }
 
     if (filter != null) {

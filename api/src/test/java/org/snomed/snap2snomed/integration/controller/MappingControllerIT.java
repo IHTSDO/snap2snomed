@@ -881,7 +881,7 @@ public class MappingControllerIT extends IntegrationTestBase {
 
     private Instant latestNote;
 
-    private UserDto assignedAuthor;
+    private List<UserDto> assignedAuthor;
 
     private UserDto assignedReviewer;
 

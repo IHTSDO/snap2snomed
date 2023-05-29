@@ -144,7 +144,7 @@ public class MapViewControllerIT extends IntegrationTestBase {
         .body("content[20].targetDisplay", is(nullValue()))
         .body("content[20].relationship", is(nullValue()))
         .body("content[20].status", is(MapStatus.UNMAPPED.name()))
-        .body("content[20].assignedAuthor.id", is(user))
+        .body("content[20].assignedAuthor[0].id", is(user))
         .body("content[20].assignedReviewer.id", is(user2));
   }
 
@@ -776,7 +776,7 @@ public class MapViewControllerIT extends IntegrationTestBase {
             .body("content[20].targetDisplay", is(nullValue()))
             .body("content[20].relationship", is(nullValue()))
             .body("content[20].status", is(MapStatus.UNMAPPED.name()))
-            .body("content[20].assignedAuthor.id", is(user))
+            .body("content[20].assignedAuthor[0].id", is(user))
             .body("content[20].assignedReviewer.id", is(user2));
   }
 
