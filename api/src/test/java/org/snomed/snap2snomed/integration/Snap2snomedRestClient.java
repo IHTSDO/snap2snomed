@@ -735,6 +735,7 @@ public class Snap2snomedRestClient {
     final java.util.Map<String, Object> map = new HashMap<>();
     map.put("title", title);
     map.put("description", description);
+    map.put("dualMapMode", false);
     if (owners != null) {
       map.put("owners", owners.stream().map(o -> "/users/" + o).collect(Collectors.toList()));
     }
