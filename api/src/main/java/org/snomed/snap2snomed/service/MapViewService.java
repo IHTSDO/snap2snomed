@@ -66,8 +66,6 @@ import org.zalando.problem.Problem;
 import org.zalando.problem.Status;
 
 import com.querydsl.core.QueryResults;
-import com.querydsl.core.types.ConstantImpl;
-import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.ExpressionUtils;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
@@ -327,7 +325,17 @@ public class MapViewService {
       PagedResourcesAssembler<MapView> assembler, MapViewFilter filter) {
     final List<AdditionalCodeColumn> additionalColumns = mapRepository.findSourceByMapId(mapId).get().getAdditionalColumnsMetadata();
 
-    JPAQuery<MapView> query = getQueryForMap(mapId, task, filter);
+    final Map map = mapRepository.findById(mapId).orElseThrow(() -> Problem.valueOf(Status.NOT_FOUND, "No Map found with id " + mapId));
+    Boolean dualMapMode = map.getProject().getDualMapMode();
+
+    JPAQuery<MapView> query;
+    if (dualMapMode) {
+      query = getDualMapQueryForMap(mapId, task, filter);
+    }
+    else {
+      query = getQueryForMap(mapId, task, filter);
+    }
+
     query = transformSortable(query, pageable.getSort(), additionalColumns);
     query = transformPageable(query, pageable);
 
@@ -456,6 +464,46 @@ public class MapViewService {
     return stream.map(RepresentationModel::of).collect(Collectors.toList());
   }
 
+  private JPAQuery<MapView> getDualMapQueryForMap(Long mapId, Task task, MapViewFilter filter) {
+
+    if (task != null) {
+      // details / task screen .. don't display reconcile state or reconciled (mapped)
+      return new JPAQuery<MapView>(entityManager)
+      .select(Projections.constructor(MapView.class, mapRow, mapTarget,
+          ExpressionUtils.as(JPAExpressions.select(note.modified.max()).from(note)
+              .where(note.mapRow.eq(mapRow).and(note.deleted.isFalse())), "latestNote"),
+              mapRow.status))
+      .from(mapRow)
+      .leftJoin(mapTarget).on(mapTarget.row.eq(mapRow))
+      .leftJoin(mapRow.authorTask)
+      .leftJoin(mapRow.reviewTask)
+      .leftJoin(mapRow.lastAuthor)
+      .leftJoin(mapRow.lastReviewer)
+      .where(getWhereClause(mapId, task, filter))
+      .where(mapRow.blindMapFlag.eq(true));
+    }
+    else {
+      // view screen
+
+      //TODO make other entries in getWhereClause work with mapView instead of mapRow
+
+      return new JPAQuery<MapView>(entityManager)
+      .select(Projections.constructor(MapView.class, mapView.mapRow, mapTarget,
+          ExpressionUtils.as(JPAExpressions.select(note.modified.max()).from(note)
+              .where(note.mapRow.eq(mapView.mapRow).and(note.deleted.isFalse())), "latestNote"),
+              mapView.mapRow.status, mapView.mapRow.status))
+      .from(mapView)
+      .leftJoin(mapTarget).on(mapTarget.row.eq(mapView.mapRow))
+      .leftJoin(mapView.mapRow.authorTask)
+      .leftJoin(mapView.mapRow.reviewTask)
+      .leftJoin(mapView.mapRow.lastAuthor)
+      .leftJoin(mapView.mapRow.lastReviewer)
+      //.where(getWhereClause(mapId, task, filter))
+      .where(mapView.mapRow.map.id.eq(mapId))
+      .where(mapView.mapRow.blindMapFlag.eq(true));
+    }
+  }
+
   protected JPAQuery<MapView> getQueryForMap(Long mapId, Task task, MapViewFilter filter) {
 
     return new JPAQuery<MapView>(entityManager)
@@ -468,7 +516,8 @@ public class MapViewService {
         .leftJoin(mapRow.reviewTask)
         .leftJoin(mapRow.lastAuthor)
         .leftJoin(mapRow.lastReviewer)
-        .where(getWhereClause(mapId, task, filter));
+        .where(getWhereClause(mapId, task, filter))
+        .where(mapRow.blindMapFlag.eq(false));
   }
 
   protected JPAQuery<MappedRowDetailsDto> getQueryMappedRowDetailsForMap(Long mapId, Task task, MapViewFilter filter,
