@@ -69,7 +69,7 @@
   }
 
   /** Constructor for dual map mode - view screen */
-  public MapView(MapRow row, MapRowTarget target, Instant latestNote, MapStatus status, User siblingRowAuthor) {
+  public MapView(MapRow row, MapRowTarget target, Instant latestNote, MapStatus status, MapStatus status2) {//User siblingRowAuthor) {
 
     this.rowId = row.getId();
     this.sourceIndex = row.getSourceCode().getIndex();
@@ -94,9 +94,9 @@
 
       this.assignedAuthor = new ArrayList<User>();
       this.assignedAuthor.add(row.getAuthorTask().getAssignee());
-      if (siblingRowAuthor != null) {
-        this.assignedAuthor.add(siblingRowAuthor);
-      }
+      // if (siblingRowAuthor != null) {
+      //   this.assignedAuthor.add(siblingRowAuthor);
+      // }
 
     }
     if (row.getReviewTask() != null) {
@@ -118,6 +118,8 @@
 
   /** Constructor for dual map mode - task screen */
   public MapView(MapRow row, MapRowTarget target, Instant latestNote, MapStatus status) {
+
+    this.rowId = row.getId();
     this.sourceIndex = row.getSourceCode().getIndex();
     this.sourceCode = row.getSourceCode().getCode();
     this.sourceDisplay = row.getSourceCode().getDisplay();
