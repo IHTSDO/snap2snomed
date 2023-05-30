@@ -660,6 +660,7 @@ public class Snap2snomedRestClient {
     map.put("targetDisplay", targetDisplay);
     map.put("relationship", relationship);
     map.put("flagged", flagged);
+    map.put("blindMapFlag", false);
 
     final ValidatableResponse response = givenUser(user)
         .body(objectMapper.writeValueAsString(map))
