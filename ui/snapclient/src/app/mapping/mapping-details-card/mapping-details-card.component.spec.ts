@@ -79,6 +79,7 @@ describe('MappingDetailsCardComponent', () => {
     project = mapping.project;
     project.id = '1';
     project.title = 'Test Map';
+    project.dualMapMode = false;
 
     mapping.project.maps.push(mapping);
 

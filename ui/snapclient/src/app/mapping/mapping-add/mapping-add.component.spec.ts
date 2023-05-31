@@ -69,6 +69,7 @@ describe('MappingAddComponent', () => {
   mapping.project = new Project();
   mapping.project.title = 'TEST';
   mapping.project.id = '1';
+  mapping.project.dualMapMode = false;
   mapping.mapVersion = '1.0';
   mapping.source.id = '1';
   mapping.toVersion = 'target';

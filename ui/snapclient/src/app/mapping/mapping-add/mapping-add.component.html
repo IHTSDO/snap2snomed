@@ -11,7 +11,7 @@
         </div>
         <app-errormessage [error]="error"></app-errormessage>
         <div>
-          <mat-button-toggle-group class="author-mode-toggle-group" name="mapMode" [(ngModel)]="mappingModel.project.dualMapMode" [disabled]="mode !== 'FORM.CREATE'">
+          <mat-button-toggle-group class="author-mode-toggle-group" id="dualMapMode" name="dualMapMode" #dualMapMode="ngModel" [(ngModel)]="mappingModel.project.dualMapMode" [disabled]="mode !== 'FORM.CREATE'">
             <mat-button-toggle class="mat-primary" [value]="false">
               {{'MAP.SINGLE_AUTHOR_MODE' | translate }}
             </mat-button-toggle>
