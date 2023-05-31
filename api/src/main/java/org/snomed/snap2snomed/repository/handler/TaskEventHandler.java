@@ -235,9 +235,7 @@ public class TaskEventHandler {
               findIndexesIncompatiblyAssigned(task,
                   mapRow.authorTask.assignee.id.eq(assigneeId).or(mapRow.lastAuthor.id.eq(assigneeId))));
         } else if (task.getType().equals(TaskType.RECONCILE)) {
-          // cannot have an author task for any of the rows
-          // cannot have been the most recent author for any of the rows
-          // TODO: any resrictions
+          // TODO: any restrictions?
           // indexesWithRoleConflict.addAll(
           //     findIndexesIncompatiblyAssigned(task,
           //         mapRow.authorTask.assignee.id.eq(assigneeId).or(mapRow.lastAuthor.id.eq(assigneeId))));
@@ -279,18 +277,33 @@ public class TaskEventHandler {
           .and(mapRow.reviewTask.id.ne(task.getId()));
     }
     whereClause = getSourceIndexWhereClause(task, whereClause).and(expression);
-    //TODO change to work for single map mode too
-    return new JPAQuery<User>(entityManager)
-        .select(mapRow.sourceCode.index).distinct()
-        .from(mapRow)
-        .leftJoin(mapRow.lastAuthor)
-        .leftJoin(mapRow.lastReviewer)
-        .leftJoin(mapRow.authorTask)
-        .leftJoin(mapRow.reviewTask)
-        .where(whereClause)
-        .groupBy(mapRow.sourceCode.index)
-        .having(mapRow.sourceCode.index.count().gt(Integer.valueOf(2)))
-        .fetch();
+
+    if (task.getMap().getProject().getDualMapMode()) {
+      //TODO: check if only applies for author task
+      return new JPAQuery<User>(entityManager)
+      .select(mapRow.sourceCode.index).distinct()
+      .from(mapRow)
+      .leftJoin(mapRow.lastAuthor)
+      .leftJoin(mapRow.lastReviewer)
+      .leftJoin(mapRow.authorTask)
+      .leftJoin(mapRow.reviewTask)
+      .where(whereClause)
+      .groupBy(mapRow.sourceCode.index)
+      .having(mapRow.sourceCode.index.count().gt(Integer.valueOf(2)))
+      .fetch();
+    }
+    else {
+      return new JPAQuery<User>(entityManager)
+      .select(mapRow.sourceCode.index).distinct()
+      .from(mapRow)
+      .leftJoin(mapRow.lastAuthor)
+      .leftJoin(mapRow.lastReviewer)
+      .leftJoin(mapRow.authorTask)
+      .leftJoin(mapRow.reviewTask)
+      .where(whereClause)
+      .fetch();
+    }
+
   }
 
   private BooleanExpression getSourceIndexWhereClause(Task task, BooleanExpression whereClause) {
