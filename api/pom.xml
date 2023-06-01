@@ -43,7 +43,7 @@
     <problem-spring-web.version>0.27.0</problem-spring-web.version>
     <swagger-request-validator.version>2.34.0</swagger-request-validator.version>
     <apache-poi.version>5.2.3</apache-poi.version>
-    <rest-assured.version>4.4.0</rest-assured.version>
+    <rest-assured.version>4.5.1</rest-assured.version>
     <jjwt.version>0.11.5</jjwt.version>
     <tc-mysql.version>1.17.2</tc-mysql.version>
     <mockserver.version>5.14.0</mockserver.version>
