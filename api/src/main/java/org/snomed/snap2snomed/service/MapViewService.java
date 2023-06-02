@@ -499,8 +499,7 @@ public class MapViewService {
       .leftJoin(mapView.mapRow.lastAuthor)
       .leftJoin(mapView.mapRow.lastReviewer)
       //.where(getWhereClause(mapId, task, filter))
-      .where(mapView.mapRow.map.id.eq(mapId))
-      .where(mapView.mapRow.blindMapFlag.eq(true));
+      .where(mapView.mapRow.map.id.eq(mapId));
     }
   }
 
