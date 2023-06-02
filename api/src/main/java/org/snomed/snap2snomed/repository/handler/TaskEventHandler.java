@@ -370,9 +370,18 @@ public class TaskEventHandler {
     Instant modified = Instant.now();
     String user = authenticationFacade.getPrincipalSubject();
     if (task.getType().equals(TaskType.AUTHOR)) {
-      addRange = (lower, upper) ->
+      if (task.getMap().getProject().getDualMapMode()) {
+        // dual mapping mode
+        addRange = (lower, upper) ->
+          mapRowRepository.setAuthorTaskBySourceCodeRangeDualMap(task, lower, upper, modified, user);
+        addCollection = (ids) -> mapRowRepository.setAuthorTaskBySourceCodeDualMap(task, ids, modified, user);
+      }
+      else {
+        // single mapping mode
+        addRange = (lower, upper) ->
           mapRowRepository.setAuthorTaskBySourceCodeRange(task, lower, upper, modified, user);
-      addCollection = (ids) -> mapRowRepository.setAuthorTaskBySourceCode(task, ids, modified, user);
+        addCollection = (ids) -> mapRowRepository.setAuthorTaskBySourceCode(task, ids, modified, user);
+      }
     } else if (task.getType().equals(TaskType.REVIEW)) {
       addRange = (lower, upper) ->
           mapRowRepository.setReviewTaskBySourceCodeRange(task, lower, upper, modified, user);
