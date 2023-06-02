@@ -116,7 +116,7 @@ public interface MapRowRepository
       + "    and mr.sourceCode.id in "
       + "        (select code.id from ImportedCode code "
       + "         where code.importedCodeSet.id = :#{#task.map.source.id} "
-      + "           and code.index between in :singleIndexes) "
+      + "           and code.index in :singleIndexes) "
       + "    and mr.authorTask is null "
       + "    and not exists (select 1 from MapRow mr2 "
       + "                  where mr2.map.id = mr.map.id "
