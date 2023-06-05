@@ -409,8 +409,9 @@ export class MappingTableComponent implements OnInit, AfterViewInit, OnDestroy {
     if (row && self.task.mapping.id) {
       self.mapService.findTargetsBySourceIndex(self.task.mapping.id, row.sourceIndex)
       .subscribe(rows => {
-        const targetCodes = rows._embedded.mapRowTargets.map(target => target.targetCode);
-        if (targetCodes.includes(event.data?.code)) {
+        const matchingTargetCodes = rows._embedded.mapRowTargets.filter(target => target.targetCode==event.data?.code);
+        if ((this.task?.mapping.project.dualMapMode && matchingTargetCodes.length > 1) || 
+            (!this.task?.mapping.project.dualMapMode && matchingTargetCodes.length > 0)) {
           self.dialog.open(ConfirmDialogComponent, {data: self.getDuplicateTargetDialogData()});
         } else {
           self.fhirService.getEnglishFsn(event.data?.code, event.data?.system, self.task?.mapping?.toVersion || '').subscribe(englishFsn => {
