@@ -135,10 +135,10 @@ public class MapRowEventHandler {
    */
   private boolean isEquivalentTarget(MapRow mapRow1, MapRow mapRow2) {
 
-    if (!mapRow1.isNoMap() == mapRow2.isNoMap()) {
+    if (mapRow1.isNoMap() != mapRow2.isNoMap()) {
       return false;
     }
-    else if (mapRow1.getStatus().equals(mapRow2.getStatus())) {
+    else if (!mapRow1.getStatus().equals(mapRow2.getStatus())) {
       return false;
     }
     else {
