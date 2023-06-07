@@ -38,7 +38,7 @@
         </div>
       </mat-tab>
 
-      <mat-tab>
+      <mat-tab *ngIf="mapping?.project?.dualMapMode">
         <ng-template mat-tab-label>
           <mat-icon class="tab-icon">compare_arrows</mat-icon>
           <span matBadge="{{reconcileTotalElements}}" matBadgeSize="small"
