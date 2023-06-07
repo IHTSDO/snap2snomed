@@ -268,7 +268,7 @@ export class MappingDetailComponent implements OnInit, OnDestroy {
     if (self.task?.mapping?.id && self.source) {
       self.rowId = self.source.id ?? null;
       // self.noMap = self.source.noMap;
-      self.mapService.findTargetsBySourceIndex(self.task.mapping.id, self.source.index).pipe(debounceTime(200)).subscribe((rows) => {
+      self.mapService.findTargetsBySourceIndex(self.task.mapping.id, self.source.index, self.task.id).pipe(debounceTime(200)).subscribe((rows) => {
         const source = self.source;
         if (source && !source.noMap && rows._embedded.mapRowTargets.length > 0) {
           self.mapRows = rows._embedded.mapRowTargets.map((target) => {

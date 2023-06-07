@@ -415,13 +415,23 @@ export class MapService {
   /**
    * Get Targets for Source Code
    */
-  findTargetsBySourceIndex(map_id: string, source_idx: string): Observable<MapRowTargetResults> {
+  findTargetsBySourceIndex(map_id: string, source_idx: string, taskId: string | undefined): Observable<MapRowTargetResults> {
     const url = `${this.config.apiBaseUrl}/mapRowTargets`;
     const header = ServiceUtils.getHTTPHeaders();
-    header.params = new HttpParams()
+
+    if (taskId) {
+      header.params = new HttpParams()
+      .set('projection', 'targetView')
+      .set('mapId', map_id)
+      .set('row.sourceCode.index', source_idx)
+      .set('row.authorTask.id', taskId);
+    }
+    else {
+      header.params = new HttpParams()
       .set('projection', 'targetView')
       .set('mapId', map_id)
       .set('row.sourceCode.index', source_idx);
+    }
     return this.http.get<MapRowTargetResults>(url, header);
   }
 

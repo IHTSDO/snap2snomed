@@ -407,7 +407,7 @@ export class MappingTableComponent implements OnInit, AfterViewInit, OnDestroy {
     const self = this;
     const row = self.page?.data[index];
     if (row && self.task.mapping.id) {
-      self.mapService.findTargetsBySourceIndex(self.task.mapping.id, row.sourceIndex)
+      self.mapService.findTargetsBySourceIndex(self.task.mapping.id, row.sourceIndex, undefined)
       .subscribe(rows => {
         const matchingTargetCodes = rows._embedded.mapRowTargets.filter(target => target.targetCode==event.data?.code);
         if ((this.task?.mapping.project.dualMapMode && matchingTargetCodes.length > 1) || 
