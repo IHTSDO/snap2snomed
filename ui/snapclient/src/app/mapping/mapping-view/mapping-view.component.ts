@@ -131,7 +131,7 @@ export class MappingViewComponent implements OnInit, AfterViewInit, OnDestroy {
     {columnId: 'latestNote', columnDisplay: 'SOURCE.TABLE.NOTES', displayed: true},
     {columnId: 'lastAuthorReviewer', columnDisplay: 'TABLE.LAST_AUTHOR_REVIEWER', displayed: true},
     {columnId: 'assignedAuthor', columnDisplay: 'TABLE.AUTHOR', displayed: true},
-    {columnId: 'assignedReconciler', columnDisplay: 'TABLE.RECONCILER', displayed: true},
+    //{columnId: 'assignedReconciler', columnDisplay: 'TABLE.RECONCILER', displayed: true},
     {columnId: 'assignedReviewer', columnDisplay: 'TABLE.REVIEWER', displayed: true}
   ];
   // columns that are eligable for user controlling the hiding / displaying
@@ -146,7 +146,7 @@ export class MappingViewComponent implements OnInit, AfterViewInit, OnDestroy {
     'relationship',
     'lastAuthorReviewer',
     'assignedAuthor',
-    'assignedReconciler',
+    // 'assignedReconciler',
     'assignedReviewer'
   ];
   additionalDisplayedColumns: TableColumn[] = [];
@@ -168,7 +168,7 @@ export class MappingViewComponent implements OnInit, AfterViewInit, OnDestroy {
     'filter-notes',
     'filter-lastAuthorReviewer',
     'filter-assignedAuthor',
-    'filter-assignedReconciler',
+    //'filter-assignedReconciler',
     'filter-assignedReviewer'
   ];
   additionalFilteredColumns: string[] = [];
@@ -391,6 +391,12 @@ export class MappingViewComponent implements OnInit, AfterViewInit, OnDestroy {
       (mapping) => {
         if (this.mapping_id === mapping?.id) {
           self.mapping = mapping;
+
+          // add in the reconciler column to the table if it is a dual map
+          if (this.mapping?.project.dualMapMode) {
+            this.addReconcilerTableColumn();
+          }
+
           if (self.mapping && self.mapping.id && self.mapping_id === self.mapping.id) {
             self.store.dispatch(new LoadTasksForMap({id: self.mapping.id, 
                 authPageSize: self.authPageSize, authCurrentPage: self.authCurrentPage, 
@@ -553,6 +559,12 @@ export class MappingViewComponent implements OnInit, AfterViewInit, OnDestroy {
         self.error.detail = error;
       })
     ));
+  }
+
+  addReconcilerTableColumn() {
+    this.constantFilteredColumns.push("filter-assignedReconciler");
+    this.constantHideShowColumns.push("assignedReconciler");
+    this.constantColumns.push({columnId: 'assignedReconciler', columnDisplay: 'TABLE.RECONCILER', displayed: true});
   }
 
   explainRelationship(relationship: string | null): string {

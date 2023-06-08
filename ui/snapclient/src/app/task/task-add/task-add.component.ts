@@ -48,7 +48,7 @@ export class TaskAddComponent implements OnInit, AfterViewInit, OnDestroy {
   error: ErrorInfo = {};
   task: Task | undefined = undefined;
   members: User[] = [];
-  type_options = [TaskType.AUTHOR, TaskType.RECONCILE, TaskType.REVIEW];
+  type_options: TaskType[] = [];
   row_options = ['ALL', 'SELECTED'];
   assignRows = '';
   isMember = false;
@@ -108,6 +108,7 @@ export class TaskAddComponent implements OnInit, AfterViewInit, OnDestroy {
         self.mapping = mapping;
         self.initTask();
         self.loadMemberList();
+        self.initTaskTypeOptions(self.mapping);
       }
     }));
   }
@@ -157,6 +158,15 @@ export class TaskAddComponent implements OnInit, AfterViewInit, OnDestroy {
       this.isMember = this.mapping.project.members.filter((u) => u.id === this.currentUser.id).length > 0;
       // @ts-ignore
       this.isOwner = this.mapping.project.owners.filter((u) => u.id === this.currentUser.id).length > 0;
+    }
+  }
+
+  initTaskTypeOptions(mapping: Mapping): void {
+    if (mapping.project.dualMapMode) {
+      this.type_options = [TaskType.AUTHOR, TaskType.RECONCILE, TaskType.REVIEW];
+    }
+    else {
+      this.type_options = [TaskType.AUTHOR, TaskType.REVIEW];
     }
   }
 
