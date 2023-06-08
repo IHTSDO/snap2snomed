@@ -99,13 +99,15 @@ public class MapViewService {
     private final List<String> lastAuthorReviewer;
     private final List<String> assignedAuthor;
     private final List<String> assignedReviewer;
+    private final List<String> assignedReconciler;
     private final Boolean targetOutOfScope;
     private final Boolean flagged;
     private final List<String> additionalColumns;
 
     public MapViewFilter(List<String> sourceCodes, List<String> sourceDisplays, Boolean noMap, List<String> targetCodes,
-        List<String> targetDisplays, List<MappingRelationship> relationshipTypes, List<MapStatus> statuses, List<String> lastAuthor,
-        List<String> lastReviewer, List<String> lastAuthorReviewer, List<String> assignedAuthor, List<String> assignedReviewer,
+        List<String> targetDisplays, List<MappingRelationship> relationshipTypes, List<MapStatus> statuses, 
+        List<String> lastAuthor, List<String> lastReviewer, List<String> lastAuthorReviewer, 
+        List<String> assignedAuthor, List<String> assignedReviewer, List<String> assignedReconciler,
         Boolean targetOutOfScope, Boolean flagged, List<String> additionalColumns) {
       this.sourceCodes = sourceCodes;
       this.sourceDisplays = sourceDisplays;
@@ -119,6 +121,7 @@ public class MapViewService {
       this.lastAuthorReviewer = lastAuthorReviewer;
       this.assignedAuthor = assignedAuthor;
       this.assignedReviewer = assignedReviewer;
+      this.assignedReconciler = assignedReconciler;
       this.targetOutOfScope = targetOutOfScope;
       this.flagged = flagged;
       this.additionalColumns  = additionalColumns;
@@ -190,6 +193,16 @@ public class MapViewService {
         }
 
         expression = collectAndStatement(expression, collectOrStatement(QMapRow.mapRow.reviewTask.assignee.id.in(assignedReviewer),
+            noneMatch));
+      }
+
+      if (!CollectionUtils.isEmpty(assignedReconciler)) {
+        BooleanExpression noneMatch = null;
+        if (assignedReconciler.contains("none")) {
+          noneMatch = QMapRow.mapRow.reconcileTask.assignee.isNull();
+        }
+
+        expression = collectAndStatement(expression, collectOrStatement(QMapRow.mapRow.reconcileTask.assignee.id.in(assignedReconciler),
             noneMatch));
       }
 
@@ -477,6 +490,7 @@ public class MapViewService {
       .leftJoin(mapTarget).on(mapTarget.row.eq(mapRow))
       .leftJoin(mapRow.authorTask)
       .leftJoin(mapRow.reviewTask)
+      .leftJoin(mapRow.reconcileTask)
       .leftJoin(mapRow.lastAuthor)
       .leftJoin(mapRow.lastReviewer)
       .where(getWhereClause(mapId, task, filter))
@@ -496,6 +510,7 @@ public class MapViewService {
       .leftJoin(mapTarget).on(mapTarget.row.eq(mapView.mapRow))
       .leftJoin(mapView.mapRow.authorTask)
       .leftJoin(mapView.mapRow.reviewTask)
+      .leftJoin(mapView.mapRow.reconcileTask)
       .leftJoin(mapView.mapRow.lastAuthor)
       .leftJoin(mapView.mapRow.lastReviewer)
       //.where(getWhereClause(mapId, task, filter))

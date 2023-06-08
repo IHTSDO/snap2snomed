@@ -54,7 +54,7 @@
     }
     if (row.getReviewTask() != null) {
       this.assignedReviewer = row.getReviewTask().getAssignee();
-    }
+    }  
     if (null != target) {
       this.targetId = target.getId();
       this.targetCode = target.getTargetCode();
@@ -102,6 +102,9 @@
     if (row.getReviewTask() != null) {
       this.assignedReviewer = row.getReviewTask().getAssignee();
     }
+    if (row.getReconcileTask() != null) {
+      this.assignedReconciler = row.getReconcileTask().getAssignee();
+    }  
     if (null != target && !row.getBlindMapFlag()) {
       this.targetId = target.getId();
       this.targetCode = target.getTargetCode();
@@ -180,6 +183,8 @@
    private List<User> assignedAuthor;
  
    private User assignedReviewer;
+
+   private User assignedReconciler;
  
    private User lastAuthor;
  

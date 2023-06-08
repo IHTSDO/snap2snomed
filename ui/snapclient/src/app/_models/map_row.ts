@@ -88,6 +88,7 @@ export class MapView {
     this.assignedAuthor = assignedAuthor;
     this.assignedReconciler = assignedReconciler;
     this.assignedReviewer = assignedReviewer;
+    this.assignedReconciler = assignedReconciler;
     this.lastAuthor = lastAuthor;
     this.lastReviewer = lastReviewer;
     this.additionalColumnValues = additionalColumnValues || [];
@@ -103,7 +104,7 @@ export class MapView {
     return new MapView(
       rowId, mv.targetId, mv.sourceIndex, mv.sourceCode, mv.sourceDisplay,
       mv.targetCode, mv.targetDisplay, mv.relationship, mv.status, mv.noMap, mv.latestNote,
-      mv.assignedAuthor, mv.assiginedReconciler, mv.assignedReviewer, mv.lastAuthor, mv.lastReviewer, 
+      mv.assignedAuthor, mv.assignedReconciler, mv.assignedReviewer, mv.lastAuthor, mv.lastReviewer, 
       mv.flagged, targetOutOfScope, mv.targetTags, additionalColumnValues
     );
   }
