@@ -131,7 +131,6 @@ export class MappingViewComponent implements OnInit, AfterViewInit, OnDestroy {
     {columnId: 'latestNote', columnDisplay: 'SOURCE.TABLE.NOTES', displayed: true},
     {columnId: 'lastAuthorReviewer', columnDisplay: 'TABLE.LAST_AUTHOR_REVIEWER', displayed: true},
     {columnId: 'assignedAuthor', columnDisplay: 'TABLE.AUTHOR', displayed: true},
-    //{columnId: 'assignedReconciler', columnDisplay: 'TABLE.RECONCILER', displayed: true},
     {columnId: 'assignedReviewer', columnDisplay: 'TABLE.REVIEWER', displayed: true}
   ];
   // columns that are eligable for user controlling the hiding / displaying
@@ -146,7 +145,6 @@ export class MappingViewComponent implements OnInit, AfterViewInit, OnDestroy {
     'relationship',
     'lastAuthorReviewer',
     'assignedAuthor',
-    // 'assignedReconciler',
     'assignedReviewer'
   ];
   additionalDisplayedColumns: TableColumn[] = [];
@@ -168,7 +166,6 @@ export class MappingViewComponent implements OnInit, AfterViewInit, OnDestroy {
     'filter-notes',
     'filter-lastAuthorReviewer',
     'filter-assignedAuthor',
-    //'filter-assignedReconciler',
     'filter-assignedReviewer'
   ];
   additionalFilteredColumns: string[] = [];
@@ -562,9 +559,14 @@ export class MappingViewComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   addReconcilerTableColumn() {
-    this.constantFilteredColumns.push("filter-assignedReconciler");
-    this.constantHideShowColumns.push("assignedReconciler");
-    this.constantColumns.push({columnId: 'assignedReconciler', columnDisplay: 'TABLE.RECONCILER', displayed: true});
+    
+    // check if already added as sometimes the column appears multiple times due to multiple mapping selection events
+    if (this.constantFilteredColumns[this.constantFilteredColumns.length-1] !== "filter-assignedReconciler") {
+      this.constantFilteredColumns.push("filter-assignedReconciler");
+      this.constantHideShowColumns.push("assignedReconciler");
+      this.constantColumns.push({columnId: 'assignedReconciler', columnDisplay: 'TABLE.RECONCILER', displayed: true});
+    }
+
   }
 
   explainRelationship(relationship: string | null): string {
