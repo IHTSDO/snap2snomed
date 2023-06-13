@@ -349,7 +349,7 @@ public class MapViewService {
       query = getQueryForMap(mapId, task, filter);
     }
 
-    query = transformSortable(query, pageable.getSort(), additionalColumns);
+    query = transformSortable(query, pageable.getSort(), additionalColumns, dualMapMode);
     query = transformPageable(query, pageable);
 
     final QueryResults<MapView> results = query.fetchResults();
@@ -371,25 +371,27 @@ public class MapViewService {
     return query;
   }
 
-  protected JPAQuery<MapView> transformSortable(JPAQuery<MapView> query, Sort sort, List<AdditionalCodeColumn> additionalColumns) {
+  protected JPAQuery<MapView> transformSortable(JPAQuery<MapView> query, Sort sort, List<AdditionalCodeColumn> additionalColumns, Boolean dualMapMode) {
     if (sort != null) {
+      var _mapRow = dualMapMode ? mapView.mapRow : mapRow;
+
       for (final Order s : sort) {
         List<ComparableExpressionBase<?>> field;
         switch (s.getProperty()) {
           case "rowId":
-            field = Arrays.asList(mapRow.id);
+            field = Arrays.asList(_mapRow.id);
             break;
           case "sourceIndex":
-            field = Arrays.asList(mapRow.sourceCode.index);
+            field = Arrays.asList(_mapRow.sourceCode.index);
             break;
           case "sourceCode":
-            field = Arrays.asList(mapRow.sourceCode.code);
+            field = Arrays.asList(_mapRow.sourceCode.code);
             break;
           case "sourceDisplay":
-            field = Arrays.asList(mapRow.sourceCode.display);
+            field = Arrays.asList(_mapRow.sourceCode.display);
             break;
           case "noMap":
-            field = Arrays.asList(mapRow.noMap);
+            field = Arrays.asList(_mapRow.noMap);
             break;
           case "targetId":
             field = Arrays.asList(mapTarget.id);
@@ -404,27 +406,27 @@ public class MapViewService {
             field = Arrays.asList(mapTarget.relationship);
             break;
           case "status":
-            field = Arrays.asList(mapRow.status);
+            field = Arrays.asList(_mapRow.status);
             break;
           case "latestNote":
             field = Arrays.asList(Expressions.dateTimePath(ZonedDateTime.class, "latestNote"));
             break;
           case "assignedAuthor":
-            field = Arrays.asList(getUserSortComparison(mapRow.authorTask.assignee));
+            field = Arrays.asList(getUserSortComparison(_mapRow.authorTask.assignee));
             break;
           case "assignedReviewer":
-            field = Arrays.asList(getUserSortComparison(mapRow.reviewTask.assignee));
+            field = Arrays.asList(getUserSortComparison(_mapRow.reviewTask.assignee));
             break;
           case "lastAuthor":
-            field = Arrays.asList(getUserSortComparison(mapRow.lastAuthor));
+            field = Arrays.asList(getUserSortComparison(_mapRow.lastAuthor));
             break;
           case "lastReviewer":
-            field = Arrays.asList(getUserSortComparison(mapRow.lastReviewer));
+            field = Arrays.asList(getUserSortComparison(_mapRow.lastReviewer));
             break;
           case "lastAuthorReviewer":
             field = Arrays.asList(
-                getUserSortComparison(mapRow.lastAuthor),
-                getUserSortComparison(mapRow.lastReviewer));
+                getUserSortComparison(_mapRow.lastAuthor),
+                getUserSortComparison(_mapRow.lastReviewer));
             break;
           case "targetOutOfScope":
             field = null;
@@ -439,7 +441,7 @@ public class MapViewService {
             if (s.getProperty().startsWith(ADDITIONAL_COLUMN_NAME)) {
               final int index = Integer.parseInt(s.getProperty().substring(ADDITIONAL_COLUMN_NAME.length())) - 1;
               final ColumnType type = additionalColumns.get(index).getType();
-              field = Arrays.asList(getSortExpression(mapRow.sourceCode, type, index));
+              field = Arrays.asList(getSortExpression(_mapRow.sourceCode, type, index));
             } else {
               field = null;
               log.warn("Unknown MapView sort field '" + s.getProperty() + "' - ignored");
@@ -510,7 +512,9 @@ public class MapViewService {
       .leftJoin(mapView.mapRow.reconcileTask)
       .leftJoin(mapView.mapRow.lastAuthor)
       .leftJoin(mapView.mapRow.lastReviewer)
-      .where(getMapViewWhereClause(mapId, task, filter));
+      .where(getMapViewWhereClause(mapId, task, filter))
+      .orderBy(mapView.mapRow.sourceCode.index.asc())
+      .orderBy(mapView.mapRow.lastAuthor.id.asc());
     }
   }
 
