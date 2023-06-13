@@ -185,7 +185,7 @@ describe('MappingViewComponent', () => {
   it('should show Map title', () => {
     fixture.detectChanges();
     el = fixture.debugElement.query(By.css('h2'));
-    expect(el.nativeElement.textContent).toBe('Test Map');
+    expect(el.nativeElement.textContent).toBe('Test Map - (MAP.SINGLE_MAP)');
     expect(el).toBeTruthy();
   });
 
