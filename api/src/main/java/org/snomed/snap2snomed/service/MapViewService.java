@@ -493,13 +493,10 @@ public class MapViewService {
       .leftJoin(mapRow.reconcileTask)
       .leftJoin(mapRow.lastAuthor)
       .leftJoin(mapRow.lastReviewer)
-      .where(getWhereClause(mapId, task, filter))
-      .where(mapRow.blindMapFlag.eq(true));
+      .where(getWhereClause(mapId, task, filter));
     }
     else {
       // view screen
-
-      //TODO make other entries in getWhereClause work with mapView instead of mapRow
 
       return new JPAQuery<MapView>(entityManager)
       .select(Projections.constructor(MapView.class, mapView.mapRow, mapTarget,
@@ -513,8 +510,7 @@ public class MapViewService {
       .leftJoin(mapView.mapRow.reconcileTask)
       .leftJoin(mapView.mapRow.lastAuthor)
       .leftJoin(mapView.mapRow.lastReviewer)
-      //.where(getWhereClause(mapId, task, filter))
-      .where(mapView.mapRow.map.id.eq(mapId));
+      .where(getMapViewWhereClause(mapId, task, filter));
     }
   }
 
@@ -544,6 +540,7 @@ public class MapViewService {
     if (task != null) {
       query.leftJoin(mapRow.authorTask)
            .leftJoin(mapRow.reviewTask)
+           .leftJoin(mapRow.reconcileTask)
            .leftJoin(mapRow.lastAuthor)
            .leftJoin(mapRow.lastReviewer);
     }
@@ -552,14 +549,35 @@ public class MapViewService {
     return query;
   }
 
+  private BooleanExpression getMapViewWhereClause(Long mapId, Task task, MapViewFilter filter) {
+    BooleanExpression whereClause = mapView.mapRow.map.id.eq(mapId);
+
+    if (filter != null) {
+      final BooleanExpression filterExpression = filter.getExpression();
+      if (filterExpression != null) {
+        whereClause = whereClause.and(filterExpression);
+      }
+    }
+
+    return whereClause;
+  }
+
   private BooleanExpression getWhereClause(Long mapId, Task task, MapViewFilter filter) {
     BooleanExpression whereClause = mapRow.map.id.eq(mapId);
 
     if (task != null) {
       if (task.getType().equals(TaskType.AUTHOR)) {
         whereClause = whereClause.and(mapRow.authorTask.eq(task));
-      } else {
+        if (task.getMap().getProject().getDualMapMode()) {
+          whereClause = whereClause.and(mapRow.blindMapFlag.eq(true));
+        }
+      } else if (task.getType().equals(TaskType.REVIEW)) {
         whereClause = whereClause.and(mapRow.reviewTask.eq(task));
+      }
+      else if (task.getType().equals(TaskType.RECONCILE)) {
+        whereClause = whereClause.and(mapRow.blindMapFlag.eq(false));
+        whereClause = whereClause.and(mapRow.reconcileTask.eq(task));
+        whereClause = whereClause.and(mapRow.status.eq(MapStatus.RECONCILE));
       }
     }
 
