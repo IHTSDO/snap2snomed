@@ -292,7 +292,7 @@ export function mapRowStatusToIconName(status: MapRowStatus): string {
     case MapRowStatus.REJECTED:
       return 'cancel';
     case MapRowStatus.RECONCILE:
-      return 'reconcile';
+      return 'compare_arrows';
     default:
       return 'circle';
   }
