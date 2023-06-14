@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {authorStatuses, MapRowStatus, mapRowStatuses, MapView, reviewStatuses} from '../_models/map_row';
+import {authorStatuses, MapRowStatus, mapRowStatuses, MapView, reviewStatuses, reconcileStatuses} from '../_models/map_row';
 import {TaskType} from '../_models/task';
 
 export class StatusUtils {
@@ -95,11 +95,13 @@ export class StatusUtils {
           statusList = reviewStatuses;
         }
         break;
-        case TaskType.REVIEW:
-          if (status === MapRowStatus.RECONCILE) {
-            statusList = [MapRowStatus.MAPPED]
-          }
-          break;
+      case TaskType.RECONCILE:
+        if (status === MapRowStatus.RECONCILE) {
+          statusList = reconcileStatuses;
+        } else if (status === MapRowStatus.MAPPED) {
+          statusList = [MapRowStatus.MAPPED];
+        }
+        break;
     }
     return statusList;
   }
