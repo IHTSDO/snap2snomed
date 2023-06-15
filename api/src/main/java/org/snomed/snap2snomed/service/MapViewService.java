@@ -482,8 +482,11 @@ public class MapViewService {
   private JPAQuery<MapView> getDualMapQueryForMap(Long mapId, Task task, MapViewFilter filter) {
 
     if (task != null) {
+
+      //TODO maybe two queries here removing unneeded joins?
+      
       // details / task screen .. don't display reconcile state or reconciled (mapped)
-      return new JPAQuery<MapView>(entityManager)
+      JPAQuery<MapView> query = new JPAQuery<MapView>(entityManager)
       .select(Projections.constructor(MapView.class, mapRow, mapTarget,
           ExpressionUtils.as(JPAExpressions.select(note.modified.max()).from(note)
               .where(note.mapRow.eq(mapRow).and(note.deleted.isFalse())), "latestNote"),
@@ -496,6 +499,12 @@ public class MapViewService {
       .leftJoin(mapRow.lastAuthor)
       .leftJoin(mapRow.lastReviewer)
       .where(getWhereClause(mapId, task, filter));
+
+      if (task.getType().equals(TaskType.RECONCILE)) {
+        query = query.orderBy(mapRow.sourceCode.index.asc()).orderBy((mapRow.lastAuthor.id.asc()));
+      }
+
+      return query;
     }
     else {
       // view screen
