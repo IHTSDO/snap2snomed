@@ -136,6 +136,8 @@
     "MEMBERS": "Members",
     "OWNERS": "Owners",
     "GUESTS": "Guests",
+    "DUAL_MAP": "dual map",
+    "SINGLE_MAP": "single map",
     "MAP_EDIT_BUTTON": "EDIT",
     "MAP_VIEW_BUTTON": "VIEW",
     "NUM_TARGETS_OUT_OF_SCOPE": "Number targets out of scope",
