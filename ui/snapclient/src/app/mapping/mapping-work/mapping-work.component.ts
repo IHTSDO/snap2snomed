@@ -60,6 +60,8 @@ const enum TaskMode {
   AUTHOR_DETAILS = 'AUTHOR_DETAILS_VIEW',
   REVIEW_TABLE = 'REVIEW_TABLE_VIEW',
   REVIEW_DETAILS = 'REVIEW_DETAILS_VIEW',
+  RECONCILE_TABLE = 'RECONCILE_TABLE_VIEW',
+  RECONCILE_DETAILS = 'RECONCILE_DETAILS_VIEW',
 }
 
 @Component({
@@ -331,9 +333,35 @@ export class MappingWorkComponent implements OnInit, OnDestroy {
       if (null !== self.task) {
         self.automapping = false;
         if (self.source) {
-          self.mode = self.task.type === TaskType.AUTHOR ? TaskMode.AUTHOR_DETAILS : TaskMode.REVIEW_DETAILS;
+          switch(self.task.type) { 
+            case TaskType.AUTHOR: { 
+               self.mode = TaskMode.AUTHOR_DETAILS;
+               break; 
+            } 
+            case TaskType.REVIEW: { 
+               self.mode = TaskMode.REVIEW_DETAILS;
+               break; 
+            } 
+            case TaskType.RECONCILE: { 
+               self.mode = TaskMode.RECONCILE_DETAILS;
+               break; 
+            } 
+         } 
         } else {
-          self.mode = self.task.type === TaskType.AUTHOR ? TaskMode.AUTHOR_TABLE : TaskMode.REVIEW_TABLE;
+          switch(self.task.type) { 
+            case TaskType.AUTHOR: { 
+               self.mode = TaskMode.AUTHOR_TABLE;
+               break; 
+            } 
+            case TaskType.REVIEW: { 
+               self.mode = TaskMode.REVIEW_TABLE;
+               break; 
+            } 
+            case TaskType.RECONCILE: { 
+               self.mode = TaskMode.RECONCILE_TABLE;
+               break; 
+            } 
+         } 
         }
       }
     }
@@ -382,11 +410,11 @@ export class MappingWorkComponent implements OnInit, OnDestroy {
   }
 
   isTableView(): boolean {
-    return this.mode === TaskMode.AUTHOR_TABLE || this.mode === TaskMode.REVIEW_TABLE;
+    return this.mode === TaskMode.AUTHOR_TABLE || this.mode === TaskMode.REVIEW_TABLE || this.mode === TaskMode.RECONCILE_TABLE;
   }
 
   isDetailsView(): boolean {
-    return this.mode === TaskMode.AUTHOR_DETAILS || this.mode === TaskMode.REVIEW_DETAILS;
+    return this.mode === TaskMode.AUTHOR_DETAILS || this.mode === TaskMode.REVIEW_DETAILS || this.mode === TaskMode.RECONCILE_DETAILS;
   }
 
   filterRows(): void {
@@ -438,9 +466,35 @@ export class MappingWorkComponent implements OnInit, OnDestroy {
     if (self.task_id) {
       self.sourceNavigation.loadSourceNav(self.task_id, this.getContext(), row_idx);
       self.opened = true;
-      self.mode = self.task?.type === 'AUTHOR' ? TaskMode.AUTHOR_DETAILS : TaskMode.REVIEW_DETAILS;
+      switch(self.task?.type) { 
+        case 'AUTHOR': { 
+           self.mode = TaskMode.AUTHOR_DETAILS;
+           break; 
+        } 
+        case 'REVIEW': { 
+           self.mode = TaskMode.REVIEW_DETAILS;
+           break; 
+        } 
+        case 'RECONCILE': { 
+           self.mode = TaskMode.RECONCILE_DETAILS;
+           break; 
+        } 
+     } 
     } else {
-      self.mode = self.task?.type === 'AUTHOR' ? TaskMode.AUTHOR_TABLE : TaskMode.REVIEW_TABLE;
+      switch(self.task?.type) { 
+        case 'AUTHOR': { 
+           self.mode = TaskMode.AUTHOR_TABLE;
+           break; 
+        } 
+        case 'REVIEW': { 
+           self.mode = TaskMode.REVIEW_TABLE;
+           break; 
+        } 
+        case 'RECONCILE': { 
+           self.mode = TaskMode.RECONCILE_TABLE;
+           break; 
+        } 
+     } 
     }
   }
 
