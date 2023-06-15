@@ -43,8 +43,7 @@ export class StatusUtils {
     let disableStatus = false;
     switch (taskType) {
       case TaskType.RECONCILE:
-        //TODO
-        console.log("isStatusOptionDisabled: implement for review");
+        //TODO implement for review
         break;
       case TaskType.REVIEW:
         if (mapView.status === MapRowStatus.UNMAPPED || mapView.status === MapRowStatus.DRAFT) {
