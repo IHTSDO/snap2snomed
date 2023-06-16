@@ -513,7 +513,7 @@ public class MapViewService {
       .select(Projections.constructor(MapView.class, mapView.mapRow, mapTarget,
           ExpressionUtils.as(JPAExpressions.select(note.modified.max()).from(note)
               .where(note.mapRow.eq(mapView.mapRow).and(note.deleted.isFalse())), "latestNote"),
-              mapView.status, mapView.status))
+              mapView.status, mapView.status, mapView.siblingRowAuthorTask))
       .from(mapView)
       .leftJoin(mapTarget).on(mapTarget.row.eq(mapView.mapRow))
       .leftJoin(mapView.mapRow.authorTask)
@@ -521,6 +521,7 @@ public class MapViewService {
       .leftJoin(mapView.mapRow.reconcileTask)
       .leftJoin(mapView.mapRow.lastAuthor)
       .leftJoin(mapView.mapRow.lastReviewer)
+      .leftJoin(mapView.siblingRowAuthorTask)
       .where(getMapViewWhereClause(mapId, task, filter))
       .orderBy(mapView.mapRow.sourceCode.index.asc())
       .orderBy(mapView.mapRow.lastAuthor.id.asc());

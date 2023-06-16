@@ -1,5 +1,7 @@
 package org.snomed.snap2snomed.model;
 
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
 import org.hibernate.annotations.Immutable;
 import org.snomed.snap2snomed.model.enumeration.MapStatus;
 
@@ -39,7 +41,7 @@ public class DbMapView implements Serializable {
     @JoinColumn(name = "mapRowId", insertable = false, updatable = false)
     MapRow mapRow;
 
-    @OneToOne(fetch = FetchType.EAGER)
+    @OneToOne
     @JoinColumn(name = "siblingRowAuthorTaskId", insertable = false, updatable = false)
     Task siblingRowAuthorTask;
 
