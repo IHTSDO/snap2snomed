@@ -69,7 +69,7 @@
   }
 
   /** Constructor for dual map mode - view screen */
-  public MapView(MapRow row, MapRowTarget target, Instant latestNote, MapStatus status, MapStatus status2) {//User siblingRowAuthor) {
+  public MapView(MapRow row, MapRowTarget target, Instant latestNote, MapStatus status, Task siblingRowAuthorTask) {
 
     this.rowId = row.getId();
     this.sourceIndex = row.getSourceCode().getIndex();
@@ -94,9 +94,9 @@
 
       this.assignedAuthor = new ArrayList<User>();
       this.assignedAuthor.add(row.getAuthorTask().getAssignee());
-      // if (siblingRowAuthor != null) {
-      //   this.assignedAuthor.add(siblingRowAuthor);
-      // }
+      if (siblingRowAuthorTask != null) {
+        this.assignedAuthor.add(siblingRowAuthorTask.assignee);
+      }
 
     }
     if (row.getReviewTask() != null) {
