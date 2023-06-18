@@ -36,7 +36,7 @@ This is an example of how to list things you need to use the software and how to
 
 1. Clone the repo
    ```sh
-   git clone https://github.com/aehrc/snapagogo.git
+   git clone https://github.com/aehrc/snap2snomed.git
    ```
 2. Run the Maven build
    ```sh
