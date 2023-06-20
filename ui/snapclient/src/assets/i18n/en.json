@@ -450,6 +450,7 @@
     "CANNOT_OPEN_PROJECT_NO_ROLE": "Request a role from a project owner to open this project",
     "DELETE": "DELETE MAP",
     "DELETE_TOOLTIP": "Delete this map",
+    "DELETE_NOTE_TOOLTIP": "Delete this note",
     "TITLE_CONFIRM": "Delete Map",
     "CANCEL": "CANCEL",
     "CONFIRM_DELETE": "Are you sure you wish to delete this map? This will delete all versions of the map. Any mapping that has been performed will be removed and this cannot be undone."

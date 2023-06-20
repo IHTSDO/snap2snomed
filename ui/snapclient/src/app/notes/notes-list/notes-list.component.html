@@ -34,7 +34,7 @@
       <div id="notes-list">
         <div *ngFor="let note of notes">
           <app-notes-item [note]="note">
-            <button mat-icon-button color="accent" title="{{'PROJECT.DELETE_TOOLTIP' | translate}}"
+            <button mat-icon-button color="accent" title="{{'PROJECT.DELETE_NOTE_TOOLTIP' | translate}}"
                     [disabled]="!canDelete(note)"
                     (click)="deleteNote(note)"><mat-icon>delete</mat-icon></button>
           </app-notes-item>
