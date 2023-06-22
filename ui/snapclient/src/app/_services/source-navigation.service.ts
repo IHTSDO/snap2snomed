@@ -20,6 +20,7 @@ import {MapView, Page} from '../_models/map_row';
 import {catchError, map} from 'rxjs/operators';
 import {MapService} from './map.service';
 import {ViewContext} from '../store/mapping-feature/mapping.actions';
+import { Mapping } from '../_models/mapping';
 
 interface MapViewParams {
   page: Page;
@@ -29,6 +30,7 @@ interface MapViewParams {
 
 export interface SourceNavSet {
   mapRow: MapView | null;
+  siblingRow: MapView | null;
   current: MapViewParams | null;
   previous: MapViewParams | null;
   next: MapViewParams | null;
@@ -36,6 +38,7 @@ export interface SourceNavSet {
 
 export const initialSourceNav: SourceNavSet = {
   mapRow: null,
+  siblingRow: null,
   current: null,
   previous: null,
   next: null
@@ -80,8 +83,8 @@ export class SourceNavigationService {
    * @param params View filters and sorting
    * @param row_idx Index of row in the view
    */
-  loadSourceNav(task_id: string, params: ViewContext, row_idx: number): void {
-    this.setSourceNavigation(task_id, row_idx, params);
+  loadSourceNav(task_id: string, mapping : Mapping | null, params: ViewContext, row_idx: number): void {
+    this.setSourceNavigation(task_id, mapping, row_idx, params);
   }
 
   private findAdjacentSource(task_id: string, params: ViewContext, sourceIndex: string,
@@ -126,8 +129,8 @@ export class SourceNavigationService {
     }
   }
 
-  select(task_id: string, row: MapViewParams): void {
-    this.setSourceNavigation(task_id, row.rowIndex, row.params);
+  select(task_id: string, mapping: Mapping | null, row: MapViewParams): void {
+    this.setSourceNavigation(task_id, mapping, row.rowIndex, row.params);
   }
 
   /**
@@ -139,8 +142,9 @@ export class SourceNavigationService {
    * @param task - Current Task
    * @param page - Page representation of the view
    */
-  private setSourceNavigation(task_id: string, row_idx: number | null, params: ViewContext): void {
+  private setSourceNavigation(task_id: string, mapping: Mapping | null, row_idx: number | null, params: ViewContext): void {
     if (row_idx !== null) {
+      let siblingRow: MapView | null = null;
       // Refresh page.data to avoid bugs with changes to status or noMap
       this.mapService.getTaskView(task_id,
         params.pageIndex, params.pageSize, params.sortColumn, params.sortDir, params.filter)
@@ -151,45 +155,66 @@ export class SourceNavigationService {
           }),
         ).subscribe((page: Page) => {
         const selectedRow = page.data[row_idx];
-        const prev_row_idx = SourceNavigationService.prevUniqueRow(page.data, row_idx - 1, selectedRow.sourceIndex);
-        const next_row_idx = SourceNavigationService.nextUniqueRow(page.data, row_idx + 1, selectedRow.sourceIndex);
 
-        const prevParams = {...params};
-        const nextParams = {...params};
-        const sourceNav: SourceNavSet = {
-          mapRow: selectedRow,
-          current: {
-            page,
-            rowIndex: row_idx,
-            params
-          },
-          previous: prev_row_idx !== null ? {
-            page,
-            rowIndex: prev_row_idx,
-            params: prevParams
-          } : null,
-          next: next_row_idx !== null ? {
-            page,
-            rowIndex: next_row_idx,
-            params: nextParams
-          } : null
-        };
-
-        // Find previous source - may be previous page
-        if (prev_row_idx === null && page.pageIndex > 0) {
-          prevParams.pageIndex = page.pageIndex - 1;
-          this.findAdjacentSource(task_id, prevParams, selectedRow.sourceIndex, 'PREVIOUS', sourceNav);
+        if (mapping !== null && mapping.id && mapping.project.dualMapMode) {
+          // call to get the sibling row as we may not have it (all) in the page of data retrieved
+          this.mapService.getSiblingMapViewRow(mapping.id, selectedRow.sourceIndex, selectedRow.rowId)
+          .pipe(
+            map((result) => {
+              return MapView.create(result as MapView);
+            }),
+          ).subscribe((mapView: MapView) => {
+            siblingRow = mapView;
+            this.configureSourceNaviagation(page, row_idx, selectedRow, siblingRow, task_id, params);
+          });
         }
-        // Find next source - may be next page
-        if (next_row_idx === null && page.pageIndex < page.totalPages) {
-          nextParams.pageIndex = page.pageIndex + 1;
-          this.findAdjacentSource(task_id, nextParams, selectedRow.sourceIndex, 'NEXT', sourceNav);
-        }
-
-        if (selectedRow) {
-          this.setSelectedRow(sourceNav);
+        else {
+          this.configureSourceNaviagation(page, row_idx, selectedRow, siblingRow, task_id, params);
         }
       });
+    }
+  }
+
+  private configureSourceNaviagation(page: Page, row_idx: number, selectedRow: MapView, siblingRow: MapView | null, 
+      task_id: string, params: ViewContext) {
+    const prev_row_idx = SourceNavigationService.prevUniqueRow(page.data, row_idx - 1, selectedRow.sourceIndex);
+    const next_row_idx = SourceNavigationService.nextUniqueRow(page.data, row_idx + 1, selectedRow.sourceIndex);
+
+    const prevParams = {...params};
+    const nextParams = {...params};
+    const sourceNav: SourceNavSet = {
+      mapRow: selectedRow,
+      siblingRow: siblingRow,
+      current: {
+        page,
+        rowIndex: row_idx,
+        params
+      },
+      previous: prev_row_idx !== null ? {
+        page,
+        rowIndex: prev_row_idx,
+        params: prevParams
+      } : null,
+      next: next_row_idx !== null ? {
+        page,
+        rowIndex: next_row_idx,
+        params: nextParams
+      } : null
+    };
+
+    // Find previous source - may be previous page
+    if (prev_row_idx === null && page.pageIndex > 0) {
+      prevParams.pageIndex = page.pageIndex - 1;
+      this.findAdjacentSource(task_id, prevParams, selectedRow.sourceIndex, 'PREVIOUS', sourceNav);
+    }
+    // Find next source - may be next page
+    if (next_row_idx === null && page.pageIndex < page.totalPages) {
+      nextParams.pageIndex = page.pageIndex + 1;
+      this.findAdjacentSource(task_id, nextParams, selectedRow.sourceIndex, 'NEXT', sourceNav);
+    }
+
+    if (selectedRow) {
+      this.setSelectedRow(sourceNav);
     }
   }
 

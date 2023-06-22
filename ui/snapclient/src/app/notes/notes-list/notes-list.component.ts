@@ -22,7 +22,7 @@ import {Store} from '@ngrx/store';
 import {IAppState} from '../../store/app.state';
 import {TranslateService} from '@ngx-translate/core';
 import {MapService, NoteResults} from '../../_services/map.service';
-import {SourceNavigationService} from '../../_services/source-navigation.service';
+import {SourceNavSet, SourceNavigationService} from '../../_services/source-navigation.service';
 import {ErrorInfo} from '../../errormessage/errormessage.component';
 import {Task} from '../../_models/task';
 import {Subscription} from 'rxjs';
@@ -45,6 +45,7 @@ export class NotesListComponent implements OnInit, OnDestroy {
   private subscription: Subscription = new Subscription();
   @Input() currentUser: User | null = null;
   @Input() task: Task | null = null;
+  @Input() sourceNavSet: SourceNavSet | null = null;
   @ViewChild('text') formControl: FormControl | undefined;
 
   mapRow: MapRow | null = null;
@@ -148,6 +149,16 @@ export class NotesListComponent implements OnInit, OnDestroy {
           note.noteBy.familyName = note.noteBy.familyName ?? '';
           return note;
         });
+        if (this.sourceNavSet?.siblingRow) {
+          self.mapService.getNotesByMapRow(this.sourceNavSet?.siblingRow?.rowId).subscribe((results: NoteResults) => {
+            let siblingNotes = results._embedded.notes.map((note) => {
+              note.noteBy.givenName = note.noteBy.givenName ?? '';
+              note.noteBy.familyName = note.noteBy.familyName ?? '';
+              return note;
+            });
+            self.notes = self.notes.concat(siblingNotes);
+          })
+        }
         self.notes.sort((a, b) => self.sortNotes(a, b));
       });
     }

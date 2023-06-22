@@ -260,6 +260,19 @@ export class MapService {
     return this.getView(url, pageIndex, pageSize, sortColumn, sortDir, filter);
   }
 
+  getSiblingMapViewRow(mapId: string, sourceCodeId: string, mapRowId: string): Observable<any> {
+
+    const url = `${this.config.apiBaseUrl}/mapView/${mapId}/$dualMapSiblingRow`;
+    const header = ServiceUtils.getHTTPHeaders();
+
+    let params = new HttpParams();
+    params = params.set('sourceCodeId', sourceCodeId);
+    params = params.set('mapRowId', mapRowId);
+    header.params = params;
+
+    return this.http.get<MapViewResults>(url, header);
+  }
+
   /**
    * Server-side pagination and filtering of mapViews
    * 1. Pagination              ?map=3&sort=sourceCode,asc&page=1

@@ -29,6 +29,7 @@ export interface MapRow {
   status: string;
   created: Date;
   modified: Date;
+  modifiedBy: User;
   latestNote: Date | null;
 }
 

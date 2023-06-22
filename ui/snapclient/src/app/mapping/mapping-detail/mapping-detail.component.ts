@@ -70,7 +70,7 @@ export type SourceRow = {
 export class MappingDetailComponent implements OnInit, OnDestroy {
 
   private subscription = new Subscription();
-  private selectedRowset: SourceNavSet | null = null;
+  public selectedRowset: SourceNavSet | null = null;
   source!: SourceRow;
   nodes: ConceptNode<Coding>[] = [];
   loadingHierarchy = false;
@@ -207,6 +207,35 @@ export class MappingDetailComponent implements OnInit, OnDestroy {
     this.selectionService.select(node);
   }
 
+  private isDualMapMode() : boolean {
+    if (this.task) {
+      return this.task.mapping.project.dualMapMode;
+    }
+    return false;
+  }
+
+  isNoMapChecked() : boolean {
+    if (this.isDualMapMode() && this.selectedRowset?.siblingRow) {
+      return this.source.noMap || this.selectedRowset.siblingRow.noMap;
+    }
+    
+    return this.source.noMap;
+  }
+
+  getNoMapAuthor() : User {
+
+    let author : User = new User();
+
+    if (this.source.noMap && this.selectedRowset?.mapRow?.lastAuthor) {
+      author = this.selectedRowset?.mapRow?.lastAuthor;
+    }
+    else if (this.selectedRowset?.siblingRow?.noMap && this.selectedRowset?.siblingRow?.lastAuthor) {
+      author = this.selectedRowset.siblingRow.lastAuthor;
+    }
+
+    return author;
+  }
+
   private updateChips(): void {
     const self = this;
 
@@ -268,7 +297,12 @@ export class MappingDetailComponent implements OnInit, OnDestroy {
     if (self.task?.mapping?.id && self.source) {
       self.rowId = self.source.id ?? null;
       // self.noMap = self.source.noMap;
-      self.mapService.findTargetsBySourceIndex(self.task.mapping.id, self.source.index, self.task.id).pipe(debounceTime(200)).subscribe((rows) => {
+
+      let taskId : string | undefined = self.task.id;
+      if (this.isDualMapMode()) {
+        taskId = undefined;
+      }
+      self.mapService.findTargetsBySourceIndex(self.task.mapping.id, self.source.index, taskId).pipe(debounceTime(200)).subscribe((rows) => {
         const source = self.source;
         if (source && !source.noMap && rows._embedded.mapRowTargets.length > 0) {
           self.mapRows = rows._embedded.mapRowTargets.map((target) => {
@@ -389,14 +423,14 @@ export class MappingDetailComponent implements OnInit, OnDestroy {
   loadPrevious(): void {
     const self = this;
     if (self.task && self.selectedRowset?.previous) {
-      self.sourceNavigation.select(self.task.id, self.selectedRowset?.previous);
+      self.sourceNavigation.select(self.task.id, self.task.mapping, self.selectedRowset?.previous);
     }
   }
 
   loadNext(): void {
     const self = this;
     if (self.task && self.selectedRowset?.next) {
-      self.sourceNavigation.select(self.task.id, self.selectedRowset?.next);
+      self.sourceNavigation.select(self.task.id, self.task.mapping, self.selectedRowset?.next);
     }
   }
 
@@ -441,7 +475,7 @@ export class MappingDetailComponent implements OnInit, OnDestroy {
       }
 
       context.pageIndex = pageIndex;
-      self.sourceNavigation.loadSourceNav(self.task.id, context, firstIndex);
+      self.sourceNavigation.loadSourceNav(self.task.id, self.task.mapping, context, firstIndex);
     }
   }
 

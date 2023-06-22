@@ -619,4 +619,25 @@ public class MapViewService {
     return expression.and(betweenStatement);
   }
 
+  public MapView getDualMapSiblingRow(Long mapId, Long sourceCodeId, Long mapRowId) {
+
+    if (!mapRepository.existsById(mapId)) {
+      throw Problem.valueOf(Status.NOT_FOUND, "No Map found with id " + mapId);
+    }
+
+    JPAQuery<MapView> query = new JPAQuery<MapView>(entityManager)
+        .select(Projections.constructor(MapView.class, mapRow, mapTarget,
+            ExpressionUtils.as(JPAExpressions.select(note.modified.max()).from(note)
+                .where(note.mapRow.eq(mapRow).and(note.deleted.isFalse())), "latestNote")))
+        .from(mapRow)
+        .leftJoin(mapTarget).on(mapTarget.row.eq(mapRow))
+        .where(mapRow.map.id.eq(mapId))
+        .where(mapRow.id.ne(mapRowId))
+        .where(mapRow.sourceCode.id.eq(sourceCodeId));
+
+    QueryResults<MapView> queryResults = query.fetchResults();
+    return queryResults.getResults().get(0);
+
+  }
+
 }

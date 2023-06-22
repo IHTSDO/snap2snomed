@@ -1,7 +1,7 @@
 <div id="target-relationship-container">
   <app-errormessage [error]="error"></app-errormessage>
   <div class="card-relationship">
-    <mat-card *ngIf="isNoMap(); else showRelationships">
+    <mat-card *ngIf="isNoMap() && !isDualMapMode(); else showRelationships">
       <mat-card-content>{{'MAP.NO_MAPPING_AVAILABLE' | translate}}</mat-card-content>
     </mat-card>
     <ng-template #showRelationships>
@@ -21,6 +21,8 @@
             <mat-option *ngFor="let row of filterRows(relationship)" (click)="click(row)">
               <span [appDraggable]="{data:row, zones:['relationshipZone']}"
                     class="row-target">
+                <app-user-chip id="targetLastAuthorUserChip" *ngIf="isDualMapMode() && row.lastAuthor" [user]="row.lastAuthor"
+                [font_size]="'12px'"></app-user-chip>
                 <span class="selection-text">{{row.targetDisplay}}</span>
                 <span>
                   <button mat-icon-button *ngIf="row.targetOutOfScope" color="accent" #tooltip="matTooltip"

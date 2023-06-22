@@ -103,13 +103,16 @@
             <mat-card-header>
               <mat-card-title>{{'DETAILS.TARGET_BY_RELATIONSHIP' | translate}}</mat-card-title>
               <span class="cbNoMap pull-right">
-                <mat-checkbox [checked]="source.noMap"
+                <!--TODO *ngIf="isDualMapMode() && row.lastAuthor"-->
+                <app-user-chip id="targetLastAuthorUserChip" *ngIf="isNoMapChecked()" 
+                [user]="getNoMapAuthor()" [font_size]="'12px'"></app-user-chip>
+                <mat-checkbox [checked]="isNoMapChecked()"
                               [disabled]="writeDisableUtils.isEditDisabled(this.task?.type, toMapRowStatus(source.status))"
                               (change)="updateNoMap($event)">{{'TABLE.NO_MAP' | translate}}</mat-checkbox>
               </span>
           </mat-card-header>
           <mat-card-content>
-            <app-target-relationship [task]="task" [targetRows]="mapRows" [source]="getSource()"
+            <app-target-relationship [task]="task" [targetRows]="mapRows" [source]="getSource()" [sourceNavSet]="selectedRowset"
                                      (newTargetEvent)="saveTarget($event)"
                                      [disableActions]="writeDisableUtils.isEditDisabled(this.task?.type, toMapRowStatus(source.status))"
                                      [disableFlagging]="writeDisableUtils.isFlaggingDisabled(this.task?.type, toMapRowStatus(source.status))"
@@ -147,7 +150,7 @@
     </div>
     <div class="container-row">
       <div class="notes-view card-col">
-        <app-notes-list [currentUser]="currentUser" [task]="task"></app-notes-list>
+        <app-notes-list [currentUser]="currentUser" [task]="task" [sourceNavSet]="selectedRowset"></app-notes-list>
       </div>
     </div>
   </div>

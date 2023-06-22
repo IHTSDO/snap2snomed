@@ -196,6 +196,11 @@ export class MappingWorkComponent implements OnInit, OnDestroy {
       if (res) {
         self.error = {};
         self.mapping = res;
+
+        // add in the author column to the table if it is a dual map
+        if (this.mapping?.project.dualMapMode && this.task?.type === 'RECONCILE') {
+          this.addAuthorTableColumn();
+        }
       }
     }));
 
@@ -236,6 +241,17 @@ export class MappingWorkComponent implements OnInit, OnDestroy {
         console.error('Selection error', error);
       }
     }));
+  }
+
+  private addAuthorTableColumn() {
+    
+    //check if already added as sometimes the column appears multiple times due to multiple mapping selection events
+    if (this.constantColumns.filter(column => column.columnId === 'lastAuthorReviewer').length < 1) {
+      this.constantHideShowColumns.push("lastAuthorReviewer");
+      // actions should be the final column
+      this.constantColumns.splice(-1, 0, {columnId: 'lastAuthorReviewer', columnDisplay: 'TABLE.LAST_AUTHOR', displayed: true});
+    }
+
   }
 
   private loadHeirarchy(): void {
@@ -463,8 +479,8 @@ export class MappingWorkComponent implements OnInit, OnDestroy {
 
   showDetail(row_idx: number): void {
     const self = this;
-    if (self.task_id) {
-      self.sourceNavigation.loadSourceNav(self.task_id, this.getContext(), row_idx);
+    if (self.task_id && self.task) {
+      self.sourceNavigation.loadSourceNav(self.task_id, self.task.mapping, this.getContext(), row_idx);
       self.opened = true;
       switch(self.task?.type) { 
         case 'AUTHOR': { 

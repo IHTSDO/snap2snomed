@@ -32,7 +32,6 @@ import org.apache.poi.xssf.streaming.SXSSFRow;
 import org.apache.poi.xssf.streaming.SXSSFSheet;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 import org.snomed.snap2snomed.controller.dto.Snap2SnomedPagedModel;
-import org.snomed.snap2snomed.model.AdditionalCodeColumn;
 import org.snomed.snap2snomed.model.AdditionalCodeValue;
 import org.snomed.snap2snomed.model.MapView;
 import org.snomed.snap2snomed.model.enumeration.MapStatus;
@@ -401,5 +400,30 @@ public class MapViewRestController {
     }
   }
 
+  @Operation(description = "Returns a flattened view of the MapRow and MapRowTargets for sibling of the specified mapRow.")
+  @Parameter(name = "mapId", in = ParameterIn.PATH, required = true, allowEmptyValue = false,
+  description = "Id of the map the view is to be generated for")
+  @Parameter(name = "sourceCodeId", in = ParameterIn.QUERY, required = false, allowEmptyValue = true,
+  description = "Filters the results by ensuring source codes start with the specified text. ")
+  @Parameter(name = "mapRowId", in = ParameterIn.QUERY, required = true, allowEmptyValue = false,
+  description = "Id of the map row that is the sibling of the map row that the view is to be generated for")
+  @GetMapping(path = "/{mapId}/$dualMapSiblingRow", produces = MediaType.APPLICATION_JSON_VALUE)
+  public ResponseEntity<MapView> getDualMapSiblingRow(      
+    @PathVariable("mapId") Long mapId,
+    @RequestParam(required = true) Long sourceCodeId,
+    @RequestParam(required = true) Long mapRowId) {
+    
+    //TODO work out what security is required here
+    if (!webSecurity.isValidUser()) {
+        throw new NoSuchUserProblem();
+    }
+    if (!webSecurity.isAdminUser() && !webSecurity.hasAnyProjectRoleForMapId(mapId)) {
+        throw new NotAuthorisedProblem(
+                "Not authorised to view map if the user is not admin or member of an associated project!");
+    }
 
+    MapView result = mapViewService.getDualMapSiblingRow(mapId, sourceCodeId, mapRowId);
+    return ResponseEntity.ok(result);
+ }
 }
+

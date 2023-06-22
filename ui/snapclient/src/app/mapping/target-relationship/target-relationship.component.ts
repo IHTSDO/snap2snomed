@@ -27,6 +27,7 @@ import {StatusUtils} from '../../_utils/status_utils';
 import {SourceRow} from '../mapping-detail/mapping-detail.component';
 import {WriteDisableUtils} from "../../_utils/write_disable_utils";
 import {FhirService} from "../../_services/fhir.service";
+import { SourceNavSet } from 'src/app/_services/source-navigation.service';
 
 @Component({
   selector: 'app-target-relationship',
@@ -40,6 +41,7 @@ export class TargetRelationshipComponent implements OnInit {
   @Input() task: Task | null = null;
   @Input() targetRows: Array<MapView> = new Array<MapView>();
   @Input() source: SourceRow | null = null;
+  @Input() sourceNavSet: SourceNavSet | null = null;
   @Input() disableActions = false;
   @Input() disableFlagging = false;
   @Output() newTargetEvent = new EventEmitter<MapView>();
@@ -97,8 +99,18 @@ export class TargetRelationshipComponent implements OnInit {
   }
 
   filterRows(relationship: MapRowRelationship): MapView[] {
-    return (this.targetRows && this.targetRows.length > 0) ? this.targetRows.map((m) => m).filter(
+    let rows = (this.targetRows && this.targetRows.length > 0) ? this.targetRows.map((m) => m).filter(
       (row) => row.relationship === relationship) : [];
+    rows.forEach(row => {
+      // populating the last author from sources we already have at our disposal
+      if (row.rowId == this.sourceNavSet?.siblingRow?.rowId) {
+       row.lastAuthor = this.sourceNavSet?.siblingRow?.lastAuthor;
+      } 
+      else if (row.rowId == this.sourceNavSet?.mapRow?.rowId) {
+        row.lastAuthor = this.sourceNavSet?.mapRow?.lastAuthor;
+      }
+    })
+    return rows;
   }
 
   addFocusTarget(relationship: MapRowRelationship): void {
@@ -137,6 +149,13 @@ export class TargetRelationshipComponent implements OnInit {
   removeTarget(targetRow: MapView): void {
     const self = this;
     self.removeTargetEvent.emit(targetRow);
+  }
+
+  public isDualMapMode() : boolean {
+    if (this.task) {
+      return this.task.mapping.project.dualMapMode;
+    }
+    return false;
   }
 
   isNoMap(): boolean {
