@@ -227,7 +227,7 @@ export class AssignedWorkComponent implements OnInit, AfterViewInit, OnDestroy {
         this.reviewCurrentPage = 0;
         break;
       case TaskType.RECONCILE:
-        this.reviewCurrentPage = 0;
+        this.reconcileCurrentPage = 0;
         break;
     }
     this.updateCurrentTaskPage.emit(this.selectedTaskType);
