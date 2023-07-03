@@ -224,6 +224,7 @@
     "RECONCILER": "Assigned reconciler",
     "REVIEWER": "Assigned reviewer",
     "BULK_CHANGE": "BULK EDIT",
+    "LAST_AUTHOR": "Last author",
     "LAST_AUTHOR_REVIEWER": "Last author/ reviewer"
   },
   "TASK": {
