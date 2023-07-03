@@ -636,7 +636,10 @@ public class MapViewService {
         .where(mapRow.sourceCode.id.eq(sourceCodeId));
 
     QueryResults<MapView> queryResults = query.fetchResults();
-    return queryResults.getResults().get(0);
+    if (queryResults.getResults().size() > 0) {
+      return queryResults.getResults().get(0);
+    }
+    return null;
 
   }
 
