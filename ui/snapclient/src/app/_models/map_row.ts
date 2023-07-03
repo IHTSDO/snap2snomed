@@ -36,6 +36,7 @@ export interface MapRow {
 /** Outer join of MapRow and MapRowTarget */
 export class MapView {
   rowId: string;           // MapRow ID
+  sourceId: string;
   sourceIndex: string;
   sourceCode: string;
   sourceDisplay: string;
@@ -66,13 +67,14 @@ export class MapView {
   private prevNoMap: boolean;
   private prevFlagged?: boolean;
 
-  constructor(rowId: string, targetId: string | undefined, sourceIndex: string, sourceCode: string, sourceDisplay: string,
+  constructor(rowId: string, targetId: string | undefined, sourceId: string, sourceIndex: string, sourceCode: string, sourceDisplay: string,
               targetCode: string | undefined, targetDisplay: string | undefined, relationship: string | undefined,
               status: string, noMap: boolean, latestNote: Date | null | undefined, assignedAuthor: User[] | null | undefined,
               assignedReconciler: User | null | undefined, assignedReviewer: User | null | undefined, lastAuthor: User | null | undefined,
               lastReviewer: User | null | undefined, flagged: boolean | undefined, targetOutOfScope: boolean | undefined, tags: string[] | undefined, additionalColumnValues: string[] | undefined) {
     this.rowId = rowId;
     this.targetId = targetId;
+    this.sourceId = sourceId;
     this.sourceIndex = sourceIndex;
     this.sourceCode = sourceCode;
     this.sourceDisplay = sourceDisplay;
@@ -103,7 +105,7 @@ export class MapView {
     const targetOutOfScope = mv.targetTags?.includes(TARGET_OUT_OF_SCOPE_TAG);
 
     return new MapView(
-      rowId, mv.targetId, mv.sourceIndex, mv.sourceCode, mv.sourceDisplay,
+      rowId, mv.targetId, mv.sourceId, mv.sourceIndex, mv.sourceCode, mv.sourceDisplay,
       mv.targetCode, mv.targetDisplay, mv.relationship, mv.status, mv.noMap, mv.latestNote,
       mv.assignedAuthor, mv.assignedReconciler, mv.assignedReviewer, mv.lastAuthor, mv.lastReviewer, 
       mv.flagged, targetOutOfScope, mv.targetTags, additionalColumnValues

@@ -40,6 +40,7 @@
   /** Constructor for single map mode */
   public MapView(MapRow row, MapRowTarget target, Instant latestNote) {
     this.rowId = row.getId();
+    this.sourceId = row.getSourceCode().getId();
     this.sourceIndex = row.getSourceCode().getIndex();
     this.sourceCode = row.getSourceCode().getCode();
     this.sourceDisplay = row.getSourceCode().getDisplay();
@@ -72,6 +73,7 @@
   public MapView(MapRow row, MapRowTarget target, Instant latestNote, MapStatus status, Task siblingRowAuthorTask) {
 
     this.rowId = row.getId();
+    this.sourceId = row.getSourceCode().getId();
     this.sourceIndex = row.getSourceCode().getIndex();
     this.sourceCode = row.getSourceCode().getCode();
     this.sourceDisplay = row.getSourceCode().getDisplay();
@@ -123,6 +125,7 @@
   public MapView(MapRow row, MapRowTarget target, Instant latestNote, MapStatus status) {
 
     this.rowId = row.getId();
+    this.sourceId = row.getSourceCode().getId();
     this.sourceIndex = row.getSourceCode().getIndex();
     this.sourceCode = row.getSourceCode().getCode();
     this.sourceDisplay = row.getSourceCode().getDisplay();
@@ -157,6 +160,9 @@
    @NotNull
    private Long rowId;
  
+   @NotNull
+   private Long sourceId;
+
    @NotNull
    private Long sourceIndex;
  

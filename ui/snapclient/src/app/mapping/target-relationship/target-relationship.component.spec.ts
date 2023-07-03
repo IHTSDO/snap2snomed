@@ -53,12 +53,13 @@ describe('TargetRelationshipComponent', () => {
 
   const sourceCode = '1212121';
   const sourceDisplay = 'This is test';
+  const sourceId = '1';
   const sourceIndex = '1';
   const targetCode = '123456';
   const targetDisplay = 'Test target';
   const targetSystem = 'http://snomed.info/sct/900000000000207008/version/20220228'
   const relationship = MapRowRelationship.EQUIVALENT;
-  const target = new MapView('', '', sourceIndex, sourceCode, sourceDisplay, targetCode, targetDisplay, relationship,
+  const target = new MapView('', '', sourceId, sourceIndex, sourceCode, sourceDisplay, targetCode, targetDisplay, relationship,
     'DRAFT', false, null, null, null, null, null, null, false, false, undefined, undefined);
   const parameterValue = [
     {
@@ -185,7 +186,7 @@ describe('TargetRelationshipComponent', () => {
     el = fixture.debugElement.query(By.css('button'));
     expect(el).toBeTruthy();
     el.triggerEventHandler('click', null);
-    const calledWith = new MapView('', '', sourceIndex, sourceCode, sourceDisplay, code, display, relationship,
+    const calledWith = new MapView('', '', sourceId, sourceIndex, sourceCode, sourceDisplay, code, display, relationship,
       'DRAFT', false, null, null, null, null, null, null, false, false, undefined, undefined);
 
     fixture.whenStable().then(() => {
@@ -201,7 +202,7 @@ describe('TargetRelationshipComponent', () => {
     const code = '1234567';
     const display = 'This is a test selection';
 
-    component.targetRows.push(new MapView('', '', sourceIndex, sourceCode, sourceDisplay, code, display, relationship,
+    component.targetRows.push(new MapView('', '', sourceId, sourceIndex, sourceCode, sourceDisplay, code, display, relationship,
       'DRAFT', false, null, null, null, null, null, null, false, false, undefined, undefined));
     selectionService.select({code, display});
 

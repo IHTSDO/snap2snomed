@@ -158,7 +158,7 @@ export class SourceNavigationService {
 
         if (mapping !== null && mapping.id && mapping.project.dualMapMode) {
           // call to get the sibling row as we may not have it (all) in the page of data retrieved
-          this.mapService.getSiblingMapViewRow(mapping.id, mapping.source.id!, mapping.id)
+          this.mapService.getSiblingMapViewRow(mapping.id, selectedRow.sourceId, mapping.id)
           .pipe(
             map((result) => {
               return MapView.create(result as MapView);
