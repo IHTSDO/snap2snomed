@@ -22,7 +22,7 @@ import {TranslateService} from '@ngx-translate/core';
 import {DroppableEventObject} from '../../_directives/droppable.directive';
 import {ErrorInfo} from '../../errormessage/errormessage.component';
 import {SelectionService} from 'src/app/_services/selection.service';
-import {Task} from 'src/app/_models/task';
+import {Task, TaskType} from 'src/app/_models/task';
 import {StatusUtils} from '../../_utils/status_utils';
 import {SourceRow} from '../mapping-detail/mapping-detail.component';
 import {WriteDisableUtils} from "../../_utils/write_disable_utils";
@@ -151,9 +151,9 @@ export class TargetRelationshipComponent implements OnInit {
     self.removeTargetEvent.emit(targetRow);
   }
 
-  public isDualMapMode() : boolean {
-    if (this.task) {
-      return this.task.mapping.project.dualMapMode;
+  isReconcileTask() : boolean {
+    if (this.task?.type === TaskType.RECONCILE) {
+      return true;
     }
     return false;
   }

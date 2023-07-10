@@ -376,11 +376,17 @@ export class MapService {
    * @param rowId Id of row
    * @param noMap true or false
    */
-  updateNoMap(rowId: string, noMap: boolean): Observable<any> {
+  updateNoMap(rowId: string, noMap: boolean, reconcileTask: boolean): Observable<any> {
     const url = `${this.config.apiBaseUrl}/mapRows/${rowId}`;
     const header = ServiceUtils.getHTTPHeaders();
     const status = noMap ? MapRowStatus.DRAFT : MapRowStatus.UNMAPPED;
-    const body = {noMap, status};
+    let body : {};
+    if (reconcileTask) {
+      body = {noMap};
+    }
+    else {
+      body = {noMap, status};
+    }
     return this.http.patch<any>(url, body, header);
   }
 

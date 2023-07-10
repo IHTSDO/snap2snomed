@@ -480,7 +480,7 @@ export class MappingWorkComponent implements OnInit, OnDestroy {
   showDetail(row_idx: number): void {
     const self = this;
     if (self.task_id && self.task) {
-      self.sourceNavigation.loadSourceNav(self.task_id, self.task.mapping, this.getContext(), row_idx);
+      self.sourceNavigation.loadSourceNav(self.task, self.task.mapping, this.getContext(), row_idx);
       self.opened = true;
       switch(self.task?.type) { 
         case 'AUTHOR': { 

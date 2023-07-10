@@ -214,6 +214,13 @@ export class MappingDetailComponent implements OnInit, OnDestroy {
     return false;
   }
 
+  isReconcileTask() : boolean {
+    if (this.task?.type === TaskType.RECONCILE) {
+      return true;
+    }
+    return false;
+  }
+
   isNoMapChecked() : boolean {
     if (this.isDualMapMode() && this.selectedRowset?.siblingRow) {
       return this.source.noMap || this.selectedRowset.siblingRow.noMap;
@@ -299,12 +306,12 @@ export class MappingDetailComponent implements OnInit, OnDestroy {
       // self.noMap = self.source.noMap;
 
       let taskId : string | undefined = self.task.id;
-      if (this.isDualMapMode()) {
+      if (this.isReconcileTask()) {
         taskId = undefined;
       }
       self.mapService.findTargetsBySourceIndex(self.task.mapping.id, self.source.index, taskId).pipe(debounceTime(200)).subscribe((rows) => {
         const source = self.source;
-        if (source && !source.noMap && rows._embedded.mapRowTargets.length > 0) {
+        if (source && rows._embedded.mapRowTargets.length > 0) {
           self.mapRows = rows._embedded.mapRowTargets.map((target) => {
             const status = target.row?.status ?? MapRowStatus.UNMAPPED;
             const flagged = target.row?.id ? target.flagged : undefined;
@@ -355,10 +362,13 @@ export class MappingDetailComponent implements OnInit, OnDestroy {
       this.mapService.deleteTarget(mapView.targetId).subscribe((result) => {
           self.mapRows = self.mapRows.map((r) => r).filter((row) => row !== mapView);
           self.updateSelectedRowSet(false);
-          if (self.mapRows.length <= 0) {
-            self.updateStatus(MapRowStatus.UNMAPPED);
-          } else {
-            self.updateStatus(MapRowStatus.DRAFT);
+          ///TODO check after hear back from Kylynn RE: status for dual mapped rows
+          if (!this.isReconcileTask()) {
+            if (self.mapRows.length <= 0) {
+              self.updateStatus(MapRowStatus.UNMAPPED);
+            } else {
+              self.updateStatus(MapRowStatus.DRAFT);
+            }
           }
         },
         (err) => this.translate.get('ERROR.TARGETS_NOT_DELETED').subscribe((msg) => {
@@ -387,7 +397,7 @@ export class MappingDetailComponent implements OnInit, OnDestroy {
           if (ok) {
             if (self.rowId) {
               // remove any saved targets - will be deleted by API when No Map set to true
-              self.mapService.updateNoMap(self.rowId, cbNoMap).subscribe((result) => {
+              self.mapService.updateNoMap(self.rowId, cbNoMap, self.task?.type == TaskType.RECONCILE).subscribe((result) => {
                 self.source.noMap = cbNoMap;
                 self.mapRows = [];
                 self.source.status = result.status;
@@ -406,7 +416,7 @@ export class MappingDetailComponent implements OnInit, OnDestroy {
           }
         });
     } else if (self.rowId) {
-      self.mapService.updateNoMap(self.rowId, cbNoMap).subscribe((result) => {
+      self.mapService.updateNoMap(self.rowId, cbNoMap, self.task?.type == TaskType.RECONCILE).subscribe((result) => {
         self.source.noMap = cbNoMap;
         self.source.status = result.status;
         if (self.selectedRowset?.mapRow) {
@@ -423,14 +433,14 @@ export class MappingDetailComponent implements OnInit, OnDestroy {
   loadPrevious(): void {
     const self = this;
     if (self.task && self.selectedRowset?.previous) {
-      self.sourceNavigation.select(self.task.id, self.task.mapping, self.selectedRowset?.previous);
+      self.sourceNavigation.select(self.task, self.task.mapping, self.selectedRowset?.previous);
     }
   }
 
   loadNext(): void {
     const self = this;
     if (self.task && self.selectedRowset?.next) {
-      self.sourceNavigation.select(self.task.id, self.task.mapping, self.selectedRowset?.next);
+      self.sourceNavigation.select(self.task, self.task.mapping, self.selectedRowset?.next);
     }
   }
 
@@ -475,13 +485,34 @@ export class MappingDetailComponent implements OnInit, OnDestroy {
       }
 
       context.pageIndex = pageIndex;
-      self.sourceNavigation.loadSourceNav(self.task.id, self.task.mapping, context, firstIndex);
+      self.sourceNavigation.loadSourceNav(self.task, self.task.mapping, context, firstIndex);
     }
   }
 
   updateStatus($event: MapRowStatus): void {
     const self = this;
     if (self.rowId && $event) {
+      if (self.task?.type == TaskType.RECONCILE && $event == MapRowStatus.MAPPED) {
+
+        //TODO multiple rows?
+        if (this.isNoMapChecked() && (this.selectedRowset?.mapRow?.targetCode || this.selectedRowset?.siblingRow?.targetCode)) {
+          self.translate.get('ERROR.RECONCILE_NO_MAP_AND_TARGETS').subscribe((res: any) => {
+            self.error.message = res;
+          });
+        }
+        else if (!this.isNoMapChecked() && !this.selectedRowset?.mapRow?.targetCode && !this.selectedRowset?.siblingRow?.targetCode) {
+          self.translate.get('ERROR.RECONCILE_NO_NO_MAP_OR_TARGETS').subscribe((res: any) => {
+            self.error.message = res;
+          });          
+        }
+        else if ((this.selectedRowset?.mapRow?.targetCode === this.selectedRowset?.siblingRow?.targetCode) 
+          && (this.selectedRowset?.mapRow?.relationship !== this.selectedRowset?.siblingRow?.relationship)) {
+          self.translate.get('ERROR.RECONCILE_NO_NO_MAP_OR_TARGETS').subscribe((res: any) => {
+            self.error.message = res;
+          });  
+        }
+        
+      }
       self.mapService.updateStatus(self.rowId, $event).subscribe((result) => {
           self.source.status = result.status;
           if (self.task && self.selectedRowset?.current && self.selectedRowset?.mapRow) {

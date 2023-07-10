@@ -21,6 +21,7 @@ import {catchError, map} from 'rxjs/operators';
 import {MapService} from './map.service';
 import {ViewContext} from '../store/mapping-feature/mapping.actions';
 import { Mapping } from '../_models/mapping';
+import { Task, TaskType } from '../_models/task';
 
 interface MapViewParams {
   page: Page;
@@ -83,8 +84,8 @@ export class SourceNavigationService {
    * @param params View filters and sorting
    * @param row_idx Index of row in the view
    */
-  loadSourceNav(task_id: string, mapping : Mapping | null, params: ViewContext, row_idx: number): void {
-    this.setSourceNavigation(task_id, mapping, row_idx, params);
+  loadSourceNav(task: Task, mapping : Mapping | null, params: ViewContext, row_idx: number): void {
+    this.setSourceNavigation(task, mapping, row_idx, params);
   }
 
   private findAdjacentSource(task_id: string, params: ViewContext, sourceIndex: string,
@@ -129,8 +130,8 @@ export class SourceNavigationService {
     }
   }
 
-  select(task_id: string, mapping: Mapping | null, row: MapViewParams): void {
-    this.setSourceNavigation(task_id, mapping, row.rowIndex, row.params);
+  select(task: Task, mapping: Mapping | null, row: MapViewParams): void {
+    this.setSourceNavigation(task, mapping, row.rowIndex, row.params);
   }
 
   /**
@@ -142,11 +143,11 @@ export class SourceNavigationService {
    * @param task - Current Task
    * @param page - Page representation of the view
    */
-  private setSourceNavigation(task_id: string, mapping: Mapping | null, row_idx: number | null, params: ViewContext): void {
+  private setSourceNavigation(task: Task, mapping: Mapping | null, row_idx: number | null, params: ViewContext): void {
     if (row_idx !== null) {
       let siblingRow: MapView | null = null;
       // Refresh page.data to avoid bugs with changes to status or noMap
-      this.mapService.getTaskView(task_id,
+      this.mapService.getTaskView(task.id,
         params.pageIndex, params.pageSize, params.sortColumn, params.sortDir, params.filter)
         .pipe(
           map((result) => {
@@ -156,7 +157,7 @@ export class SourceNavigationService {
         ).subscribe((page: Page) => {
         const selectedRow = page.data[row_idx];
 
-        if (mapping !== null && mapping.id && mapping.project.dualMapMode) {
+        if (mapping !== null && mapping.id && mapping.project.dualMapMode && task.type == TaskType.RECONCILE) {
           // call to get the sibling row as we may not have it (all) in the page of data retrieved
           this.mapService.getSiblingMapViewRow(mapping.id, selectedRow.sourceId, selectedRow.rowId)
           .pipe(
@@ -165,11 +166,11 @@ export class SourceNavigationService {
             }),
           ).subscribe((mapView: MapView) => {
             siblingRow = mapView;
-            this.configureSourceNaviagation(page, row_idx, selectedRow, siblingRow, task_id, params);
+            this.configureSourceNaviagation(page, row_idx, selectedRow, siblingRow, task.id, params);
           });
         }
         else {
-          this.configureSourceNaviagation(page, row_idx, selectedRow, siblingRow, task_id, params);
+          this.configureSourceNaviagation(page, row_idx, selectedRow, siblingRow, task.id, params);
         }
       });
     }

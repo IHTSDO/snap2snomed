@@ -103,8 +103,7 @@
             <mat-card-header>
               <mat-card-title>{{'DETAILS.TARGET_BY_RELATIONSHIP' | translate}}</mat-card-title>
               <span class="cbNoMap pull-right">
-                <!--TODO *ngIf="isDualMapMode() && row.lastAuthor"-->
-                <app-user-chip id="targetLastAuthorUserChip" *ngIf="isNoMapChecked()" 
+                <app-user-chip id="targetLastAuthorUserChip" *ngIf="isReconcileTask() && isNoMapChecked()" 
                 [user]="getNoMapAuthor()" [font_size]="'12px'"></app-user-chip>
                 <mat-checkbox [checked]="isNoMapChecked()"
                               [disabled]="writeDisableUtils.isEditDisabled(this.task?.type, toMapRowStatus(source.status))"

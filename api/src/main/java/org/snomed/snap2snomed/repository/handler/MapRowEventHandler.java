@@ -16,6 +16,7 @@
 
 package org.snomed.snap2snomed.repository.handler;
 
+import java.time.Instant;
 import java.util.Collections;
 import java.util.List;
 
@@ -29,6 +30,7 @@ import org.snomed.snap2snomed.problem.mapping.InvalidMappingProblem;
 import org.snomed.snap2snomed.problem.mapping.UnauthorisedMappingProblem;
 import org.snomed.snap2snomed.repository.MapRowRepository;
 import org.snomed.snap2snomed.repository.MapRowTargetRepository;
+import org.snomed.snap2snomed.repository.NoteRepository;
 import org.snomed.snap2snomed.security.AuthenticationFacade;
 import org.snomed.snap2snomed.util.EntityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,6 +52,9 @@ public class MapRowEventHandler {
 
   @Autowired
   MapRowTargetRepository mapRowTargetRepository;
+
+  @Autowired
+  NoteRepository noteRepository;
 
   @Autowired
   AuthenticationFacade authenticationFacade;
@@ -127,7 +132,33 @@ public class MapRowEventHandler {
 
         // TODO check if author task no longer has any tasks and delete the task - ML said framework should take care of this
       }
+      else if ((mapRow.getStatus() == MapStatus.MAPPED && siblingMapRow.getStatus() == MapStatus.RECONCILE) ||
+          (mapRow.getStatus() == MapStatus.RECONCILE && siblingMapRow.getStatus() == MapStatus.MAPPED)) {
+
+        // Reconciler has fixed the dual map .. merge two rows together
+
+        if (siblingMapRow.isNoMap()) {
+          mapRow.setNoMap(true);
+        }
+
+        List<MapRowTarget> mapRowTargets = mapRow.getMapRowTargets();
+        mapRowTargets.addAll(siblingMapRow.getMapRowTargets());
+
+        Note note = new Note();
+        //TODO finalise format
+        note.setNoteText("This row was dual mapped by " + mapRow.getLastAuthor().getFullName() + " and " + siblingMapRow.getLastAuthor().getFullName());
+        note.setCreated(Instant.now());
+        note.setCreatedBy(authenticationFacade.getAuthenticatedUser().getId());
+        note.setNoteBy(authenticationFacade.getAuthenticatedUser());
+        note.setMapRow(mapRow);
+        note = noteRepository.save(note);
+
+        mapRowRepository.save(mapRow);
+        mapRowRepository.delete(siblingMapRow);
+
+      }
     }
+
   }
 
   /*
@@ -175,12 +206,15 @@ public class MapRowEventHandler {
 
     boolean author = EntityUtils.isTaskAssignee(currentUser, mapRowFromDatabase.getAuthorTask());
     boolean reviewer = EntityUtils.isTaskAssignee(currentUser, mapRowFromDatabase.getReviewTask());
-    MapStatus.Role role = author ? MapStatus.Role.AUTHOR : reviewer ? MapStatus.Role.REVIEWER : null ;
+    boolean reconciler = EntityUtils.isTaskAssignee(currentUser, mapRowFromDatabase.getReconcileTask());
+    MapStatus.Role role = author ? MapStatus.Role.AUTHOR : reviewer ? MapStatus.Role.REVIEWER : reconciler ? MapStatus.Role.RECONCILER : null ;
 
     if (author && reviewer) {
       // state transition will be validated precommit
       validateAuthorChanges(mapRow, mapRowFromDatabase);
-    } else if (author || reviewer) {
+    } else if (author || reviewer || reconciler) {
+      System.err.println("role"+ role.getName());
+      System.err.println("mapRow.getStatus()"+ mapRow.getStatus());
       if (!mapRowFromDatabase.getStatus().isValidTransitionForRole(mapRow.getStatus(), role)) {
         throw new UnauthorisedMappingProblem(
           role.getName() + " can only change rows that are in a valid " + role.getStateName()
@@ -193,8 +227,11 @@ public class MapRowEventHandler {
           throw new UnauthorisedMappingProblem("Reviewer cannot change no map status");
         }
       }
+      else if (reconciler) {
+        validateReconcilerChanges(mapRow, mapRowFromDatabase);
+      }
     } else {
-      throw new UnauthorisedMappingProblem("User is neither author nor reviewer for the requested update");
+      throw new UnauthorisedMappingProblem("User is not author / reviewer / reconciler for the requested update");
     }
   }
 
@@ -207,6 +244,12 @@ public class MapRowEventHandler {
     } else if (MapStatus.UNMAPPED.equals(mapRow.getStatus()) && (mapRow.isNoMap() || !mapRow.getMapRowTargets().isEmpty())) {
       throw new InvalidMappingProblem("Cannot change state to UNMAPPED for row with mapping targets or 'no map' set");
     }
+  }
+
+  private void validateReconcilerChanges(MapRow mapRow, MapRow mapRowFromDatabase) {
+        //TODO put reconciler limitations here
+        // prevent no map and target and setting status to mapped
+        // prevent multiple target and setting status to mapped
   }
 
   private boolean immutableFieldChanged(MapRow mapRow, MapRow mapRowFromDatabase) {
@@ -231,6 +274,7 @@ public class MapRowEventHandler {
   }
 
   private void updateLastAuthorOrReviewed(MapRow mapRow) {
+    //TODO review for reconcile
     if (mapRow.getStatus().isAuthorState()) {
       mapRow.setLastAuthor(authenticationFacade.getAuthenticatedUser());
     } else {

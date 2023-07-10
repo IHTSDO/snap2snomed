@@ -315,7 +315,7 @@ export class MappingTableComponent implements OnInit, AfterViewInit, OnDestroy {
         confirmDialogRef.afterClosed().subscribe(
           (ok) => {
             if (ok) {
-              self.mapService.updateNoMap(mapView.rowId, mapView.noMap).subscribe((res) => {
+              self.mapService.updateNoMap(mapView.rowId, mapView.noMap, this.task!.isReconcile()).subscribe((res) => {
                 mapView.updateFromRow(res);
                 self.updateTableEvent.emit();
               });
@@ -333,7 +333,7 @@ export class MappingTableComponent implements OnInit, AfterViewInit, OnDestroy {
           });
 
       } else {
-        self.mapService.updateNoMap(mapView.rowId, mapView.noMap).subscribe((res) => {
+        self.mapService.updateNoMap(mapView.rowId, mapView.noMap, this.task!.isReconcile()).subscribe((res) => {
           mapView.updateFromRow(res);
           self.updateTableEvent.emit();
         });
