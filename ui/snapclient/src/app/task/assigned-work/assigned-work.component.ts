@@ -193,10 +193,16 @@ export class AssignedWorkComponent implements OnInit, AfterViewInit, OnDestroy {
         self.activeTab = 1;
         break;
       case TaskType.REVIEW:
-        self.activeTab = 2;
+        if (this.mapping?.project.dualMapMode) {
+          self.activeTab = 3;
+        }
+        else {
+          self.activeTab = 2;
+        }
+  
         break;
       case TaskType.RECONCILE:
-        self.activeTab = 3;
+        self.activeTab = 2;
         break;
       default:
         self.activeTab = 0;
@@ -219,6 +225,7 @@ export class AssignedWorkComponent implements OnInit, AfterViewInit, OnDestroy {
     if (this.selectedTaskType !== $event) {
       this.selectedTaskType = $event;
     }
+    console.log("selectedtasktype", this.selectedTaskType);
     switch (this.selectedTaskType) {
       case TaskType.AUTHOR:
         this.authCurrentPage = 0;
