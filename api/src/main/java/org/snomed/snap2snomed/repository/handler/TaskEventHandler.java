@@ -281,7 +281,7 @@ public class TaskEventHandler {
     if (task.getMap().getProject().getDualMapMode()) {
       //TODO: check if only applies for author task
       return new JPAQuery<User>(entityManager)
-      .select(mapRow.sourceCode.index).distinct()
+      .select(mapRow.sourceCode.index)
       .from(mapRow)
       .leftJoin(mapRow.lastAuthor)
       .leftJoin(mapRow.lastReviewer)
@@ -289,7 +289,7 @@ public class TaskEventHandler {
       .leftJoin(mapRow.reviewTask)
       .where(whereClause)
       .groupBy(mapRow.sourceCode.index)
-      .having(mapRow.sourceCode.index.count().gt(Integer.valueOf(2)))
+      .having(mapRow.sourceCode.index.count().gt(Integer.valueOf(1)))
       .fetch();
     }
     else {
