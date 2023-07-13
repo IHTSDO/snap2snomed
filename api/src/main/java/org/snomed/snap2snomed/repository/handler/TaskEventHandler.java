@@ -116,8 +116,10 @@ public class TaskEventHandler {
     Instant modified = Instant.now();
     if (task.getType().equals(TaskType.AUTHOR)) {
       mapRowRepository.setAuthorTaskToNull(task, modified, principalSubject);
-    } else {
+    } else if (task.getType().equals(TaskType.REVIEW)) {
       mapRowRepository.setReviewTaskToNull(task, modified, principalSubject);
+    } else if (task.getType().equals(TaskType.RECONCILE)) {
+      mapRowRepository.setReconcileTaskToNull(task, modified, principalSubject);
     }
     setMapRows(task);
   }
@@ -139,8 +141,10 @@ public class TaskEventHandler {
 
     if (task.getType().equals(TaskType.AUTHOR)) {
       mapRowRepository.setAuthorTaskToNull(task, modified, principalSubject);
-    } else {
+    } else if (task.getType().equals(TaskType.REVIEW)) {
       mapRowRepository.setReviewTaskToNull(task, modified, principalSubject);
+    } else if (task.getType().equals(TaskType.RECONCILE)) {
+      mapRowRepository.setReconcileTaskToNull(task, modified, principalSubject);
     }
   }
 
@@ -277,9 +281,8 @@ public class TaskEventHandler {
           .and(mapRow.reviewTask.id.ne(task.getId()));
     }
     whereClause = getSourceIndexWhereClause(task, whereClause).and(expression);
-
-    if (task.getMap().getProject().getDualMapMode()) {
-      //TODO: check if only applies for author task
+    //TODO review for reconcile task
+    if (task.getType() == TaskType.AUTHOR && task.getMap().getProject().getDualMapMode()) {
       return new JPAQuery<User>(entityManager)
       .select(mapRow.sourceCode.index)
       .from(mapRow)
@@ -356,11 +359,8 @@ public class TaskEventHandler {
      * By reassigning rows to different tasks, it is possible for a task to become "empty" i.e. have no rows associated with it. This case
      * will be handled by deleting these tasks.
      */
-    if (!task.getMap().getProject().getDualMapMode()) {
-      /*TODO: Change logic so permits two authors .. earlier need to prevent the removal of source 
-      indexes from existing */
-      taskRepository.deleteTasksWithNoMapRows();
-    }
+
+    taskRepository.deleteTasksWithNoMapRows();
   }
 
   private void associateMapRows(Task task, RangeSet<Long> rangeSet) {

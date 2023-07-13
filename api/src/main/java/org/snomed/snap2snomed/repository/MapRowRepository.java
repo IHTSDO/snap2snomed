@@ -196,12 +196,17 @@ public interface MapRowRepository
   @RestResource(exported = false)
   void setReviewTaskToNull(Task task, Instant date, String user);
 
+  @Query("update MapRow mr set mr.reconcileTask = null, mr.modifiedBy = :user, mr.modified = :date  where mr.reconcileTask = :task")
+  @Modifying
+  @RestResource(exported = false)
+  void setReconcileTaskToNull(Task task, Instant date, String user);
+
   @Query("select distinct mr.sourceCode.index from MapRow mr "
-      + "where mr.reviewTask = :task or mr.authorTask = :task order by mr.sourceCode.index asc")
+      + "where mr.reconcileTask = :task or mr.reviewTask = :task or mr.authorTask = :task order by mr.sourceCode.index asc")
   @RestResource(exported = false)
   List<Long> getSourceRowIndexesForTask(Task task);
 
-  @Query("select distinct mr.sourceCode.index from MapRow mr where (mr.authorTask = :task or mr.reviewTask = :task) and mr.status not in (:statuses)")
+  @Query("select distinct mr.sourceCode.index from MapRow mr where (mr.authorTask = :task or mr.reviewTask = :task or mr.reconcileTask = :task) and mr.status not in (:statuses)")
   @RestResource(exported = false)
   List<Long> getSourceRowIndexesForTaskNotInState(Task task, List<MapStatus> statuses);
 
@@ -217,7 +222,7 @@ public interface MapRowRepository
   @RestResource(exported = false)
   List<AutomapRowDto> findUnmappedAuthorTaskRows(Long taskId);
 
-  @Query("select mr from MapRow mr where mr.authorTask.id = :taskId or mr.reviewTask.id = :taskId")
+  @Query("select mr from MapRow mr where mr.authorTask.id = :taskId or mr.reviewTask.id = :taskId or mr.reconcileTask.id = :taskId")
   @RestResource(exported = false)
   List<MapRow> findMapRowsByTaskId(Long taskId);
 
