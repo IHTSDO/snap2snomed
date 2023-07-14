@@ -281,7 +281,6 @@ public class TaskEventHandler {
           .and(mapRow.reviewTask.id.ne(task.getId()));
     }
     whereClause = getSourceIndexWhereClause(task, whereClause).and(expression);
-    //TODO review for reconcile task
     if (task.getType() == TaskType.AUTHOR && task.getMap().getProject().getDualMapMode()) {
       return new JPAQuery<User>(entityManager)
       .select(mapRow.sourceCode.index)
