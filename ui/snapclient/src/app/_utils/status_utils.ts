@@ -72,6 +72,7 @@ export class StatusUtils {
    * getAvailableStatusOptions for status toggle
    */
   static getAvailableStatusOptions(taskType: TaskType, status: MapRowStatus): MapRowStatus[] {
+    console.log("tasktype", taskType);
     let statusList: MapRowStatus[] = mapRowStatuses;
     switch (taskType) {
       case TaskType.AUTHOR:
@@ -79,6 +80,8 @@ export class StatusUtils {
           statusList = [MapRowStatus.UNMAPPED];
         } else if (status === MapRowStatus.REJECTED) {
           statusList = authorStatuses.filter((m) => m !== MapRowStatus.UNMAPPED).concat([MapRowStatus.REJECTED])
+        } else if (status === MapRowStatus.RECONCILE) {
+          statusList = [MapRowStatus.RECONCILE];
         } else if (this.inAuthoredState(status)) {
           statusList = authorStatuses.filter((m) => m !== MapRowStatus.UNMAPPED);
         } else if (this.inReviewedState(status)) {
