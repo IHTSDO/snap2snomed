@@ -252,6 +252,13 @@
       <version>${mockserver.version}</version>
       <scope>test</scope>
     </dependency>
+    <!-- included to work around trivy issue with mock-server dependency  CVE-2023-2976 in 31.1-jre .. remove when mock-server updates dependency -->
+    <dependency>
+        <groupId>com.google.guava</groupId>
+        <artifactId>guava</artifactId>
+        <version>32.1.1-jre</version>
+    </dependency>
+
     <dependency>
       <groupId>org.exparity</groupId>
       <artifactId>hamcrest-date</artifactId>
