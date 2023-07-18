@@ -19,6 +19,7 @@ package org.snomed.snap2snomed.repository.handler;
 import java.time.Instant;
 import java.util.Collections;
 import java.util.List;
+import java.util.SortedSet;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -109,17 +110,31 @@ public class MapRowEventHandler {
       // 1. check if both dual map rows have been mapped
       if (mapRow.getStatus() == MapStatus.MAPPED && siblingMapRow.getStatus() == MapStatus.MAPPED) {
 
-        // 2. check if both dual map rows agree
+        // 2. auto create note documenting those responsible for dual mapping
+        //TODO translate note
+        Note author1Note = createNote(mapRow.getAuthorTask().getAssignee().getFullName() + " dual mapped this", 
+          mapRow.getModified(), mapRow.getAuthorTask().getAssignee(), mapRow);
+        Note author2Note = createNote(siblingMapRow.getAuthorTask().getAssignee().getFullName() + " dual mapped this", 
+          siblingMapRow.getModified(), siblingMapRow.getAuthorTask().getAssignee(), siblingMapRow);
+        noteRepository.save(author1Note);
+        noteRepository.save(author2Note);
+
+        // 3a. check if both dual map rows agree .. if so resolve into one map row
         if (isEquivalentTarget(mapRow, siblingMapRow)) {
           // TODO determine equality over multiple rows
           mapRow.setAuthorTask(null);
           mapRow.setBlindMapFlag(Boolean.FALSE);
+          SortedSet<Note> siblingNotes = siblingMapRow.getNotes();
+          for (Note note : siblingNotes) {
+            Note newNote = createNote(note.getNoteText(), note.getCreated(), note.getNoteBy(), mapRow);
+            noteRepository.save(newNote);
+          }
           mapRowRepository.deleteById(siblingMapRow.getId());
           mapRowRepository.save(mapRow);
           siblingMapRow = null;
         }
         else {
-          // 3b. Put the dual map rows into the reconcile state
+          // 3b. dual map rows don't agree .. put the dual map rows into the reconcile state
           mapRow.setStatus(MapStatus.RECONCILE);
           mapRow.setAuthorTask(null);
           mapRow.setBlindMapFlag(Boolean.FALSE);
@@ -141,17 +156,18 @@ public class MapRowEventHandler {
           mapRow.setNoMap(true);
         }
 
-        List<MapRowTarget> mapRowTargets = mapRow.getMapRowTargets();
-        mapRowTargets.addAll(siblingMapRow.getMapRowTargets());
+        for (MapRowTarget siblingMapRowTarget : siblingMapRow.getMapRowTargets()) {
+          MapRowTarget newMapRowTarget = new MapRowTarget(siblingMapRowTarget.getCreated(), siblingMapRowTarget.getModified(), siblingMapRowTarget.getCreatedBy(), 
+            siblingMapRowTarget.getModifiedBy(), null, mapRow, siblingMapRowTarget.getTargetCode(), 
+            siblingMapRowTarget.getTargetDisplay(), siblingMapRowTarget.getRelationship(), siblingMapRowTarget.getTags(), siblingMapRowTarget.isFlagged());
+          mapRowTargetRepository.save(newMapRowTarget);
+        }
 
-        Note note = new Note();
-        //TODO finalise format
-        note.setNoteText("This row was dual mapped by " + mapRow.getLastAuthor().getFullName() + " and " + siblingMapRow.getLastAuthor().getFullName());
-        note.setCreated(Instant.now());
-        note.setCreatedBy(authenticationFacade.getAuthenticatedUser().getId());
-        note.setNoteBy(authenticationFacade.getAuthenticatedUser());
-        note.setMapRow(mapRow);
-        note = noteRepository.save(note);
+        SortedSet<Note> siblingNotes = siblingMapRow.getNotes();
+        for (Note note : siblingNotes) {
+          Note newNote = createNote(note.getNoteText(), note.getCreated(), note.getNoteBy(), mapRow);
+          noteRepository.save(newNote);
+        }
 
         mapRowRepository.save(mapRow);
         mapRowRepository.delete(siblingMapRow);
@@ -159,6 +175,16 @@ public class MapRowEventHandler {
       }
     }
 
+  }
+
+  private Note createNote(String noteText, Instant createdInstant, User createdByUser, MapRow mapRow) {
+    Note note = new Note();
+    note.setNoteText(noteText);
+    note.setCreated(createdInstant);
+    note.setCreatedBy(createdByUser.getId());
+    note.setNoteBy(createdByUser);
+    note.setMapRow(mapRow);
+    return note;
   }
 
   /*
