@@ -97,21 +97,13 @@ public class MapRowEventHandler {
   public void performAutomaticUpdates(MapRow mapRow) {
     updateLastAuthorOrReviewed(mapRow);
 
-    if (mapRow.isNoMap() && !mapRow.isNoMapPrevious()) {
-      log.debug("noMap has been change to true, removing dangling MapRowTargets");
-      // Clean up MapRowTargets if and only if noMap is true and was previously false
-      mapRowTargetRepository.deleteAllByRow(mapRow);
-
-    }
-    mapRow.setNoMapPrevious(mapRow.isNoMap());
-
     if (mapRow.getMap().getProject().getDualMapMode()) {
       MapRow siblingMapRow = mapRowRepository.findDualMapSiblingRow(mapRow.getMap().getId(), mapRow.getSourceCode().getId(), mapRow.getId());
       // 1. check if both dual map rows have been mapped
       if (mapRow.getStatus() == MapStatus.MAPPED && siblingMapRow.getStatus() == MapStatus.MAPPED) {
 
         // 2. auto create note documenting those responsible for dual mapping
-        //TODO translate note
+        //TODO translate note .. maybe this has to be pushed to the ui
         Note author1Note = createNote(mapRow.getAuthorTask().getAssignee().getFullName() + " dual mapped this", 
           mapRow.getModified(), mapRow.getAuthorTask().getAssignee(), mapRow);
         Note author2Note = createNote(siblingMapRow.getAuthorTask().getAssignee().getFullName() + " dual mapped this", 
@@ -226,6 +218,7 @@ public class MapRowEventHandler {
   }
 
   private void validateRequestedChange(MapRow mapRow, User currentUser, MapRow mapRowFromDatabase) {
+    //todo consider for sibling row .. should be invoked on a change to nomap?
     if (immutableFieldChanged(mapRow, mapRowFromDatabase)) {
       throw new UnauthorisedMappingProblem("Attempt to change an immutable field");
     }
@@ -291,6 +284,22 @@ public class MapRowEventHandler {
         && (mapRow.isNoMap() || mapRowTargetRepository.exists(QMapRowTarget.mapRowTarget.row.eq(mapRow)))) {
       mapRow.setStatus(MapStatus.DRAFT);
     }
+
+    if (mapRow.isNoMap() && !mapRow.isNoMapPrevious()) {
+
+      log.debug("noMap has been change to true, removing dangling MapRowTargets");
+      // Clean up MapRowTargets if and only if noMap is true and was previously false
+
+      mapRowTargetRepository.deleteAllByRow(mapRow);
+      
+      if (mapRow.getMap().getProject().getDualMapMode()) {
+        MapRow siblingMapRow = mapRowRepository.findDualMapSiblingRow(mapRow.getMap().getId(), mapRow.getSourceCode().getId(), mapRow.getId());
+        mapRowTargetRepository.deleteAllByRow(siblingMapRow);
+
+      }
+
+    }
+    mapRow.setNoMapPrevious(mapRow.isNoMap());
   }
 
   @HandleBeforeLinkSave
