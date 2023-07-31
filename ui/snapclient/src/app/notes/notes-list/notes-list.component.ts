@@ -17,7 +17,7 @@
 import {Component, Input, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {MapRow} from '../../_models/map_row';
 import {User} from '../../_models/user';
-import {Note} from '../../_models/note';
+import {Note, NoteCategory} from '../../_models/note';
 import {Store} from '@ngrx/store';
 import {IAppState} from '../../store/app.state';
 import {TranslateService} from '@ngx-translate/core';
@@ -51,6 +51,7 @@ export class NotesListComponent implements OnInit, OnDestroy {
   mapRow: MapRow | null = null;
   error: ErrorInfo = {};
   notes: Note[] = [];
+  systemNotes: Note[] = [];
   newNote: Note | null;
   MAX_NOTE = FormUtils.MAX_NOTE;
   VALID_STRING_PATTERN = FormUtils.VALID_STRING_PATTERN;
@@ -142,15 +143,17 @@ export class NotesListComponent implements OnInit, OnDestroy {
   loadNotes(): void {
     const self = this;
     if (self.mapRow?.id) {
-      self.newNote = new Note(null, '', new User(), '', '', self.mapRow);
-      self.mapService.getNotesByMapRow(self.mapRow.id).subscribe((results: NoteResults) => {
+      self.newNote = new Note(null, '', new User(), '', '', self.mapRow, NoteCategory.USER);
+
+      // user notes
+      self.mapService.getNotesByMapRow(self.mapRow.id, NoteCategory.USER).subscribe((results: NoteResults) => {
         self.notes = results._embedded.notes.map((note) => {
           note.noteBy.givenName = note.noteBy.givenName ?? '';
           note.noteBy.familyName = note.noteBy.familyName ?? '';
           return note;
         });
         if (this.sourceNavSet?.siblingRow) {
-          self.mapService.getNotesByMapRow(this.sourceNavSet?.siblingRow?.rowId).subscribe((results: NoteResults) => {
+          self.mapService.getNotesByMapRow(this.sourceNavSet?.siblingRow?.rowId, NoteCategory.USER).subscribe((results: NoteResults) => {
             let siblingNotes = results._embedded.notes.map((note) => {
               note.noteBy.givenName = note.noteBy.givenName ?? '';
               note.noteBy.familyName = note.noteBy.familyName ?? '';
@@ -161,7 +164,31 @@ export class NotesListComponent implements OnInit, OnDestroy {
         }
         self.notes.sort((a, b) => self.sortNotes(a, b));
       });
+
+      // system notes
+      self.mapService.getNotesByMapRow(self.mapRow.id, NoteCategory.STATUS).subscribe((results: NoteResults) => {
+        self.systemNotes = results._embedded.notes.map((note) => {
+          note.noteBy.givenName = '';
+          note.noteBy.familyName = '';
+          note.noteBy.id = '';
+          return note;
+        });
+        self.systemNotes.sort((a, b) => self.sortNotes(a, b));
+      });
+      if (this.sourceNavSet?.siblingRow) {
+        self.mapService.getNotesByMapRow(this.sourceNavSet?.siblingRow?.rowId, NoteCategory.STATUS).subscribe((results: NoteResults) => {
+          let siblingNotes = results._embedded.notes.map((note) => {
+            note.noteBy.givenName = '';
+            note.noteBy.familyName = '';
+            note.noteBy.id = '';
+            return note;
+          });
+          self.systemNotes = self.systemNotes.concat(siblingNotes);
+        })
+      }
+      self.systemNotes.sort((a, b) => self.sortNotes(a, b));
     }
+    
   }
 
   isValid(): boolean {

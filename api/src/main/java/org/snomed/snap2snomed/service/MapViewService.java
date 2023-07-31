@@ -1,5 +1,5 @@
 /*
- * Copyright © 2022 SNOMED International
+ * Copyright © 2022-23 SNOMED International
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,6 +43,7 @@ import org.snomed.snap2snomed.model.Task;
 import org.snomed.snap2snomed.model.enumeration.ColumnType;
 import org.snomed.snap2snomed.model.enumeration.MapStatus;
 import org.snomed.snap2snomed.model.enumeration.MappingRelationship;
+import org.snomed.snap2snomed.model.enumeration.NoteCategory;
 import org.snomed.snap2snomed.model.enumeration.TaskType;
 import org.snomed.snap2snomed.problem.auth.NotAuthorisedProblem;
 import org.snomed.snap2snomed.repository.DbMapViewRepository;
@@ -489,7 +490,7 @@ public class MapViewService {
       JPAQuery<MapView> query = new JPAQuery<MapView>(entityManager)
       .select(Projections.constructor(MapView.class, mapRow, mapTarget,
           ExpressionUtils.as(JPAExpressions.select(note.modified.max()).from(note)
-              .where(note.mapRow.eq(mapRow).and(note.deleted.isFalse())), "latestNote"),
+              .where(note.mapRow.eq(mapRow).and(note.category.eq(NoteCategory.USER)).and(note.deleted.isFalse())), "latestNote"),
               mapRow.status))
       .from(mapRow)
       .leftJoin(mapTarget).on(mapTarget.row.eq(mapRow))
@@ -512,7 +513,7 @@ public class MapViewService {
       return new JPAQuery<MapView>(entityManager)
       .select(Projections.constructor(MapView.class, mapView.mapRow, mapTarget,
           ExpressionUtils.as(JPAExpressions.select(note.modified.max()).from(note)
-              .where(note.mapRow.eq(mapView.mapRow).and(note.deleted.isFalse())), "latestNote"),
+              .where(note.mapRow.eq(mapView.mapRow).and(note.category.eq(NoteCategory.USER)).and(note.deleted.isFalse())), "latestNote"),
               mapView.status, mapView.siblingRowAuthorTask))
       .from(mapView)
       .leftJoin(mapTarget).on(mapTarget.row.eq(mapView.mapRow))
@@ -533,7 +534,7 @@ public class MapViewService {
     return new JPAQuery<MapView>(entityManager)
         .select(Projections.constructor(MapView.class, mapRow, mapTarget,
             ExpressionUtils.as(JPAExpressions.select(note.modified.max()).from(note)
-                .where(note.mapRow.eq(mapRow).and(note.deleted.isFalse())), "latestNote")))
+                .where(note.mapRow.eq(mapRow).and(note.category.eq(NoteCategory.USER)).and(note.deleted.isFalse())), "latestNote")))
         .from(mapRow)
         .leftJoin(mapTarget).on(mapTarget.row.eq(mapRow))
         .leftJoin(mapRow.authorTask)
@@ -628,7 +629,7 @@ public class MapViewService {
     JPAQuery<MapView> query = new JPAQuery<MapView>(entityManager)
         .select(Projections.constructor(MapView.class, mapRow, mapTarget,
             ExpressionUtils.as(JPAExpressions.select(note.modified.max()).from(note)
-                .where(note.mapRow.eq(mapRow).and(note.deleted.isFalse())), "latestNote")))
+                .where(note.mapRow.eq(mapRow).and(note.category.eq(NoteCategory.USER)).and(note.deleted.isFalse())), "latestNote")))
         .from(mapRow)
         .leftJoin(mapTarget).on(mapTarget.row.eq(mapRow))
         .where(mapRow.map.id.eq(mapId))

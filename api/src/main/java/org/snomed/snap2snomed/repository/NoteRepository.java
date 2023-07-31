@@ -1,5 +1,5 @@
 /*
- * Copyright © 2022 SNOMED International
+ * Copyright © 2022-23 SNOMED International
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,8 @@ package org.snomed.snap2snomed.repository;
 
 import java.util.Optional;
 import org.snomed.snap2snomed.model.Note;
+import org.snomed.snap2snomed.model.Task;
+import org.snomed.snap2snomed.model.enumeration.NoteCategory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -38,6 +40,13 @@ public interface NoteRepository extends RevisionRepository<Note, Long, Integer>,
         "(true = ?#{@authenticationFacadeImpl.isAdminUser()} or exists (select 1 from User u where u.id = " +
         "?#{@authenticationFacadeImpl.principalSubject} and n.mapRow.id = :id and (u member of n.mapRow.map.project.owners or u member of n.mapRow.map.project.members or u member of n.mapRow.map.project.guests))) ")
     Page<Note> findByMapRowId(Long id, Pageable pageable);
+
+    @Query("select n from Note n where n.mapRow.id = :id and n.deleted = false and " +
+        "n.category = :category and " +
+        "(true = ?#{@authenticationFacadeImpl.isAdminUser()} or exists (select 1 from User u where u.id = " +
+        "?#{@authenticationFacadeImpl.principalSubject} and n.mapRow.id = :id " +
+        "and (u member of n.mapRow.map.project.owners or u member of n.mapRow.map.project.members or u member of n.mapRow.map.project.guests))) ")
+    Page<Note> findByMapRowIdAndCategory(Long id, NoteCategory category, Pageable pageable);
 
     @Override
     @Query("select n from Note n where n.deleted = false and true = ?#{@authenticationFacadeImpl.isAdminUser()} or " +

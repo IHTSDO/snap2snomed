@@ -23,6 +23,7 @@
     "DIALOG_NOTE_DELETE": "DELETE NOTE",
     "DIALOG_NOTE_TITLE": "Delete Note",
     "NOTES": "Notes",
+    "SYSTEM_NOTES": "System Notes",
     "HAS_NOTES": "Source has notes",
     "SOURCE_DETAILS": "Source details",
     "TARGET_SEARCH_RESULTS": "Target search results",
@@ -95,9 +96,9 @@
     "EXPORT_FAILED": "Export Failed",
     "EXISTING_VERSION": "A map with the same version already exists",
     "PROJECT_LOAD": "Project access may not be authorized",
-    "RECONCILE_NO_MAP_AND_TARGETS": "This map is not fully reconciled.  No Map cannot be selected when targets are supplied",
-    "RECONCILE_NO_NO_MAP_OR_TARGETS": "This map is not fully reconciled. Either No Map needs to be selected or targets should be supplied",
-    "RECONCILE_SAME_TARGET_MULTIPLE_RELATIONSHIPS": "This map is not fully reconciled. The same target exists with multiple relationships"
+    "RECONCILE_NO_MAP_AND_TARGETS": "This map is not yet fully reconciled.  No Map cannot be selected when targets are specified",
+    "RECONCILE_NO_NO_MAP_OR_TARGETS": "This map is not yet fully reconciled. Either No Map needs to be selected or targets should be specified",
+    "RECONCILE_SAME_TARGET_MULTIPLE_RELATIONSHIPS": "This map is not yet fully reconciled. The same target exists with multiple relationships"
   },
   "FORM": {
     "CANCEL": "Cancel",

@@ -1,5 +1,5 @@
 /*
- * Copyright © 2022 SNOMED International
+ * Copyright © 2022-23 SNOMED International
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import javax.persistence.PersistenceContext;
 import lombok.extern.slf4j.Slf4j;
 import org.snomed.snap2snomed.model.*;
 import org.snomed.snap2snomed.model.enumeration.MapStatus;
+import org.snomed.snap2snomed.model.enumeration.NoteCategory;
 import org.snomed.snap2snomed.problem.auth.NotAuthorisedProblem;
 import org.snomed.snap2snomed.problem.mapping.InvalidMappingProblem;
 import org.snomed.snap2snomed.problem.mapping.UnauthorisedMappingProblem;
@@ -105,9 +106,9 @@ public class MapRowEventHandler {
         // 2. auto create note documenting those responsible for dual mapping
         //TODO translate note .. maybe this has to be pushed to the ui
         Note author1Note = createNote(mapRow.getAuthorTask().getAssignee().getFullName() + " dual mapped this", 
-          mapRow.getModified(), mapRow.getAuthorTask().getAssignee(), mapRow);
+          mapRow.getModified(), mapRow.getAuthorTask().getAssignee(), mapRow, NoteCategory.STATUS);
         Note author2Note = createNote(siblingMapRow.getAuthorTask().getAssignee().getFullName() + " dual mapped this", 
-          siblingMapRow.getModified(), siblingMapRow.getAuthorTask().getAssignee(), siblingMapRow);
+          siblingMapRow.getModified(), siblingMapRow.getAuthorTask().getAssignee(), siblingMapRow, NoteCategory.STATUS);
         noteRepository.save(author1Note);
         noteRepository.save(author2Note);
 
@@ -118,7 +119,7 @@ public class MapRowEventHandler {
           mapRow.setBlindMapFlag(Boolean.FALSE);
           SortedSet<Note> siblingNotes = siblingMapRow.getNotes();
           for (Note note : siblingNotes) {
-            Note newNote = createNote(note.getNoteText(), note.getCreated(), note.getNoteBy(), mapRow);
+            Note newNote = createNote(note.getNoteText(), note.getCreated(), note.getNoteBy(), mapRow, note.getCategory());
             noteRepository.save(newNote);
           }
           mapRowRepository.deleteById(siblingMapRow.getId());
@@ -157,7 +158,7 @@ public class MapRowEventHandler {
 
         SortedSet<Note> siblingNotes = siblingMapRow.getNotes();
         for (Note note : siblingNotes) {
-          Note newNote = createNote(note.getNoteText(), note.getCreated(), note.getNoteBy(), mapRow);
+          Note newNote = createNote(note.getNoteText(), note.getCreated(), note.getNoteBy(), mapRow, note.getCategory());
           noteRepository.save(newNote);
         }
 
@@ -169,13 +170,14 @@ public class MapRowEventHandler {
 
   }
 
-  private Note createNote(String noteText, Instant createdInstant, User createdByUser, MapRow mapRow) {
+  private Note createNote(String noteText, Instant createdInstant, User createdByUser, MapRow mapRow, NoteCategory noteCategory) {
     Note note = new Note();
     note.setNoteText(noteText);
     note.setCreated(createdInstant);
     note.setCreatedBy(createdByUser.getId());
     note.setNoteBy(createdByUser);
     note.setMapRow(mapRow);
+    note.setCategory(noteCategory);
     return note;
   }
 

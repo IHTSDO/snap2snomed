@@ -424,7 +424,9 @@ export class MappingTableComponent implements OnInit, AfterViewInit, OnDestroy {
 
             row.targetCode = event.data?.code;
             row.targetDisplay = displayTerm;
-            row.status = MapRowStatus.DRAFT;
+            if (this.task!.isReconcile()) {
+              row.status = MapRowStatus.DRAFT;
+            }
             row.relationship = MapRowRelationship.INEXACT;
             row.targetOutOfScope = false;
 

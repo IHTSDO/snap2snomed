@@ -1,5 +1,5 @@
 /*
- * Copyright © 2022 SNOMED International
+ * Copyright © 2022-23 SNOMED International
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@ import {Project} from '../_models/project';
 import {ServiceUtils} from '../_utils/service_utils';
 import {AdditionalColumn, MappedRowDetailsDto, MapRow, MapRowRelationship, MapRowStatus, MapView} from '../_models/map_row';
 import {JSONTargetRow, TargetRow} from '../_models/target_row';
-import {Note} from '../_models/note';
+import {Note, NoteCategory} from '../_models/note';
 import {APP_CONFIG, AppConfig} from '../app.config';
 import {map} from 'rxjs/operators';
 import {ImportMappingFileParams} from '../store/source-feature/source.actions';
@@ -475,12 +475,25 @@ export class MapService {
    * Get all notes by Source Row ID
    * @param mapRow ID of MapRow
    */
-  getNotesByMapRow(mapRow: string): Observable<NoteResults> {
-    const url = `${this.config.apiBaseUrl}/notes/search/findByMapRowId`;
+  getNotesByMapRow(mapRow: string, category?: NoteCategory): Observable<NoteResults> {
+
+    let url: string;
     const header = ServiceUtils.getHTTPHeaders();
-    header.params = new HttpParams()
+    
+    if (category) {
+      url = `${this.config.apiBaseUrl}/notes/search/findByMapRowIdAndCategory`;
+      header.params = new HttpParams()
+      .set('projection', 'noteView')
+      .set('id', mapRow)
+      .set('category', category);
+    }
+    else {
+      url = `${this.config.apiBaseUrl}/notes/search/findByMapRowId`;
+      header.params = new HttpParams()
       .set('projection', 'noteView')
       .set('id', mapRow);
+    }
+
     return this.http.get<NoteResults>(url, header);
   }
 

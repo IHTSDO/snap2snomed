@@ -42,4 +42,20 @@
       </div>
     </mat-card-content>
   </mat-card>
+  <mat-card id="list">
+    <mat-card-header>
+      <mat-card-title>{{'DETAILS.SYSTEM_NOTES' | translate}}
+        &nbsp;
+        <mat-chip color="accent" *ngIf="systemNotes.length > 0" selected>{{systemNotes.length}}</mat-chip>
+      </mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <div id="system-notes-list">
+        <div *ngFor="let note of systemNotes">
+          <app-notes-item [note]="note">
+          </app-notes-item>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
 </div>

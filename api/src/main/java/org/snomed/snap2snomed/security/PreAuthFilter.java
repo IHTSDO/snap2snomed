@@ -1,5 +1,5 @@
 /*
- * Copyright © 2022 SNOMED International
+ * Copyright © 2022-23 SNOMED International
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -77,6 +77,7 @@ public class PreAuthFilter extends GenericFilterBean {
             new FilterRule(HttpMethod.GET, "/users/.*", groupValues -> webSecurity.isValidUser()),
 
             new FilterRule(HttpMethod.GET, "/notes/search/findByMapRowId", groupValues -> webSecurity.isValidUser()),
+            new FilterRule(HttpMethod.GET, "/notes/search/findByMapRowIdAndCategory", groupValues -> webSecurity.isValidUser()),
             new FilterRule(HttpMethod.GET, "/notes/.*", groupValues -> webSecurity.isValidUser()),
             new FilterRule(HttpMethod.GET, "/notes", groupValues -> webSecurity.isValidUser()),
 
