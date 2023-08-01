@@ -245,7 +245,7 @@ public interface MapRowRepository
    * WHERE m.map_id = :sourceMapId
    *
    */
-  @Query(value = "insert into map_row (created, created_by, modified, modified_by, no_map, status, last_author_id, last_reviewer_id, map_id, source_code_id) select :dateTime, :user, :dateTime, :user, no_map, status, m.last_author_id, m.last_reviewer_id, :mapId, m.source_code_id from map_row m where m.map_id = :sourceMapId", nativeQuery = true)
+  @Query(value = "insert into map_row (created, created_by, modified, modified_by, no_map, status, last_author_id, last_reviewer_id, map_id, source_code_id, blind_map_flag) select :dateTime, :user, :dateTime, :user, no_map, status, m.last_author_id, m.last_reviewer_id, :mapId, m.source_code_id, m.blind_map_flag from map_row m where m.map_id = :sourceMapId", nativeQuery = true)
   @Modifying
   @RestResource(exported = false)
   int copyMapRows(Long mapId, Long sourceMapId, String user, Instant dateTime);

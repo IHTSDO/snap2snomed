@@ -309,6 +309,7 @@ function toProject(project: any, loadProject?: boolean): Project {
   proj.id = project.id;
   proj.maps = (project.maps ?? []).map((m: any) => toMapping(m, project));
   proj.mapcount = project.mapCount;
+  proj.dualMapMode = project.dualMapMode;
 
   if (loadProject) {
     const allOwners = Array.from(new Set(project.maps.flatMap((map: any) => map?.project?.owners).concat(project.owners)));
