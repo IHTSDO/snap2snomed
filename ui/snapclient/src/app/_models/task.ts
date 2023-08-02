@@ -1,5 +1,5 @@
 /*
- * Copyright © 2022 SNOMED International
+ * Copyright © 2022-23 SNOMED International
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -83,7 +83,7 @@ export class Task {
   }
 
   public isReconcile(): boolean {
-    return this.type == TaskType.RECONCILE;
+    return this.type === TaskType.RECONCILE;
   }
 }
 
