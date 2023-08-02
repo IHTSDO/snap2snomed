@@ -43,7 +43,8 @@ export class WriteDisableUtils {
    */
   static isEditDisabled(taskType: TaskType | string | undefined, status: MapRowStatus | null | undefined): boolean {
     return taskType && status ? taskType as TaskType === TaskType.REVIEW ||
-      StatusUtils.inReviewedState(status as MapRowStatus) : false;
+      StatusUtils.inReviewedState(status as MapRowStatus) || taskType as TaskType === TaskType.RECONCILE ||
+      StatusUtils.inReconcileState(status as MapRowStatus) : false;
   }
 
   /**

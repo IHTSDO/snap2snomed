@@ -1,5 +1,5 @@
 /*
- * Copyright © 2022 SNOMED International
+ * Copyright © 2022-23 SNOMED International
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,14 @@ export class StatusUtils {
   }
 
   /**
+   * Under Reconciliation (Dual Mapping)
+   */
+  static inReconcileState(status: MapRowStatus): boolean {
+    return reconcileStatuses.filter((s) => s !== MapRowStatus.MAPPED)
+    .includes(status);
+  }
+
+  /**
    * Under Review or Completed Review
    */
   static inReviewedState(status: MapRowStatus): boolean {
@@ -43,7 +51,9 @@ export class StatusUtils {
     let disableStatus = false;
     switch (taskType) {
       case TaskType.RECONCILE:
-        //TODO implement for review
+        if (mapView.status === MapRowStatus.RECONCILE) {
+          disableStatus = true;
+        }
         break;
       case TaskType.REVIEW:
         if (mapView.status === MapRowStatus.UNMAPPED || mapView.status === MapRowStatus.DRAFT) {
