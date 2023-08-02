@@ -308,14 +308,14 @@ export class MappingTableComponent implements OnInit, AfterViewInit, OnDestroy {
     const self = this;
     const mapView: MapView = self.page?.data[index] as MapView;
     if (mapView) {
-      if ($event.checked && mapView.targetCode && mapView.targetCode !== '') {
+      if (($event.checked && mapView.targetCode && mapView.targetCode !== '') || ($event.checked && self.task!.type == TaskType.RECONCILE)) {
         // when noMap ON - remove any targets - confirm
         const confirmDialogRef = self.dialog.open(ConfirmDialogComponent,
           {data: self.getNomapConfirmDialogData()});
         confirmDialogRef.afterClosed().subscribe(
           (ok) => {
             if (ok) {
-              self.mapService.updateNoMap(mapView.rowId, mapView.noMap, this.task!.isReconcile()).subscribe((res) => {
+              self.mapService.updateNoMap(mapView.rowId, mapView.noMap, this.task!.type === TaskType.RECONCILE).subscribe((res) => {
                 mapView.updateFromRow(res);
                 self.updateTableEvent.emit();
               });
@@ -333,7 +333,7 @@ export class MappingTableComponent implements OnInit, AfterViewInit, OnDestroy {
           });
 
       } else {
-        self.mapService.updateNoMap(mapView.rowId, mapView.noMap, this.task!.isReconcile()).subscribe((res) => {
+        self.mapService.updateNoMap(mapView.rowId, mapView.noMap, this.task!.type === TaskType.RECONCILE).subscribe((res) => {
           mapView.updateFromRow(res);
           self.updateTableEvent.emit();
         });
@@ -375,7 +375,7 @@ export class MappingTableComponent implements OnInit, AfterViewInit, OnDestroy {
     const self = this;
     const mapView: MapView = $event ? $event as MapView : self.page?.data[index] as MapView;
     if (mapView) {
-      if (mapView.hasTargetOrRelationshipChanged()) {
+      if (mapView.hasTargetOrRelationshipChanged() && !(self.task!.type == TaskType.RECONCILE)) {
         mapView.status = MapRowStatus.DRAFT;
       }
       this.doMapRowTargetUodate(self, mapView);
@@ -424,7 +424,7 @@ export class MappingTableComponent implements OnInit, AfterViewInit, OnDestroy {
 
             row.targetCode = event.data?.code;
             row.targetDisplay = displayTerm;
-            if (this.task!.isReconcile()) {
+            if (this.task!.type !== TaskType.RECONCILE) {
               row.status = MapRowStatus.DRAFT;
             }
             row.relationship = MapRowRelationship.INEXACT;
