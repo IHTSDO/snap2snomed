@@ -173,21 +173,22 @@ export class NotesListComponent implements OnInit, OnDestroy {
           note.noteBy.id = '';
           return note;
         });
+        if (this.sourceNavSet?.siblingRow) {
+          self.mapService.getNotesByMapRow(this.sourceNavSet?.siblingRow?.rowId, NoteCategory.STATUS).subscribe((results: NoteResults) => {
+            let siblingNotes = results._embedded.notes.map((note) => {
+              note.noteBy.givenName = '';
+              note.noteBy.familyName = '';
+              note.noteBy.id = '';
+              return note;
+            });
+            self.systemNotes = self.systemNotes.concat(siblingNotes);
+          })
+        }
         self.systemNotes.sort((a, b) => self.sortNotes(a, b));
       });
-      if (this.sourceNavSet?.siblingRow) {
-        self.mapService.getNotesByMapRow(this.sourceNavSet?.siblingRow?.rowId, NoteCategory.STATUS).subscribe((results: NoteResults) => {
-          let siblingNotes = results._embedded.notes.map((note) => {
-            note.noteBy.givenName = '';
-            note.noteBy.familyName = '';
-            note.noteBy.id = '';
-            return note;
-          });
-          self.systemNotes = self.systemNotes.concat(siblingNotes);
-        })
-      }
-      self.systemNotes.sort((a, b) => self.sortNotes(a, b));
+
     }
+
     
   }
 
