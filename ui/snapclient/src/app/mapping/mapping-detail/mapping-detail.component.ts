@@ -1,5 +1,5 @@
 /*
- * Copyright © 2022 SNOMED International
+ * Copyright © 2022-23 SNOMED International
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -345,7 +345,9 @@ export class MappingDetailComponent implements OnInit, OnDestroy {
           mapView.targetId = targetId;
           self.loadTargets();
           self.updateSelectedRowSet(true);
-          self.updateStatus(mapView.status as MapRowStatus);
+          if (!(this.isReconcileTask() && mapView.status == MapRowStatus.DRAFT)) {
+            self.updateStatus(mapView.status as MapRowStatus);
+          }
           this.targetChangedService.changeTarget(targetRow);
         },
         (err) => this.translate.get('ERROR.TARGETS_NOT_SAVED').subscribe((msg) => {
@@ -376,6 +378,38 @@ export class MappingDetailComponent implements OnInit, OnDestroy {
         })
       );
     }
+  }
+
+  canSaveTarget($event: MapRowStatus) : boolean {
+    const self = this;
+    if (self.task?.type == TaskType.RECONCILE && $event == MapRowStatus.MAPPED) {
+
+      //TODO multiple rows?
+      if (this.isNoMapChecked() && (this.selectedRowset?.mapRow?.targetCode || this.selectedRowset?.siblingRow?.targetCode)) {
+        self.translate.get('ERROR.RECONCILE_NO_MAP_AND_TARGETS').subscribe((res: any) => {
+          self.error.message = res;
+        });
+        self.source.status = MapRowStatus.RECONCILE;
+        return false;
+      }
+      else if (!this.isNoMapChecked() && !this.selectedRowset?.mapRow?.targetCode && !this.selectedRowset?.siblingRow?.targetCode) {
+        self.translate.get('ERROR.RECONCILE_NO_NO_MAP_OR_TARGETS').subscribe((res: any) => {
+          self.error.message = res;
+        });          
+        self.source.status = MapRowStatus.RECONCILE;
+        return false;
+      }
+      else if ((this.selectedRowset?.mapRow?.targetCode === this.selectedRowset?.siblingRow?.targetCode) 
+        && (this.selectedRowset?.mapRow?.relationship !== this.selectedRowset?.siblingRow?.relationship)) {
+        self.translate.get('ERROR.RECONCILE_SAME_TARGET_MULTIPLE_RELATIONSHIPS').subscribe((res: any) => {
+          self.error.message = res;
+        });  
+        self.source.status = MapRowStatus.RECONCILE;
+        return false;
+      }
+      
+    }
+    return true;
   }
 
   updateNoMap($event: MatCheckboxChange): void {
@@ -488,32 +522,20 @@ export class MappingDetailComponent implements OnInit, OnDestroy {
       self.sourceNavigation.loadSourceNav(self.task, self.task.mapping, context, firstIndex);
     }
   }
+  
+  updateStatus2(status: string): void {
+    const mrStatus: MapRowStatus | null = toMapRowStatus(status);
+    if (mrStatus) {
+      this.updateStatus(mrStatus);
+    }
+
+  }
 
   updateStatus($event: MapRowStatus): void {
     const self = this;
     if (self.rowId && $event) {
-      if (self.task?.type == TaskType.RECONCILE && $event == MapRowStatus.MAPPED) {
-
-        //TODO multiple rows?
-        if (this.isNoMapChecked() && (this.selectedRowset?.mapRow?.targetCode || this.selectedRowset?.siblingRow?.targetCode)) {
-          self.translate.get('ERROR.RECONCILE_NO_MAP_AND_TARGETS').subscribe((res: any) => {
-            self.error.message = res;
-          });
-        }
-        else if (!this.isNoMapChecked() && !this.selectedRowset?.mapRow?.targetCode && !this.selectedRowset?.siblingRow?.targetCode) {
-          self.translate.get('ERROR.RECONCILE_NO_NO_MAP_OR_TARGETS').subscribe((res: any) => {
-            self.error.message = res;
-          });          
-        }
-        else if ((this.selectedRowset?.mapRow?.targetCode === this.selectedRowset?.siblingRow?.targetCode) 
-          && (this.selectedRowset?.mapRow?.relationship !== this.selectedRowset?.siblingRow?.relationship)) {
-          self.translate.get('ERROR.RECONCILE_NO_NO_MAP_OR_TARGETS').subscribe((res: any) => {
-            self.error.message = res;
-          });  
-        }
-        
-      }
-      self.mapService.updateStatus(self.rowId, $event).subscribe((result) => {
+      if (this.canSaveTarget($event)) {
+        self.mapService.updateStatus(self.rowId, $event).subscribe((result) => {
           self.source.status = result.status;
           if (self.task && self.selectedRowset?.current && self.selectedRowset?.mapRow) {
             self.selectedRowset.mapRow.updateFromRow(result as MapRow);
@@ -521,9 +543,10 @@ export class MappingDetailComponent implements OnInit, OnDestroy {
         },
         (error) => this.translate.get('ERROR.TARGET_NOT_UPDATED').subscribe((msg) => {
           this.error.message = msg;
-        })
-      );
+        }))
+      }
     }
+
   }
 
   updateFlag($event: MapView): void {
