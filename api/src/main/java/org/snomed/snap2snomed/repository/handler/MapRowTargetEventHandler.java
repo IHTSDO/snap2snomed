@@ -194,7 +194,7 @@ public class MapRowTargetEventHandler {
   private void updateLastAuthorOrReviewed(MapRowTarget mapRowTarget, boolean isDelete) {
     MapRow mapRow = mapRowTarget.getRow();
 
-    if (isDelete || mapRow.getStatus().isAuthorState()) {
+    if (isDelete || mapRow.getStatus().isAuthorState() || mapRow.getStatus().isReconcileState()) {
       mapRow.setLastAuthor(authenticationFacade.getAuthenticatedUser());
     } else {
       mapRow.setLastReviewer(authenticationFacade.getAuthenticatedUser());

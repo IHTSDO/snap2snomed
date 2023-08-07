@@ -177,6 +177,10 @@ public enum MapStatus {
     return status.equals(ACCEPTED) || status.equals(REJECTED) || status.equals(INREVIEW);
   }
 
+  public Boolean isReconcileState() {
+    return this.equals(RECONCILE);
+  }
+
   public Boolean isReconcileTransition(MapStatus status) {
     return status.equals(MAPPED);
   }
