@@ -7,7 +7,7 @@
     <ng-template #showRelationships>
       <mat-card cdkDropList *ngFor="let relationship of relationships"
                 [appDroppable]="{zone: 'relationshipZone'}"
-                [dropDisabled]="writeDisableUtils.isEditDisabled(this.task?.type, toMapRowStatus(source?.status))"
+                [dropDisabled]="!isReconcileTask() && writeDisableUtils.isEditDisabled(this.task?.type, toMapRowStatus(source?.status))"
                 (onDroppableComplete)="onDrop($event, relationship)">
         <mat-card-title>
           <button color="any" mat-icon-button (click)="addFocusTarget(relationship)"
