@@ -234,8 +234,6 @@ public class MapRowEventHandler {
       // state transition will be validated precommit
       validateAuthorChanges(mapRow, mapRowFromDatabase);
     } else if (author || reviewer || reconciler) {
-      System.err.println("role"+ role.getName());
-      System.err.println("mapRow.getStatus()"+ mapRow.getStatus());
       if (!mapRowFromDatabase.getStatus().isValidTransitionForRole(mapRow.getStatus(), role)) {
         throw new UnauthorisedMappingProblem(
           role.getName() + " can only change rows that are in a valid " + role.getStateName()
