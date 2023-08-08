@@ -83,6 +83,7 @@ export class TargetRelationshipComponent implements OnInit {
    * @param relationship String relationship
    */
   onDrop(event: DroppableEventObject, relationship: string): void {
+    console.log("on drop");
     const self = this;
     if (self.source && event.data && !StatusUtils.inReviewedState(self.source.status as MapRowStatus)) {
       if (!event.data.rowId) {
@@ -101,15 +102,6 @@ export class TargetRelationshipComponent implements OnInit {
   filterRows(relationship: MapRowRelationship): MapView[] {
     let rows = (this.targetRows && this.targetRows.length > 0) ? this.targetRows.map((m) => m).filter(
       (row) => row.relationship === relationship) : [];
-    rows.forEach(row => {
-      // populating the last author from sources we already have at our disposal
-      if (row.rowId == this.sourceNavSet?.siblingRow?.rowId) {
-       row.lastAuthor = this.sourceNavSet?.siblingRow?.lastAuthor;
-      } 
-      else if (row.rowId == this.sourceNavSet?.mapRow?.rowId) {
-        row.lastAuthor = this.sourceNavSet?.mapRow?.lastAuthor;
-      }
-    })
     return rows;
   }
 
@@ -131,7 +123,7 @@ export class TargetRelationshipComponent implements OnInit {
       if (self.source) {
         const targetRow = new MapView('', '', self.source.id, self.source.index, self.source.code,
           self.source.display, code, displayTerm, relationship, MapRowStatus.DRAFT,
-          false, null, null, null, null, null, null, false, false, undefined, self.source.additionalColumnValues);
+          false, null, null, null, null, null, null, false, false, undefined, self.source.additionalColumnValues, null);
         const duplicate = self.targetRows.find((row: any) => row.targetCode === targetRow.targetCode);
         if (!duplicate) {
           self.newTargetEvent.emit(targetRow);

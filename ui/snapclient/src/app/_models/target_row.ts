@@ -20,6 +20,7 @@
 import {SourceCode} from './source_code';
 import {Mapping} from './mapping';
 import {MapRow} from './map_row';
+import {User} from './user';
 
 export class TargetRow {
   row?: string;
@@ -54,16 +55,19 @@ export class TargetRow {
 export class JSONTargetRow extends TargetRow {
   source?: SourceCode;
   mapping?: Mapping;
+  lastAuthor?: User;
   // @ts-ignore
   row?: MapRow;
   tags?: string[];
 
   constructor(row: MapRow | undefined, id: string | undefined, targetCode: string | undefined, tags: string[] | undefined, targetDisplay: string | undefined,
-              relationship: string | undefined, flagged: boolean, targetOutOfScope: boolean, source: SourceCode | undefined, mapping: Mapping | undefined) {
+              relationship: string | undefined, flagged: boolean, targetOutOfScope: boolean, source: SourceCode | undefined, mapping: Mapping | undefined, 
+              lastAuthor: User | undefined) {
     super(row?.id || '', id, targetCode, targetDisplay, relationship, flagged, targetOutOfScope, tags);
     this.source = source;
     this.mapping = mapping;
     this.row = row;
     this.tags = tags;
+    this.lastAuthor = lastAuthor
   }
 }

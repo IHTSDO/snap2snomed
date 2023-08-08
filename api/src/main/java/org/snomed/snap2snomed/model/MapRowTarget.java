@@ -100,6 +100,9 @@ public class MapRowTarget implements Snap2SnomedEntity, java.lang.Comparable<Map
 
     boolean flagged;
 
+    @ManyToOne
+    private User lastAuthor;
+
 
     @Projection(name = "targetView", types = {MapRowTarget.class})
     public interface TargetView {
@@ -124,6 +127,8 @@ public class MapRowTarget implements Snap2SnomedEntity, java.lang.Comparable<Map
         boolean getFlagged();
 
         Set<String> getTags();
+
+        User getLastAuthor();
 
     }
 

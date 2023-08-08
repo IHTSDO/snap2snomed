@@ -152,7 +152,7 @@ public class MapRowEventHandler {
         for (MapRowTarget siblingMapRowTarget : siblingMapRow.getMapRowTargets()) {
           MapRowTarget newMapRowTarget = new MapRowTarget(siblingMapRowTarget.getCreated(), siblingMapRowTarget.getModified(), siblingMapRowTarget.getCreatedBy(), 
             siblingMapRowTarget.getModifiedBy(), null, mapRow, siblingMapRowTarget.getTargetCode(), 
-            siblingMapRowTarget.getTargetDisplay(), siblingMapRowTarget.getRelationship(), siblingMapRowTarget.getTags(), siblingMapRowTarget.isFlagged());
+            siblingMapRowTarget.getTargetDisplay(), siblingMapRowTarget.getRelationship(), siblingMapRowTarget.getTags(), siblingMapRowTarget.isFlagged(), siblingMapRowTarget.getLastAuthor());
           mapRowTargetRepository.save(newMapRowTarget);
         }
 

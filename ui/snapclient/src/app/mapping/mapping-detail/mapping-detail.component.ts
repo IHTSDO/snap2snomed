@@ -319,7 +319,7 @@ export class MappingDetailComponent implements OnInit, OnDestroy {
             return new MapView(target.row?.id || '', target.id, source.id, source.index || '', source.code || '',
               source.display || '', target.targetCode, target.targetDisplay, target.relationship, status,
               false, target.row?.latestNote || null, null, null, null, null,
-              null, flagged, targetOutOfScope, target.tags, source.additionalColumnValues);
+              null, flagged, targetOutOfScope, target.tags, source.additionalColumnValues, target.lastAuthor);
           });
         } else {
           self.mapRows = [];

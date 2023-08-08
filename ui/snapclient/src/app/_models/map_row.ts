@@ -45,6 +45,7 @@ export class MapView {
   assignedReviewer?: User | null;
   lastAuthor?: User | null;
   lastReviewer?: User | null;
+  targetLastAuthor?: User | null;
 
   targetId?: string;        // TargetRow ID
   targetCode?: string;
@@ -71,7 +72,8 @@ export class MapView {
               targetCode: string | undefined, targetDisplay: string | undefined, relationship: string | undefined,
               status: string, noMap: boolean, latestNote: Date | null | undefined, assignedAuthor: User[] | null | undefined,
               assignedReconciler: User | null | undefined, assignedReviewer: User | null | undefined, lastAuthor: User | null | undefined,
-              lastReviewer: User | null | undefined, flagged: boolean | undefined, targetOutOfScope: boolean | undefined, tags: string[] | undefined, additionalColumnValues: string[] | undefined) {
+              lastReviewer: User | null | undefined, flagged: boolean | undefined, targetOutOfScope: boolean | undefined, tags: string[] | undefined, 
+              additionalColumnValues: string[] | undefined, targetLastAuthor: User | null | undefined) {
     this.rowId = rowId;
     this.targetId = targetId;
     this.sourceId = sourceId;
@@ -95,6 +97,7 @@ export class MapView {
     this.lastAuthor = lastAuthor;
     this.lastReviewer = lastReviewer;
     this.additionalColumnValues = additionalColumnValues || [];
+    this.targetLastAuthor = targetLastAuthor;
   }
 
   static create(mv: any): MapView {
@@ -108,7 +111,7 @@ export class MapView {
       rowId, mv.targetId, mv.sourceId, mv.sourceIndex, mv.sourceCode, mv.sourceDisplay,
       mv.targetCode, mv.targetDisplay, mv.relationship, mv.status, mv.noMap, mv.latestNote,
       mv.assignedAuthor, mv.assignedReconciler, mv.assignedReviewer, mv.lastAuthor, mv.lastReviewer, 
-      mv.flagged, targetOutOfScope, mv.targetTags, additionalColumnValues
+      mv.flagged, targetOutOfScope, mv.targetTags, additionalColumnValues, mv.targetLastAuthor
     );
   }
 

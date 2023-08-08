@@ -21,7 +21,7 @@
             <mat-option *ngFor="let row of filterRows(relationship)" (click)="click(row)">
               <span [appDraggable]="{data:row, zones:['relationshipZone']}"
                     class="row-target">
-                <app-user-chip id="targetLastAuthorUserChip" *ngIf="isReconcileTask() && row.lastAuthor" [user]="row.lastAuthor"
+                <app-user-chip id="targetLastAuthorUserChip" *ngIf="isReconcileTask() && row.targetLastAuthor" [user]="row.targetLastAuthor"
                 [font_size]="'12px'"></app-user-chip>
                 <span class="selection-text">{{row.targetDisplay}}</span>
                 <span>
