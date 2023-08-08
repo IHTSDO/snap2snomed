@@ -136,11 +136,11 @@ describe('MappingTableComponent', () => {
     const mapViews: MapView[] = [];
     const tobeSpiedOn = new MapView('1', '1231', '1', '1', '1111', 'test source',
       '1234', 'testtarget', 'EQUIVALENT', 'DRAFT', false, null,
-      null, null, null, null, null, false, false, undefined, []);
+      null, null, null, null, null, false, false, undefined, [], null);
     mapViews.push(tobeSpiedOn);
     mapViews.push(new MapView('2', '0000', '2', '2', '2222', 'test source2',
       '5678', 'testtarget2', 'EQUIVALENT', 'DRAFT', false, null,
-      null, null, null, null, null, false, false, undefined, []));
+      null, null, null, null, null, false, false, undefined, [], null));
     const page = new Page(mapViews, 0, 20, 2, 1);
     mockMapService.getMapView.and.returnValue(
       of({
