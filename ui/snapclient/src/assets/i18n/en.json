@@ -29,6 +29,7 @@
     "TARGET_BY_RELATIONSHIP": "Target by relationship",
     "MAPPED_SOURCE_TO_TARGET": "Mapped Source to Target",
     "TARGET_PROPERTIES": "Target Properties",
+    "MAP_MAINTENANCE": "Update",
     "NOTE_DELETE": "Delete note",
     "NOTE_TEXT": "Add your notes here",
     "NOTE_TEXT_ERROR": "Notes text entry cannot start with a space",

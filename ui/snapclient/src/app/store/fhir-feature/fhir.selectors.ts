@@ -35,6 +35,11 @@ export const selectSuggestions = createSelector(
     (state: IFhirState) => state.suggests
 );
 
+export const selectReplacementConceptsList = createSelector(
+    selectModules,
+    (state: IFhirState) => state.replacementSuggestions
+);
+
 export const selectConceptHierarcy = createSelector(
     selectModules,
     (state: IFhirState) => state.nodes

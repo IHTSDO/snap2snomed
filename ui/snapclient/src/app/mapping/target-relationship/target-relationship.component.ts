@@ -27,6 +27,17 @@ import {StatusUtils} from '../../_utils/status_utils';
 import {SourceRow} from '../mapping-detail/mapping-detail.component';
 import {WriteDisableUtils} from "../../_utils/write_disable_utils";
 import {FhirService} from "../../_services/fhir.service";
+import { Subscription } from 'rxjs';
+import { Store } from '@ngrx/store';
+import { IAppState } from 'src/app/store/app.state';
+import { FindSuggestedReplacementConcepts } from 'src/app/store/fhir-feature/fhir.actions';
+import { selectReplacementConceptsList } from 'src/app/store/fhir-feature/fhir.selectors';
+import { IParameters } from '@ahryman40k/ts-fhir-types/lib/R4';
+
+export interface Coding { //import from reducer?
+  code: string;
+  display: string;
+}
 
 @Component({
   selector: 'app-target-relationship',
@@ -50,11 +61,19 @@ export class TargetRelationshipComponent implements OnInit {
   writeDisableUtils = WriteDisableUtils;
   toMapRowStatus = toMapRowStatus;
 
+  sameAsConcepts: Coding[] = [];
+  replacedByConcepts: Coding[] = [];
+  alternativeConcepts: Coding[] = [];
+  possiblyEquivalentToConcepts: Coding[] = [];
+
+  private subscription = new Subscription();
+
   constructor(private mapService: MapService,
               private fhirService: FhirService,
               private router: Router,
               private selectionService: SelectionService,
-              private translate: TranslateService) {
+              private translate: TranslateService,
+              private store: Store<IAppState>) {
     this.relationships = mapRowRelationships;
   }
 
@@ -65,6 +84,124 @@ export class TargetRelationshipComponent implements OnInit {
         self.selectedSearchItem = value;
       }
     });
+
+    
+    self.subscription.add(self.store.select(selectReplacementConceptsList).subscribe(
+      (parameters) => {
+
+        // guard against multiple notifications        
+        this.sameAsConcepts = []; 
+        this.replacedByConcepts = [];
+        this.possiblyEquivalentToConcepts = [];
+        this.alternativeConcepts = [];
+
+        if (parameters) {
+          //TODO fix up code below
+          if (parameters.sameAs) {
+            this.sameAsConcepts = this.updateReplacements(parameters.sameAs);
+            console.log("this.sameAsConcepts" + this.sameAsConcepts);
+            if (this.sameAsConcepts.length > 0) {
+              let rowId = "1";
+              let sourceIndex = "1";
+              let sourceCode = "1";
+              let sourceDisplay = "diaply";
+              let targetCode = this.sameAsConcepts[0].code;
+              let targetDisplay = this.sameAsConcepts[0].display;
+              let relationship = MapRowRelationship.INEXACT;
+              let status = MapRowStatus.DRAFT;
+              let noMap = false;
+              let flagged = true;
+              let tags = ["replacement"];
+              this.targetRows.push(new MapView(rowId, undefined, sourceIndex, sourceCode, sourceDisplay, targetCode, targetDisplay, 
+                relationship, status, noMap, undefined, undefined, undefined, undefined, undefined, flagged, undefined, tags, undefined))
+            }
+          }
+          if (parameters.replacedBy) {
+            this.replacedByConcepts = this.updateReplacements(parameters.replacedBy);
+            console.log("this.replacedByConcepts" + this.replacedByConcepts);
+            if (this.replacedByConcepts.length > 0) {
+              let rowId = "1";
+              let sourceIndex = "1";
+              let sourceCode = "1";
+              let sourceDisplay = "diaply";
+              let targetCode = this.replacedByConcepts[0].code;
+              let targetDisplay = this.replacedByConcepts[0].display;
+              let relationship = MapRowRelationship.INEXACT;
+              let status = MapRowStatus.DRAFT;
+              let noMap = false;
+              let flagged = true;
+              let tags = ["replacement"];
+              this.targetRows.push(new MapView(rowId, undefined, sourceIndex, sourceCode, sourceDisplay, targetCode, targetDisplay, 
+                relationship, status, noMap, undefined, undefined, undefined, undefined, undefined, flagged, undefined, tags, undefined))
+            }
+          }
+          if (parameters.possiblyEquivalentTo) {
+            this.possiblyEquivalentToConcepts = this.updateReplacements(parameters.possiblyEquivalentTo);
+            console.log("this.possibleyEquivalentToConcepts" + this.possiblyEquivalentToConcepts);
+            if (this.possiblyEquivalentToConcepts.length > 0) {
+              let rowId = "1";
+              let sourceIndex = "1";
+              let sourceCode = "1";
+              let sourceDisplay = "diaply";
+              let targetCode = this.possiblyEquivalentToConcepts[0].code;
+              let targetDisplay = this.possiblyEquivalentToConcepts[0].display;
+              let relationship = MapRowRelationship.INEXACT;
+              let status = MapRowStatus.DRAFT;
+              let noMap = false;
+              let flagged = true;
+              let tags = ["replacement"];
+              this.targetRows.push(new MapView(rowId, undefined, sourceIndex, sourceCode, sourceDisplay, targetCode, targetDisplay, 
+                relationship, status, noMap, undefined, undefined, undefined, undefined, undefined, flagged, undefined, tags, undefined))
+            }
+          }
+          if (parameters.alternative) {
+            this.alternativeConcepts = this.updateReplacements(parameters.alternative);
+            console.log("this.alternativeConcepts" + this.alternativeConcepts);
+            if (this.alternativeConcepts.length > 0) {
+              let rowId = "1";
+              let sourceIndex = "1";
+              let sourceCode = "1";
+              let sourceDisplay = "diaply";
+              let targetCode = this.alternativeConcepts[0].code;
+              let targetDisplay = this.alternativeConcepts[0].display;
+              let relationship = MapRowRelationship.INEXACT;
+              let status = MapRowStatus.DRAFT;
+              let noMap = false;
+              let flagged = true;
+              let tags = ["replacement"];
+              this.targetRows.push(new MapView(rowId, undefined, sourceIndex, sourceCode, sourceDisplay, targetCode, targetDisplay, 
+                relationship, status, noMap, undefined, undefined, undefined, undefined, undefined, flagged, undefined, tags, undefined))
+            }
+          }
+
+        }
+      },
+      //TODO change error message
+      error => this.translate.get('ERROR.CONCEPT_SEARCH').subscribe((res) => this.error.message = res)
+    ));
+  }
+
+  updateReplacements(parameters: IParameters): Coding[] {
+    let conceptList: Coding[] = [];
+    if (parameters.parameter && parameters.parameter[0].name === "result" && parameters.parameter[0].valueBoolean === true) {
+      if (parameters.parameter[1].name === "match") {
+        let part = parameters.parameter[1].part;
+        part?.forEach(item => {
+          if (item.name === "concept") {
+            if (item.valueCoding && item.valueCoding.code && item.valueCoding.display) {
+              conceptList.push({
+                code: item.valueCoding.code,
+                display: item.valueCoding.display,
+
+              });
+            }
+          }
+        })
+
+      }
+    }
+    return conceptList;
+
   }
 
   click(row: MapView): void {
@@ -137,6 +274,23 @@ export class TargetRelationshipComponent implements OnInit {
   removeTarget(targetRow: MapView): void {
     const self = this;
     self.removeTargetEvent.emit(targetRow);
+  }
+
+  onMapMaintenance(): void {
+
+    this.targetRows.forEach(targetRow => {
+      console.log("targetRow", targetRow);
+      if (targetRow.targetOutOfScope && targetRow.targetCode) {
+        //TODO: system / version .. also in api
+        this.store.dispatch(new FindSuggestedReplacementConcepts({
+          code: targetRow.targetCode,//"72940011000036107",
+          system: "",//self.selectedSearchItem.system,
+          version: ""//self.selectedSearchItem.version
+        }));
+      }
+    })
+
+
   }
 
   isNoMap(): boolean {

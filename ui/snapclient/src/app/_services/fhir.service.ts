@@ -51,6 +51,54 @@ export class FhirService {
       this.config.fhirBaseUrl.indexOf('ontoserver') > 0 : false;
   }
 
+  //Same As : http://snomed.info/sct[/edition[/version]]?fhir_cm=900000000000527005 (target ValueSet is http://snomed.info/sct?fhir_vs)
+  //TODO edition / version
+  findSameAsConcepts(conceptId: string) {
+    return this.findHistoricalAssociation("900000000000527005", conceptId);
+  }
+
+  //Replaced By : http://snomed.info/sct[/edition[/version]]?fhir_cm=900000000000526001 (target ValueSet is http://snomed.info/sct?fhir_vs)
+  findReplacedByConcepts(conceptId: string) {
+    return this.findHistoricalAssociation("900000000000526001", conceptId);
+  }
+
+  //Possibly Equivalent To : http://snomed.info/sct[/edition[/version]]?fhir_cm=900000000000523009 (target ValueSet is http://snomed.info/sct?fhir_vs)
+  findPossiblyEquivalentTo(conceptId: string) {
+    return this.findHistoricalAssociation("900000000000523009", conceptId);
+  }
+
+  //Alternative : http://snomed.info/sct[/edition[/version]]?fhir_cm=900000000000530003 (target ValueSet is http://snomed.info/sct?fhir_vs)
+  findAlternative(conceptId: string) {
+    return this.findHistoricalAssociation("900000000000530003", conceptId);
+  }
+
+
+  findHistoricalAssociation(cmId: string, conceptId: string) {
+    const url = `${this.config.fhirBaseUrl}/ConceptMap/$translate`;
+    const body: R4.IParameters = {
+      resourceType: "Parameters",
+      parameter: [
+        {
+          name: "url",
+          valueUri: "http://snomed.info/sct?fhir_cm=" + cmId
+        },
+        {
+          name: "coding",
+          valueCoding: {
+            system: "http://snomed.info/sct",
+            code: conceptId
+          }
+        }
+      ]
+    };
+
+    const options = ServiceUtils.getHTTPHeaders();
+    options.headers = options.headers
+      .set('Content-Type', 'application/fhir+json');
+    return this.http.post<R4.IParameters>(url, body, options);
+  }
+
+
   findOutliers(toSystem: string, toVersion: string, targets: string[], toScope: string) {
     const valueSet: R4.IValueSet = {
       resourceType: 'ValueSet',

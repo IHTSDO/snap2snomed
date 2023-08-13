@@ -1,6 +1,9 @@
 <div id="target-relationship-container">
   <app-errormessage [error]="error"></app-errormessage>
   <div class="card-relationship">
+    <button class="add" color="primary" mat-raised-button type="button" (click)="onMapMaintenance()">
+      <mat-icon class="add">build</mat-icon>{{'DETAILS.MAP_MAINTENANCE' | translate}}
+    </button>
     <mat-card *ngIf="isNoMap(); else showRelationships">
       <mat-card-content>{{'MAP.NO_MAPPING_AVAILABLE' | translate}}</mat-card-content>
     </mat-card>
