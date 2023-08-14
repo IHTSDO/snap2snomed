@@ -17,6 +17,7 @@
 package org.snomed.snap2snomed.model;
 
 import java.time.Instant;
+import java.util.Iterator;
 import java.util.List;
 
 import java.util.Set;
@@ -45,6 +46,14 @@ public class MapView {
     this.sourceDisplay = row.getSourceCode().getDisplay();
     this.noMap = row.isNoMap();
     this.latestNote = latestNote;
+
+    this.appendedNotes = "";
+    Iterator<Note> i = row.getNotes().iterator();
+    while (i.hasNext()) {
+      Note note = i.next();
+      this.appendedNotes += note.getCreated() + " " + note.noteBy.getFullName() + " " + note.noteText + ";";
+    }
+
     this.status = row.getStatus();
     this.lastAuthor = row.getLastAuthor();
     this.lastReviewer = row.getLastReviewer();
@@ -94,6 +103,8 @@ public class MapView {
 
   @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSXXX", timezone = "UTC")
   private Instant latestNote;
+
+  private String appendedNotes;
 
   private User assignedAuthor;
 

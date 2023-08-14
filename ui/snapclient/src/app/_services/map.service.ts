@@ -389,8 +389,12 @@ export class MapService {
     return this.http.get<MapRowTargetResults>(url, header);
   }
 
-  exportMapView(mapping: string, contentType: string): Observable<Blob> {
-    return this.http.get(`${this.config.apiBaseUrl}/mapView/${mapping}`,
+  exportMapView(mapping: string, contentType: string, extraColumns: string[]): Observable<Blob> {
+    let url = `${this.config.apiBaseUrl}/mapView/${mapping}`;
+    if (extraColumns.length > 0) {
+      url += `?extraColumns=` + extraColumns.join(",");
+    }
+    return this.http.get(url,
       {
         headers: {Accept: contentType},
         responseType: 'blob'

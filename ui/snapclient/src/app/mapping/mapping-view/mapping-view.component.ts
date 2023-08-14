@@ -502,7 +502,7 @@ export class MappingViewComponent implements OnInit, AfterViewInit, OnDestroy {
     this.opened = false;
   }
 
-  exportMapView(type: string): void {
+  exportMapViewAdditionalColumns(type: string, additionalColumns: string[]) {
     this.setLoading();
     let contentType: string;
     let extension: string;
@@ -530,13 +530,17 @@ export class MappingViewComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     if (this.mapping && this.mapping.id) {
-      this.mapService.exportMapView(this.mapping.id, contentType)
+      this.mapService.exportMapView(this.mapping.id, contentType, additionalColumns)
         .subscribe(blob => saveAs(blob, this.mapping?.project.title + '_' + this.mapping?.mapVersion + extension),
           (error) => {
             console.log(error);
             this.translate.get('ERROR.EXPORT_FAILED').subscribe((msg) => this.error = msg);
           }).add(() => this.clearLoading());
     }
+  }
+
+  exportMapView(type: string): void {
+    this.exportMapViewAdditionalColumns(type, []);
   }
 
   loadTaskList(): void {

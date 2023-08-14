@@ -209,7 +209,7 @@ describe('MappingViewComponent', () => {
     el.triggerEventHandler('click', null);
     const menu = fixture.debugElement.query(By.css('.mat-menu-panel'));
     expect(menu).toBeTruthy();
-    expect(menu.nativeElement.textContent).toBe('MAP.EXPORT_CSVMAP.EXPORT_TSVMAP.EXPORT_XLSX');
+    expect(menu.nativeElement.textContent).toBe('MAP.EXPORT_CSVMAP.EXPORT_TSVMAP.EXPORT_FHIR_JSONMAP.EXPORT_XLSXMAP.EXPORT_XLSX_EXTENDED');
   });
 
 });

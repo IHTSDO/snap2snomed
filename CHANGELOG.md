@@ -21,6 +21,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 #### Changed
 
 - SNOMED-457: streamline login process (DEX)
+- SNOMED-499: expand export to include additional source columns
+- SNOMED-500: export notes, author and reviewer
 
 #### Fixed
 

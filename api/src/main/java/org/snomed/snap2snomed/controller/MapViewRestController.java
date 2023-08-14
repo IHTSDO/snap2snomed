@@ -257,9 +257,12 @@ public class MapViewRestController {
   @Parameter(name = "sort", in = ParameterIn.QUERY, required = false, allowEmptyValue = false,
       description = "Sorting criteria in the format: property(,asc|desc). Default sort order is ascending. Multiple sort criteria are supported.",
       array = @ArraySchema(schema = @Schema(type = "string")))
+  @Parameter(name="extraColumns", in = ParameterIn.QUERY, required = false, allowEmptyValue = false,
+      description = "Additional columns to include. Options are ( notes | lastAuthor | lastReviewer | assignedAuthor | assignedReviewer ).")
   @GetMapping(path = "/{mapId}", produces = {TEXT_CSV, TEXT_TSV})
   public void getMapViewCsv(HttpServletResponse response, @RequestHeader(name = "Accept", required = false) String contentType,
-      @PathVariable("mapId") Long mapId) {
+      @PathVariable("mapId") Long mapId,
+      @RequestParam(required = false) List<String> extraColumns) {
 
     if (!webSecurity.isValidUser()) {
       throw new NoSuchUserProblem();
@@ -294,8 +297,8 @@ public class MapViewRestController {
         new OutputStreamWriter(response.getOutputStream()));
 
         CSVPrinter csvPrinter = new CSVPrinter(writer,
-            format.builder().setHeader(mapViewService.getExportHeader(mapId)).build());) {
-
+            format.builder().setHeader(mapViewService.getExportHeader(mapId, extraColumns)).build());) {
+      
       for (final MapView mapView : mapViewService.getAllMapViewForMap(mapId)) {
 
         ArrayList<Object> printRow = new ArrayList<Object>(Arrays.asList(mapView.getSourceCode(), mapView.getSourceDisplay()));
@@ -315,6 +318,27 @@ public class MapViewRestController {
             mapView.getNoMap() == null ? "" : mapView.getNoMap(),
             mapView.getStatus()));
 
+        if (extraColumns != null && extraColumns.size() > 0) {
+            for (String extraColumn : extraColumns) {
+                switch (extraColumn.toUpperCase()) {
+                    case "NOTES":
+                        printRow.add(mapView.getAppendedNotes());
+                        break;
+                    case "ASSIGNEDAUTHOR":
+                        printRow.add(mapView.getAssignedAuthor() == null ? "" : mapView.getAssignedAuthor().getFullName());
+                        break;
+                    case "ASSIGNEDREVIEWER":
+                        printRow.add(mapView.getAssignedReviewer() == null ? "" : mapView.getAssignedReviewer().getFullName());
+                        break;
+                    case "LASTAUTHOR":
+                        printRow.add(mapView.getLastAuthor() == null ? "" : mapView.getLastAuthor().getFullName());
+                        break;
+                    case "LASTREVIEWER":
+                        printRow.add(mapView.getLastReviewer() == null ? "" : mapView.getLastReviewer().getFullName());
+                        break;
+                }
+            }
+        }
         csvPrinter.printRecord(printRow);
       }
       csvPrinter.flush();
@@ -331,8 +355,12 @@ public class MapViewRestController {
   @Parameter(name = "sort", in = ParameterIn.QUERY, required = false, allowEmptyValue = false,
       description = "Sorting criteria in the format: property(,asc|desc). Default sort order is ascending. Multiple sort criteria are supported.",
       array = @ArraySchema(schema = @Schema(type = "string")))
+  @Parameter(name="extraColumns", in = ParameterIn.QUERY, required = false, allowEmptyValue = false,
+      description = "Additional columns to include. Options are ( notes | lastAuthor | lastReviewer | assignedAuthor | assignedReviewer ).")
   @GetMapping(path = "/{mapId}", produces = APPLICATION_XSLX)
-  public void getMapViewExcel(HttpServletResponse response, @PathVariable("mapId") Long mapId) throws IOException {
+  public void getMapViewExcel(HttpServletResponse response, 
+        @PathVariable("mapId") Long mapId,
+        @RequestParam(required = false) List<String> extraColumns) throws IOException {
     if (!webSecurity.isValidUser()) {
       throw new NoSuchUserProblem();
     }
@@ -351,7 +379,7 @@ public class MapViewRestController {
       final SXSSFSheet sh = wb.createSheet();
       final SXSSFRow header = sh.createRow(0);
 
-      final String[] exportHeader = mapViewService.getExportHeader(mapId);
+      final String[] exportHeader = mapViewService.getExportHeader(mapId, extraColumns);
 
       for (int cellNum = 0; cellNum < exportHeader.length; cellNum++) {
         final SXSSFCell cell = header.createCell(cellNum);
@@ -405,6 +433,30 @@ public class MapViewRestController {
         cell = row.createCell(cellCount);
         cell.setCellValue(mapView.getStatus() == null ? "" : mapView.getStatus().toString());
         cellCount++;
+
+        if (extraColumns != null && extraColumns.size() > 0) {
+            for (String extraColumn : extraColumns) {
+                cell = row.createCell(cellCount);
+                switch (extraColumn.toUpperCase()) {
+                    case "NOTES":
+                        cell.setCellValue(mapView.getAppendedNotes());
+                        break;
+                    case "ASSIGNEDAUTHOR":
+                        cell.setCellValue(mapView.getAssignedAuthor() == null ? "" : mapView.getAssignedAuthor().getFullName());
+                        break;
+                    case "ASSIGNEDREVIEWER":
+                        cell.setCellValue(mapView.getAssignedReviewer() == null ? "" : mapView.getAssignedReviewer().getFullName());
+                        break;
+                    case "LASTAUTHOR":
+                        cell.setCellValue(mapView.getLastAuthor() == null ? "" : mapView.getLastAuthor().getFullName());
+                        break;
+                    case "LASTREVIEWER":
+                        cell.setCellValue(mapView.getLastReviewer() == null ? "" : mapView.getLastReviewer().getFullName());
+                        break;
+                }
+                cellCount++;
+            }
+        }
 
       }
       wb.write(response.getOutputStream());
