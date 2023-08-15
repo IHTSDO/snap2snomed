@@ -22,6 +22,7 @@ import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -312,7 +313,10 @@ public class MapViewRestController {
                         printRow.add(mapView.getAppendedNotes());
                         break;
                     case "ASSIGNEDAUTHOR":
-                        printRow.add(mapView.getAssignedAuthor() == null ? "" : mapView.getAssignedAuthor().getFullName());
+                        printRow.add(mapView.getAssignedAuthor() == null ? "" : mapView.getAssignedAuthor()
+                            .stream()
+                            .map(author -> author.getFullName())
+                            .collect(Collectors.joining(",")));
                         break;
                     case "ASSIGNEDREVIEWER":
                         printRow.add(mapView.getAssignedReviewer() == null ? "" : mapView.getAssignedReviewer().getFullName());
@@ -429,7 +433,10 @@ public class MapViewRestController {
                         cell.setCellValue(mapView.getAppendedNotes());
                         break;
                     case "ASSIGNEDAUTHOR":
-                        cell.setCellValue(mapView.getAssignedAuthor() == null ? "" : mapView.getAssignedAuthor().getFullName());
+                        cell.setCellValue(mapView.getAssignedAuthor() == null ? "" : mapView.getAssignedAuthor()
+                            .stream()
+                            .map(author -> author.getFullName())
+                            .collect(Collectors.joining(",")));
                         break;
                     case "ASSIGNEDREVIEWER":
                         cell.setCellValue(mapView.getAssignedReviewer() == null ? "" : mapView.getAssignedReviewer().getFullName());

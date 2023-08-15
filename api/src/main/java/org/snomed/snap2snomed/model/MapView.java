@@ -18,15 +18,18 @@
 
  import java.time.Instant;
  import java.util.ArrayList;
- import java.util.List;
+import java.util.Iterator;
+import java.util.List;
  
  import java.util.Set;
  import javax.validation.constraints.NotNull;
  
  import org.snomed.snap2snomed.model.enumeration.MapStatus;
  import org.snomed.snap2snomed.model.enumeration.MappingRelationship;
- 
- import lombok.AllArgsConstructor;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
+
+import lombok.AllArgsConstructor;
  import lombok.Builder;
  import lombok.Data;
  import lombok.NoArgsConstructor;
