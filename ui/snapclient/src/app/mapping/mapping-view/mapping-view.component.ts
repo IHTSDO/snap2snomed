@@ -715,6 +715,9 @@ export class MappingViewComponent implements OnInit, AfterViewInit, OnDestroy {
     });
   }
 
+  clickMapMaintenance(): void {
+  }
+
   getBulkChangeDialogData(): BulkChangeDialogData {
     return {
       task: null,

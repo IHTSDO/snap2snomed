@@ -382,6 +382,13 @@ export class MapService {
     const body = {flagged};
     return this.http.patch<any>(url, body, header);
   }
+
+  updateTags(targetId: string, tags: string[]): Observable<any> {
+    const url = `${this.config.apiBaseUrl}/mapRowTargets/${targetId}`;
+    const header = ServiceUtils.getHTTPHeaders();
+    const body = {tags};
+    return this.http.patch<any>(url, body, header);
+  }
   
   getTagCount(mapId: string, tag: string): Observable<MapRowTargetResults> {
     const url = `${this.config.apiBaseUrl}/mapRowTargets?tags=${tag}&mapId=${mapId}`;

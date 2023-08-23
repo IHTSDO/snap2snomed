@@ -29,7 +29,8 @@
     "TARGET_BY_RELATIONSHIP": "Target by relationship",
     "MAPPED_SOURCE_TO_TARGET": "Mapped Source to Target",
     "TARGET_PROPERTIES": "Target Properties",
-    "MAP_MAINTENANCE": "Update",
+    "OUT_OF_SCOPE_FIND_REPLACEMENTS": "Target out of scope - click to find suggested replacements",
+    "OUT_OF_SCOPE_NO_SUGGESTED_REPLACEMENTS": "Target out of scope - no active in scope replacements suggested",
     "NOTE_DELETE": "Delete note",
     "NOTE_TEXT": "Add your notes here",
     "NOTE_TEXT_ERROR": "Notes text entry cannot start with a space",
@@ -200,6 +201,8 @@
     "SWITCH_VIEW": "Switch view",
     "FAILED_TO_IMPORT_MAPPING_FILE": "Failed to import mapping file",
     "FAILED_TO_IMPORT_MAPPING_FILE_ERROR": "Details of error: {{error}}",
+    "MAP_MAINTENANCE": "UPDATE INACTIVES",
+    "MAP_MAINTENANCE_TOOLTIP": "Suggest in-scope active replacements for inactive targets",
     "VALIDATE_TARGETS": "VALIDATE",
     "VALIDATE_TARGETS_TOOLTIP": "Flag all rows where the target code is outside the target scope",
     "VALIDATE_TARGETS_ERROR": "Unexpected error occurred during validation of target scope"

@@ -171,7 +171,7 @@ export class ConceptHierarchyFailure implements Action {
 
 export class FindSuggestedReplacementConcepts implements Action {
   readonly type = FhirActionTypes.FIND_SUGGESTED_REPLACEMENT_CONCEPTS;
-  constructor(public payload: { code: string, system: string, version: string }) {
+  constructor(public payload: { code: string, scope: string, version: string }) {
   }
 }
 

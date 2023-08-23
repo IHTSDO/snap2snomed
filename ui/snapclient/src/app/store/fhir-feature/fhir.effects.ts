@@ -184,10 +184,11 @@ export class FhirEffects {
     ofType(FhirActionTypes.FIND_SUGGESTED_REPLACEMENT_CONCEPTS),
     map(action => action.payload),
     switchMap((action) => forkJoin({
-      sameAs: this.fhirService.findSameAsConcepts(action.code),
-      replacedBy: this.fhirService.findReplacedByConcepts(action.code),
-      possiblyEquivalentTo: this.fhirService.findPossiblyEquivalentTo(action.code),
-      alternative: this.fhirService.findAlternative(action.code),
+      sameAs: this.fhirService.findSameAsConcepts(action.code, action.scope, action.version),
+      replacedBy: this.fhirService.findReplacedByConcepts(action.code, action.scope, action.version),
+      possiblyEquivalentTo: this.fhirService.findPossiblyEquivalentTo(action.code, action.scope, action.version),
+      alternative: this.fhirService.findAlternative(action.code, action.scope, action.version),
+      code: action.code
     }).pipe(
       switchMap((map) => of(new FindSuggestedReplacementConceptsSuccess(map))),
       catchError((err) => of(new FindSuggestedReplacementConceptsFailure({ error: err })))
