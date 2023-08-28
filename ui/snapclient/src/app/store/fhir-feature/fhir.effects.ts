@@ -128,7 +128,20 @@ export class FhirEffects {
           if (part) {
             const partKey = part.find((sub: any) => sub?.name === 'code').valueCode;
             if ("609096000" === partKey) { // role group
-              const subproperties = part.filter((sub: any) => sub.name?.startsWith('subproperty')).map((subproperty: any) => subproperty.part);
+              const subproperties = part.filter((sub: any) => sub.name?.startsWith('subproperty')).map((subproperty: any) => subproperty.part)
+              .sort((a:any, b:any) => {
+                  const aValueStr = a.filter((subproperty: any) => {
+                    if (subproperty.name === "code" && subproperty.hasOwnProperty("valueString")) {
+                      return subproperty;
+                    }
+                  });
+                  const bValueStr = b.filter((subproperty: any) => {
+                    if (subproperty.name === "code" && subproperty.hasOwnProperty("valueString")) {
+                      return subproperty;
+                    }
+                  });
+                    return aValueStr[0].valueString.localeCompare(bValueStr[0].valueString);
+              });
               FhirEffects.updateProps(props, "attributeRelationships", subproperties);
             }
             else if (!isNaN(+partKey)) {
