@@ -41,6 +41,8 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.data.rest.core.config.Projection;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 @Entity
 @Data
 @Builder
@@ -54,6 +56,7 @@ public class Note implements Comparable<Note>, Snap2SnomedEntity {
     @CreatedDate
     private Instant created;
 
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSXXX", timezone = "UTC")
     @Column(name = "modified")
     @LastModifiedDate
     private Instant modified;
