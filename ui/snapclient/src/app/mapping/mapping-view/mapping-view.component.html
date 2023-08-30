@@ -23,7 +23,6 @@
               <mat-menu #exportMenu="matMenu">
                 <a mat-menu-item (click)="exportMapView('csv')">{{'MAP.EXPORT_CSV' | translate}}</a>
                 <a mat-menu-item (click)="exportMapView('tsv')">{{'MAP.EXPORT_TSV' | translate}}</a>
-                <a mat-menu-item disabled>{{'MAP.EXPORT_FHIR_JSON' | translate}}</a>
                 <a mat-menu-item (click)="exportMapView('xlsx')">{{'MAP.EXPORT_XLSX' | translate}}</a>
                 <a mat-menu-item (click)="exportMapView('fhir-json')">{{'MAP.EXPORT_FHIR_JSON' | translate}}</a>
                 <a mat-menu-item (click)="exportMapViewAdditionalColumns('xlsx', ['notes', 'lastAuthor', 'lastReviewer', 'assignedAuthor', 'assignedReviewer'])" 
