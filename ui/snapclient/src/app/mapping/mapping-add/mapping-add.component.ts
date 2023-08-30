@@ -325,6 +325,7 @@ export class MappingAddComponent implements OnInit {
           this.store.select(selectSourceState).subscribe((state) => {
             this.sources = state.sources;
             this.mappingModel.source = state.selectedSource ?? new Source();
+            this.formGroup.controls.sourceId.setValue(this.mappingModel.source.id);
           });
         }
       });
