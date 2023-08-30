@@ -147,20 +147,6 @@ export function fhirReducer(state = initialFhirState, action: FhirActions): IFhi
         errorMessage: action.payload.error
       };
 
-    case FhirActionTypes.FIND_SUGGESTED_REPLACEMENT_CONCEPTS_SUCCESS:
-      return {
-        ...state,
-        replacementSuggestions: action.payload,
-        errorMessage: null
-      };
-
-    case FhirActionTypes.FIND_SUGGESTED_REPLACEMENT_CONCEPTS_FAILED:
-      return {
-        ...state,
-        matches: undefined,
-        errorMessage: action.payload.error
-      };
-
     default:
       return state;
   }
