@@ -468,6 +468,13 @@ export class MappingDetailComponent implements OnInit, OnDestroy {
     }
   }
 
+  updateTags($event: MapView): void {
+    const self = this;
+    if ($event && $event.targetId && $event.tags !== undefined) {
+      self.mapService.updateTags($event.targetId, $event.tags).subscribe();
+    }
+  }
+
   getStatusList(): MapRowStatus[] {
     const self = this;
     return self.task && self.source.status ?
