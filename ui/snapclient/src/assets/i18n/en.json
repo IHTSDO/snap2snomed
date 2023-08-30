@@ -201,8 +201,6 @@
     "SWITCH_VIEW": "Switch view",
     "FAILED_TO_IMPORT_MAPPING_FILE": "Failed to import mapping file",
     "FAILED_TO_IMPORT_MAPPING_FILE_ERROR": "Details of error: {{error}}",
-    "MAP_MAINTENANCE": "UPDATE INACTIVES",
-    "MAP_MAINTENANCE_TOOLTIP": "Suggest in-scope active replacements for inactive targets",
     "VALIDATE_TARGETS": "VALIDATE",
     "VALIDATE_TARGETS_TOOLTIP": "Flag all rows where the target code is outside the target scope",
     "VALIDATE_TARGETS_ERROR": "Unexpected error occurred during validation of target scope"

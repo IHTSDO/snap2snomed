@@ -40,11 +40,6 @@
               </p>
             </ng-template>
             <span class="space-fill">&nbsp;</span>
-            <button id="map-maintenance" mat-stroked-button *ngIf="isOwner()" (click)="clickMapMaintenance()"
-                    matTooltip="{{'MAP.MAP_MAINTENANCE_TOOLTIP' | translate}}"
-                    matTooltipShowDelay="1000">
-              {{'MAP.MAP_MAINTENANCE' | translate}}
-            </button>
             <button id="validate-targets" mat-stroked-button *ngIf="isOwner()" (click)="clickValidateTargets()"
                     matTooltip="{{'MAP.VALIDATE_TARGETS_TOOLTIP' | translate}}"
                     matTooltipShowDelay="1000">
