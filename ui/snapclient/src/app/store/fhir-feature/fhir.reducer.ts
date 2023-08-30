@@ -38,19 +38,26 @@ export interface Match {
 }
 
 export interface IFhirState {
-  editionToVersionsMap : Map<string, Release[]> | undefined;
+  editionToVersionsMap: Map<string, Release[]> | undefined;
   matches?: R4.IValueSet_Expansion;
   nodes: ConceptNode<Coding>[];
   suggests?: Match[];
   properties?: Properties;
   resolvedDisplayProperties? : Properties;
   errorMessage: any | null;
+  replacementSuggestions: {
+    sameAs: R4.IParameters,
+    replacedBy: R4.IParameters, 
+    possiblyEquivalentTo: R4.IParameters, 
+    alternative: R4.IParameters
+  } | null;
 }
 
 export const initialFhirState: IFhirState = {
   editionToVersionsMap: new Map(),
   nodes: [],
-  errorMessage: null
+  errorMessage: null,
+  replacementSuggestions: null
 };
 
 export function fhirReducer(state = initialFhirState, action: FhirActions): IFhirState {
@@ -137,6 +144,20 @@ export function fhirReducer(state = initialFhirState, action: FhirActions): IFhi
       return {
         ...state,
         nodes: [],
+        errorMessage: action.payload.error
+      };
+
+    case FhirActionTypes.FIND_SUGGESTED_REPLACEMENT_CONCEPTS_SUCCESS:
+      return {
+        ...state,
+        replacementSuggestions: action.payload,
+        errorMessage: null
+      };
+
+    case FhirActionTypes.FIND_SUGGESTED_REPLACEMENT_CONCEPTS_FAILED:
+      return {
+        ...state,
+        matches: undefined,
         errorMessage: action.payload.error
       };
 

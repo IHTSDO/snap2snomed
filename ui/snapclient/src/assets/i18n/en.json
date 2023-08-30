@@ -29,6 +29,8 @@
     "TARGET_BY_RELATIONSHIP": "Target by relationship",
     "MAPPED_SOURCE_TO_TARGET": "Mapped Source to Target",
     "TARGET_PROPERTIES": "Target Properties",
+    "OUT_OF_SCOPE_FIND_REPLACEMENTS": "Target out of scope - click to find suggested replacements",
+    "OUT_OF_SCOPE_NO_SUGGESTED_REPLACEMENTS": "Target out of scope - no active in scope replacements suggested",
     "NOTE_DELETE": "Delete note",
     "NOTE_TEXT": "Add your notes here",
     "NOTE_TEXT_ERROR": "Notes text entry cannot start with a space",

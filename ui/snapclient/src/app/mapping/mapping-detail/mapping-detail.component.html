@@ -96,6 +96,7 @@
                                      [disableFlagging]="writeDisableUtils.isFlaggingDisabled(this.task?.type, toMapRowStatus(source.status))"
                                      (removeTargetEvent)="removeTarget($event)"
                                      (flagEvent)="updateFlag($event)"
+                                     (noReplacementEvent)="updateTags($event)"
             ></app-target-relationship>
           </mat-card-content>
           <mat-card-footer>

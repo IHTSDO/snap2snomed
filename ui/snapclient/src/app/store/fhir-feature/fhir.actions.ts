@@ -40,7 +40,10 @@ export enum FhirActionTypes {
   DISPLAY_RESOLVED_LOOKUP_CONCEPT_FAILED = "Display Resolved Lookup Concept Failed",
   CONCEPT_HIERARCHY = "[Fhir] Concept Hierarchy",
   CONCEPT_HIERARCHY_SUCCESS = "Concept Hierarchy Succeeded",
-  CONCEPT_HIERARCHY_FAILED = "Concept Hierarchy Failed"
+  CONCEPT_HIERARCHY_FAILED = "Concept Hierarchy Failed",
+  FIND_SUGGESTED_REPLACEMENT_CONCEPTS = "[Fhir] Find Suggested Replacement Concepts",
+  FIND_SUGGESTED_REPLACEMENT_CONCEPTS_SUCCESS = "[Fhir] Find Suggested Replacement Concepts Succeeded",
+  FIND_SUGGESTED_REPLACEMENT_CONCEPTS_FAILED = "[Fhir] Find Suggested Replacement Concepts Failed",
 }
 
 export class LoadReleases implements Action {
@@ -166,6 +169,29 @@ export class ConceptHierarchyFailure implements Action {
   }
 }
 
+export class FindSuggestedReplacementConcepts implements Action {
+  readonly type = FhirActionTypes.FIND_SUGGESTED_REPLACEMENT_CONCEPTS;
+  constructor(public payload: { code: string, scope: string, version: string }) {
+  }
+}
+
+export class FindSuggestedReplacementConceptsSuccess implements Action {
+  readonly type = FhirActionTypes.FIND_SUGGESTED_REPLACEMENT_CONCEPTS_SUCCESS;
+
+  constructor(public payload: {
+    sameAs: R4.IParameters,
+    replacedBy: R4.IParameters, possiblyEquivalentTo: R4.IParameters, alternative: R4.IParameters
+  }) {
+  }
+}
+
+export class FindSuggestedReplacementConceptsFailure implements Action {
+  readonly type = FhirActionTypes.FIND_SUGGESTED_REPLACEMENT_CONCEPTS_FAILED;
+
+  constructor(public payload: { error: any }) {
+  }
+}
+
 export type FhirActions = LoadReleases
   | LoadReleasesSuccess
   | LoadReleasesFailure
@@ -184,4 +210,7 @@ export type FhirActions = LoadReleases
   | ConceptHierarchy
   | ConceptHierarchySuccess
   | ConceptHierarchyFailure
+  | FindSuggestedReplacementConcepts
+  | FindSuggestedReplacementConceptsSuccess
+  | FindSuggestedReplacementConceptsFailure
 ;

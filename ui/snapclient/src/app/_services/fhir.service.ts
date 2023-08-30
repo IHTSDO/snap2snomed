@@ -16,7 +16,7 @@
 
 import {Inject, Injectable} from '@angular/core';
 import {HttpClient} from '@angular/common/http';
-import {Observable, of} from 'rxjs';
+import {Observable, forkJoin, of} from 'rxjs';
 import {ServiceUtils} from '../_utils/service_utils';
 import {APP_CONFIG, AppConfig} from '../app.config';
 import {R4} from '@ahryman40k/ts-fhir-types';
@@ -50,6 +50,65 @@ export class FhirService {
     this.isOntoserver = this.config && this.config.fhirBaseUrl ?
       this.config.fhirBaseUrl.indexOf('ontoserver') > 0 : false;
   }
+
+  findReplacementConcepts(conceptId: string, scope: string, version: string) {
+
+    return forkJoin({
+      sameAs: this.findSameAsConcepts(conceptId, scope, version),
+      replacedBy: this.findReplacedByConcepts(conceptId, scope, version),
+      possiblyEquivalentTo: this.findPossiblyEquivalentTo(conceptId, scope, version),
+      alternative: this.findAlternative(conceptId, scope, version),
+      code: conceptId
+    });
+
+  }
+
+  //Same As : http://snomed.info/sct[/edition[/version]]?fhir_cm=900000000000527005 (target ValueSet is http://snomed.info/sct?fhir_vs)
+  findSameAsConcepts(conceptId: string, scope: string, version: string) {
+    return this.findHistoricalAssociation("900000000000527005", conceptId, scope, version);
+  }
+
+  //Replaced By : http://snomed.info/sct[/edition[/version]]?fhir_cm=900000000000526001 (target ValueSet is http://snomed.info/sct?fhir_vs)
+  findReplacedByConcepts(conceptId: string, scope: string, version: string) {
+    return this.findHistoricalAssociation("900000000000526001", conceptId, scope, version);
+  }
+
+  //Possibly Equivalent To : http://snomed.info/sct[/edition[/version]]?fhir_cm=900000000000523009 (target ValueSet is http://snomed.info/sct?fhir_vs)
+  findPossiblyEquivalentTo(conceptId: string, scope: string, version: string) {
+    return this.findHistoricalAssociation("900000000000523009", conceptId, scope, version);
+  }
+
+  //Alternative : http://snomed.info/sct[/edition[/version]]?fhir_cm=900000000000530003 (target ValueSet is http://snomed.info/sct?fhir_vs)
+  findAlternative(conceptId: string, scope: string, version: string) {
+    return this.findHistoricalAssociation("900000000000530003", conceptId, scope, version);
+  }
+
+
+  findHistoricalAssociation(cmId: string, conceptId: string, scope: string, version: string) {
+    const url = `${this.config.fhirBaseUrl}/ConceptMap/$translate`;
+    const body: R4.IParameters = {
+      resourceType: "Parameters",
+      parameter: [
+        {
+          name: "url",
+          valueUri: version + "?fhir_cm=" + cmId
+        },
+        {
+          name: "coding",
+          valueCoding: {
+            system: "http://snomed.info/sct",
+            code: conceptId
+          }
+        }
+      ]
+    };
+
+    const options = ServiceUtils.getHTTPHeaders();
+    options.headers = options.headers
+      .set('Content-Type', 'application/fhir+json');
+    return this.http.post<R4.IParameters>(url, body, options);
+  }
+
 
   findOutliers(toSystem: string, toVersion: string, targets: string[], toScope: string) {
     const valueSet: R4.IValueSet = {
@@ -456,6 +515,24 @@ export class FhirService {
 
   private static toValueSet(version: string, ecl: string): string {
     return version + '?fhir_vs=ecl/' + encodeURIComponent(ecl.replace(/\s+/g, ' '));
+  }
+
+  validateConceptInScopeAndActive(code: string, system: string, version: string, scope: string): Observable<R4.IParameters> {
+
+    const url = `${this.config.fhirBaseUrl}/ValueSet/$validate-code`;
+
+    const params: any = {
+      'code': code,
+      'system': system,
+      'url': FhirService.toValueSet(version, scope)
+    };
+
+    const options = ServiceUtils.getHTTPHeaders();
+    options.headers = options.headers
+      .set('Accept', ['application/fhir+json', 'application/json']);
+    options.params = {...options.params, ...params};
+    return this.http.get<R4.IParameters>(url, options);
+
   }
 
   validateEcl(ecl: string): Observable<{ valid: boolean, detail?: any }> {
