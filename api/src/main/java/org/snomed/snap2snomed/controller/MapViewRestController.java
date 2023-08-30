@@ -528,7 +528,7 @@ public class MapViewRestController {
           cm.setTarget(new UriType(FhirService.DEFAULT_CODE_SYSTEM + "?fhir_vs=ecl/" + ecl));
 
           String systemUri = source.getSystemUri();
-          if (null != valuesetUri) {
+          if (null != systemUri) {
               group.setSource(systemUri);
           }
           group.setSourceVersion(source.getVersion());
