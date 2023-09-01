@@ -45,9 +45,9 @@ export const selectConceptProperties = createSelector(
     (state: IFhirState) => state.properties
 );
 
-export const selectModuleProperties = createSelector(
+export const selectDisplayResolvedConceptProperties = createSelector(
     selectModules,
-    (state: IFhirState) => state.moduleProperties
+    (state: IFhirState) => state.resolvedDisplayProperties
 );
 
 export const selectFhirError = createSelector(

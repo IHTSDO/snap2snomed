@@ -68,6 +68,7 @@ import { MappingNotesComponent } from '../mapping-table-notes/mapping-notes.comp
 import { MatCheckboxChange } from '@angular/material/checkbox';
 import { TableColumn } from '../mapping-table/mapping-table.component';
 import { TargetChangedService } from 'src/app/_services/target-changed.service';
+import { cloneDeep } from 'lodash';
 
 @Component({
   selector: 'app-mapping-view',
@@ -527,6 +528,11 @@ export class MappingViewComponent implements OnInit, AfterViewInit, OnDestroy {
         extension = '.xlsx';
         break;
 
+      case 'fhir-json':
+        contentType = 'application/fhir+json';
+        extension = '.json';
+        break;
+  
       case 'csv':
       default:
         contentType = 'text/csv';

@@ -54,6 +54,7 @@ public interface MapRowTargetRepository
     QuerydslPredicateExecutor<MapRowTarget>, QuerydslBinderCustomizer<QMapRowTarget> {
 
   String TARGET_OUT_OF_SCOPE_TAG = "target-out-of-scope";
+  String TARGET_NO_ACTIVE_SUGGESTIONS_TAG = "target-no-active-suggestions-tag";
 
   // ---------------------------------
   // Exported in REST interface

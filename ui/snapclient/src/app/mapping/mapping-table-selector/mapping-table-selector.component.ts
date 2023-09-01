@@ -210,8 +210,9 @@ export class MappingTableSelectorComponent implements OnInit, OnDestroy, AfterVi
 
   checkSelected(row: MapView): boolean {
     return this.selectedRows.filter(selectedRow =>
-      selectedRow.sourceIndex === parseInt(row.sourceIndex)
-      && selectedRow.mapRowTargetId === row.targetId).length > 0;
+      row.targetId
+      && selectedRow.sourceIndex === parseInt(row.sourceIndex)
+      && selectedRow.mapRowTargetId === parseInt(row.targetId)).length > 0;
   }
 
   toggleSelection(event: any, row: MapView, index: number): void {

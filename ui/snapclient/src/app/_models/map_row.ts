@@ -20,6 +20,7 @@ import {Mapping} from './mapping';
 import {User} from './user';
 
 export const TARGET_OUT_OF_SCOPE_TAG = "target-out-of-scope";
+export const TARGET_NO_ACTIVE_SUGGESTIONS_TAG = "target-no-active-suggestions-tag";
 
 export interface MapRow {
   id: string | null;

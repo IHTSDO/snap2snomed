@@ -15,7 +15,7 @@
  */
 
 import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
-import {MapRowRelationship, mapRowRelationships, MapRowStatus, MapView, toMapRowStatus} from '../../_models/map_row';
+import {MapRowRelationship, mapRowRelationships, MapRowStatus, MapView, TARGET_NO_ACTIVE_SUGGESTIONS_TAG, toMapRowStatus} from '../../_models/map_row';
 import {MapService} from '../../_services/map.service';
 import {Router} from '@angular/router';
 import {TranslateService} from '@ngx-translate/core';
@@ -28,6 +28,15 @@ import {SourceRow} from '../mapping-detail/mapping-detail.component';
 import {WriteDisableUtils} from "../../_utils/write_disable_utils";
 import {FhirService} from "../../_services/fhir.service";
 import { SourceNavSet } from 'src/app/_services/source-navigation.service';
+import { Subscription } from 'rxjs';
+import { Store } from '@ngrx/store';
+import { IAppState } from 'src/app/store/app.state';
+import { IParameters } from '@ahryman40k/ts-fhir-types/lib/R4';
+
+export interface Coding { //import from reducer?
+  code: string;
+  display: string;
+}
 
 @Component({
   selector: 'app-target-relationship',
@@ -48,15 +57,19 @@ export class TargetRelationshipComponent implements OnInit {
   @Output() removeTargetEvent = new EventEmitter<MapView>();
   @Output() noMapEvent = new EventEmitter<boolean>();
   @Output() flagEvent = new EventEmitter<MapView>();
+  @Output() noReplacementEvent = new EventEmitter<MapView>();
 
   writeDisableUtils = WriteDisableUtils;
   toMapRowStatus = toMapRowStatus;
+
+  private subscription = new Subscription();
 
   constructor(private mapService: MapService,
               private fhirService: FhirService,
               private router: Router,
               private selectionService: SelectionService,
-              private translate: TranslateService) {
+              private translate: TranslateService,
+              private store: Store<IAppState>) {
     this.relationships = mapRowRelationships;
   }
 
@@ -67,6 +80,29 @@ export class TargetRelationshipComponent implements OnInit {
         self.selectedSearchItem = value;
       }
     });
+  }
+
+  updateReplacements(parameters: IParameters): Coding[] {
+    let conceptList: Coding[] = [];
+    if (parameters.parameter && parameters.parameter[0].name === "result" && parameters.parameter[0].valueBoolean === true) {
+      for (let index = 1; index < parameters.parameter.length; index++) {
+        if (parameters.parameter[index].name === "match") {
+          let part = parameters.parameter[index].part;
+          part?.forEach(item => {
+            if (item.name === "concept") {
+              if (item.valueCoding && item.valueCoding.code && item.valueCoding.display) {
+                conceptList.push({
+                  code: item.valueCoding.code,
+                  display: item.valueCoding.display,
+                });
+              }
+            }
+          })
+        }
+      }
+    }
+    return conceptList;
+
   }
 
   click(row: MapView): void {
@@ -149,6 +185,96 @@ export class TargetRelationshipComponent implements OnInit {
     }
     return false;
   }
+  
+  addSuggestedConcepts(suggestedConcepts : Coding[], row: MapView) {
+    suggestedConcepts.forEach(suggestedConcept => {
+
+      this.fhirService.validateConceptInScopeAndActive(suggestedConcept.code, 
+                this.task?.mapping.toSystem ?? 'http://snomed.info/sct', 
+                this.task?.mapping.toVersion ?? '', 
+                this.task?.mapping.toScope ?? '').subscribe(result => {
+
+        let inScopeAndActive : boolean = true;
+
+        if (result.parameter) {
+ 
+          for (let param of result.parameter) {
+            if (param.name === "result" && param.valueBoolean === false) {
+              inScopeAndActive = false;
+              break;
+            }
+            else if (param.name === "inactive" && param.valueBoolean === true) {
+              inScopeAndActive = false;
+              break;
+            }
+          }
+        }
+        else {
+          inScopeAndActive = false;
+        }
+
+
+        if (inScopeAndActive) {
+          this.addSelection(suggestedConcept.code, suggestedConcept.display, this.task?.mapping.toSystem ?? 'http://snomed.info/sct', 
+          MapRowRelationship.INEXACT);
+        }
+        else {
+          console.log("invalid .. update tag");
+          // update tag to indicate there are no suggestions
+          if (!row.tags?.includes(TARGET_NO_ACTIVE_SUGGESTIONS_TAG)) {
+            row.tags?.push(TARGET_NO_ACTIVE_SUGGESTIONS_TAG);
+            this.noReplacementEvent.emit(row);
+          }
+
+        }
+
+      });
+
+    })
+  }
+
+  onMapMaintenance(row: MapView): void {
+
+    if (row.targetOutOfScope && row.targetCode) {
+      this.fhirService.findReplacementConcepts(row.targetCode, this.task?.mapping.toScope ?? '', 
+        this.task?.mapping.toVersion ?? '').subscribe(parameters => {
+
+          let suggestionsFound : boolean = false;
+          if (parameters) {
+            if (parameters.sameAs) {
+              let sameAsConcepts : Coding[] = this.updateReplacements(parameters.sameAs);
+              if (!suggestionsFound && sameAsConcepts.length > 0) suggestionsFound = true;
+              this.addSuggestedConcepts(sameAsConcepts, row);
+            }
+            if (parameters.replacedBy) {
+              let replacedByConcepts : Coding[] = this.updateReplacements(parameters.replacedBy);
+              if (!suggestionsFound && replacedByConcepts.length > 0) suggestionsFound = true;
+              this.addSuggestedConcepts(replacedByConcepts, row);
+            }
+            if (parameters.possiblyEquivalentTo) {
+              let possiblyEquivalentToConcepts : Coding[] = this.updateReplacements(parameters.possiblyEquivalentTo);
+              if (!suggestionsFound && possiblyEquivalentToConcepts.length > 0) suggestionsFound = true;
+              this.addSuggestedConcepts(possiblyEquivalentToConcepts, row);
+            }
+            if (parameters.alternative) {
+              let alternativeConcepts : Coding[] = this.updateReplacements(parameters.alternative);
+              if (!suggestionsFound && alternativeConcepts.length > 0) suggestionsFound = true;
+              this.addSuggestedConcepts(alternativeConcepts, row);
+            }
+  
+          }
+          if (parameters && !suggestionsFound) {
+            // update tag to indicate there are no suggestions
+            if (!row.tags?.includes(TARGET_NO_ACTIVE_SUGGESTIONS_TAG)) {
+              row.tags?.push(TARGET_NO_ACTIVE_SUGGESTIONS_TAG);
+              this.noReplacementEvent.emit(row);
+            }
+          }
+
+        })
+    }
+
+  }
 
   isNoMap(): boolean {
     return this.source?.noMap ?? false;
@@ -158,5 +284,28 @@ export class TargetRelationshipComponent implements OnInit {
     const self = this;
     maprow.flagged = !maprow.flagged;
     self.flagEvent.emit(maprow);
+  }
+
+  getTargetOutOfScopeTooltip(row: MapView) : string {
+
+    if (row.tags?.includes(TARGET_NO_ACTIVE_SUGGESTIONS_TAG)) {
+      return this.translate.instant("DETAILS.OUT_OF_SCOPE_NO_SUGGESTED_REPLACEMENTS");
+    }
+    else {
+      return this.translate.instant("DETAILS.OUT_OF_SCOPE_FIND_REPLACEMENTS");
+    }
+  }
+
+  isOutOfScopeWithSuggestions(row: MapView) : boolean {
+
+    let outOfScopeWithSuggestions : boolean = false;
+
+    if (row.targetOutOfScope) {
+      if (!row.tags?.includes(TARGET_NO_ACTIVE_SUGGESTIONS_TAG)) {
+        outOfScopeWithSuggestions = true;
+      }
+    }
+
+    return outOfScopeWithSuggestions;
   }
 }

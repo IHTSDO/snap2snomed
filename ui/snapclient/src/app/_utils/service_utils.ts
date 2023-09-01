@@ -41,7 +41,7 @@ export class ServiceUtils {
     return {
       headers: new HttpHeaders({
         'Content-Type': 'application/json',
-        Accept: '*/*',
+        Accept: 'application/hal+json, application/json',
       })
     };
   }
@@ -49,7 +49,7 @@ export class ServiceUtils {
   static getHTTPUploadHeaders(): { headers: HttpHeaders, params?: any } {
     return {
       headers: new HttpHeaders({
-        Accept: '*/*',
+        Accept: 'application/json',
       })
     };
   }
@@ -353,7 +353,7 @@ export class ServiceUtils {
     if (result) {
       return result[0];
     }
-    return result;
+    return null;
   }
 
   // TODO: Maybe deprecate this as backend does the same thing

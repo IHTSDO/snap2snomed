@@ -59,7 +59,7 @@ h2 {
 .container-row {
   display: flex;
   flex-direction: row;
-  flex-wrap: wrap;
+  /* flex-wrap: wrap;  this causes properties / attributes to wrap to the next row which is not desirable */
 }
 
 .card-col {
@@ -78,7 +78,7 @@ h2 {
 
 .tree-view {
   flex: 2;
-  height: 500px;
+  /* height: 500px; */
   position: relative;
 }
 
@@ -89,6 +89,9 @@ h2 {
   z-index: 10;
 }
 
+.tab-view {
+  flex: 1;
+}
 .properties-view {
   flex: 1;
 }

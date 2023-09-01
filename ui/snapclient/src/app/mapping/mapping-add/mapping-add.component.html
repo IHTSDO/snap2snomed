@@ -1,5 +1,5 @@
 <div class="full-page-container mat-elevation-z8">
-  <form (ngSubmit)="onSubmit()" #myForm="ngForm">
+  <form (ngSubmit)="onSubmit()" [formGroup]="formGroup">
     <mat-card>
       <mat-card-header>
         <mat-card-title>{{ getFormModeTextForTranslation() | translate }}</mat-card-title>
@@ -23,44 +23,42 @@
         </div>
         <mat-form-field class="field-full-width" hintLabel="{{'FORM.MAX_CHARS' | translate}} {{MAX_TITLE}}">
           <mat-label>{{ 'MAP.TITLE' | translate }}</mat-label>
-          <input matInput [(ngModel)]="mappingModel.project.title"
-                 id="title" name="title" #title="ngModel"
+          <input matInput
+                 id="title" formControlName="title"
                  [maxLength]="MAX_TITLE" [pattern]="VALID_STRING_PATTERN"
-                 [disabled]="mode === 'FORM.COPY'" required>
-          <mat-hint *ngIf="!title.invalid" align="end">{{title.value?.length || 0}}/{{MAX_TITLE}}</mat-hint>
-          <mat-error *ngIf="title.invalid">{{ 'MAP.TITLE_ERROR' | translate }}</mat-error>
+                 required>
+          <mat-hint *ngIf="!formGroup.controls.title.invalid" align="end">{{formGroup.controls.title.value?.length || 0}}/{{MAX_TITLE}}</mat-hint>
+          <mat-error *ngIf="formGroup.controls.title.invalid">{{ 'MAP.TITLE_ERROR' | translate }}</mat-error>
         </mat-form-field>
         <mat-form-field class="field-full-width" hintLabel="{{'FORM.MAX_CHARS' | translate}} {{MAX_VERSION}}">
           <mat-label>{{ 'MAP.VERSION' | translate }}</mat-label>
-          <input matInput [(ngModel)]="mappingModel.mapVersion"
-                 id="mapVersion" name="mapVersion" #version="ngModel"
+          <input matInput
+                 id="mapVersion" formControlName="mapVersion"
                  [maxLength]="MAX_VERSION" [pattern]="VALID_STRING_PATTERN"
                  required>
-          <mat-hint align="end">{{version.value?.length || 0}}/{{MAX_VERSION}}</mat-hint>
-          <mat-error *ngIf="version.invalid">{{ 'MAP.VERSION_ERROR' | translate }}</mat-error>
+          <mat-hint align="end">{{formGroup.controls.mapVersion.value?.length || 0}}/{{MAX_VERSION}}</mat-hint>
+          <mat-error *ngIf="formGroup.controls.mapVersion.invalid">{{ 'MAP.VERSION_ERROR' | translate }}</mat-error>
         </mat-form-field>
         <mat-form-field class="field-full-width" hintLabel="{{'FORM.MAX_CHARS' | translate}} {{MAX_DESCRIPTION}}">
           <mat-label>{{ 'MAP.DESCRIPTION' | translate }}</mat-label>
-          <textarea matNativeControl [(ngModel)]="mappingModel.project.description"
-                    id="description" name="description" #description="ngModel"
+          <textarea matNativeControl
+                    id="description" formControlName="description"
                     [maxLength]="MAX_DESCRIPTION" [pattern]="VALID_STRING_PATTERN"
-                    [disabled]="mode === 'FORM.VIEW' || mode === 'FORM.COPY'"></textarea>
-          <mat-hint align="end">{{description.value?.length || 0}}/{{MAX_DESCRIPTION}}</mat-hint>
-          <mat-error *ngIf="description.invalid">{{ 'MAP.DESCRIPTION_ERROR' | translate }}</mat-error>
+                    ></textarea>
+          <mat-hint align="end">{{formGroup.controls.description.value?.length || 0}}/{{MAX_DESCRIPTION}}</mat-hint>
+          <mat-error *ngIf="formGroup.controls.description.invalid">{{ 'MAP.DESCRIPTION_ERROR' | translate }}</mat-error>
         </mat-form-field>
         <div *ngIf="mode === 'FORM.CREATE' || mode === 'FORM.COPY'">
           <div class="source-field">
             <mat-form-field class="field-withbutton-width">
               <mat-label>{{ 'MAP.SOURCE' | translate }}</mat-label>
-              <mat-select [(ngModel)]="mappingModel.source.id"
-                          id="sourceId" name="sourceId" #sourceId="ngModel"
-                          required>
+              <mat-select id="sourceId" formControlName="sourceId" required>
                 <mat-option disabled value=""><i>{{ 'MAP.SOURCE_SELECT' | translate }}</i></mat-option>
                 <mat-option *ngFor="let src of sources" [value]="src.id">
                   {{src.name}}: {{src.version}}
                 </mat-option>
               </mat-select>
-              <mat-error *ngIf="sourceId.invalid">{{ 'MAP.SOURCE_REQUIRED' | translate }}</mat-error>
+              <mat-error *ngIf="formGroup.controls.sourceId.invalid">{{ 'MAP.SOURCE_REQUIRED' | translate }}</mat-error>
             </mat-form-field>
             <button mat-mini-fab color="accent" type="button" title="{{ 'MAP.SOURCE_IMPORT' | translate }}"
                     (click)="addSource($event)">
@@ -70,8 +68,8 @@
           <div class="source-field">
             <mat-form-field class="field-withbutton-width multi-field-row-field">
               <mat-label>{{ 'MAP.TARGET_EDITION' | translate }}</mat-label>
-              <mat-select id="toEdition" name="toEdition" [(ngModel)]="selectedEdition"
-                          (selectionChange)="changeEdition($event)" required>
+              <mat-select id="toEdition" formControlName="toEdition"
+                          required>
                 <mat-option *ngFor="let elem of editionToVersionsMap | keyvalue" [value]="elem.key">
                   {{elem.key}}
                 </mat-option>
@@ -80,14 +78,13 @@
             </mat-form-field>
             <mat-form-field class="field-withbutton-width multi-field-row-field">
               <mat-label>{{ 'MAP.TARGET_VERSION' | translate }}</mat-label>
-              <mat-select [(ngModel)]="mappingModel.toVersion"
-                          id="toVersion" name="toVersion" #toVersion="ngModel"
+              <mat-select id="toVersion" formControlName="toVersion"
                           required>
                 <mat-option *ngFor="let vers of editionVersions" [value]="vers.uri">
                   {{vers.version}}
                 </mat-option>
               </mat-select>
-              <mat-error *ngIf="toVersion.invalid">{{ 'MAP.TARGET_VERSION_ERROR' | translate }}</mat-error>
+              <mat-error *ngIf="formGroup.controls.toVersion.invalid">{{ 'MAP.TARGET_VERSION_ERROR' | translate }}</mat-error>
             </mat-form-field>
             <button mat-mini-fab color="accent" type="button" title="{{ 'MAP.REFRESH_TARGET_VERSIONS' | translate }}"
                     (click)="loadReleases()">
@@ -96,8 +93,7 @@
           </div>
           <mat-form-field class="field-full-width" hintLabel="{{'FORM.MAX_CHARS' | translate}} {{MAX_TARGETSCOPE}}">
             <mat-label for="toScopeSelect">{{ 'MAP.TARGET_SCOPE_COMMON' | translate }}</mat-label>
-            <mat-select id="toScopeSelect" name="toScope"
-                        [(ngModel)]="mappingModel.toScope">
+            <mat-select id="toScopeSelect" formControlName="toScopeSelect">
               <mat-option value="*">{{ 'MAP.ECL_ANY' | translate }}</mat-option>
               <mat-option value="<< 404684003|Clinical finding|">{{ 'MAP.ECL_FINDINGS' | translate }}</mat-option>
               <mat-option value="<< 71388002|Procedure|">{{ 'MAP.ECL_PROCEDURES' | translate }}</mat-option>
@@ -111,26 +107,26 @@
             <textarea id="toScope" class="ecl" matNativeControl
                       cdkTextareaAutosize
                       cdkAutosizeMinRows="2"
-                      matInput [(ngModel)]="mappingModel.toScope"
-                      name="toScope" #toscope="ngModel"
+                      matInput
+                      formControlName="toScope"
                       [maxLength]="MAX_TARGETSCOPE" [pattern]="VALID_STRING_PATTERN"
                       required></textarea>
             <mat-error
-              *ngIf="toscope.invalid || toscope.hasError('maxlength')">{{ 'MAP.TARGET_SCOPE_ERROR' | translate }}</mat-error>
+              *ngIf="formGroup.controls.toScope.invalid || formGroup.controls.toScope.hasError('maxlength')">{{ 'MAP.TARGET_SCOPE_ERROR' | translate }}</mat-error>
             <a href="https://confluence.ihtsdotools.org/x/lT3oBg" target="_blank">{{ 'MAP.ECL_HELP' | translate }}</a>
             <mat-hint align="end">
-              {{toscope.value?.length || 0}}/{{MAX_TARGETSCOPE}}
+              {{mappingModel.toScope.length || 0}}/{{MAX_TARGETSCOPE}}
             </mat-hint>
           </mat-form-field>
           <div *ngIf="mode === 'FORM.CREATE'" class="import-existing-map">
             <button mat-raised-button color="primary"  title="{{ 'FORM.IMPORT_EXISTING_MAP' | translate }}"
-                type="button" (click)="onImportMapping($event, myForm)">
+                type="button" (click)="onImportMapping($event)">
                 {{ 'FORM.IMPORT_EXISTING_MAP' | translate }}
               </button>
             <span>Selected Mapping File:</span>
             <div>
               {{mappingFile?.source?.source_file?.name}}
-              <mat-icon (click)="onClearSelectedMappingFile($event, myForm)"
+              <mat-icon (click)="onClearSelectedMappingFile($event)"
                 title="{{ 'FORM.CLEAR_SELECTED_FILE' | translate }}"
                 *ngIf="mappingFile?.source?.source_file?.name">cancel</mat-icon>
             </div>
@@ -177,10 +173,10 @@
           <mat-icon class="mat-icon-warning">info</mat-icon>
           <div [innerHtml]="'FORM.DELETE_WARN' | translate" class="infotext"></div>
         </div>
-        <button *ngIf="mode !== 'FORM.VIEW'" mat-raised-button color="primary" type="submit"
-                [disabled]="myForm.form.invalid">{{ 'FORM.SAVE' | translate }}</button>
-        <button mat-raised-button color="default" type="cancel"
-                (click)="onCancel($event, myForm)">{{ (mode !== 'FORM.VIEW' ? 'FORM.CLOSE' : 'FORM.CANCEL') | translate }}</button>
+        <button *ngIf="mode !== 'FORM.VIEW'" mat-raised-button color="primary" type="submit" id="save"
+                [disabled]="formGroup.invalid">{{ 'FORM.SAVE' | translate }}</button>
+        <button mat-raised-button color="default" type="cancel" id="cancel"
+                (click)="onCancel($event)">{{ (mode !== 'FORM.VIEW' ? 'FORM.CLOSE' : 'FORM.CANCEL') | translate }}</button>
         <button *ngIf="mode === 'FORM.EDIT'" id="delete" mat-raised-button color="accent" (click)="deleteMap()" type="button">
           {{ (warnDelete ? 'FORM.DELETE_CONFIRM' : 'FORM.DELETE') | translate }}
         </button>

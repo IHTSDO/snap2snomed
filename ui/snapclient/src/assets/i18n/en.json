@@ -30,6 +30,8 @@
     "TARGET_BY_RELATIONSHIP": "Target by relationship",
     "MAPPED_SOURCE_TO_TARGET": "Mapped Source to Target",
     "TARGET_PROPERTIES": "Target Properties",
+    "OUT_OF_SCOPE_FIND_REPLACEMENTS": "Target out of scope - click to find suggested replacements",
+    "OUT_OF_SCOPE_NO_SUGGESTED_REPLACEMENTS": "Target out of scope - no active in scope replacements suggested",
     "NOTE_DELETE": "Delete note",
     "NOTE_TEXT": "Add your notes here",
     "NOTE_TEXT_ERROR": "Notes text entry cannot start with a space",
@@ -116,7 +118,8 @@
     "VIEW": "VIEW",
     "IMPORT_EXISTING_MAP": "Import existing map",
     "SELECT_FILE": "Select file",
-    "CLEAR_SELECTED_FILE": "Clear selected file"
+    "CLEAR_SELECTED_FILE": "Clear selected file",
+    "FHIR_METADATA": "Additional FHIR metadata (for FHIR ConceptMap export)"
   },
   "MAP": {
     "BULK_CHANGE_TOOLTIP": "Perform bulk changes to selected rows",
@@ -197,8 +200,8 @@
     "EXPORT_CSV": "Comma separated",
     "EXPORT_TSV": "Tab separated",
     "EXPORT_XLSX": "Excel (xlsx)",
+    "EXPORT_FHIR_JSON": "FHIR (json)",
     "EXPORT_XLSX_EXTENDED": "Excel (xlsx) extended",
-    "EXPORT_FHIR_JSON": "FHIR JSON",
     "CODE_SYSTEMS": "Code systems",
     "LAST_UPDATED": "Last updated",
     "UNSAVED_CHANGES": "Warning: you have unsaved changes",
@@ -334,6 +337,10 @@
     "NAME_DUPLICATE": "Source name and version combination must be unique",
     "NAME_ERROR": "A source name is required",
     "NAME_PLACEHOLDER": "Provide a title or brief description",
+    "CODESYSTEM": "CodeSystem URI",
+    "CODESYSTEM_PLACEHOLDER": "The URI that identifies the CodeSystem containing these codes",
+    "VALUESET": "ValueSet URI",
+    "VALUESET_PLACEHOLDER": "The URI that identifies the ValueSet consisting of these codes",
     "NO_FILE": "No file selected",
     "SELECT_COLUMNS": "We have selected columns for source code and display to be used for mapping. Please check these are correct as they cannot be changed later.",
     "SOURCE": "Source",
@@ -435,6 +442,10 @@
     "NO_SEARCH": "No search text provided",
     "NO_MATCHES": "No search results",
     "INPUT_LABEL": "Text search"
+  },
+  "PROPERTIES": {
+    "TARGET_PROPERTIES": "Target Properties",
+    "ATTRIBUTE_RELATIONSHIPS": "Attribute Relationships"
   },
   "AUTOMAP": {
     "AUTOMAP": "AUTOMAP",

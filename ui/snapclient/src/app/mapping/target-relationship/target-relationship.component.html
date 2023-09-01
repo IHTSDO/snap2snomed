@@ -24,10 +24,11 @@
                 <app-user-chip id="targetLastAuthorUserChip" *ngIf="isReconcileTask() && row.targetLastAuthor" [user]="row.targetLastAuthor"
                 [font_size]="'12px'"></app-user-chip>
                 <span class="selection-text">{{row.targetDisplay}}</span>
-                <span>
-                  <button mat-icon-button *ngIf="row.targetOutOfScope" color="accent" #tooltip="matTooltip"
-                          matTooltip="{{'TABLE.TARGET_OUT_OF_SCOPE_TOOLTIP' | translate}}"
-                          ><mat-icon>warning</mat-icon></button>
+                <span>    
+                  <span #tooltip="matTooltip" matTooltip="{{getTargetOutOfScopeTooltip(row)}}">
+                    <button mat-icon-button *ngIf="row.targetOutOfScope" disabled="{{!isOutOfScopeWithSuggestions(row)}}"(click)="onMapMaintenance(row)" color="accent" 
+                    ><mat-icon>warning</mat-icon></button>
+                  </span>  
                   <button mat-icon-button (click)="updateFlag(row)" [disabled]="disableFlagging"
                           [ngClass]="['flag']"
                           #tooltip="matTooltip" matTooltip="{{'MAP.TARGET_FLAGGED' | translate}}"

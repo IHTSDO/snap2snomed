@@ -72,16 +72,17 @@ export class MappingEffects {
           map(p => ServiceUtils.extractIdFromHref(p._links.self.href, null)));
       }
 
+      const theMapping = cloneDeep(new_mapping.mapping);
       return forkJoin([pid, sid]).pipe(
         switchMap(([projectid, sourceid]) => {
-          return this.mapService.createMapping(new_mapping.mapping, projectid, sourceid, new_mapping.dualMapMode).pipe(
+          return this.mapService.createMapping(theMapping, projectid, sourceid, new_mapping.dualMapMode).pipe(
             map((m) => {
-              new_mapping.mapping.id = ServiceUtils.extractIdFromHref(m._links.self.href, null);
-              new_mapping.mapping.source = m.source as Source;
-              if (new_mapping.mapping.project) {
-                new_mapping.mapping.project.mapcount = 1;
+              theMapping.id = ServiceUtils.extractIdFromHref(m._links.self.href, null);
+              theMapping.source = m.source as Source;
+              if (theMapping.project) {
+                theMapping.project.mapcount = 1;
               }
-              return new_mapping.mapping;
+              return theMapping;
             }),
             switchMap((mapping: Mapping) => of(new AddMappingSuccess(mapping))),
             catchError((err: any) => of(new AddMappingFailure(err))),
@@ -98,11 +99,11 @@ export class MappingEffects {
                 }),
                 switchMap((result: ImportMappingFileResult) => [
                   new ImportMappingFileSuccess(result),
-                  new AddMappingSuccess(new_mapping.mapping)
+                  new AddMappingSuccess(theMapping)
                 ]),
                 catchError((err, mapping) => [
                   new ImportMappingFileFailure(err),
-                  new AddMappingSuccess(new_mapping.mapping)
+                  new AddMappingSuccess(theMapping)
                 ])
               );
             })
@@ -229,8 +230,9 @@ export class MappingEffects {
     map((action) => action.payload),
     switchMap((payload) => {
       const context = payload.context;
+      const filter = cloneDeep(context.filter);
       return this.mapService.getMapView(payload.mapping, context.pageIndex,
-        context.pageSize, context.sortColumn, context.sortDir, context.filter).pipe(
+        context.pageSize, context.sortColumn, context.sortDir, filter).pipe(
         switchMap((mapView: MapViewResults) => of(new LoadMapViewSuccess(mapView))),
         catchError((error: any) => of(new LoadMapViewFailure(error))),
       );

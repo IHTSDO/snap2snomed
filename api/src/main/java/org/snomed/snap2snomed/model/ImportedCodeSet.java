@@ -86,6 +86,12 @@ public class ImportedCodeSet implements Snap2SnomedEntity {
   @Size(min = 1, max = 30, message = "Version must be between 1 and 30 characters")
   String version;
 
+  @Size(min = 1, max = 255, message = "CodeSystem URI must be between 1 and 255 characters")
+  String systemUri;
+
+  @Size(min = 1, max = 255, message = "ValueSet URI must be between 1 and 255 characters")
+  String valuesetUri;
+
   @ReadOnlyProperty
   @ElementCollection
   @OrderColumn(name = "collection_order")

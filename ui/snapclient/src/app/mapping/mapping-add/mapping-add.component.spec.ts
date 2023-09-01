@@ -157,16 +157,16 @@ describe('MappingAddComponent', () => {
   it('form should initially be invalid', () => {
     component.ngOnInit();
     fixture.detectChanges();
-    expect(component.form).toBeTruthy();
-    expect(component.form?.invalid).toBeTruthy();
+    expect(component.formGroup).toBeTruthy();
+    expect(component.formGroup?.invalid).toBeTruthy();
   });
 
   it('form should be valid with all fields', () => {
     component.mappingModel = mapping;
     fixture.detectChanges();
-    expect(component.form).toBeTruthy();
+    expect(component.formGroup).toBeTruthy();
     fixture.whenStable().then(() => {
-      expect(component.form?.valid).toBeTruthy();
+      expect(component.formGroup?.valid).toBeTruthy();
     });
   });
 });
