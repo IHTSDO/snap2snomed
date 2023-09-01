@@ -114,7 +114,8 @@
     "VIEW": "VIEW",
     "IMPORT_EXISTING_MAP": "Import existing map",
     "SELECT_FILE": "Select file",
-    "CLEAR_SELECTED_FILE": "Clear selected file"
+    "CLEAR_SELECTED_FILE": "Clear selected file",
+    "FHIR_METADATA": "Additional FHIR metadata (for FHIR ConceptMap export)"
   },
   "MAP": {
     "BULK_CHANGE_TOOLTIP": "Perform bulk changes to selected rows",
@@ -193,8 +194,8 @@
     "EXPORT_CSV": "Comma separated",
     "EXPORT_TSV": "Tab separated",
     "EXPORT_XLSX": "Excel (xlsx)",
+    "EXPORT_FHIR_JSON": "FHIR (json)",
     "EXPORT_XLSX_EXTENDED": "Excel (xlsx) extended",
-    "EXPORT_FHIR_JSON": "FHIR JSON",
     "CODE_SYSTEMS": "Code systems",
     "LAST_UPDATED": "Last updated",
     "UNSAVED_CHANGES": "Warning: you have unsaved changes",
@@ -320,6 +321,10 @@
     "NAME_DUPLICATE": "Source name and version combination must be unique",
     "NAME_ERROR": "A source name is required",
     "NAME_PLACEHOLDER": "Provide a title or brief description",
+    "CODESYSTEM": "CodeSystem URI",
+    "CODESYSTEM_PLACEHOLDER": "The URI that identifies the CodeSystem containing these codes",
+    "VALUESET": "ValueSet URI",
+    "VALUESET_PLACEHOLDER": "The URI that identifies the ValueSet consisting of these codes",
     "NO_FILE": "No file selected",
     "SELECT_COLUMNS": "We have selected columns for source code and display to be used for mapping. Please check these are correct as they cannot be changed later.",
     "SOURCE": "Source",

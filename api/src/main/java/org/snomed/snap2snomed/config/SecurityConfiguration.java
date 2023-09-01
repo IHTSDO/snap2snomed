@@ -17,9 +17,11 @@
 package org.snomed.snap2snomed.config;
 
 import javax.validation.constraints.NotBlank;
+
+import org.snomed.snap2snomed.validation.AtLeastOneNotNull;
+
 import lombok.Getter;
 import lombok.Setter;
-import org.snomed.snap2snomed.validation.AtLeastOneNotNull;
 
 @Getter
 @Setter

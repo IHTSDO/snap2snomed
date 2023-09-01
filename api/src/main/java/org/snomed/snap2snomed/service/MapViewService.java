@@ -280,8 +280,12 @@ public class MapViewService {
         extension = ".xlsx";
         break;
 
+      case MapViewRestController.FHIR_JSON:
+        extension = ".json";
+        break;
+
       default:
-        throw Problem.valueOf(Status.UNSUPPORTED_MEDIA_TYPE, "Content type " + contentType + " is not supported");
+        throw Problem.valueOf(Status.UNSUPPORTED_MEDIA_TYPE, "Content type " + contentType + " is not supported for map export");
     }
 
     return "map-" + map.getProject().getTitle() + "_" + map.getMapVersion() + extension;
@@ -295,7 +299,7 @@ public class MapViewService {
     
     ArrayList<String> exportHeader = new ArrayList<String>(Arrays.asList("\ufeff" + "Source code", "Source display"));
 
-    final List<AdditionalCodeColumn> additionalCodeColumnList = this.getAdditionalColumnsMetadata(mapId);      
+    final List<AdditionalCodeColumn> additionalCodeColumnList = this.getAdditionalColumnsMetadata(mapId);
     if (additionalCodeColumnList != null && additionalCodeColumnList.size() > 0) {
       for (AdditionalCodeColumn additionalColumn : additionalCodeColumnList) {
         exportHeader.add(additionalColumn.getName());

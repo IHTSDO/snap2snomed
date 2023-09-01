@@ -19,9 +19,12 @@ package org.snomed.snap2snomed.controller;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -31,17 +34,28 @@ import org.apache.poi.xssf.streaming.SXSSFCell;
 import org.apache.poi.xssf.streaming.SXSSFRow;
 import org.apache.poi.xssf.streaming.SXSSFSheet;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
+import org.hl7.fhir.r4.model.ConceptMap;
+import org.hl7.fhir.r4.model.ConceptMap.ConceptMapGroupComponent;
+import org.hl7.fhir.r4.model.ConceptMap.SourceElementComponent;
+import org.hl7.fhir.r4.model.ConceptMap.TargetElementComponent;
+import org.hl7.fhir.r4.model.Enumerations.ConceptMapEquivalence;
+import org.hl7.fhir.r4.model.Enumerations.PublicationStatus;
+import org.hl7.fhir.r4.model.UriType;
 import org.snomed.snap2snomed.controller.dto.Snap2SnomedPagedModel;
-import org.snomed.snap2snomed.model.AdditionalCodeColumn;
+import org.snomed.snap2snomed.model.ImportedCodeSet;
 import org.snomed.snap2snomed.model.AdditionalCodeValue;
 import org.snomed.snap2snomed.model.MapView;
+import org.snomed.snap2snomed.model.Project;
 import org.snomed.snap2snomed.model.enumeration.MapStatus;
 import org.snomed.snap2snomed.model.enumeration.MappingRelationship;
 import org.snomed.snap2snomed.problem.auth.NoSuchUserProblem;
 import org.snomed.snap2snomed.problem.auth.NotAuthorisedProblem;
+import org.snomed.snap2snomed.repository.MapRepository;
 import org.snomed.snap2snomed.security.WebSecurity;
+import org.snomed.snap2snomed.service.FhirService;
 import org.snomed.snap2snomed.service.MapViewService;
 import org.snomed.snap2snomed.service.MapViewService.MapViewFilter;
+import org.snomed.snap2snomed.service.TerminologyProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PagedResourcesAssembler;
@@ -57,6 +71,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.zalando.problem.Problem;
 import org.zalando.problem.Status;
 
+import ca.uhn.fhir.parser.IParser;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
@@ -75,12 +90,16 @@ public class MapViewRestController {
 
   public static final String TEXT_CSV = "text/csv";
 
+  public static final String FHIR_JSON = "application/fhir+json";
 
   @Autowired
   MapViewService mapViewService;
 
   @Autowired
   WebSecurity webSecurity;
+
+  @Autowired
+  TerminologyProvider terminology;
 
   @Operation(description = "Returns a flattened view of the MapRows and MapRowTargets for the specified mapId.")
   @Parameter(name = "mapId", in = ParameterIn.PATH, required = true, allowEmptyValue = false,
@@ -215,7 +234,7 @@ public class MapViewRestController {
       @RequestParam(required = false) List<String> lastAuthorReviewer,
       @RequestParam(required = false) List<String> assignedAuthor,
       @RequestParam(required = false) List<String> assignedReviewer,
-      @RequestParam(required = false) Boolean targetOutOfScope,      
+      @RequestParam(required = false) Boolean targetOutOfScope,
       @RequestParam(required = false) Boolean flagged,
       @RequestParam(required = false) List<String> additionalColumns,
       @Parameter(hidden = true) Pageable pageable,
@@ -444,6 +463,123 @@ public class MapViewRestController {
 
       wb.dispose();
     }
+  }
+
+  @Operation(description = "Returns a flattened view of the MapRows and MapRowTargets for the specified mapId.")
+  @Parameter(name = "page", in = ParameterIn.QUERY, required = false, allowEmptyValue = false, description = "Zero-based page index (0..N)")
+  @Parameter(name = "size", in = ParameterIn.QUERY, required = false, allowEmptyValue = false,
+      description = "The size of the page to be returned")
+  @Parameter(name = "sort", in = ParameterIn.QUERY, required = false, allowEmptyValue = false,
+      description = "Sorting criteria in the format: property(,asc|desc). Default sort order is ascending. Multiple sort criteria are supported.",
+      array = @ArraySchema(schema = @Schema(type = "string")))
+  @GetMapping(path = "/{mapId}", produces = {FHIR_JSON})
+  public void getMapViewConceptMapJson(HttpServletResponse response, @RequestHeader(name = "Accept", required = false) String contentType,
+          @PathVariable("mapId") Long mapId) {
+
+      if (!webSecurity.isValidUser()) {
+          throw new NoSuchUserProblem();
+      }
+      if (!webSecurity.isAdminUser() && !webSecurity.hasAnyProjectRoleForMapId(mapId)) {
+          throw new NotAuthorisedProblem("Not authorised to view map if the user is not admin or member of an associated project!");
+      }
+
+      response.setContentType(FHIR_JSON);
+      response.setHeader("Content-Disposition",
+              "attachment; filename=\"" + mapViewService.getFileNameForMapExport(mapId, FHIR_JSON)
+              + "\"");
+
+
+      final ConceptMap cm = convertToConceptMap(mapId);
+
+      try (final BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(response.getOutputStream()))) {
+          final IParser parser = terminology.getFhirContext().newJsonParser();
+          parser.encodeResourceToWriter(cm, writer);
+          writer.flush();
+      } catch (final IOException e) {
+          throw Problem.builder().withDetail("IO error exporting").build();
+      }
+  }
+
+  @Autowired
+  private MapRepository mapRepo;
+
+  private ConceptMap convertToConceptMap(Long mapId) {
+      final Map<Long, SourceElementComponent> mapEntry = new HashMap<>();
+      final ConceptMap cm = new ConceptMap();
+      final ConceptMapGroupComponent group = cm.addGroup();
+
+      mapRepo.findById(mapId).ifPresent(map -> {
+          final Project project = map.getProject();
+          final String title = project.getTitle();
+          cm.setStatus(PublicationStatus.UNKNOWN);
+          cm.setDate(Date.from(map.getModified()));
+          cm.setTitle(title);
+          cm.setName(title.replaceAll("[^\\w\\d]", "_"));
+          cm.setDescription(project.getDescription());
+          cm.setVersion(map.getMapVersion());
+
+          final ImportedCodeSet source = map.getSource();
+          String valuesetUri = source.getValuesetUri();
+          if (null != valuesetUri) {
+              cm.setSource(new UriType(valuesetUri));
+          }
+
+          final String ecl = map.getToScope();
+          cm.setTarget(new UriType(FhirService.DEFAULT_CODE_SYSTEM + "?fhir_vs=ecl/" + ecl));
+
+          String systemUri = source.getSystemUri();
+          if (null != systemUri) {
+              group.setSource(systemUri);
+          }
+          group.setSourceVersion(source.getVersion());
+          group.setTarget(FhirService.DEFAULT_CODE_SYSTEM);
+          group.setTargetVersion(map.getToVersion());
+      });
+
+
+      for (final MapView mapView : mapViewService.getAllMapViewForMap(mapId)) {
+          final Long key = mapView.getSourceIndex();
+          final SourceElementComponent src;
+          if (!mapEntry.containsKey(key)) {
+              src = group.addElement();
+              src.setCode(mapView.getSourceCode());
+              src.setDisplay(mapView.getSourceDisplay());
+
+              mapEntry.put(key, src);
+          } else {
+              src = mapEntry.get(key);
+          }
+
+          final TargetElementComponent tgt = src.addTarget();
+          if (null != mapView.getNoMap() && mapView.getNoMap()) {
+              tgt.setEquivalence(ConceptMapEquivalence.UNMATCHED);
+          } else {
+              tgt.setCode(mapView.getTargetCode());
+              tgt.setDisplay(mapView.getTargetDisplay());
+              if (null != mapView.getRelationship()) {
+                  switch (mapView.getRelationship()) {
+                  case TARGET_EQUIVALENT:
+                      tgt.setEquivalence(ConceptMapEquivalence.EQUIVALENT);
+                      break;
+                  case TARGET_BROADER:
+                      tgt.setEquivalence(ConceptMapEquivalence.WIDER);
+                      break;
+                  case TARGET_NARROWER:
+                      tgt.setEquivalence(ConceptMapEquivalence.NARROWER);
+                      break;
+                  case TARGET_INEXACT:
+                      tgt.setEquivalence(ConceptMapEquivalence.RELATEDTO);
+                      break;
+                  }
+              }
+
+              if (mapView.getNoMap()) {
+                  tgt.setEquivalence(ConceptMapEquivalence.UNMATCHED);
+              }
+
+          }
+      }
+      return cm;
   }
 
 

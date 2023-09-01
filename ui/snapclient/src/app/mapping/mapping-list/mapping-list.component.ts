@@ -135,11 +135,11 @@ export class MappingListComponent implements OnInit, AfterViewInit, OnDestroy {
     if (window.history.state?.error) {
       this.setError(window.history.state.error);
     }
-  }
+
+    this.getProjects();
+  }  
 
   ngAfterViewInit(): void {
-    this.getProjects();
-
     if (this.sort) {
       this.sort.sortChange.pipe(tap(() => {
         if (this.sort?.direction) {

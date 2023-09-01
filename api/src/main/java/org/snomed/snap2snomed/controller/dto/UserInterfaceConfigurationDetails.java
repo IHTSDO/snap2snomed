@@ -18,9 +18,11 @@ package org.snomed.snap2snomed.controller.dto;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
+
+import org.hibernate.validator.constraints.URL;
+
 import lombok.Builder;
 import lombok.Value;
-import org.hibernate.validator.constraints.URL;
 
 @Value
 @Builder
