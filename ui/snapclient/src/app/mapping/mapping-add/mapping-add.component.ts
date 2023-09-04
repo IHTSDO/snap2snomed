@@ -86,6 +86,7 @@ export class MappingAddComponent implements OnInit {
     toVersion: new FormControl(''),
     toScopeSelect: new FormControl(''),
     toScope: new FormControl(''),
+    dualMapMode: new FormControl('')
   });
 
   @Input() set mapping(value: Mapping | undefined) {
@@ -154,6 +155,7 @@ export class MappingAddComponent implements OnInit {
     self.formGroup.controls.toVersion.setValue(this.mappingModel.toVersion);
     self.formGroup.controls.toScopeSelect.setValue(this.mappingModel.toScope);
     self.formGroup.controls.toScope.setValue(this.mappingModel.toScope);
+    self.formGroup.controls.dualMapMode.setValue(this.mappingModel.project.dualMapMode);
 
     self.formGroup.controls.title.valueChanges.subscribe((value) => {
       if (self.mappingModel.project.title !== value) {
@@ -190,6 +192,11 @@ export class MappingAddComponent implements OnInit {
       self.mappingModel.toScope = value;
       if (value !== self.formGroup.controls.toScopeSelect.value) {
         self.formGroup.controls.toScopeSelect.setValue(value);
+      }
+    });
+    self.formGroup.controls.dualMapMode.valueChanges.subscribe((value) => {
+      if (self.mappingModel.project.dualMapMode !== value) {
+        self.mappingModel.project.dualMapMode = value;
       }
     });
   }
