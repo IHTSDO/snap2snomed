@@ -31,6 +31,8 @@ export class Source {
   id: string | null;
   name: string;
   version: string;
+  codesystemUri?: string;
+  valuesetUri?: string;
   description: string | null;
   hasHeader: boolean | null;
   contentType: string;

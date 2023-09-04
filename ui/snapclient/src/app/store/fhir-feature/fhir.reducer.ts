@@ -38,19 +38,26 @@ export interface Match {
 }
 
 export interface IFhirState {
-  editionToVersionsMap : Map<string, Release[]> | undefined;
+  editionToVersionsMap: Map<string, Release[]> | undefined;
   matches?: R4.IValueSet_Expansion;
   nodes: ConceptNode<Coding>[];
   suggests?: Match[];
   properties?: Properties;
-  moduleProperties?: Properties;
+  resolvedDisplayProperties? : Properties;
   errorMessage: any | null;
+  replacementSuggestions: {
+    sameAs: R4.IParameters,
+    replacedBy: R4.IParameters, 
+    possiblyEquivalentTo: R4.IParameters, 
+    alternative: R4.IParameters
+  } | null;
 }
 
 export const initialFhirState: IFhirState = {
   editionToVersionsMap: new Map(),
   nodes: [],
-  errorMessage: null
+  errorMessage: null,
+  replacementSuggestions: null
 };
 
 export function fhirReducer(state = initialFhirState, action: FhirActions): IFhirState {
@@ -112,17 +119,17 @@ export function fhirReducer(state = initialFhirState, action: FhirActions): IFhi
         errorMessage: action.payload.error
       };
 
-    case FhirActionTypes.LOOKUP_MODULE_SUCCESS:
+    case FhirActionTypes.DISPLAY_RESOLVED_LOOKUP_CONCEPT_SUCCESS:
       return {
         ...state,
-        moduleProperties: action.payload,
+        resolvedDisplayProperties: action.payload,
         errorMessage: null
       };
 
-    case FhirActionTypes.LOOKUP_MODULE_FAILED:
+    case FhirActionTypes.DISPLAY_RESOLVED_LOOKUP_CONCEPT_FAILED:
       return {
         ...state,
-        moduleProperties: undefined,
+        resolvedDisplayProperties: undefined,
         errorMessage: action.payload.error
       };
 

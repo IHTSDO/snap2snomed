@@ -17,6 +17,7 @@
 package org.snomed.snap2snomed.service;
 
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.BiFunction;
@@ -279,11 +280,57 @@ public class MapViewService {
         extension = ".xlsx";
         break;
 
+      case MapViewRestController.FHIR_JSON:
+        extension = ".json";
+        break;
+
       default:
-        throw Problem.valueOf(Status.UNSUPPORTED_MEDIA_TYPE, "Content type " + contentType + " is not supported");
+        throw Problem.valueOf(Status.UNSUPPORTED_MEDIA_TYPE, "Content type " + contentType + " is not supported for map export");
     }
 
     return "map-" + map.getProject().getTitle() + "_" + map.getMapVersion() + extension;
+  }
+
+  public List<AdditionalCodeColumn> getAdditionalColumnsMetadata(Long mapId) {
+    return mapRepository.findSourceByMapId(mapId).get().getAdditionalColumnsMetadata();
+  }
+
+  public String[] getExportHeader(Long mapId, List<String> extraColumns) {
+    
+    ArrayList<String> exportHeader = new ArrayList<String>(Arrays.asList("\ufeff" + "Source code", "Source display"));
+
+    final List<AdditionalCodeColumn> additionalCodeColumnList = this.getAdditionalColumnsMetadata(mapId);
+    if (additionalCodeColumnList != null && additionalCodeColumnList.size() > 0) {
+      for (AdditionalCodeColumn additionalColumn : additionalCodeColumnList) {
+        exportHeader.add(additionalColumn.getName());
+      }
+    }
+    exportHeader.addAll(Arrays.asList("Target code", "Target display", "Relationship type code", "Relationship type display", "No map flag", "Status"));
+
+    if (extraColumns != null) {
+      for (String extraColumn : extraColumns) {
+        switch(extraColumn.toUpperCase()) {
+          case "NOTES":
+            exportHeader.add("Notes");
+            break;
+          case "ASSIGNEDAUTHOR":
+            exportHeader.add("Assigned author");
+            break;
+          case "ASSIGNEDREVIEWER":
+            exportHeader.add("Assigned reviewer");
+            break;
+          case "LASTAUTHOR":
+            exportHeader.add("Last author");
+            break;
+          case "LASTREVIEWER":
+            exportHeader.add("Last reviewer");
+            break;
+        }
+      }
+    }
+
+    return exportHeader.toArray(new String[0]);
+
   }
 
   public List<MapView> getAllMapViewForMap(Long mapId) {

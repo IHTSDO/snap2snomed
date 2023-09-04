@@ -16,8 +16,8 @@
 
 package org.snomed.snap2snomed.controller;
 
-import io.swagger.v3.oas.annotations.Operation;
 import javax.validation.Valid;
+
 import org.snomed.snap2snomed.Snap2snomedVersion;
 import org.snomed.snap2snomed.config.SecurityConfiguration;
 import org.snomed.snap2snomed.config.Snap2snomedConfiguration;
@@ -28,6 +28,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.util.unit.DataSize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import io.swagger.v3.oas.annotations.Operation;
 
 @RestController
 public class UserInterfaceConfigurationRestController {
@@ -52,9 +54,9 @@ public class UserInterfaceConfigurationRestController {
   @Operation(description = "Returns configuration information for front end applications connecting to the server.")
   @GetMapping("/config")
   public @Valid UserInterfaceConfigurationDetails getConfiguration() {
-    SecurityConfiguration security = config.getSecurity();
+    final SecurityConfiguration security = config.getSecurity();
 
-    UserInterfaceConfigurationDetailsBuilder builder = UserInterfaceConfigurationDetails.builder()
+    final UserInterfaceConfigurationDetailsBuilder builder = UserInterfaceConfigurationDetails.builder()
         .appName(config.getApplicationInstanceName())
         .authClientID(security.getClientId())
         .authDomainUrl(security.getAuthDomainUrl())
@@ -75,7 +77,8 @@ public class UserInterfaceConfigurationRestController {
         .userRegistrationUrl(config.getUserRegistrationUrl())
         .registrationText(config.getRegistrationText())
         .mainPageText(config.getMainPageText())
-        .currentTermsVersion(config.getCurrentTermsVersion());
+        .currentTermsVersion(config.getCurrentTermsVersion())
+        .identityProvider(config.getIdentityProvider());
 
     version.getShortGitCommit().ifPresent(builder::sentryRelease);
 

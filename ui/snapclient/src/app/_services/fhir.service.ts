@@ -16,11 +16,11 @@
 
 import {Inject, Injectable} from '@angular/core';
 import {HttpClient} from '@angular/common/http';
-import {Observable, of} from 'rxjs';
+import {Observable, forkJoin, of} from 'rxjs';
 import {ServiceUtils} from '../_utils/service_utils';
 import {APP_CONFIG, AppConfig} from '../app.config';
 import {R4} from '@ahryman40k/ts-fhir-types';
-import {catchError, map, mergeMap} from 'rxjs/operators';
+import {catchError, concatMap, map, mergeMap, tap} from 'rxjs/operators';
 import {ErrorDetail} from '../_models/error_detail';
 import {BundleTypeKind, Bundle_RequestMethodKind} from '@ahryman40k/ts-fhir-types/lib/R4';
 import {Coding, Match} from '../store/fhir-feature/fhir.reducer';
@@ -50,6 +50,65 @@ export class FhirService {
     this.isOntoserver = this.config && this.config.fhirBaseUrl ?
       this.config.fhirBaseUrl.indexOf('ontoserver') > 0 : false;
   }
+
+  findReplacementConcepts(conceptId: string, scope: string, version: string) {
+
+    return forkJoin({
+      sameAs: this.findSameAsConcepts(conceptId, scope, version),
+      replacedBy: this.findReplacedByConcepts(conceptId, scope, version),
+      possiblyEquivalentTo: this.findPossiblyEquivalentTo(conceptId, scope, version),
+      alternative: this.findAlternative(conceptId, scope, version),
+      code: conceptId
+    });
+
+  }
+
+  //Same As : http://snomed.info/sct[/edition[/version]]?fhir_cm=900000000000527005 (target ValueSet is http://snomed.info/sct?fhir_vs)
+  findSameAsConcepts(conceptId: string, scope: string, version: string) {
+    return this.findHistoricalAssociation("900000000000527005", conceptId, scope, version);
+  }
+
+  //Replaced By : http://snomed.info/sct[/edition[/version]]?fhir_cm=900000000000526001 (target ValueSet is http://snomed.info/sct?fhir_vs)
+  findReplacedByConcepts(conceptId: string, scope: string, version: string) {
+    return this.findHistoricalAssociation("900000000000526001", conceptId, scope, version);
+  }
+
+  //Possibly Equivalent To : http://snomed.info/sct[/edition[/version]]?fhir_cm=900000000000523009 (target ValueSet is http://snomed.info/sct?fhir_vs)
+  findPossiblyEquivalentTo(conceptId: string, scope: string, version: string) {
+    return this.findHistoricalAssociation("900000000000523009", conceptId, scope, version);
+  }
+
+  //Alternative : http://snomed.info/sct[/edition[/version]]?fhir_cm=900000000000530003 (target ValueSet is http://snomed.info/sct?fhir_vs)
+  findAlternative(conceptId: string, scope: string, version: string) {
+    return this.findHistoricalAssociation("900000000000530003", conceptId, scope, version);
+  }
+
+
+  findHistoricalAssociation(cmId: string, conceptId: string, scope: string, version: string) {
+    const url = `${this.config.fhirBaseUrl}/ConceptMap/$translate`;
+    const body: R4.IParameters = {
+      resourceType: "Parameters",
+      parameter: [
+        {
+          name: "url",
+          valueUri: version + "?fhir_cm=" + cmId
+        },
+        {
+          name: "coding",
+          valueCoding: {
+            system: "http://snomed.info/sct",
+            code: conceptId
+          }
+        }
+      ]
+    };
+
+    const options = ServiceUtils.getHTTPHeaders();
+    options.headers = options.headers
+      .set('Content-Type', 'application/fhir+json');
+    return this.http.post<R4.IParameters>(url, body, options);
+  }
+
 
   findOutliers(toSystem: string, toVersion: string, targets: string[], toScope: string) {
     const valueSet: R4.IValueSet = {
@@ -154,6 +213,121 @@ export class FhirService {
 
   static conceptNodeId(code: string, system: string): string {
     return system + '|' + code;
+  }
+
+  displayResolvedLookupConcept(code: string, system: string, version: string, properties: string[] = []): Observable<R4.IParameters> {
+
+    let expandList = "";
+    let conceptDisplayMap = new Map<string, string>();
+
+    return this.lookupConcept(code, system, version, properties).pipe(
+      tap(parameters => {
+        // Step 1. find all the concept codes in the properties so their display can be looked up
+        parameters.parameter?.map(param => {
+          if ("property" === param.name) {
+            let value;
+            
+            param.part?.forEach(part => {
+              if (part.name) {
+                if ('value' === part.name) {
+                  if (part.valueCode) {
+                    value = part.valueCode
+                    if (expandList.length > 0) {
+                      expandList += " OR ";
+                    }
+                    expandList += value;
+                  }
+                }
+                else if ('subproperty' === part.name) {
+                  part.part?.map(subPropPart => {
+                    if (subPropPart.hasOwnProperty('valueCode')) {
+                      if (expandList.length > 0) {
+                        expandList += " OR ";
+                      }
+                      expandList += subPropPart.valueCode;
+                    }
+                  })
+                }
+                else if ('code' === part.name && part.valueCode && !isNaN(+part.valueCode)) {
+                  // pick up the attribute relationships that do not reside in a role group
+                  if ('609096000' !== part.valueCode) { // role group
+                    if (expandList.length > 0) {
+                      expandList += " OR ";
+                    }
+                    expandList += part.valueCode;
+
+                  }
+
+                }
+              }
+
+            })
+
+          }
+        })
+      }),
+      concatMap(parameters => {
+
+        // 2. Look up the display for the concept codes 
+
+        const url = `${this.config.fhirBaseUrl}/ValueSet/$expand`;
+        const params: any = {
+          url: FhirService.toValueSet('http://snomed.info/sct', expandList),
+        };
+    
+        const options = ServiceUtils.getHTTPHeaders();
+        options.headers = options.headers
+          .set('Accept', ['application/fhir+json', 'application/json']);
+    
+        options.params = {...options.params, ...params};
+        return this.http.get<R4.IValueSet | R4.IOperationOutcome>(url, options).pipe( 
+          tap(res => {
+            if (res.resourceType === 'ValueSet') {
+              res.expansion?.contains?.map(param => {
+                if (param.code && param.display) {
+                  conceptDisplayMap.set(param.code, param.display);
+                }
+              })
+            }
+        }),
+        map(res => {
+
+          // 3. update the parameters with display terms for display in the UI
+          
+          parameters.parameter?.map(param => {
+            if ("property" === param.name) {
+              let parameterCode : string | undefined;
+  
+              param.part?.forEach(paramPart => {
+                if ('value' === paramPart.name) {
+                  parameterCode = paramPart.valueCode;
+                  param.part?.push({name: 'valueString', valueString: conceptDisplayMap.get(parameterCode!)});
+                }
+                else if ('subproperty' === paramPart.name) {
+                  paramPart.part?.map(subpart => {
+                    if (subpart.valueCode) {
+                      if ('code' === subpart.name  || 'value' === subpart.name || 'valueCode' === subpart.name) {
+                        paramPart.part?.push({name: subpart.name, valueString: conceptDisplayMap.get(subpart.valueCode)});
+                      }
+                    }                
+                  })
+                }
+                else if ('code' === paramPart.name && paramPart.valueCode && !isNaN(+paramPart.valueCode)) {
+                  // pick up the attribute relationships that do not reside in a role group
+                  if ('609096000' !== paramPart.valueCode) { // role gorup
+                    parameterCode = paramPart.valueCode;
+                    param.part?.push({name: 'code', valueString: conceptDisplayMap.get(parameterCode!)});  
+                  }
+
+                }
+              })  
+            }
+          })
+          return parameters;
+        })
+        )
+      })
+    );
   }
 
   conceptHierarchy(code: string, system: string, version: string): Observable<ConceptNode<Coding>[]> {
@@ -341,6 +515,24 @@ export class FhirService {
 
   private static toValueSet(version: string, ecl: string): string {
     return version + '?fhir_vs=ecl/' + encodeURIComponent(ecl.replace(/\s+/g, ' '));
+  }
+
+  validateConceptInScopeAndActive(code: string, system: string, version: string, scope: string): Observable<R4.IParameters> {
+
+    const url = `${this.config.fhirBaseUrl}/ValueSet/$validate-code`;
+
+    const params: any = {
+      'code': code,
+      'system': system,
+      'url': FhirService.toValueSet(version, scope)
+    };
+
+    const options = ServiceUtils.getHTTPHeaders();
+    options.headers = options.headers
+      .set('Accept', ['application/fhir+json', 'application/json']);
+    options.params = {...options.params, ...params};
+    return this.http.get<R4.IParameters>(url, options);
+
   }
 
   validateEcl(ecl: string): Observable<{ valid: boolean, detail?: any }> {

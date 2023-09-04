@@ -27,17 +27,13 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.nullValue;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.io.Files;
-import io.restassured.http.ContentType;
-import io.restassured.response.ValidatableResponse;
-import io.restassured.specification.RequestSpecification;
 import java.io.ByteArrayInputStream;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.Set;
+
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
@@ -56,6 +52,14 @@ import org.snomed.snap2snomed.model.enumeration.TaskType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.io.Files;
+
+import ca.uhn.fhir.context.FhirContext;
+import io.restassured.http.ContentType;
+import io.restassured.response.ValidatableResponse;
+import io.restassured.specification.RequestSpecification;
+
 @TestInstance(Lifecycle.PER_CLASS)
 public class MapViewControllerIT extends IntegrationTestBase {
 
@@ -67,8 +71,8 @@ public class MapViewControllerIT extends IntegrationTestBase {
 
   private long taskId, task2Id;
 
-  private String user = "another-test-user";
-  private String user2 = "yet-another-test-user";
+  private final String user = "another-test-user";
+  private final String user2 = "yet-another-test-user";
 
   private long projectId, mapId;
   private long codesetId;
@@ -149,11 +153,11 @@ public class MapViewControllerIT extends IntegrationTestBase {
   }
 
   private ValidatableResponse getMapView(int size, int expectedStatusCode, String sortColumn, Pair<String, Object>... qs) {
-    RequestSpecification request = restClient.givenUser(user)
+    final RequestSpecification request = restClient.givenUser(user)
         .queryParam("size", 100)
         .queryParam("sort", sortColumn);
 
-    for (Pair<String, Object> item : qs) {
+    for (final Pair<String, Object> item : qs) {
       request.queryParam(item.getLeft(), item.getRight());
     }
 
@@ -163,11 +167,11 @@ public class MapViewControllerIT extends IntegrationTestBase {
   }
 
   private ValidatableResponse getTaskView(long taskId, int size, int expectedStatusCode, String sortColumn, Pair<String, Object>... qs) {
-    RequestSpecification request = restClient.givenUser(user)
+    final RequestSpecification request = restClient.givenUser(user)
         .queryParam("size", 100)
         .queryParam("sort", sortColumn);
 
-    for (Pair<String, Object> item : qs) {
+    for (final Pair<String, Object> item : qs) {
       request.queryParam(item.getLeft(), item.getRight());
     }
 
@@ -615,14 +619,14 @@ public class MapViewControllerIT extends IntegrationTestBase {
 
   @Test
   public void testExportCsv() throws Exception {
-    byte[] result = exportMapViewFile(MapViewRestController.TEXT_CSV);
+    final byte[] result = exportMapViewFile(MapViewRestController.TEXT_CSV);
     assertCsvContent(result);
   }
 
   private byte[] exportMapViewFile(String accept, Pair<String, Object>... qs) {
-    RequestSpecification request = restClient.givenUser(user, "application/json", accept);
+    final RequestSpecification request = restClient.givenUser(user, "application/json", accept);
 
-    for (Pair<String, Object> item : qs) {
+    for (final Pair<String, Object> item : qs) {
       request.queryParam(item.getLeft(), item.getRight());
     }
     return request.get("/mapView/" + mapId)
@@ -634,22 +638,46 @@ public class MapViewControllerIT extends IntegrationTestBase {
 
   @Test
   public void testExportTsv() throws Exception {
-    byte[] result = exportMapViewFile(MapViewRestController.TEXT_TSV);
+    final byte[] result = exportMapViewFile(MapViewRestController.TEXT_TSV);
     assertTsvContent(result);
   }
 
 
   @Test
   public void testExportXlsx() throws Exception {
-    byte[] result = exportMapViewFile(MapViewRestController.APPLICATION_XSLX);
+    final byte[] result = exportMapViewFile(MapViewRestController.APPLICATION_XSLX);
     assertXlsxContent(result);
+  }
+
+  // @Test
+  // public void testExportXlsxExtended() throws Exception {
+  //   byte[] result = exportMapViewFile(MapViewRestController.APPLICATION_XSLX, Pair.of("extraColumns", "notes"), Pair.of("extraColumns", "author"), Pair.of("extraColumns", "reviewer"));
+  //   assertXlsxContent(result);
+  // }
+
+  // @Test
+  // public void testExportTsvExtended() throws Exception {
+  //   byte[] result = exportMapViewFile(MapViewRestController.TEXT_TSV, Pair.of("extraColumns", "notes"), Pair.of("extraColumns", "author"), Pair.of("extraColumns", "reviewer"));
+  //   assertTsvContent(result);
+  // }
+
+  // @Test
+  // public void testExportCsvExtended() throws Exception {
+  //   byte[] result = exportMapViewFile(MapViewRestController.TEXT_CSV, Pair.of("extraColumns", "notes"), Pair.of("extraColumns", "author"), Pair.of("extraColumns", "reviewer"));
+  //   assertCsvContent(result);
+  // }
+
+  @Test
+  public void testExportFhirJson() throws Exception {
+    final byte[] result = exportMapViewFile(MapViewRestController.FHIR_JSON);
+    assertFhirJsonContent(result);
   }
 
 
   @Test
   public void testExportIgnoresSortAndSizeParametersCsv() throws Exception {
     // Assert that adding size/sort parameters doesn't affect export
-    byte[] result = exportMapViewFile(MapViewRestController.TEXT_CSV, Pair.of("size", 5), Pair.of("sort", "sourceDisplay"));
+    final byte[] result = exportMapViewFile(MapViewRestController.TEXT_CSV, Pair.of("size", 5), Pair.of("sort", "sourceDisplay"));
 
     assertCsvContent(result);
   }
@@ -658,7 +686,7 @@ public class MapViewControllerIT extends IntegrationTestBase {
   @Test
   public void testExportIgnoresSortAndSizeParametersTsv() throws Exception {
     // Assert that adding size/sort parameters doesn't affect export
-    byte[] result = exportMapViewFile(MapViewRestController.TEXT_TSV, Pair.of("size", 5), Pair.of("sort", "sourceDisplay"));
+    final byte[] result = exportMapViewFile(MapViewRestController.TEXT_TSV, Pair.of("size", 5), Pair.of("sort", "sourceDisplay"));
     assertTsvContent(result);
   }
 
@@ -666,7 +694,7 @@ public class MapViewControllerIT extends IntegrationTestBase {
   @Test
   public void testExportIgnoresSortAndSizeParametersXlsx() throws Exception {
     // Assert that adding size/sort parameters doesn't affect export
-    byte[] result = exportMapViewFile(MapViewRestController.APPLICATION_XSLX, Pair.of("size", 5), Pair.of("sort", "sourceDisplay"));
+    final byte[] result = exportMapViewFile(MapViewRestController.APPLICATION_XSLX, Pair.of("size", 5), Pair.of("sort", "sourceDisplay"));
     assertXlsxContent(result);
   }
 
@@ -675,30 +703,41 @@ public class MapViewControllerIT extends IntegrationTestBase {
         .isEqualTo(Files.toByteArray(new ClassPathResource("test_export.tsv").getFile()));
   }
 
-
   private void assertCsvContent(byte[] result) throws IOException {
     assertThat(result).isEqualTo(Files.toByteArray(new ClassPathResource("test_export.csv").getFile()));
+  }
+
+  private void assertFhirJsonContent(byte[] result) throws IOException {
+    final FhirContext ctx = FhirContext.forR4();
+    final String r = new String(result);
+    final String x = new String(Files.toByteArray(new ClassPathResource("test_export.json").getFile()));
+    final int idx_r = r.indexOf("\"date\":");
+    final int idx_x = x.indexOf("\"date\":");
+    final int skip = 35;
+
+    assertThat(r.substring(0, idx_r)).isEqualTo(x.substring(0, idx_x));
+    assertThat(r.substring(idx_r + skip)).isEqualTo(x.substring(idx_x + skip));
   }
 
   private void assertXlsxContent(byte[] result) throws IOException, FileNotFoundException {
     try (ByteArrayInputStream export = new ByteArrayInputStream(result);
         Workbook exportedWorkbook = new XSSFWorkbook(export);) {
-      Iterator<Row> exportedIterator = exportedWorkbook.getSheetAt(0).iterator();
+      final Iterator<Row> exportedIterator = exportedWorkbook.getSheetAt(0).iterator();
 
       try (FileInputStream expected = new FileInputStream(new ClassPathResource("test_export.xlsx").getFile());
           Workbook expectedWorkbook = new XSSFWorkbook(expected);) {
-        Iterator<Row> expectedIterator = expectedWorkbook.getSheetAt(0).iterator();
+        final Iterator<Row> expectedIterator = expectedWorkbook.getSheetAt(0).iterator();
 
         while (exportedIterator.hasNext()) {
-          Row exportedRow = exportedIterator.next();
-          Row expectedRow = expectedIterator.next();
+          final Row exportedRow = exportedIterator.next();
+          final Row expectedRow = expectedIterator.next();
 
-          Iterator<Cell> exportedCellIterator = exportedRow.iterator();
-          Iterator<Cell> expectedCellIterator = expectedRow.iterator();
+          final Iterator<Cell> exportedCellIterator = exportedRow.iterator();
+          final Iterator<Cell> expectedCellIterator = expectedRow.iterator();
 
           while (exportedCellIterator.hasNext()) {
-            Cell exportedCell = exportedCellIterator.next();
-            Cell expectedCell = expectedCellIterator.next();
+            final Cell exportedCell = exportedCellIterator.next();
+            final Cell expectedCell = expectedCellIterator.next();
 
             switch (exportedCell.getCellType()) {
               case NUMERIC:
@@ -730,14 +769,14 @@ public class MapViewControllerIT extends IntegrationTestBase {
 
   /** Admin access tests where admin user is not owner **/
   private ValidatableResponse getMapViewAsAdmin(int size, int expectedStatusCode, String sortColumn, Pair<String, Object>... qs) {
-    RequestSpecification request = restClient.givenUserWithGroup(DEFAULT_TEST_ADMIN_USER_SUBJECT,
+    final RequestSpecification request = restClient.givenUserWithGroup(DEFAULT_TEST_ADMIN_USER_SUBJECT,
                     ContentType.JSON.getContentTypeStrings()[0],
                     ContentType.JSON,
                     config.getSecurity().getAdminGroup())
             .queryParam("size", 100)
             .queryParam("sort", sortColumn);
 
-    for (Pair<String, Object> item : qs) {
+    for (final Pair<String, Object> item : qs) {
       request.queryParam(item.getLeft(), item.getRight());
     }
 
@@ -747,14 +786,14 @@ public class MapViewControllerIT extends IntegrationTestBase {
   }
 
   private ValidatableResponse getTaskViewAsAdmin(long taskId, int size, int expectedStatusCode, String sortColumn, Pair<String, Object>... qs) {
-    RequestSpecification request = restClient.givenUserWithGroup(DEFAULT_TEST_ADMIN_USER_SUBJECT,
+    final RequestSpecification request = restClient.givenUserWithGroup(DEFAULT_TEST_ADMIN_USER_SUBJECT,
                     ContentType.JSON.getContentTypeStrings()[0],
                     ContentType.JSON,
                     config.getSecurity().getAdminGroup())
             .queryParam("size", 100)
             .queryParam("sort", sortColumn);
 
-    for (Pair<String, Object> item : qs) {
+    for (final Pair<String, Object> item : qs) {
       request.queryParam(item.getLeft(), item.getRight());
     }
 

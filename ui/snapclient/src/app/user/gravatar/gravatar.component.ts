@@ -17,6 +17,8 @@
 import { Component, Input, OnInit, ViewChild } from '@angular/core';
 import {Md5} from 'ts-md5';
 
+const SESSION_STORAGE_FAILED_GRAVATARS_KEY = "failedGravatars";
+
 @Component({
   selector: 'app-gravatar',
   templateUrl: './gravatar.component.html',
@@ -93,6 +95,14 @@ export class GravatarComponent implements OnInit {
 
   handleError(): void {
     this.gravatar = false;
+
+    // remember that this.src has failed previously .. stored for a session only
+    let failedGravatarsArray = this.getFailedGravatarsArray();
+    if (failedGravatarsArray.indexOf(this.src) === -1) {
+      failedGravatarsArray.push(this.src);
+      sessionStorage.setItem(SESSION_STORAGE_FAILED_GRAVATARS_KEY, JSON.stringify(failedGravatarsArray));
+    }
+
   }
 
   updateGravatar(email?: string): void {
@@ -104,6 +114,22 @@ export class GravatarComponent implements OnInit {
     }
     const emailHash = Md5.hashStr(email.trim().toLowerCase());
     this.src = `//www.gravatar.com/avatar/${emailHash}?${this.param}`;
+
+    // don't look up the image if it has failed previously
+    let failedGravatarsArray = this.getFailedGravatarsArray();
+    if (failedGravatarsArray.indexOf(this.src) > -1) {
+      this.gravatar = false;
+    }  
+  }
+
+  getFailedGravatarsArray() : string[] {
+    let failedGravatarsStr = sessionStorage.getItem(SESSION_STORAGE_FAILED_GRAVATARS_KEY);
+    let failedGravatarsArray = [];
+    if (failedGravatarsStr) {
+      failedGravatarsArray = JSON.parse(failedGravatarsStr);
+    }
+
+    return failedGravatarsArray;
   }
 
 }

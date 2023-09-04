@@ -2,7 +2,7 @@ terraform {
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = "4.30.0"
+      version = "4.58.0"
     }
   }
   backend "remote" {
@@ -61,6 +61,7 @@ module "api" {
   force_dex_deployment             = var.force_dex_deployment
   database_backup_retention_period = var.database_backup_retention_period
   jumpbox_ami_id                   = var.jumpbox_ami_id
+  identity_provider                = var.identity_provider
 }
 
 module "ui" {
@@ -89,3 +90,14 @@ module "cognito" {
   dex_client_secret    = var.dex_client_secret
   prodlogin            = var.prodlogin
 }
+
+module "lambda-promtail" {
+  source = "./lambda-promtail"
+  kms_key_arn  = module.api.kms_key_arn
+  host_name    = var.ui_host_name
+  aws_region   = var.aws_region
+  username     = var.loki_username
+  password     = var.loki_password
+  log_groups   = [module.api.dex_log_group_name, module.api.api_log_group_name]
+}
+

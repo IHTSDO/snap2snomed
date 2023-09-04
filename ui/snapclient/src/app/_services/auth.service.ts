@@ -49,6 +49,7 @@ export class AuthService {
   private authLoginResponseType = this.config.authLoginResponseType;
   private authLoginScope = this.config.authLoginScope;
   private authLoginGrantType = this.config.authLoginGrantType;
+  private identityProvider = this.config.identityProvider;
 
   private authLoginRedirectUrl = window.location.origin;
   private authLogout = window.location.origin + '/';
@@ -65,13 +66,24 @@ export class AuthService {
     // clear SessionStorage first
     this.clearSessionStorage();
     if (this.baseUrl.length > 5) {
-      const params = new HttpParams()
+      let href = `${this.baseUrl}`;
+      let params = new HttpParams()
         .set('client_id', this.authClientID)
         .set('response_type', this.authLoginResponseType)
         .set('scope', this.authLoginScope)
         .set('redirect_uri', this.authLoginRedirectUrl);
+
+      if (this.identityProvider) {
+        params = params.set('identity_provider', this.identityProvider);
+        href += `/authorize`;
+      }
+      else {
+        href += `/login`;
+      }
+
+      href += `?${params.toString()}`;
       // Redirect to AWS Cognito hosted UI
-      window.location.href = `${this.baseUrl}/login?${params.toString()}`;
+      window.location.href = href;
     } else {
       throwError({error: `Login unsuccessful - missing URL ${this.baseUrl}`});
     }

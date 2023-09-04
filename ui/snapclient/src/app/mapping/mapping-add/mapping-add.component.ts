@@ -40,7 +40,7 @@ import {Source} from 'src/app/_models/source';
 import {FhirService, Release} from 'src/app/_services/fhir.service';
 import {LoadReleases} from 'src/app/store/fhir-feature/fhir.actions';
 import {selectFhirError, selectReleaseList} from 'src/app/store/fhir-feature/fhir.selectors';
-import {NgForm} from '@angular/forms';
+import {FormControl, FormGroup} from '@angular/forms';
 import {cloneDeep} from 'lodash';
 import {ErrorInfo} from 'src/app/errormessage/errormessage.component';
 import {FormUtils} from '../../_utils/form_utils';
@@ -65,7 +65,6 @@ export class MappingAddComponent implements OnInit {
   existingMapVersions: string[] | null = null;
   loading = false;
   selectedEdition : string = "";
-  @ViewChild('myForm') form: NgForm | undefined;
   mappingFile: ImportMappingFileParams | undefined | null;
 
   MAX_TITLE = FormUtils.MAX_TITLE;
@@ -78,13 +77,24 @@ export class MappingAddComponent implements OnInit {
   previousVersionSource: Source | undefined;
   warnDelete = false;
 
-  @Input() set mapping(value: Mapping) {
+  formGroup: FormGroup = new FormGroup({
+    title: new FormControl(''),
+    mapVersion: new FormControl(''),
+    description: new FormControl(''),
+    sourceId: new FormControl(''),
+    toEdition: new FormControl(''),
+    toVersion: new FormControl(''),
+    toScopeSelect: new FormControl(''),
+    toScope: new FormControl(''),
+  });
+
+  @Input() set mapping(value: Mapping | undefined) {
     if (value) {
       this.mappingModel = cloneDeep(value);
       // if target version no longer available - need to clear model
       if (!this.hasAvailableTargetVersion(this.mappingModel.toVersion) && this.editionToVersionsMapLoaded) {
-        this.mappingModel.toVersion = '';
-        this.mappingModel.toScope = '';
+        this.formGroup.controls.toVersion.setValue('');
+        this.formGroup.controls.toScope.setValue('');
       }
       else if (this.editionToVersionsMapLoaded && this.editionToVersionsMap) {
         // initialize to version (country and date)
@@ -128,9 +138,60 @@ export class MappingAddComponent implements OnInit {
   ngOnInit(): void {
     const self = this;
     self.error = {};
-    self.loadReleases();
-    self.store.dispatch(new LoadSources());
     self.load();
+
+    self.formGroup.controls.title.setValue(this.mappingModel.project.title);
+    if (self.mode === 'FORM.COPY') {
+      self.formGroup.controls.title.disable()
+    }
+    self.formGroup.controls.mapVersion.setValue(this.mappingModel.mapVersion);
+    self.formGroup.controls.description.setValue(this.mappingModel.project.description);
+    if (self.mode === 'FORM.VIEW' || self.mode === 'FORM.COPY') {
+      self.formGroup.controls.description.disable()
+    }
+    self.formGroup.controls.sourceId.setValue(this.mappingModel.source.id);
+    self.formGroup.controls.toEdition.setValue(this.selectedEdition);
+    self.formGroup.controls.toVersion.setValue(this.mappingModel.toVersion);
+    self.formGroup.controls.toScopeSelect.setValue(this.mappingModel.toScope);
+    self.formGroup.controls.toScope.setValue(this.mappingModel.toScope);
+
+    self.formGroup.controls.title.valueChanges.subscribe((value) => {
+      if (self.mappingModel.project.title !== value) {
+        self.mappingModel.project.title = value;
+      }
+    });
+    self.formGroup.controls.mapVersion.valueChanges.subscribe((value) => {
+      if (self.mappingModel.mapVersion !== value) {
+        self.mappingModel.mapVersion = value;
+      }
+    });
+    self.formGroup.controls.description.valueChanges.subscribe((value) => {
+      self.mappingModel.project.description = value;
+    });
+    self.formGroup.controls.sourceId.valueChanges.subscribe((value) => {
+      if (self.mappingModel.source.id !== value) {
+        self.mappingModel.source.id = value;
+      }
+    });
+    self.formGroup.controls.toEdition.valueChanges.subscribe((value) => {
+      self.selectedEdition = value;
+      self.changeEdition(value);
+    });
+    self.formGroup.controls.toVersion.valueChanges.subscribe((value) => {
+      self.mappingModel.toVersion = value;
+    });
+    self.formGroup.controls.toScopeSelect.valueChanges.subscribe((value) => {
+      self.mappingModel.toScope = value;
+      if (value !== self.formGroup.controls.toScope.value) {
+        self.formGroup.controls.toScope.setValue(value);
+      }
+    });
+    self.formGroup.controls.toScope.valueChanges.subscribe((value) => {
+      self.mappingModel.toScope = value;
+      if (value !== self.formGroup.controls.toScopeSelect.value) {
+        self.formGroup.controls.toScopeSelect.setValue(value);
+      }
+    });
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -156,6 +217,10 @@ export class MappingAddComponent implements OnInit {
 
   private load(): void {
     const self = this;
+
+    self.loadReleases();
+    self.loadSources();
+
     self.store.select(selectMappingLoading).subscribe((res) => this.loading = res);
     self.store.select(selectMappingFile).subscribe((res) => this.mappingFile = res);
     self.store.select(selectMappingError).subscribe((error) => {
@@ -188,7 +253,7 @@ export class MappingAddComponent implements OnInit {
     });
     self.store.select(selectAddEditMappingSuccess).subscribe(res => {
       if (res && !self.error.detail) {
-        this.closed.emit();
+        //this.closed.emit();
       }
     });
   }
@@ -230,12 +295,13 @@ export class MappingAddComponent implements OnInit {
     );
   }
 
-  onCancel($event: Event, form: NgForm): void {
+  onCancel($event: Event): void {
     $event.preventDefault();
     this.warnDelete = false;
     this.closed.emit();
     this.error = {};
   }
+
 
   addSource($event: MouseEvent): void {
     $event.preventDefault();
@@ -259,6 +325,7 @@ export class MappingAddComponent implements OnInit {
           this.store.select(selectSourceState).subscribe((state) => {
             this.sources = state.sources;
             this.mappingModel.source = state.selectedSource ?? new Source();
+            this.formGroup.controls.sourceId.setValue(this.mappingModel.source.id);
           });
         }
       });
@@ -266,6 +333,10 @@ export class MappingAddComponent implements OnInit {
 
   loadReleases(): void {
     this.store.dispatch(new LoadReleases());
+  }
+
+  loadSources(): void {
+    this.store.dispatch(new LoadSources());
   }
 
   getFormModeTextForTranslation(): string {
@@ -282,7 +353,7 @@ export class MappingAddComponent implements OnInit {
     }
   }
 
-  onImportMapping($event: Event, form: NgForm): void {
+  onImportMapping($event: Event): void {
     $event.preventDefault();
     const dialogRef = this.dialog.open(MappingImportComponent, {
       width: this.width, data: {
@@ -299,7 +370,7 @@ export class MappingAddComponent implements OnInit {
       });
   }
 
-  onClearSelectedMappingFile($event: Event, form: NgForm): void {
+  onClearSelectedMappingFile($event: Event): void {
     this.mappingFile = undefined;
   }
 
@@ -313,13 +384,13 @@ export class MappingAddComponent implements OnInit {
     }
   }
 
-  changeEdition($event: MatSelectChange) {
-    this.mappingModel.toVersion = ""; // reset
-    let versions = this.editionToVersionsMap?.get($event.value);
+  changeEdition(value: string) {
+    this.formGroup.controls.toVersion.setValue(''); // reset
+    const versions = this.editionToVersionsMap?.get(value);
     if (versions) {
       this.editionVersions = versions;
       // select the most recent (or only, if just 1) version
-      this.mappingModel.toVersion = this.editionVersions[0].uri;
+      this.formGroup.controls.toVersion.setValue(versions[0].uri);
     }
   }
 

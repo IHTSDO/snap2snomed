@@ -19,7 +19,12 @@ package org.snomed.snap2snomed.controller;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -29,15 +34,28 @@ import org.apache.poi.xssf.streaming.SXSSFCell;
 import org.apache.poi.xssf.streaming.SXSSFRow;
 import org.apache.poi.xssf.streaming.SXSSFSheet;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
+import org.hl7.fhir.r4.model.ConceptMap;
+import org.hl7.fhir.r4.model.ConceptMap.ConceptMapGroupComponent;
+import org.hl7.fhir.r4.model.ConceptMap.SourceElementComponent;
+import org.hl7.fhir.r4.model.ConceptMap.TargetElementComponent;
+import org.hl7.fhir.r4.model.Enumerations.ConceptMapEquivalence;
+import org.hl7.fhir.r4.model.Enumerations.PublicationStatus;
+import org.hl7.fhir.r4.model.UriType;
 import org.snomed.snap2snomed.controller.dto.Snap2SnomedPagedModel;
+import org.snomed.snap2snomed.model.ImportedCodeSet;
+import org.snomed.snap2snomed.model.AdditionalCodeValue;
 import org.snomed.snap2snomed.model.MapView;
+import org.snomed.snap2snomed.model.Project;
 import org.snomed.snap2snomed.model.enumeration.MapStatus;
 import org.snomed.snap2snomed.model.enumeration.MappingRelationship;
 import org.snomed.snap2snomed.problem.auth.NoSuchUserProblem;
 import org.snomed.snap2snomed.problem.auth.NotAuthorisedProblem;
+import org.snomed.snap2snomed.repository.MapRepository;
 import org.snomed.snap2snomed.security.WebSecurity;
+import org.snomed.snap2snomed.service.FhirService;
 import org.snomed.snap2snomed.service.MapViewService;
 import org.snomed.snap2snomed.service.MapViewService.MapViewFilter;
+import org.snomed.snap2snomed.service.TerminologyProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PagedResourcesAssembler;
@@ -53,6 +71,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.zalando.problem.Problem;
 import org.zalando.problem.Status;
 
+import ca.uhn.fhir.parser.IParser;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
@@ -71,14 +90,16 @@ public class MapViewRestController {
 
   public static final String TEXT_CSV = "text/csv";
 
-  public static final String[] EXPORT_HEADER = {"\ufeff" + "Source code", "Source display", "Target code", "Target display", "Relationship type code",
-      "Relationship type display", "No map flag", "Status"};
+  public static final String FHIR_JSON = "application/fhir+json";
 
   @Autowired
   MapViewService mapViewService;
 
   @Autowired
   WebSecurity webSecurity;
+
+  @Autowired
+  TerminologyProvider terminology;
 
   @Operation(description = "Returns a flattened view of the MapRows and MapRowTargets for the specified mapId.")
   @Parameter(name = "mapId", in = ParameterIn.PATH, required = true, allowEmptyValue = false,
@@ -213,7 +234,7 @@ public class MapViewRestController {
       @RequestParam(required = false) List<String> lastAuthorReviewer,
       @RequestParam(required = false) List<String> assignedAuthor,
       @RequestParam(required = false) List<String> assignedReviewer,
-      @RequestParam(required = false) Boolean targetOutOfScope,      
+      @RequestParam(required = false) Boolean targetOutOfScope,
       @RequestParam(required = false) Boolean flagged,
       @RequestParam(required = false) List<String> additionalColumns,
       @Parameter(hidden = true) Pageable pageable,
@@ -236,9 +257,12 @@ public class MapViewRestController {
   @Parameter(name = "sort", in = ParameterIn.QUERY, required = false, allowEmptyValue = false,
       description = "Sorting criteria in the format: property(,asc|desc). Default sort order is ascending. Multiple sort criteria are supported.",
       array = @ArraySchema(schema = @Schema(type = "string")))
+  @Parameter(name="extraColumns", in = ParameterIn.QUERY, required = false, allowEmptyValue = false,
+      description = "Additional columns to include. Options are ( notes | lastAuthor | lastReviewer | assignedAuthor | assignedReviewer ).")
   @GetMapping(path = "/{mapId}", produces = {TEXT_CSV, TEXT_TSV})
   public void getMapViewCsv(HttpServletResponse response, @RequestHeader(name = "Accept", required = false) String contentType,
-      @PathVariable("mapId") Long mapId) {
+      @PathVariable("mapId") Long mapId,
+      @RequestParam(required = false) List<String> extraColumns) {
 
     if (!webSecurity.isValidUser()) {
       throw new NoSuchUserProblem();
@@ -273,14 +297,49 @@ public class MapViewRestController {
         new OutputStreamWriter(response.getOutputStream()));
 
         CSVPrinter csvPrinter = new CSVPrinter(writer,
-            format.builder().setHeader(EXPORT_HEADER).build());) {
+            format.builder().setHeader(mapViewService.getExportHeader(mapId, extraColumns)).build());) {
+      
       for (final MapView mapView : mapViewService.getAllMapViewForMap(mapId)) {
-        csvPrinter.printRecord(
-            mapView.getSourceCode(), mapView.getSourceDisplay(),
-            mapView.getTargetCode(), mapView.getTargetDisplay(),
+
+        ArrayList<Object> printRow = new ArrayList<Object>(Arrays.asList(mapView.getSourceCode(), mapView.getSourceDisplay()));
+
+        // additional source columns
+        if (mapView.getAdditionalColumns() != null) {
+            if (mapView.getAdditionalColumns().size() > 0) {
+                for (int i = 0; i < mapView.getAdditionalColumns().size(); i++) {
+                    final AdditionalCodeValue additionalColumn = mapView.getAdditionalColumns().get(i);
+                    printRow.add(additionalColumn.getValue());
+                }
+            }
+        }
+
+        printRow.addAll(Arrays.asList(mapView.getTargetCode(), mapView.getTargetDisplay(),
             mapView.getRelationship(), mapView.getRelationship() == null ? "" : mapView.getRelationship().getLabel(),
             mapView.getNoMap() == null ? "" : mapView.getNoMap(),
-            mapView.getStatus());
+            mapView.getStatus()));
+
+        if (extraColumns != null && extraColumns.size() > 0) {
+            for (String extraColumn : extraColumns) {
+                switch (extraColumn.toUpperCase()) {
+                    case "NOTES":
+                        printRow.add(mapView.getAppendedNotes());
+                        break;
+                    case "ASSIGNEDAUTHOR":
+                        printRow.add(mapView.getAssignedAuthor() == null ? "" : mapView.getAssignedAuthor().getFullName());
+                        break;
+                    case "ASSIGNEDREVIEWER":
+                        printRow.add(mapView.getAssignedReviewer() == null ? "" : mapView.getAssignedReviewer().getFullName());
+                        break;
+                    case "LASTAUTHOR":
+                        printRow.add(mapView.getLastAuthor() == null ? "" : mapView.getLastAuthor().getFullName());
+                        break;
+                    case "LASTREVIEWER":
+                        printRow.add(mapView.getLastReviewer() == null ? "" : mapView.getLastReviewer().getFullName());
+                        break;
+                }
+            }
+        }
+        csvPrinter.printRecord(printRow);
       }
       csvPrinter.flush();
       writer.flush();
@@ -296,8 +355,12 @@ public class MapViewRestController {
   @Parameter(name = "sort", in = ParameterIn.QUERY, required = false, allowEmptyValue = false,
       description = "Sorting criteria in the format: property(,asc|desc). Default sort order is ascending. Multiple sort criteria are supported.",
       array = @ArraySchema(schema = @Schema(type = "string")))
+  @Parameter(name="extraColumns", in = ParameterIn.QUERY, required = false, allowEmptyValue = false,
+      description = "Additional columns to include. Options are ( notes | lastAuthor | lastReviewer | assignedAuthor | assignedReviewer ).")
   @GetMapping(path = "/{mapId}", produces = APPLICATION_XSLX)
-  public void getMapViewExcel(HttpServletResponse response, @PathVariable("mapId") Long mapId) throws IOException {
+  public void getMapViewExcel(HttpServletResponse response, 
+        @PathVariable("mapId") Long mapId,
+        @RequestParam(required = false) List<String> extraColumns) throws IOException {
     if (!webSecurity.isValidUser()) {
       throw new NoSuchUserProblem();
     }
@@ -316,9 +379,11 @@ public class MapViewRestController {
       final SXSSFSheet sh = wb.createSheet();
       final SXSSFRow header = sh.createRow(0);
 
-      for (int cellNum = 0; cellNum < EXPORT_HEADER.length; cellNum++) {
+      final String[] exportHeader = mapViewService.getExportHeader(mapId, extraColumns);
+
+      for (int cellNum = 0; cellNum < exportHeader.length; cellNum++) {
         final SXSSFCell cell = header.createCell(cellNum);
-        cell.setCellValue(EXPORT_HEADER[cellNum]);
+        cell.setCellValue(exportHeader[cellNum]);
       }
 
       for (int rownum = 1; rownum <= mapViewResult.size(); rownum++) {
@@ -332,31 +397,189 @@ public class MapViewRestController {
         cell = row.createCell(1);
         cell.setCellValue(mapView.getSourceDisplay());
 
-        cell = row.createCell(2);
+        int cellCount = 2;
+        // additional source columns
+        if (mapView.getAdditionalColumns() != null) {
+            for (int i = 0; i < mapView.getAdditionalColumns().size(); i++) {
+                cell = row.createCell(cellCount);
+                final AdditionalCodeValue additionalColumn = mapView.getAdditionalColumns().get(i);
+                cell.setCellValue(additionalColumn.getValue());
+                cellCount++;
+            }
+        }
+
+        cell = row.createCell(cellCount);
         cell.setCellValue(mapView.getTargetCode());
+        cellCount++;
 
-        cell = row.createCell(3);
+        cell = row.createCell(cellCount);
         cell.setCellValue(mapView.getTargetDisplay());
+        cellCount++;
 
-        cell = row.createCell(4);
+        cell = row.createCell(cellCount);
         cell.setCellValue(mapView.getRelationship() == null ? "" : mapView.getRelationship().toString());
+        cellCount++;
 
-        cell = row.createCell(5);
+        cell = row.createCell(cellCount);
         cell.setCellValue(mapView.getRelationship() == null ? "" : mapView.getRelationship().getLabel());
+        cellCount++;
 
-        cell = row.createCell(6);
+        cell = row.createCell(cellCount);
         if (mapView.getNoMap() != null) {
           cell.setCellValue(mapView.getNoMap());
         }
+        cellCount++;
 
-        cell = row.createCell(7);
+        cell = row.createCell(cellCount);
         cell.setCellValue(mapView.getStatus() == null ? "" : mapView.getStatus().toString());
+        cellCount++;
+
+        if (extraColumns != null && extraColumns.size() > 0) {
+            for (String extraColumn : extraColumns) {
+                cell = row.createCell(cellCount);
+                switch (extraColumn.toUpperCase()) {
+                    case "NOTES":
+                        cell.setCellValue(mapView.getAppendedNotes());
+                        break;
+                    case "ASSIGNEDAUTHOR":
+                        cell.setCellValue(mapView.getAssignedAuthor() == null ? "" : mapView.getAssignedAuthor().getFullName());
+                        break;
+                    case "ASSIGNEDREVIEWER":
+                        cell.setCellValue(mapView.getAssignedReviewer() == null ? "" : mapView.getAssignedReviewer().getFullName());
+                        break;
+                    case "LASTAUTHOR":
+                        cell.setCellValue(mapView.getLastAuthor() == null ? "" : mapView.getLastAuthor().getFullName());
+                        break;
+                    case "LASTREVIEWER":
+                        cell.setCellValue(mapView.getLastReviewer() == null ? "" : mapView.getLastReviewer().getFullName());
+                        break;
+                }
+                cellCount++;
+            }
+        }
 
       }
       wb.write(response.getOutputStream());
 
       wb.dispose();
     }
+  }
+
+  @Operation(description = "Returns a flattened view of the MapRows and MapRowTargets for the specified mapId.")
+  @Parameter(name = "page", in = ParameterIn.QUERY, required = false, allowEmptyValue = false, description = "Zero-based page index (0..N)")
+  @Parameter(name = "size", in = ParameterIn.QUERY, required = false, allowEmptyValue = false,
+      description = "The size of the page to be returned")
+  @Parameter(name = "sort", in = ParameterIn.QUERY, required = false, allowEmptyValue = false,
+      description = "Sorting criteria in the format: property(,asc|desc). Default sort order is ascending. Multiple sort criteria are supported.",
+      array = @ArraySchema(schema = @Schema(type = "string")))
+  @GetMapping(path = "/{mapId}", produces = {FHIR_JSON})
+  public void getMapViewConceptMapJson(HttpServletResponse response, @RequestHeader(name = "Accept", required = false) String contentType,
+          @PathVariable("mapId") Long mapId) {
+
+      if (!webSecurity.isValidUser()) {
+          throw new NoSuchUserProblem();
+      }
+      if (!webSecurity.isAdminUser() && !webSecurity.hasAnyProjectRoleForMapId(mapId)) {
+          throw new NotAuthorisedProblem("Not authorised to view map if the user is not admin or member of an associated project!");
+      }
+
+      response.setContentType(FHIR_JSON);
+      response.setHeader("Content-Disposition",
+              "attachment; filename=\"" + mapViewService.getFileNameForMapExport(mapId, FHIR_JSON)
+              + "\"");
+
+
+      final ConceptMap cm = convertToConceptMap(mapId);
+
+      try (final BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(response.getOutputStream()))) {
+          final IParser parser = terminology.getFhirContext().newJsonParser();
+          parser.encodeResourceToWriter(cm, writer);
+          writer.flush();
+      } catch (final IOException e) {
+          throw Problem.builder().withDetail("IO error exporting").build();
+      }
+  }
+
+  @Autowired
+  private MapRepository mapRepo;
+
+  private ConceptMap convertToConceptMap(Long mapId) {
+      final Map<Long, SourceElementComponent> mapEntry = new HashMap<>();
+      final ConceptMap cm = new ConceptMap();
+      final ConceptMapGroupComponent group = cm.addGroup();
+
+      mapRepo.findById(mapId).ifPresent(map -> {
+          final Project project = map.getProject();
+          final String title = project.getTitle();
+          cm.setStatus(PublicationStatus.UNKNOWN);
+          cm.setDate(Date.from(map.getModified()));
+          cm.setTitle(title);
+          cm.setName(title.replaceAll("[^\\w\\d]", "_"));
+          cm.setDescription(project.getDescription());
+          cm.setVersion(map.getMapVersion());
+
+          final ImportedCodeSet source = map.getSource();
+          String valuesetUri = source.getValuesetUri();
+          if (null != valuesetUri) {
+              cm.setSource(new UriType(valuesetUri));
+          }
+
+          final String ecl = map.getToScope();
+          cm.setTarget(new UriType(FhirService.DEFAULT_CODE_SYSTEM + "?fhir_vs=ecl/" + ecl));
+
+          String systemUri = source.getSystemUri();
+          if (null != systemUri) {
+              group.setSource(systemUri);
+          }
+          group.setSourceVersion(source.getVersion());
+          group.setTarget(FhirService.DEFAULT_CODE_SYSTEM);
+          group.setTargetVersion(map.getToVersion());
+      });
+
+
+      for (final MapView mapView : mapViewService.getAllMapViewForMap(mapId)) {
+          final Long key = mapView.getSourceIndex();
+          final SourceElementComponent src;
+          if (!mapEntry.containsKey(key)) {
+              src = group.addElement();
+              src.setCode(mapView.getSourceCode());
+              src.setDisplay(mapView.getSourceDisplay());
+
+              mapEntry.put(key, src);
+          } else {
+              src = mapEntry.get(key);
+          }
+
+          final TargetElementComponent tgt = src.addTarget();
+          if (null != mapView.getNoMap() && mapView.getNoMap()) {
+              tgt.setEquivalence(ConceptMapEquivalence.UNMATCHED);
+          } else {
+              tgt.setCode(mapView.getTargetCode());
+              tgt.setDisplay(mapView.getTargetDisplay());
+              if (null != mapView.getRelationship()) {
+                  switch (mapView.getRelationship()) {
+                  case TARGET_EQUIVALENT:
+                      tgt.setEquivalence(ConceptMapEquivalence.EQUIVALENT);
+                      break;
+                  case TARGET_BROADER:
+                      tgt.setEquivalence(ConceptMapEquivalence.WIDER);
+                      break;
+                  case TARGET_NARROWER:
+                      tgt.setEquivalence(ConceptMapEquivalence.NARROWER);
+                      break;
+                  case TARGET_INEXACT:
+                      tgt.setEquivalence(ConceptMapEquivalence.RELATEDTO);
+                      break;
+                  }
+              }
+
+              if (mapView.getNoMap()) {
+                  tgt.setEquivalence(ConceptMapEquivalence.UNMATCHED);
+              }
+
+          }
+      }
+      return cm;
   }
 
 

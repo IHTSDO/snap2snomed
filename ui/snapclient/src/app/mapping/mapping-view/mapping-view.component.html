@@ -4,7 +4,7 @@
 <div class="container">
   <app-errormessage [error]="error"></app-errormessage>
   <mat-drawer-container *ngIf="mapping">
-    <mat-drawer class="mapping-edit" mode="over" position="end" [(opened)]="opened">
+    <mat-drawer *ngIf="opened" class="mapping-edit" mode="over" position="end" [(opened)]="opened">
       <app-mapping-add [drawerOpen]="opened" [mapping]="mapping" (closed)="closeEdit()" [mode]="isOwner() || isAdmin ? 'FORM.EDIT' : 'FORM.VIEW'"></app-mapping-add>
     </mat-drawer>
     <div class="top-row">
@@ -24,6 +24,9 @@
                 <a mat-menu-item (click)="exportMapView('csv')">{{'MAP.EXPORT_CSV' | translate}}</a>
                 <a mat-menu-item (click)="exportMapView('tsv')">{{'MAP.EXPORT_TSV' | translate}}</a>
                 <a mat-menu-item (click)="exportMapView('xlsx')">{{'MAP.EXPORT_XLSX' | translate}}</a>
+                <a mat-menu-item (click)="exportMapView('fhir-json')">{{'MAP.EXPORT_FHIR_JSON' | translate}}</a>
+                <a mat-menu-item (click)="exportMapViewAdditionalColumns('xlsx', ['notes', 'lastAuthor', 'lastReviewer', 'assignedAuthor', 'assignedReviewer'])" 
+                matTooltip="Extended export also includes Author, Reviewer, and Notes">{{'MAP.EXPORT_XLSX_EXTENDED' | translate}}</a>
               </mat-menu>
             </span>
             <button class="mat-primary" mat-stroked-button *ngIf="isOwner()"

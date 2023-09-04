@@ -20,9 +20,9 @@ import { TranslateService } from '@ngx-translate/core';
 import { Subscription } from 'rxjs';
 import {ErrorInfo} from '../errormessage/errormessage.component';
 import { IAppState } from '../store/app.state';
-import { LookupConcept, LookupModule } from '../store/fhir-feature/fhir.actions';
+import { DisplayResolvedLookupConcept} from '../store/fhir-feature/fhir.actions';
 import { Properties } from '../store/fhir-feature/fhir.effects';
-import { selectConceptProperties, selectModuleProperties } from '../store/fhir-feature/fhir.selectors';
+import { selectDisplayResolvedConceptProperties} from '../store/fhir-feature/fhir.selectors';
 import { SelectionService } from '../_services/selection.service';
 
 @Component({
@@ -44,9 +44,22 @@ export class ConceptPropertiesComponent implements OnInit, OnDestroy {
     key: string,
     value: any,
   }[] = [];
+  attributeRelationshipsView: {
+    firstValue: boolean, // used to indicate a line should be drawn to separate previous values
+    roleGroup: boolean, // used to indicate this is the first element in a role group
+    key: string,
+    value: any,
+  }[] = [];
   error: ErrorInfo = {};
 
   displayedColumns = [
+    'key',
+    'aux',
+    'value',
+  ];
+
+  displayedAttributeRelationshipColumns = [
+    'roleGroup',  // this is where the role group symbol sits
     'key',
     'aux',
     'value',
@@ -64,6 +77,12 @@ export class ConceptPropertiesComponent implements OnInit, OnDestroy {
     'effectiveTime',
     'moduleId',
   ];
+
+  private displayedAttributeRelationshipProps = [
+    'parent',
+    'attributeRelationships'
+  ];
+
   private subscription = new Subscription();
 
   constructor(
@@ -82,10 +101,11 @@ export class ConceptPropertiesComponent implements OnInit, OnDestroy {
           self.display = selection.display;
           self.system = selection.system;
           self.selectionVersion = selection.version;
-          self.store.dispatch(new LookupConcept({
+          self.store.dispatch(new DisplayResolvedLookupConcept({
             code: selection.code,
             system: selection.system,
             version: self.selectionVersion ?? self.version,
+            properties: ["*"]
           }));
         }
       },
@@ -93,37 +113,15 @@ export class ConceptPropertiesComponent implements OnInit, OnDestroy {
       complete(): void {}
     }));
 
-    self.subscription.add(self.store.select(selectModuleProperties).subscribe(
-      (props) => {
-        if (props) {
-          // replace module id with preferred term
-          var foundIndex = this.propertiesView.findIndex(x => x.key == 'module');
-          if (foundIndex > -1) {
-            this.propertiesView[foundIndex] = { key: 'module', value: [props['display'][0][0]] };
-            // trigger angular change detection
-            this.propertiesView =  [...this.propertiesView];
-          }
-        }
-      },
-      (_error) => this.translate.get('ERROR.MODULE_LOOKUP').subscribe((res) => this.error.message = res)
-    ));
-
-    self.subscription.add(self.store.select(selectConceptProperties).subscribe(
+    self.subscription.add(self.store.select(selectDisplayResolvedConceptProperties).subscribe(
       (props) => {
         self.propertiesView = [];
+        self.attributeRelationshipsView = [];
         if (props) {
-          this.displayedProps.forEach(p => {
+          this.displayedProps.concat(this.displayedAttributeRelationshipProps).forEach(p => {
             props[p]?.forEach(v => {
               if (p === 'Fully specified name') {
                 self.display = v[0];
-              }
-              if (p === 'moduleId') {
-                // run a separate query to get the module label now that we know the module id
-                self.store.dispatch(new LookupModule({
-                  code: v[0],
-                  system: self.system,
-                  version: self.selectionVersion ?? self.version,
-                }));
               }
               
               switch ( p ) {
@@ -135,11 +133,37 @@ export class ConceptPropertiesComponent implements OnInit, OnDestroy {
                   // SNOMED-451: "inactive" to read "active"
                   this.propertiesView.push({ key: "active", value: [!v[0]]})
                   break;
-                case "moduleId":
-                  // SNOMED-451: display PT rather than id
-                  // moduleId gets replaced with PT when selectModuleProperties
-                  this.propertiesView.push({ key: "module", value: v}) 
+                case "attributeRelationships":
+
+                  let attributeCode : string = "";
+                  let attributeValue : string = "";
+                  let isFirst = true;
+
+                  if (v[0] instanceof Array) {
+                    v.forEach((subproperty: { name: string; valueCode: any; valueString: string}[]) => {
+                      if (subproperty instanceof Array) {
+                        ({attributeCode, attributeValue} = this.processSubproperty(subproperty));
+                      }
+  
+                      let displayRoleGroup = false;
+                      if (isFirst) {
+                        displayRoleGroup = true;
+                        isFirst = false;
+                      }
+                      this.attributeRelationshipsView.push({firstValue: displayRoleGroup, roleGroup: displayRoleGroup, key: attributeCode, value: [attributeValue]})
+                    });
+                  }
+                  else {
+                    ({attributeCode, attributeValue} = this.processSubproperty(v));
+                    // SNOMED CT diagramming guidelines specify ungrouped attributes should be displayed before grouped attributes
+                    this.attributeRelationshipsView.unshift({firstValue: true, roleGroup: false, key: attributeCode, value: [attributeValue]})
+                  }
+
                   break;
+                // Removed 28/02/23 due to duplication with tree view and space limitations
+                // case "parent":
+                //   this.attributeRelationshipView.push({firstValue: false, roleGroup: false, key: "parent", value: v});
+                //   break;
                 default: 
                   this.propertiesView.push({ key: p, value: v });
                   break;
@@ -147,13 +171,58 @@ export class ConceptPropertiesComponent implements OnInit, OnDestroy {
 
             });
           });
+          // first entry does not have a line above it to separate attributes
+          if (this.attributeRelationshipsView.length > 0) {
+            this.attributeRelationshipsView[0]['firstValue'] = false;
+          }
+
         }
       },
       (_error) => this.translate.get('ERROR.CONCEPT_LOOKUP').subscribe((res) => this.error.message = res)
     ));
 
     self.propertiesView = [];
+    self.attributeRelationshipsView = [];
 
+  }
+
+  private processSubproperty(subproperty: { name: string; valueCode: any; valueString: string; }[]) {
+    let attributeCode : string = "";
+    let attributeValue : string = "";
+    subproperty.forEach((part: { name: string; valueCode: any; valueString: string}) => {
+      if ('code' === part.name && part.hasOwnProperty('valueString')) {
+        if (part.hasOwnProperty('valueString')) {
+          attributeCode = part.valueString;
+        }
+        else {
+          attributeCode = part.valueCode;
+        }
+      } else if ('value' === part.name || 'valueCode' === part.name) {
+        if (part.hasOwnProperty('valueString')) {
+          attributeValue = part.valueString;
+        }
+        else {
+          attributeValue = part.valueCode;
+        }
+      } else if (part.name.startsWith('value')) {
+        let valueName;
+        type ObjectKey = keyof typeof part;
+
+        Object.getOwnPropertyNames(part).map(objectName => {
+          if (objectName.startsWith('value')) {
+            valueName = objectName as ObjectKey;
+          }
+
+        })
+        if (valueName) {
+          attributeValue = part[valueName];
+        }
+
+      }
+      
+    });
+
+    return {attributeCode: attributeCode, attributeValue: attributeValue};
   }
 
   ngOnDestroy(): void {
