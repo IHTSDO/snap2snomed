@@ -645,6 +645,15 @@ export class MappingViewComponent implements OnInit, AfterViewInit, OnDestroy {
     return this.mapping?.project.owners.map(u => u.id).includes(this.currentUser.id) ?? false;
   }
 
+  isDualMapMode(): boolean {
+    let isDualMapMode = false;
+
+    if (this.mapping && this.mapping.project.dualMapMode) {
+      isDualMapMode = this.mapping.project.dualMapMode;
+    }
+    return isDualMapMode;
+  }
+
   private setLoading(): void {
     // in case action is taking some time, display spinner
     this.timeout = setTimeout(() => {

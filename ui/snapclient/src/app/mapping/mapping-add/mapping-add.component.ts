@@ -198,6 +198,10 @@ export class MappingAddComponent implements OnInit {
       if (self.mappingModel.project.dualMapMode !== value) {
         self.mappingModel.project.dualMapMode = value;
       }
+      if (self.mappingModel.project.dualMapMode) {
+        // import is not allowed in dual map mode
+        this.mappingFile = undefined;
+      }
     });
   }
 

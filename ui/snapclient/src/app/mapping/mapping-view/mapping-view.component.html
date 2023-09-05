@@ -29,7 +29,7 @@
                 matTooltip="Extended export also includes Author, Reviewer, and Notes">{{'MAP.EXPORT_XLSX_EXTENDED' | translate}}</a>
               </mat-menu>
             </span>
-            <button class="mat-primary" mat-stroked-button *ngIf="isOwner()"
+            <button class="mat-primary" mat-stroked-button *ngIf="isOwner() && !isDualMapMode()"
                 (click)="clickImport()">{{'MAP.IMPORT' | translate}}</button>
             <span class="space-fill">&nbsp;</span>
             <ng-template #notasks>
