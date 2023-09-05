@@ -358,7 +358,15 @@ public class MapViewService {
   }
 
   public List<MapView> getAllMapViewForMap(Long mapId) {
-    return getQueryForMap(mapId, null, null).orderBy(mapRow.sourceCode.index.asc()).orderBy(mapTarget.id.asc()).fetch();
+    final Map map = mapRepository.findById(mapId).orElseThrow(() -> Problem.valueOf(Status.NOT_FOUND, "No Map found with id " + mapId));
+    Boolean dualMapMode = map.getProject().getDualMapMode();
+    if (dualMapMode) {
+      return getDualMapQueryForMap(mapId, null, null).fetch();
+    }
+    else {
+      return getQueryForMap(mapId, null, null).orderBy(mapRow.sourceCode.index.asc()).orderBy(mapTarget.id.asc()).fetch();
+    }
+    
   }
 
   private  Snap2SnomedPagedModel<EntityModel<MapView>> getMapResults(Long mapId, Task task, Pageable pageable,
