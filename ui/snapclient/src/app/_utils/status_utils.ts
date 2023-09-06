@@ -82,7 +82,6 @@ export class StatusUtils {
    * getAvailableStatusOptions for status toggle
    */
   static getAvailableStatusOptions(taskType: TaskType, status: MapRowStatus): MapRowStatus[] {
-    console.log("tasktype", taskType);
     let statusList: MapRowStatus[] = mapRowStatuses;
     switch (taskType) {
       case TaskType.AUTHOR:

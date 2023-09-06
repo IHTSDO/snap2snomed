@@ -372,6 +372,7 @@ export class MappingDetailComponent implements OnInit, OnDestroy {
               self.updateStatus(MapRowStatus.DRAFT);
             }
           }
+          this.targetChangedService.changeTarget({});
         },
         (err) => this.translate.get('ERROR.TARGETS_NOT_DELETED').subscribe((msg) => {
           this.error.message = msg;

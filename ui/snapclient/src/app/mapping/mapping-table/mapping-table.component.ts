@@ -52,6 +52,7 @@ import {MatTable} from '@angular/material/table';
 import {WriteDisableUtils} from '../../_utils/write_disable_utils';
 import {FhirService} from "../../_services/fhir.service";
 import { MappingNotesComponent } from '../mapping-table-notes/mapping-notes.component';
+import { TargetChangedService } from 'src/app/_services/target-changed.service';
 
 export interface TableParams extends Params {
   pageIndex?: number;
@@ -177,7 +178,8 @@ export class MappingTableComponent implements OnInit, AfterViewInit, OnDestroy {
               public translate: TranslateService,
               private selectionService: SelectionService,
               private mapService: MapService,
-              public dialog: MatDialog) {
+              public dialog: MatDialog,
+              private targetChangedService: TargetChangedService) {
     const initialSelection: MapView[] = [];
     const allowMultiSelect = true;
     const emitChanges = true;
@@ -391,13 +393,15 @@ export class MappingTableComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   private doMapRowTargetUodate(self: this, mapView: MapView): void {
-    self.mapService.updateMapRowTarget(mapView).subscribe(
+    const [result, targetRow] = self.mapService.updateMapRowTarget(mapView);
+    result.subscribe(
       (result) => {
         mapView.updateFromTarget(result);
         self.mapService.updateStatus(mapView.rowId, mapView.status as MapRowStatus).subscribe((saved) => {
           mapView.updateStatus(saved.status);
           self.updateTableEvent.emit();
         });
+        this.targetChangedService.changeTarget(targetRow);
       },
       (error) => {
         mapView.reset();

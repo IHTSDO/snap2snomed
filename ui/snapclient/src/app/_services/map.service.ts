@@ -344,7 +344,7 @@ export class MapService {
    * @param mapView
    * @private
    */
-  updateMapRowTarget(mapView: MapView): Observable<any> {
+  updateMapRowTarget(mapView: MapView): [Observable<any>, TargetRow] {
     const header = ServiceUtils.getHTTPHeaders();
     const rowId = mapView.rowId;
 
@@ -361,13 +361,13 @@ export class MapService {
     const targetUrl = `${this.config.apiBaseUrl}/mapRowTargets`;
 
     if (target.id) {
-      return this.http.put<any>(`${targetUrl}/${target.id}`, target, header).pipe(
+      return [this.http.put<any>(`${targetUrl}/${target.id}`, target, header).pipe(
         map(toTargetRow),
-      );
+      ), target];
     } else {
-      return this.http.post<TargetRow>(targetUrl, target, header).pipe(
+      return [this.http.post<TargetRow>(targetUrl, target, header).pipe(
         map(toTargetRow),
-      );
+      ), target];
     }
   }
 
