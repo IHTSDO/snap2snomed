@@ -361,7 +361,7 @@ public class MapViewService {
     final Map map = mapRepository.findById(mapId).orElseThrow(() -> Problem.valueOf(Status.NOT_FOUND, "No Map found with id " + mapId));
     Boolean dualMapMode = map.getProject().getDualMapMode();
     if (dualMapMode) {
-      return getDualMapQueryForMap(mapId, null, null).fetch();
+      return getDualMapQueryForMap(mapId, null, null, null).fetch();
     }
     else {
       return getQueryForMap(mapId, null, null).orderBy(mapRow.sourceCode.index.asc()).orderBy(mapTarget.id.asc()).fetch();
@@ -378,13 +378,13 @@ public class MapViewService {
 
     JPAQuery<MapView> query;
     if (dualMapMode) {
-      query = getDualMapQueryForMap(mapId, task, filter);
+      query = getDualMapQueryForMap(mapId, task, filter, pageable.getSort());
     }
     else {
       query = getQueryForMap(mapId, task, filter);
     }
 
-    query = transformSortable(query, pageable.getSort(), additionalColumns, dualMapMode);
+    query = transformSortable(query, pageable.getSort(), additionalColumns, dualMapMode, task);
     query = transformPageable(query, pageable);
 
     final QueryResults<MapView> results = query.fetchResults();
@@ -406,10 +406,10 @@ public class MapViewService {
     return query;
   }
 
-  protected JPAQuery<MapView> transformSortable(JPAQuery<MapView> query, Sort sort, List<AdditionalCodeColumn> additionalColumns, Boolean dualMapMode) {
+  protected JPAQuery<MapView> transformSortable(JPAQuery<MapView> query, Sort sort, List<AdditionalCodeColumn> additionalColumns, Boolean dualMapMode,
+          Task task) {
     if (sort != null) {
-      var _mapRow = dualMapMode ? mapView.mapRow : mapRow;
-
+      var _mapRow = dualMapMode && task == null ? mapView.mapRow : mapRow;
       for (final Order s : sort) {
         List<ComparableExpressionBase<?>> field;
         switch (s.getProperty()) {
@@ -514,7 +514,7 @@ public class MapViewService {
     return stream.map(RepresentationModel::of).collect(Collectors.toList());
   }
 
-  private JPAQuery<MapView> getDualMapQueryForMap(Long mapId, Task task, MapViewFilter filter) {
+  private JPAQuery<MapView> getDualMapQueryForMap(Long mapId, Task task, MapViewFilter filter, Sort sort) {
 
     if (task != null) {
 
@@ -535,7 +535,7 @@ public class MapViewService {
       .leftJoin(mapRow.lastReviewer)
       .where(getWhereClause(mapId, task, filter));
 
-      if (task.getType().equals(TaskType.RECONCILE)) {
+      if (task.getType().equals(TaskType.RECONCILE) && sort != null && !sort.isSorted()) {
         query = query.orderBy(mapRow.sourceCode.index.asc()).orderBy((mapRow.lastAuthor.id.asc()));
       }
 
@@ -543,8 +543,7 @@ public class MapViewService {
     }
     else {
       // view screen
-
-      return new JPAQuery<MapView>(entityManager)
+      JPAQuery<MapView> query = new JPAQuery<MapView>(entityManager)
       .select(Projections.constructor(MapView.class, mapView.mapRow, mapTarget,
           ExpressionUtils.as(JPAExpressions.select(note.modified.max()).from(note)
               .where(note.mapRow.eq(mapView.mapRow).and(note.category.eq(NoteCategory.USER)).and(note.deleted.isFalse())), "latestNote"),
@@ -557,9 +556,13 @@ public class MapViewService {
       .leftJoin(mapView.mapRow.lastAuthor)
       .leftJoin(mapView.mapRow.lastReviewer)
       .leftJoin(mapView.siblingRowAuthorTask)
-      .where(getMapViewWhereClause(mapId, task, filter))
-      .orderBy(mapView.mapRow.sourceCode.index.asc())
-      .orderBy(mapView.mapRow.lastAuthor.id.asc());
+      .where(getMapViewWhereClause(mapId, task, filter));
+
+      if (sort == null) {
+        query = query.orderBy(mapView.mapRow.sourceCode.index.asc()).orderBy(mapView.mapRow.lastAuthor.id.asc());
+      }
+
+      return query;
     }
   }
 
