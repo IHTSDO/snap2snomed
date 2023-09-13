@@ -128,19 +128,20 @@ public class MapViewService {
       this.additionalColumns  = additionalColumns;
     }
 
-    public BooleanExpression getExpression() {
+    public BooleanExpression getExpression(boolean useDualView) {
+      var _mapRow = useDualView ? QDbMapView.dbMapView.mapRow : QMapRow.mapRow;
 
       BooleanExpression expression = null;
-
+        
       expression = stringCollectionToOrStatements(expression, sourceCodes,
-          s -> QMapRow.mapRow.sourceCode.code.startsWithIgnoreCase(s),
+          s -> _mapRow.sourceCode.code.startsWithIgnoreCase(s),
           (a, b) -> collectOrStatement(a, b));
       expression = stringCollectionToOrStatements(expression, sourceDisplays,
-          s -> QMapRow.mapRow.sourceCode.display.containsIgnoreCase(s),
+          s -> _mapRow.sourceCode.display.containsIgnoreCase(s),
           (a, b) -> collectAndStatement(a, b));
 
       if (noMap != null) {
-        expression = collectAndStatement(expression, QMapRow.mapRow.noMap.eq(noMap));
+        expression = collectAndStatement(expression, _mapRow.noMap.eq(noMap));
       }
 
       expression = stringCollectionToOrStatements(expression, targetCodes,
@@ -155,55 +156,55 @@ public class MapViewService {
       }
 
       if (!CollectionUtils.isEmpty(statuses)) {
-        expression = collectAndStatement(expression, QMapRow.mapRow.status.in(statuses));
+        expression = collectAndStatement(expression, _mapRow.status.in(statuses));
       }
 
       if (!CollectionUtils.isEmpty(lastAuthor)) {
-        expression = collectAndStatement(expression, QMapRow.mapRow.lastAuthor.id.in(lastAuthor));
+        expression = collectAndStatement(expression, _mapRow.lastAuthor.id.in(lastAuthor));
       }
 
       if (!CollectionUtils.isEmpty(lastReviewer)) {
-        expression = collectAndStatement(expression, QMapRow.mapRow.lastReviewer.id.in(lastReviewer));
+        expression = collectAndStatement(expression, _mapRow.lastReviewer.id.in(lastReviewer));
       }
 
       if (!CollectionUtils.isEmpty(lastAuthorReviewer)) {
         BooleanExpression noneMatch = null;
         if (lastAuthorReviewer.contains("none")) {
-          noneMatch = QMapRow.mapRow.lastAuthor.isNull().and(QMapRow.mapRow.lastReviewer.isNull());
+          noneMatch = _mapRow.lastAuthor.isNull().and(_mapRow.lastReviewer.isNull());
         }
 
         expression = collectAndStatement(expression,
-            collectOrStatement(QMapRow.mapRow.lastAuthor.id.in(lastAuthorReviewer).or(QMapRow.mapRow.lastReviewer.id.in(lastAuthorReviewer)),
+            collectOrStatement(_mapRow.lastAuthor.id.in(lastAuthorReviewer).or(_mapRow.lastReviewer.id.in(lastAuthorReviewer)),
                 noneMatch));
       }
 
       if (!CollectionUtils.isEmpty(assignedAuthor)) {
         BooleanExpression noneMatch = null;
         if (assignedAuthor.contains("none")) {
-          noneMatch = QMapRow.mapRow.authorTask.isNull();
+          noneMatch = _mapRow.authorTask.isNull();
         }
 
-        expression = collectAndStatement(expression, collectOrStatement(QMapRow.mapRow.authorTask.assignee.id.in(assignedAuthor),
+        expression = collectAndStatement(expression, collectOrStatement(_mapRow.authorTask.assignee.id.in(assignedAuthor),
             noneMatch));
       }
 
       if (!CollectionUtils.isEmpty(assignedReviewer)) {
         BooleanExpression noneMatch = null;
         if (assignedReviewer.contains("none")) {
-          noneMatch = QMapRow.mapRow.reviewTask.assignee.isNull();
+          noneMatch = _mapRow.reviewTask.assignee.isNull();
         }
 
-        expression = collectAndStatement(expression, collectOrStatement(QMapRow.mapRow.reviewTask.assignee.id.in(assignedReviewer),
+        expression = collectAndStatement(expression, collectOrStatement(_mapRow.reviewTask.assignee.id.in(assignedReviewer),
             noneMatch));
       }
 
       if (!CollectionUtils.isEmpty(assignedReconciler)) {
         BooleanExpression noneMatch = null;
         if (assignedReconciler.contains("none")) {
-          noneMatch = QMapRow.mapRow.reconcileTask.assignee.isNull();
+          noneMatch = _mapRow.reconcileTask.assignee.isNull();
         }
 
-        expression = collectAndStatement(expression, collectOrStatement(QMapRow.mapRow.reconcileTask.assignee.id.in(assignedReconciler),
+        expression = collectAndStatement(expression, collectOrStatement(_mapRow.reconcileTask.assignee.id.in(assignedReconciler),
             noneMatch));
       }
 
@@ -224,7 +225,7 @@ public class MapViewService {
         for (int i = 0; i < additionalColumns.size(); i++) {
           final String string = additionalColumns.get(i);
           if (!string.isEmpty()) {
-            expression = collectAndStatement(expression, QMapRow.mapRow.sourceCode.additionalColumns.get(i).value.containsIgnoreCase(string));
+            expression = collectAndStatement(expression, _mapRow.sourceCode.additionalColumns.get(i).value.containsIgnoreCase(string));
           }
         }
       }
@@ -449,6 +450,9 @@ public class MapViewService {
           case "assignedAuthor":
             field = Arrays.asList(getUserSortComparison(_mapRow.authorTask.assignee));
             break;
+          case "assignedReconciler":
+            field = Arrays.asList(getUserSortComparison(_mapRow.reconcileTask.assignee));
+            break;
           case "assignedReviewer":
             field = Arrays.asList(getUserSortComparison(_mapRow.reviewTask.assignee));
             break;
@@ -533,9 +537,9 @@ public class MapViewService {
       .leftJoin(mapRow.reconcileTask)
       .leftJoin(mapRow.lastAuthor)
       .leftJoin(mapRow.lastReviewer)
-      .where(getWhereClause(mapId, task, filter));
+      .where(getWhereClause(mapId, task, filter, false));
 
-      if (task.getType().equals(TaskType.RECONCILE) && sort != null && !sort.isSorted()) {
+      if (task.getType().equals(TaskType.RECONCILE) && sort != null && sort.isUnsorted()) {
         query = query.orderBy(mapRow.sourceCode.index.asc()).orderBy((mapRow.lastAuthor.id.asc()));
       }
 
@@ -549,7 +553,7 @@ public class MapViewService {
               .where(note.mapRow.eq(mapView.mapRow).and(note.category.eq(NoteCategory.USER)).and(note.deleted.isFalse())), "latestNote"),
               mapView.status, mapView.siblingRowAuthorTask))
       .from(mapView)
-      .leftJoin(mapTarget).on(mapTarget.row.eq(mapView.mapRow))
+      .leftJoin(mapTarget).on(mapTarget.row.eq(mapView.mapRow).and(mapView.blindMapFlag.eq(false)))
       .leftJoin(mapView.mapRow.authorTask)
       .leftJoin(mapView.mapRow.reviewTask)
       .leftJoin(mapView.mapRow.reconcileTask)
@@ -558,7 +562,7 @@ public class MapViewService {
       .leftJoin(mapView.siblingRowAuthorTask)
       .where(getMapViewWhereClause(mapId, task, filter));
 
-      if (sort == null) {
+      if (sort == null || sort.isUnsorted()) {
         query = query.orderBy(mapView.mapRow.sourceCode.index.asc()).orderBy(mapView.mapRow.lastAuthor.id.asc());
       }
 
@@ -578,7 +582,7 @@ public class MapViewService {
         .leftJoin(mapRow.reviewTask)
         .leftJoin(mapRow.lastAuthor)
         .leftJoin(mapRow.lastReviewer)
-        .where(getWhereClause(mapId, task, filter))
+        .where(getWhereClause(mapId, task, filter, false))
         .where(mapRow.blindMapFlag.eq(false));
   }
 
@@ -596,7 +600,7 @@ public class MapViewService {
            .leftJoin(mapRow.lastAuthor)
            .leftJoin(mapRow.lastReviewer);
     }
-    query.where(getWhereClause(mapId, task, filter));
+    query.where(getWhereClause(mapId, task, filter, false));
     query.offset(pageable.getOffset()).limit(pageable.getPageSize());
     return query;
   }
@@ -605,7 +609,7 @@ public class MapViewService {
     BooleanExpression whereClause = mapView.mapRow.map.id.eq(mapId);
 
     if (filter != null) {
-      final BooleanExpression filterExpression = filter.getExpression();
+      final BooleanExpression filterExpression = filter.getExpression(true);
       if (filterExpression != null) {
         whereClause = whereClause.and(filterExpression);
       }
@@ -614,7 +618,7 @@ public class MapViewService {
     return whereClause;
   }
 
-  private BooleanExpression getWhereClause(Long mapId, Task task, MapViewFilter filter) {
+  private BooleanExpression getWhereClause(Long mapId, Task task, MapViewFilter filter, boolean useDualView) {
     BooleanExpression whereClause = mapRow.map.id.eq(mapId);
 
     if (task != null) {
@@ -634,7 +638,7 @@ public class MapViewService {
     }
 
     if (filter != null) {
-      final BooleanExpression filterExpression = filter.getExpression();
+      final BooleanExpression filterExpression = filter.getExpression(useDualView);
       if (filterExpression != null) {
         whereClause = whereClause.and(filterExpression);
       }
