@@ -281,6 +281,31 @@ public interface MapRowRepository
   @RestResource(exported = false)
   int createMapRowsForNewSource(Long mapId, String user, Instant dateTime, Long newCodeSetId);
 
+  @Query(value = "insert into map_row " + 
+                    "(created, created_by, status, map_id, source_code_id, blind_map_flag) " + 
+                    "(select :dateTime created, :user created_by, 0, :mapId, c.id, TRUE " + 
+                    "from imported_code c " + 
+                    "where c.imported_codeset_id = :newCodeSetId " + 
+                    "AND c.id NOT IN (SELECT m.source_code_id FROM map_row m WHERE m.map_id = :mapId)) " +
+                    "union all" + 
+                    "(select :dateTime created, :user created_by, 0, :mapId, c.id, TRUE " + 
+                    "from imported_code c " + 
+                    "where c.imported_codeset_id = :newCodeSetId " + 
+                    "AND c.id NOT IN (SELECT m.source_code_id FROM map_row m WHERE m.map_id = :mapId)) ", nativeQuery = true)
+  @Modifying
+  @RestResource(exported = false)
+  int createMapRowsForNewSourceForDualMap(Long mapId, String user, Instant dateTime, Long newCodeSetId);
+
+  @Query(value = "update map_row " + 
+                    "set blind_map_flag = TRUE, " + 
+                    "status = 0, " + 
+                    "no_map = FALSE " + 
+                    "where map_id = :mapId " + 
+                    "and ((blind_map_flag = true and status = 1) or (blind_map_flag = true and status = 2) or (status = 6))", nativeQuery = true)
+  @Modifying
+  @RestResource(exported = false)
+  int resetMapRowResetRowsForNewMap(Long mapId);
+
   @Override
   @RestResource(exported = false)
   <S extends MapRow> Iterable<S> saveAll(Iterable<S> entities);

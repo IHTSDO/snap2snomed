@@ -530,14 +530,37 @@ public class MappingService {
     if (newSourceId == originalSourceId) {
       // Copy all rows
       mapRowRepository.copyMapRows(createdId, mapId, userId, dateTime);
-      mapRowTargetRepository.copyMapRowTargets(createdId, mapId, userId, dateTime);
+      if (originalMap.getProject().getDualMapMode()) {
+        mapRowTargetRepository.copyMapRowTargetsForDualMap(createdId, mapId, userId, dateTime);
+      }
+      else {
+        mapRowTargetRepository.copyMapRowTargets(createdId, mapId, userId, dateTime);
+      }
+
     } else {
       // Copy all rows where code in new Source
       mapRowRepository.copyMapRowsForNewSource(createdId, mapId, userId, dateTime, newSourceId);
       // Copy existing targets
-      mapRowTargetRepository.copyMapRowTargetsForNewSource(createdId, mapId, userId, dateTime);
+      if (originalMap.getProject().getDualMapMode()) {
+        mapRowTargetRepository.copyMapRowTargetsForNewSourceForDualMap(createdId, mapId, userId, dateTime);
+      }
+      else {
+        mapRowTargetRepository.copyMapRowTargetsForNewSource(createdId, mapId, userId, dateTime);
+      }
       // Add new rows where previously non-existing
-      mapRowRepository.createMapRowsForNewSource(createdId, userId, dateTime, newSourceId);
+
+      if (originalMap.getProject().getDualMapMode()) {
+        mapRowRepository.createMapRowsForNewSourceForDualMap(createdId, userId, dateTime, newSourceId);
+      }
+      else {
+        mapRowRepository.createMapRowsForNewSource(createdId, userId, dateTime, newSourceId);
+      }
+    }
+
+    if (originalMap.getProject().getDualMapMode()) {
+      // Any rows in draft or reconcile state will be cleared and reblinded
+      mapRowRepository.resetMapRowResetRowsForNewMap(createdId);
+
     }
 
     validateMapTargets(createdId);
