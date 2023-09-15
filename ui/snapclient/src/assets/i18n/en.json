@@ -213,7 +213,7 @@
     "VALIDATE_TARGETS_ERROR": "Unexpected error occurred during validation of target scope",
     "SINGLE_AUTHOR_MODE": "Single Author Mode",
     "DUAL_AUTHOR_MODE": "Dual Author Mode",
-    "CLEARED_AND_REBLINDED_WARN": "Any rows undergoing dual mapping or in reconcile state will be cleared and reblinded in the new version of a dual map"
+    "CLEARED_AND_REBLINDED_WARN": "Any rows undergoing dual mapping will be cleared and reblinded in the new version of a dual map"
   },
   "TABLE": {
     "SOURCE_CODE": "Source code",
@@ -499,7 +499,7 @@
     "SELECTED_TARGET": "Selected target:",
     "UPDATED_ROWS_MESSAGE": "{{updated}} out of {{selected}} rows have been updated.",
     "UPDATED_ROWS_ERROR_MESSAGE": "{{updated}} out of {{selected}} rows have been updated. {{diff}} row(s) unable to be changed due to invalid status or relationship changes.",
-    "REDO_DUAL_MAPPING": "Redo dual mapping"
+    "REDO_DUAL_MAPPING": "Clears targets and enables row to be dual mapped again"
   },
 
   "NOTESDIALOG": {
