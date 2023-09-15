@@ -94,6 +94,7 @@ export class BulkchangeComponent implements OnInit {
   hasSearchValue: boolean;
   isMapView: boolean;
   processing: boolean;
+  resetDualMap: boolean;
 
   @ViewChild('searchComponent') searchComponent: ConceptSearchComponent | undefined;
 
@@ -115,11 +116,18 @@ export class BulkchangeComponent implements OnInit {
     this.hasSearchValue = false;
     this.isMapView = false;
     this.processing = false;
+    this.resetDualMap = false;
   }
   getStatuses(task: Task | null | undefined): MapRowStatus[] {
     let authStatuses = authorStatuses.filter(stat => stat !== MapRowStatus.UNMAPPED);
+    let dualMapViewStatuses = [MapRowStatus.ACCEPTED, MapRowStatus.REJECTED, MapRowStatus.RECONCILE, MapRowStatus.INREVIEW]
     if (task == null) {
-      return authStatuses.concat(reviewStatuses);
+      if (this.isDualMapView()) {
+        return dualMapViewStatuses;
+      }
+      else {
+        return authStatuses.concat(reviewStatuses);
+      }
     }
     if (task && task.type === TaskType.REVIEW) {
       return reviewStatuses;
@@ -173,7 +181,8 @@ export class BulkchangeComponent implements OnInit {
       noMap: this.noMapValue,
       status: this.changedStatus,
       relationship: this.changedRelationship,
-      clearTarget: !this.clearTarget ? null : true
+      clearTarget: !this.clearTarget ? null : true,
+      resetDualMap: this.resetDualMap
     }
     let mappingDetail: MappingDetails = {
       rowId: null,
@@ -234,5 +243,13 @@ export class BulkchangeComponent implements OnInit {
       this.changedRelationship = null;
       this.noMapValue = null;
     }
+  }
+
+  isDualMapView(): boolean {
+    let isDualMapView = false;
+    if (this.data.map) {
+      isDualMapView = this.data.map.project.dualMapMode;
+    }
+    return isDualMapView;
   }
 }
