@@ -10,7 +10,7 @@
     <div>{{'BULKCHANGEDIALOG.OWNER_WARNING' | translate}}</div>
   </div>
   <br>
-  <div *ngIf="isMapView" class="alert-warning box">
+  <div *ngIf="isDualMapView()" class="alert-warning box">
     <mat-icon>info</mat-icon>
     <div>{{'BULKCHANGEDIALOG.RECONCILE_STATUS_INFO' | translate}}</div>
   </div>
