@@ -301,7 +301,7 @@ public interface MapRowRepository
                     "status = 0, " + 
                     "no_map = FALSE " + 
                     "where map_id = :mapId " + 
-                    "and ((blind_map_flag = true and status = 1) or (blind_map_flag = true and status = 2) or (status = 6))", nativeQuery = true)
+                    "and ((blind_map_flag = true and status = 1) or (blind_map_flag = true and status = 2))", nativeQuery = true)
   @Modifying
   @RestResource(exported = false)
   int resetMapRowResetRowsForNewMap(Long mapId);

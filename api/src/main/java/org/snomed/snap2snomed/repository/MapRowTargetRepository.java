@@ -127,7 +127,7 @@ public interface MapRowTargetRepository
           "and (tr.map_id = :mapId) " + 
           "and (sr.source_code_id = tr.source_code_id) " +
           "and (sr.blind_map_flag = FALSE) " +
-          "and (sr.status <> 6)", nativeQuery = true)
+          "and (sr.last_author_id = tr.last_author_id)", nativeQuery = true)
   @Modifying
   @RestResource(exported = false)
   int copyMapRowTargetsForDualMap(Long mapId, Long sourceMapId, String user, Instant dateTime);
@@ -158,7 +158,7 @@ public interface MapRowTargetRepository
           "and (sc.code = tc.code) " + 
           "and (tr.source_code_id = tc.id)" + 
           "and (sr.blind_map_flag = FALSE) " + 
-          "and (sr.status <> 6)", nativeQuery = true)
+          "and (sr.last_author_id = tr.last_author_id)", nativeQuery = true)
   @Modifying
   @RestResource(exported = false)
   int copyMapRowTargetsForNewSourceForDualMap(Long mapId, Long sourceMapId, String user, Instant dateTime);
