@@ -173,6 +173,10 @@
           <mat-icon class="mat-icon-warning">info</mat-icon>
           <div [innerHtml]="'FORM.DELETE_WARN' | translate" class="infotext"></div>
         </div>
+        <div class="alert-warning warning-message" *ngIf="formGroup.controls.dualMapMode.value && mode === 'FORM.COPY'">
+          <mat-icon class="mat-icon-warning">info</mat-icon>
+          <div [innerHtml]="'MAP.CLEARED_AND_REBLINDED_WARN' | translate" class="infotext"></div>
+        </div>
         <button *ngIf="mode !== 'FORM.VIEW'" mat-raised-button color="primary" type="submit" id="save"
                 [disabled]="formGroup.invalid">{{ 'FORM.SAVE' | translate }}</button>
         <button mat-raised-button color="default" type="cancel" id="cancel"
