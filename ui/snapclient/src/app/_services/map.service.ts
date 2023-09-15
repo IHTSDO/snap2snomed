@@ -115,6 +115,7 @@ export interface MappingDto {
   status: string | null | undefined;
   relationship: string | null | undefined;
   clearTarget: boolean | null | undefined;
+  resetDualMap: boolean | null |undefined;
 }
 
 export interface MappingUpdateDto {
