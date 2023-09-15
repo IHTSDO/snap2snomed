@@ -9,6 +9,11 @@
     <mat-icon>warning</mat-icon>
     <div>{{'BULKCHANGEDIALOG.OWNER_WARNING' | translate}}</div>
   </div>
+  <br>
+  <div *ngIf="isMapView" class="alert-warning box">
+    <mat-icon>info</mat-icon>
+    <div>{{'BULKCHANGEDIALOG.RECONCILE_STATUS_INFO' | translate}}</div>
+  </div>
   <mat-divider class="divider"></mat-divider>
   <app-errormessage [error]="error"></app-errormessage>
   <div>

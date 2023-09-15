@@ -499,7 +499,8 @@
     "SELECTED_TARGET": "Selected target:",
     "UPDATED_ROWS_MESSAGE": "{{updated}} out of {{selected}} rows have been updated.",
     "UPDATED_ROWS_ERROR_MESSAGE": "{{updated}} out of {{selected}} rows have been updated. {{diff}} row(s) unable to be changed due to invalid status or relationship changes.",
-    "REDO_DUAL_MAPPING": "Clears targets and enables row to be dual mapped again"
+    "REDO_DUAL_MAPPING": "Clears targets and enables row to be dual mapped again",
+    "RECONCILE_STATUS_INFO": "To update any rows in a MAPPED or REJECTED state, change the row status to RECONCILE, then alter the row via the RECONCILE TASK"
   },
 
   "NOTESDIALOG": {
