@@ -31,7 +31,6 @@ import {
 import {MatPaginator, PageEvent} from '@angular/material/paginator';
 import {MatSort, Sort, SortDirection} from '@angular/material/sort';
 import {Subscription} from 'rxjs';
-import {debounceTime, distinctUntilChanged} from 'rxjs/operators';
 import {Store} from '@ngrx/store';
 import {IAppState} from '../../store/app.state';
 import {Task, TaskType} from '../../_models/task';

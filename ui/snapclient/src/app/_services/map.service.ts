@@ -27,6 +27,7 @@ import {APP_CONFIG, AppConfig} from '../app.config';
 import {map} from 'rxjs/operators';
 import {ImportMappingFileParams} from '../store/source-feature/source.actions';
 import {ValidationResult} from "../_models/validation_result";
+import { Task, TaskType } from '../_models/task';
 
 export interface TaskResults {
   _embedded: any;
@@ -446,16 +447,16 @@ export class MapService {
   /**
    * Get Targets for Source Code
    */
-  findTargetsBySourceIndex(map_id: string, source_idx: string, taskId: string | undefined): Observable<MapRowTargetResults> {
+  findTargetsBySourceIndex(map_id: string, source_idx: string, task: Task | undefined): Observable<MapRowTargetResults> {
     const url = `${this.config.apiBaseUrl}/mapRowTargets`;
     const header = ServiceUtils.getHTTPHeaders();
 
-    if (taskId) {
+    if (task?.type === TaskType.AUTHOR) {
       header.params = new HttpParams()
       .set('projection', 'targetView')
       .set('mapId', map_id)
       .set('row.sourceCode.index', source_idx)
-      .set('row.authorTask.id', taskId);
+      .set('row.authorTask.id', task.id);
     }
     else {
       header.params = new HttpParams()

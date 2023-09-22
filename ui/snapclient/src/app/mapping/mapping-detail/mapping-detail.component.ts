@@ -305,11 +305,7 @@ export class MappingDetailComponent implements OnInit, OnDestroy {
       self.rowId = self.source.id ?? null;
       // self.noMap = self.source.noMap;
 
-      let taskId : string | undefined = self.task.id;
-      if (this.isReconcileTask()) {
-        taskId = undefined;
-      }
-      self.mapService.findTargetsBySourceIndex(self.task.mapping.id, self.source.index, taskId).pipe(debounceTime(200)).subscribe((rows) => {
+      self.mapService.findTargetsBySourceIndex(self.task.mapping.id, self.source.index, self.task).pipe(debounceTime(200)).subscribe((rows) => {
         const source = self.source;
         if (source && rows._embedded.mapRowTargets.length > 0) {
           self.mapRows = rows._embedded.mapRowTargets.map((target) => {

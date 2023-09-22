@@ -145,7 +145,7 @@ export class TaskAddComponent implements OnInit, AfterViewInit, OnDestroy {
   initTask(): void {
     this.assignRows = '';
     if (this.mapping && this.currentUser?.id) {
-      this.task = new Task('', '', '',
+      this.task = new Task('', TaskType.AUTHOR, '',
         this.mapping, this.currentUser, '', 0, '', '', false, false);
     }
   }
@@ -193,10 +193,10 @@ export class TaskAddComponent implements OnInit, AfterViewInit, OnDestroy {
   onSubmit(form: NgForm, $event: Event): void {
     const self = this;
     try {
-      if (self.currentUser && self.task && self.task.type !== '' && form.form.valid) {
+      if (self.currentUser && self.task && form.form.valid) {
         if (self.task.assignee && self.task.assignee.id !== '') {
           self.store.dispatch(new AddTask(self.task));
-          self.newTaskEvent.emit(self.task?.type);
+          self.newTaskEvent.emit(self.task.type);
           self.mappingTableSelector?.clearAllSelectedRows();
         } else {
           throwError('TASK.ASSIGNEE_NOT_SET');

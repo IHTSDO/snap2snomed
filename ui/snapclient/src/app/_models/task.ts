@@ -31,7 +31,7 @@ export const enum TaskConflictType {
 
 export class Task {
   id: string;
-  type: TaskType | string;
+  type: TaskType;
   description?: string;
   mapping: Mapping;
   assignee: User;
@@ -52,7 +52,7 @@ export class Task {
   }
 
 
-  constructor(id: string, type: TaskType | string, description: string | undefined,
+  constructor(id: string, type: TaskType, description: string | undefined,
               mapping: Mapping, assignee: User, sourceRowSpecification: string, sourceRowCount: number,
               createdString: string | undefined, modifiedString: string | undefined,
               reassignAlreadyAssignedRows: boolean,
