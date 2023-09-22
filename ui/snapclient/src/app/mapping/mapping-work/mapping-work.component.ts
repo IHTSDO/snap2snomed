@@ -101,7 +101,7 @@ export class MappingWorkComponent implements OnInit, OnDestroy {
   @ViewChild('mapTable', {static: false}) mapTable: MappingTableComponent | undefined;
   automapping = false;
   isAdmin = false;
-  private navigationSubscription: Subscription;
+  // private navigationSubscription: Subscription;
 
   targetConceptSearchText = '';
 
@@ -154,18 +154,20 @@ export class MappingWorkComponent implements OnInit, OnDestroy {
     this.tableParams = {};
     this.tableFilter = new MapViewFilter();
     this.isAdmin = this.authService.isAdmin();
-    this.navigationSubscription = this.router.events.subscribe((e: any) => {
-      // Refresh page re-load params and data
-      if (e instanceof NavigationEnd) {
-        this.handleParams();
-      }
-    });
+//     this.navigationSubscription = this.router.events.subscribe((e: any) => {
+//       // Refresh page re-load params and data
+//       if (e instanceof NavigationEnd) {
+// console.log('NAV END -> Handle params')
+//         this.handleParams();
+//       }
+//     });
   }
 
   ngOnInit(): void {
     const self = this;
 
     self.loadHeirarchy();
+console.log('INIT -> Handle params')
     self.handleParams();
     self.automapping = false;
 
@@ -305,9 +307,9 @@ export class MappingWorkComponent implements OnInit, OnDestroy {
     this.loading = false;
     this.automapping = false;
     this.subscription.unsubscribe();
-    if (this.navigationSubscription) {
-      this.navigationSubscription.unsubscribe();
-    }
+    // if (this.navigationSubscription) {
+    //   this.navigationSubscription.unsubscribe();
+    // }
   }
 
   onSelected(node: Coding): void {
@@ -384,26 +386,28 @@ export class MappingWorkComponent implements OnInit, OnDestroy {
   }
 
   handleParams(): void {
-    this.route.params.subscribe(params => {
+    this.subscription.add(this.route.params.subscribe(params => {
       const mappingid = ServiceUtils.cleanParamId(params.mappingid);
       const taskid = ServiceUtils.cleanParamId(params.taskid);
 
-      if (mappingid) {
+      if (mappingid && this.mapping_id !== mappingid) {
         this.mapping_id = mappingid;
         this.store.dispatch(new LoadMapping({id: mappingid}));
       }
 
-      if (this.task_id !== taskid && taskid) {
+      if (taskid && this.task_id !== taskid) {
         this.task_id = taskid;
         this.updateCurrentTask();
       }
-      this.route.queryParams.subscribe(qparams => {
-        this.tableFilter = ServiceUtils.paramsToFilterEntity(qparams);
-        this.filterEnabled = this.tableFilter.hasFilters();
-        this.tableParams = ServiceUtils.pagingParamsToTableParams(qparams);
-        this.loadPage();
-      });
-    });
+      this.loadPage();
+    }));
+
+    this.subscription.add(this.route.queryParams.subscribe(qparams => {
+      this.tableFilter = ServiceUtils.paramsToFilterEntity(qparams);
+      this.filterEnabled = this.tableFilter.hasFilters();
+      this.tableParams = ServiceUtils.pagingParamsToTableParams(qparams);
+      this.loadPage();
+    }));
   }
 
   private getContext(): ViewContext {
