@@ -629,6 +629,10 @@ public class MapViewService {
         }
       } else if (task.getType().equals(TaskType.REVIEW)) {
         whereClause = whereClause.and(mapRow.reviewTask.eq(task));
+        whereClause = whereClause.and(mapRow.status.ne(MapStatus.RECONCILE));
+        if (task.getMap().getProject().getDualMapMode()) {
+          whereClause = whereClause.and(mapRow.blindMapFlag.ne(true));
+        }
       }
       else if (task.getType().equals(TaskType.RECONCILE)) {
         whereClause = whereClause.and(mapRow.blindMapFlag.eq(false));
