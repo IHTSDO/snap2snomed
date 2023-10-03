@@ -136,8 +136,13 @@ public class MappingService {
           "Only an owner can perform bulk updates outside of the context of a task");
     }
 
+    List<Long> siblingMapRowIds = new ArrayList<Long>();
     mappings.getMappingDetails().forEach(mappingDetails -> {
       validateMappingUpdates(mappingDetails.getMappingUpdate());
+
+      if (mappingDetails.getMappingUpdate().isResetDualMap() && siblingMapRowIds.contains(mappingDetails.getRowId())) {
+          return; // skip this iteration as have already processed one of the two dual map rows
+      }
 
       MapRow mapRow = mapRowRepository
           .findById(mappingDetails.getRowId())
@@ -176,9 +181,16 @@ public class MappingService {
       RowChange change = applyMapRowChanges(mapRow, mappingDetails.getMappingUpdate(), mapRowTargets, task);
       if ( change != RowChange.NO_CHANGE && (mapRowTargets.size() == 0
           || (mappingDetails.getMappingUpdate().isResetDualMap()))) {
+        if (mappingDetails.getMappingUpdate().isResetDualMap()) {
+          MapRow siblingMapRow = mapRowRepository.findDualMapSiblingRow(mapRow.getMap().getId(), mapRow.getSourceCode().getId(), mapRow.getId());
+          if (siblingMapRow != null) {
+            // keep a track fo the sibling rows so we don't attempt to process them if multiple rows have been supplied
+            siblingMapRowIds.add(siblingMapRow.getId());
+          }
+        }
         updatedRowCount.incrementAndGet(); // Only add updated count if there is not MapRowTargets
       }
-      if (mapRowTargets.size() > 0) {
+      if (mapRowTargets.size() > 0 && !mappingDetails.getMappingUpdate().isResetDualMap()) {
         if (applyMapRowTargetChanges(mapRowTargets.get(0), mappingDetails.getMappingUpdate(), task, change)) {
           updatedRowCount.incrementAndGet();
         }
@@ -465,7 +477,6 @@ public class MappingService {
    * other changes result in DRAFT/UNMAPPED so test that transition.
    */
   private boolean validChange(MapStatus currentStatus, MappingDto mappingUpd, Task task) {
-    //TODO reconcile task?
     if (task != null) {
       if (task.getType().equals(TaskType.AUTHOR) && currentStatus.isAuthorState()) {
         return mappingUpd.getStatus() == null ? true

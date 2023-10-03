@@ -128,7 +128,7 @@ public enum MapStatus {
   RECONCILE {
     @Override
     public Boolean isValidTransition(MapStatus mapStatus) {
-      if ( mapStatus == MAPPED || mapStatus == RECONCILE) {
+      if ( mapStatus == MAPPED || mapStatus == RECONCILE || mapStatus == UNMAPPED) {
         return true;
       }
       return false;
