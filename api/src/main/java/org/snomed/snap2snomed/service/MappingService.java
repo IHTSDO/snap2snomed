@@ -175,7 +175,7 @@ public class MappingService {
       rowCount.incrementAndGet(); // Increment row count for Row
       RowChange change = applyMapRowChanges(mapRow, mappingDetails.getMappingUpdate(), mapRowTargets, task);
       if ( change != RowChange.NO_CHANGE && (mapRowTargets.size() == 0
-          || (mappingDetails.getMappingUpdate().getResetDualMap() != null && mappingDetails.getMappingUpdate().getResetDualMap()))) {
+          || (mappingDetails.getMappingUpdate().isResetDualMap()))) {
         updatedRowCount.incrementAndGet(); // Only add updated count if there is not MapRowTargets
       }
       if (mapRowTargets.size() > 0) {
@@ -219,7 +219,7 @@ public class MappingService {
               .relationship(mappingDetail.getMappingUpdate().getRelationship())
               .status(mapStatus)
               .clearTarget(mappingDetail.getMappingUpdate().getClearTarget())
-              .resetDualMap(mappingDetail.getMappingUpdate().getResetDualMap())
+              .resetDualMap(mappingDetail.getMappingUpdate().isResetDualMap())
               .targetId(targetId)
               .target(targetDto)
               .build()
@@ -381,9 +381,8 @@ public class MappingService {
         }
       }
       // Reset dual mapping requested
-      //HERE
       MapRow siblingMapRow = null;
-      if (mappingUpdate.getResetDualMap() != null && mappingUpdate.getResetDualMap()) {
+      if (mappingUpdate.isResetDualMap()) {
 
         // locate the sibling row if it exists update it too
         siblingMapRow = mapRowRepository.findDualMapSiblingRow(mapRow.getMap().getId(), mapRow.getSourceCode().getId(), mapRow.getId());

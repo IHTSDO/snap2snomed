@@ -37,7 +37,7 @@ public class MappingDto {
 
   private Boolean clearTarget;
 
-  private Boolean resetDualMap;
+  private boolean resetDualMap;
 
   public boolean isNoMap() {
     return noMap != null && noMap;
@@ -48,7 +48,7 @@ public class MappingDto {
   }
 
   public boolean isNoChange() {
-    return noMap == null && status == null && relationship == null && clearTarget == null && resetDualMap == null;
+    return noMap == null && status == null && relationship == null && clearTarget == null && resetDualMap == false;
   }
 
   public boolean isValid() {
