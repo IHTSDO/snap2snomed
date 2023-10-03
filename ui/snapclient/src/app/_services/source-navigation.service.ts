@@ -162,9 +162,12 @@ export class SourceNavigationService {
           this.mapService.getSiblingMapViewRow(mapping.id, selectedRow.sourceId, selectedRow.rowId)
           .pipe(
             map((result) => {
+              if (result === null) {
+                return null;
+              }
               return MapView.create(result as MapView);
             }),
-          ).subscribe((mapView: MapView) => {
+          ).subscribe((mapView: MapView | null) => {
             siblingRow = mapView;
             this.configureSourceNaviagation(page, row_idx, selectedRow, siblingRow, task.id, params);
           });

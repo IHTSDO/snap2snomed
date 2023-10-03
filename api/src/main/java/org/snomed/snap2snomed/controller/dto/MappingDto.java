@@ -52,9 +52,10 @@ public class MappingDto {
   }
 
   public boolean isValid() {
-    return ((noMap != null && noMap) && status == null && relationship == null && clearTarget == null)
-        || ((noMap != null && !noMap) && clearTarget == null)
-        || (noMap == null && (status != null || relationship != null) && clearTarget == null)
-        || (noMap == null && status == null && relationship == null && clearTarget != null);
+    return ((noMap != null && noMap) && status == null && relationship == null && clearTarget == null && resetDualMap == false)
+        || ((noMap != null && !noMap) && clearTarget == null && resetDualMap == false)
+        || (noMap == null && (status != null || relationship != null) && clearTarget == null && resetDualMap == false)
+        || (noMap == null && status == null && relationship == null && clearTarget != null && resetDualMap == false)
+        || (noMap == null && status == null && relationship == null && clearTarget == null && resetDualMap);
   }
 }

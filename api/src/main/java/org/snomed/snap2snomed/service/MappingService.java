@@ -175,7 +175,7 @@ public class MappingService {
       rowCount.incrementAndGet(); // Increment row count for Row
       RowChange change = applyMapRowChanges(mapRow, mappingDetails.getMappingUpdate(), mapRowTargets, task);
       if ( change != RowChange.NO_CHANGE && (mapRowTargets.size() == 0
-          || (mapRowTargets.size() == 0 && mappingDetails.getMappingUpdate().getStatus() != null))) {
+          || (mappingDetails.getMappingUpdate().getResetDualMap() != null && mappingDetails.getMappingUpdate().getResetDualMap()))) {
         updatedRowCount.incrementAndGet(); // Only add updated count if there is not MapRowTargets
       }
       if (mapRowTargets.size() > 0) {
@@ -219,6 +219,7 @@ public class MappingService {
               .relationship(mappingDetail.getMappingUpdate().getRelationship())
               .status(mapStatus)
               .clearTarget(mappingDetail.getMappingUpdate().getClearTarget())
+              .resetDualMap(mappingDetail.getMappingUpdate().getResetDualMap())
               .targetId(targetId)
               .target(targetDto)
               .build()
@@ -334,6 +335,17 @@ public class MappingService {
         .build();
   }
 
+  private void resetDualMapRow(MapRow mapRow) {
+    mapRow.setNoMap(false);
+    mapRow.setStatus(MapStatus.UNMAPPED);
+    mapRow.setAuthorTask(null);
+    mapRow.setLastAuthor(null);
+    mapRow.setLastReviewer(null);
+    mapRow.setReviewTask(null);
+    mapRow.setBlindMapFlag(true);
+    mapRow.setReconcileTask(null);
+  }
+
   private RowChange applyMapRowChanges(@NotNull MapRow mapRow, MappingDto mappingUpd, List<MapRowTarget> mapRowTargets, Task task) {
     MappingDto mappingUpdate = mappingUpd.toBuilder().build();
     boolean updated = false;
@@ -368,9 +380,51 @@ public class MappingService {
           mapRow.setStatus(MapStatus.UNMAPPED);
         }
       }
-      // Repository.save doesn't fire MapRowEventHandler
-      mapRowEventHandler.performAutomaticUpdates(mapRow);
+      // Reset dual mapping requested
+      //HERE
+      MapRow siblingMapRow = null;
+      if (mappingUpdate.getResetDualMap() != null && mappingUpdate.getResetDualMap()) {
+
+        // locate the sibling row if it exists update it too
+        siblingMapRow = mapRowRepository.findDualMapSiblingRow(mapRow.getMap().getId(), mapRow.getSourceCode().getId(), mapRow.getId());
+        if (siblingMapRow == null) {
+          // re-create the sibling row
+          MapRow newSiblingMapRow = new MapRow();
+          newSiblingMapRow.setMap(mapRow.getMap());
+          newSiblingMapRow.setSourceCode(mapRow.getSourceCode());
+          newSiblingMapRow.setBlindMapFlag(true);
+          mapRowRepository.save(newSiblingMapRow);
+        }
+
+        // reset the MapRow
+        resetDualMapRow(mapRow);
+        if (siblingMapRow != null) {
+          resetDualMapRow(siblingMapRow);
+        }
+
+        // delete associated mapRowTargets
+        mapRowTargets.forEach(mapRowTarget -> {
+          mapRowTargetRepository.delete(mapRowTarget);
+        });
+        if (siblingMapRow != null) {
+          siblingMapRow.getMapRowTargets().forEach(mapRowTarget -> {
+            mapRowTargetRepository.delete(mapRowTarget);
+          });
+        }
+
+        updated = true;
+
+      }
+      else {
+        // Repository.save doesn't fire MapRowEventHandler
+        // none of these automatic updates apply to resetting a dual map
+        mapRowEventHandler.performAutomaticUpdates(mapRow);
+      }
+
       mapRowRepository.save(mapRow);
+      if (siblingMapRow != null) {
+        mapRowRepository.save(siblingMapRow);
+      }
       em.flush();
       em.clear();
     }
@@ -425,7 +479,7 @@ public class MappingService {
     } else {
       // no task, must be an owner
       return mappingUpd.isOnlyStatusChange() ? currentStatus.isValidTransition(mappingUpd.getStatus())
-          : currentStatus.isValidTransition(MapStatus.DRAFT);
+          : (currentStatus.isValidTransition(MapStatus.DRAFT) || currentStatus.isValidTransition(MapStatus.UNMAPPED));
     }
   }
 
@@ -558,7 +612,7 @@ public class MappingService {
     }
 
     if (originalMap.getProject().getDualMapMode()) {
-      // Any rows in draft or reconcile state will be cleared and reblinded
+      // Any rows in draft state will be cleared and reblinded
       mapRowRepository.resetMapRowResetRowsForNewMap(createdId);
 
     }

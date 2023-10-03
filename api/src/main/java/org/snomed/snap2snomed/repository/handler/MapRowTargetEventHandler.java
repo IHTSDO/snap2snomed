@@ -160,7 +160,7 @@ public class MapRowTargetEventHandler {
     if (!author && reviewer && (mapRow.getStatus().isAuthorState() || !isFlagOnlyChange(mapRowTarget))) {
       throw new UnauthorisedMappingProblem(
           "A reviewer may only change the flagged attribute of target in a review state, state is " + mapRow.getStatus());
-    } else if (!reviewer && author && !(mapRow.getStatus().isAuthorState() || mapRow.getStatus().equals(MapStatus.REJECTED))) {
+    } else if (!reviewer && author && !(mapRow.getStatus().isAuthorState() || mapRow.getStatus().equals(MapStatus.REJECTED) || mapRow.getStatus().isReconcileState())) {
       throw new UnauthorisedMappingProblem(
           "An author may only change targets for rows in an author state, state is " + mapRow.getStatus());
     } else if (!author && !reviewer && !reconciler) {

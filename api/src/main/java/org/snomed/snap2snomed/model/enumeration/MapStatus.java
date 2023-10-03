@@ -50,7 +50,8 @@ public enum MapStatus {
     public Boolean isValidTransition(MapStatus mapStatus) {
       if ( mapStatus == UNMAPPED || mapStatus == DRAFT
         || mapStatus == INREVIEW || mapStatus == ACCEPTED
-        || mapStatus == REJECTED || mapStatus == MAPPED ) {
+        || mapStatus == REJECTED || mapStatus == MAPPED
+        || mapStatus == RECONCILE ) {
         return true;
       }
       return false;
@@ -88,7 +89,7 @@ public enum MapStatus {
     @Override
     public Boolean isValidTransition(MapStatus mapStatus) {
       if ( mapStatus == INREVIEW || mapStatus == REJECTED
-        || mapStatus == ACCEPTED ) {
+        || mapStatus == ACCEPTED || mapStatus == RECONCILE) {
         return true;
       }
       return false;
@@ -103,7 +104,8 @@ public enum MapStatus {
     public Boolean isValidTransition(MapStatus mapStatus) {
       if ( mapStatus == UNMAPPED || mapStatus == DRAFT
         || mapStatus == INREVIEW || mapStatus == ACCEPTED
-        || mapStatus == REJECTED || mapStatus == MAPPED ) {
+        || mapStatus == REJECTED || mapStatus == MAPPED 
+        || mapStatus == RECONCILE) {
         return true;
       }
       return false;
@@ -124,7 +126,6 @@ public enum MapStatus {
     }
   },
   RECONCILE {
-    //TODO review
     @Override
     public Boolean isValidTransition(MapStatus mapStatus) {
       if ( mapStatus == MAPPED || mapStatus == RECONCILE) {

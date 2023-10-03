@@ -99,78 +99,82 @@ public class MapRowEventHandler {
     updateLastAuthorOrReviewed(mapRow);
 
     if (mapRow.getMap().getProject().getDualMapMode()) {
+  
       MapRow siblingMapRow = mapRowRepository.findDualMapSiblingRow(mapRow.getMap().getId(), mapRow.getSourceCode().getId(), mapRow.getId());
-      // 1. check if both dual map rows have been mapped
-      if (mapRow.getStatus() == MapStatus.MAPPED && siblingMapRow.getStatus() == MapStatus.MAPPED) {
 
-        // 2. auto create note documenting those responsible for dual mapping
-        //TODO translate note .. maybe this has to be pushed to the ui
-        Note author1Note = createNote(mapRow.getAuthorTask().getAssignee().getFullName() + " dual mapped this", 
-          mapRow.getModified(), mapRow.getAuthorTask().getAssignee(), mapRow, NoteCategory.STATUS);
-        Note author2Note = createNote(siblingMapRow.getAuthorTask().getAssignee().getFullName() + " dual mapped this", 
-          siblingMapRow.getModified(), siblingMapRow.getAuthorTask().getAssignee(), siblingMapRow, NoteCategory.STATUS);
-        noteRepository.save(author1Note);
-        noteRepository.save(author2Note);
+      if (null != siblingMapRow) { 
 
-        // 3a. check if both dual map rows agree .. if so resolve into one map row
-        if (isEquivalentTarget(mapRow, siblingMapRow)) {
-          // TODO determine equality over multiple rows
-          mapRow.setAuthorTask(null);
-          mapRow.setBlindMapFlag(Boolean.FALSE);
+        // 1. check if both dual map rows have been mapped
+        if (mapRow.getStatus() == MapStatus.MAPPED && siblingMapRow.getStatus() == MapStatus.MAPPED) {
+
+          // 2. auto create note documenting those responsible for dual mapping
+          //TODO translate note .. maybe this has to be pushed to the ui
+          Note author1Note = createNote(mapRow.getAuthorTask().getAssignee().getFullName() + " dual mapped this", 
+            mapRow.getModified(), mapRow.getAuthorTask().getAssignee(), mapRow, NoteCategory.STATUS, false);
+          Note author2Note = createNote(siblingMapRow.getAuthorTask().getAssignee().getFullName() + " dual mapped this", 
+            siblingMapRow.getModified(), siblingMapRow.getAuthorTask().getAssignee(), siblingMapRow, NoteCategory.STATUS, false);
+          noteRepository.save(author1Note);
+          noteRepository.save(author2Note);
+
+          // 3a. check if both dual map rows agree .. if so resolve into one map row
+          if (isEquivalentTarget(mapRow, siblingMapRow)) {
+            mapRow.setAuthorTask(null);
+            mapRow.setBlindMapFlag(Boolean.FALSE);
+            SortedSet<Note> siblingNotes = siblingMapRow.getNotes();
+            for (Note note : siblingNotes) {
+              Note newNote = createNote(note.getNoteText(), note.getCreated(), note.getNoteBy(), mapRow, note.getCategory(), note.isDeleted());
+              noteRepository.save(newNote);
+            }
+            mapRowRepository.deleteById(siblingMapRow.getId());
+            mapRowRepository.save(mapRow);
+            siblingMapRow = null;
+          }
+          else {
+            // 3b. dual map rows don't agree .. put the dual map rows into the reconcile state
+            mapRow.setStatus(MapStatus.RECONCILE);
+            mapRow.setAuthorTask(null);
+            mapRow.setBlindMapFlag(Boolean.FALSE);
+            siblingMapRow.setStatus(MapStatus.RECONCILE);
+            siblingMapRow.setAuthorTask(null);
+            siblingMapRow.setBlindMapFlag(Boolean.FALSE);
+            mapRowRepository.save(mapRow);
+            mapRowRepository.save(siblingMapRow);
+          }
+
+          // TODO check if author task no longer has any tasks and delete the task - ML said framework should take care of this
+        }
+        else if ((mapRow.getStatus() == MapStatus.MAPPED && siblingMapRow.getStatus() == MapStatus.RECONCILE) ||
+            (mapRow.getStatus() == MapStatus.RECONCILE && siblingMapRow.getStatus() == MapStatus.MAPPED)) {
+
+          // Reconciler has fixed the dual map .. merge two rows together
+
+          if (siblingMapRow.isNoMap()) {
+            mapRow.setNoMap(true);
+          }
+
+          for (MapRowTarget siblingMapRowTarget : siblingMapRow.getMapRowTargets()) {
+            MapRowTarget newMapRowTarget = new MapRowTarget(siblingMapRowTarget.getCreated(), siblingMapRowTarget.getModified(), siblingMapRowTarget.getCreatedBy(), 
+              siblingMapRowTarget.getModifiedBy(), null, mapRow, siblingMapRowTarget.getTargetCode(), 
+              siblingMapRowTarget.getTargetDisplay(), siblingMapRowTarget.getRelationship(), siblingMapRowTarget.getTags(), siblingMapRowTarget.isFlagged(), siblingMapRowTarget.getLastAuthor());
+            mapRowTargetRepository.save(newMapRowTarget);
+          }
+
           SortedSet<Note> siblingNotes = siblingMapRow.getNotes();
           for (Note note : siblingNotes) {
-            Note newNote = createNote(note.getNoteText(), note.getCreated(), note.getNoteBy(), mapRow, note.getCategory());
+            Note newNote = createNote(note.getNoteText(), note.getCreated(), note.getNoteBy(), mapRow, note.getCategory(), note.isDeleted());
             noteRepository.save(newNote);
           }
-          mapRowRepository.deleteById(siblingMapRow.getId());
+
           mapRowRepository.save(mapRow);
-          siblingMapRow = null;
+          mapRowRepository.delete(siblingMapRow);
+
         }
-        else {
-          // 3b. dual map rows don't agree .. put the dual map rows into the reconcile state
-          mapRow.setStatus(MapStatus.RECONCILE);
-          mapRow.setAuthorTask(null);
-          mapRow.setBlindMapFlag(Boolean.FALSE);
-          siblingMapRow.setStatus(MapStatus.RECONCILE);
-          siblingMapRow.setAuthorTask(null);
-          siblingMapRow.setBlindMapFlag(Boolean.FALSE);
-          mapRowRepository.save(mapRow);
-          mapRowRepository.save(siblingMapRow);
-        }
-
-        // TODO check if author task no longer has any tasks and delete the task - ML said framework should take care of this
-      }
-      else if ((mapRow.getStatus() == MapStatus.MAPPED && siblingMapRow.getStatus() == MapStatus.RECONCILE) ||
-          (mapRow.getStatus() == MapStatus.RECONCILE && siblingMapRow.getStatus() == MapStatus.MAPPED)) {
-
-        // Reconciler has fixed the dual map .. merge two rows together
-
-        if (siblingMapRow.isNoMap()) {
-          mapRow.setNoMap(true);
-        }
-
-        for (MapRowTarget siblingMapRowTarget : siblingMapRow.getMapRowTargets()) {
-          MapRowTarget newMapRowTarget = new MapRowTarget(siblingMapRowTarget.getCreated(), siblingMapRowTarget.getModified(), siblingMapRowTarget.getCreatedBy(), 
-            siblingMapRowTarget.getModifiedBy(), null, mapRow, siblingMapRowTarget.getTargetCode(), 
-            siblingMapRowTarget.getTargetDisplay(), siblingMapRowTarget.getRelationship(), siblingMapRowTarget.getTags(), siblingMapRowTarget.isFlagged(), siblingMapRowTarget.getLastAuthor());
-          mapRowTargetRepository.save(newMapRowTarget);
-        }
-
-        SortedSet<Note> siblingNotes = siblingMapRow.getNotes();
-        for (Note note : siblingNotes) {
-          Note newNote = createNote(note.getNoteText(), note.getCreated(), note.getNoteBy(), mapRow, note.getCategory());
-          noteRepository.save(newNote);
-        }
-
-        mapRowRepository.save(mapRow);
-        mapRowRepository.delete(siblingMapRow);
-
       }
     }
 
   }
 
-  private Note createNote(String noteText, Instant createdInstant, User createdByUser, MapRow mapRow, NoteCategory noteCategory) {
+  private Note createNote(String noteText, Instant createdInstant, User createdByUser, MapRow mapRow, NoteCategory noteCategory, Boolean deleted) {
     Note note = new Note();
     note.setNoteText(noteText);
     note.setCreated(createdInstant);
@@ -178,6 +182,7 @@ public class MapRowEventHandler {
     note.setNoteBy(createdByUser);
     note.setMapRow(mapRow);
     note.setCategory(noteCategory);
+    note.setDeleted(deleted);
     return note;
   }
 
@@ -228,16 +233,24 @@ public class MapRowEventHandler {
     boolean author = EntityUtils.isTaskAssignee(currentUser, mapRowFromDatabase.getAuthorTask());
     boolean reviewer = EntityUtils.isTaskAssignee(currentUser, mapRowFromDatabase.getReviewTask());
     boolean reconciler = EntityUtils.isTaskAssignee(currentUser, mapRowFromDatabase.getReconcileTask());
-    MapStatus.Role role = author ? MapStatus.Role.AUTHOR : reviewer ? MapStatus.Role.REVIEWER : reconciler ? MapStatus.Role.RECONCILER : null ;
+    MapStatus.Role authorOrReviewerRole = author ? MapStatus.Role.AUTHOR : reviewer ? MapStatus.Role.REVIEWER : null;
+    MapStatus.Role reconcilerRole = reconciler ? MapStatus.Role.RECONCILER : null;
 
     if (author && reviewer) {
       // state transition will be validated precommit
       validateAuthorChanges(mapRow, mapRowFromDatabase);
     } else if (author || reviewer || reconciler) {
-      if (!mapRowFromDatabase.getStatus().isValidTransitionForRole(mapRow.getStatus(), role)) {
-        throw new UnauthorisedMappingProblem(
-          role.getName() + " can only change rows that are in a valid " + role.getStateName()
-          + " state, this row's state is " + mapRowFromDatabase.getStatus());
+      if (!mapRowFromDatabase.getStatus().isValidTransitionForRole(mapRow.getStatus(), authorOrReviewerRole)) {
+        if (null == reconcilerRole) {
+          throw new UnauthorisedMappingProblem(
+            authorOrReviewerRole.getName() + " can only change rows that are in a valid " + authorOrReviewerRole.getStateName()
+            + " state, this row's state is " + mapRowFromDatabase.getStatus());
+        }
+        else if (!mapRowFromDatabase.getStatus().isValidTransitionForRole(mapRow.getStatus(), reconcilerRole)) {
+          throw new UnauthorisedMappingProblem(
+            reconcilerRole.getName() + " can only change rows that are in a valid " + reconcilerRole.getStateName()
+            + " state, this row's state is " + mapRowFromDatabase.getStatus());
+        }
       }
       if (author) {
         validateAuthorChanges(mapRow, mapRowFromDatabase);

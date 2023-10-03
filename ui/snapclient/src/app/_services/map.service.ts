@@ -458,6 +458,13 @@ export class MapService {
       .set('row.sourceCode.index', source_idx)
       .set('row.authorTask.id', task.id);
     }
+    else if (task?.type === TaskType.RECONCILE) {
+      header.params = new HttpParams()
+      .set('projection', 'targetView')
+      .set('mapId', map_id)
+      .set('row.sourceCode.index', source_idx)
+      .set('row.reconcileTask.id', task.id);
+    }
     else {
       header.params = new HttpParams()
       .set('projection', 'targetView')

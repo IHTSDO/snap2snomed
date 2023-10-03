@@ -113,6 +113,7 @@ public class MapRow implements Snap2SnomedEntity, Serializable {
 
   @OneToMany(mappedBy = "mapRow", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
   @EqualsAndHashCode.Exclude
+  @Exclude
   @OrderBy("modified DESC, created DESC")
   private SortedSet<@NotNull Note> notes;
 

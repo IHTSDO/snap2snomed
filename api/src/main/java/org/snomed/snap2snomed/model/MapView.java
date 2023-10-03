@@ -54,7 +54,9 @@ import lombok.AllArgsConstructor;
     Iterator<Note> i = row.getNotes().iterator();
     while (i.hasNext()) {
       Note note = i.next();
-      this.appendedNotes += note.getCreated() + " " + note.noteBy.getFullName() + " " + note.noteText + ";";
+      if (!note.isDeleted()) {
+        this.appendedNotes += note.getCreated() + " " + note.noteBy.getFullName() + " " + note.noteText + ";";
+      }
     }
 
     this.status = row.getStatus();
@@ -99,6 +101,15 @@ import lombok.AllArgsConstructor;
       this.latestNote = latestNote;
       this.lastAuthor = row.getLastAuthor();
       this.lastReviewer = row.getLastReviewer();
+    }
+
+    this.appendedNotes = "";
+    Iterator<Note> i = row.getNotes().iterator();
+    while (i.hasNext()) {
+      Note note = i.next();
+      if (!note.isDeleted()) {
+        this.appendedNotes += note.getCreated() + " " + note.noteBy.getFullName() + " " + note.noteText + ";";
+      }
     }
 
     this.status = (status != null ? status : row.getStatus());

@@ -69,7 +69,7 @@
       <span class="auto-margin-top">{{'BULKCHANGEDIALOG.CLEAR_TARGET' | translate}}</span>
     </div>
   </mat-card>
-  <mat-card *ngIf="isDualMapView()">
+  <mat-card *ngIf="isDualMapView() && changedStatus == null">
     <div class="box">
       <mat-checkbox color="primary"
       [(ngModel)]="resetDualMap"
