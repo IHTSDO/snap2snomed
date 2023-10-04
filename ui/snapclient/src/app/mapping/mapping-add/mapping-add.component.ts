@@ -40,7 +40,7 @@ import {Source} from 'src/app/_models/source';
 import {FhirService, Release} from 'src/app/_services/fhir.service';
 import {LoadReleases} from 'src/app/store/fhir-feature/fhir.actions';
 import {selectFhirError, selectReleaseList} from 'src/app/store/fhir-feature/fhir.selectors';
-import {FormControl, FormGroup} from '@angular/forms';
+import {FormControl, FormGroup, Validators} from '@angular/forms';
 import {cloneDeep} from 'lodash';
 import {ErrorInfo} from 'src/app/errormessage/errormessage.component';
 import {FormUtils} from '../../_utils/form_utils';
@@ -85,7 +85,7 @@ export class MappingAddComponent implements OnInit {
     toEdition: new FormControl(''),
     toVersion: new FormControl(''),
     toScopeSelect: new FormControl(''),
-    toScope: new FormControl(''),
+    toScope: new FormControl('', [Validators.minLength(1)]),
     dualMapMode: new FormControl('')
   });
 

@@ -115,7 +115,7 @@
               *ngIf="formGroup.controls.toScope.invalid || formGroup.controls.toScope.hasError('maxlength')">{{ 'MAP.TARGET_SCOPE_ERROR' | translate }}</mat-error>
             <a href="https://confluence.ihtsdotools.org/x/lT3oBg" target="_blank">{{ 'MAP.ECL_HELP' | translate }}</a>
             <mat-hint align="end">
-              {{mappingModel.toScope.length || 0}}/{{MAX_TARGETSCOPE}}
+              {{mappingModel.toScope?.length || 0}}/{{MAX_TARGETSCOPE}}
             </mat-hint>
           </mat-form-field>
           <div *ngIf="mode === 'FORM.CREATE' && !formGroup.controls.dualMapMode.value" class="import-existing-map">
