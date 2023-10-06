@@ -105,6 +105,8 @@ public class MapRow implements Snap2SnomedEntity, Serializable {
   @JsonIgnore
   @Transient
   @Builder.Default
+  // NB this does not seem to be functional and I can't find a workaround
+  // https://github.com/spring-projects/spring-data-rest/issues/753?focusedCommentId=127082&page=com.atlassian.jira.plugin.system.issuetabpanels:comment-tabpanel#comment-127082
   private boolean noMapPrevious = false;
 
   @NotNull

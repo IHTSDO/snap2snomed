@@ -96,6 +96,9 @@ public class MapRowEventHandler {
    * @param mapRow
    */
   public void performAutomaticUpdates(MapRow mapRow) {
+
+    MapStatus originalStatus = mapRow.getStatus();
+
     updateLastAuthorOrReviewed(mapRow);
 
     if (mapRow.getMap().getProject().getDualMapMode()) {
@@ -169,9 +172,24 @@ public class MapRowEventHandler {
           mapRowRepository.delete(siblingMapRow);
 
         }
+        else if (originalStatus == MapStatus.RECONCILE && mapRow.getStatus() == MapStatus.RECONCILE && siblingMapRow.getStatus() == MapStatus.RECONCILE && mapRow.isNoMap()) {
+          // Remove any targets the sibling row may have if we are in reconcile mode and noMap is 
+          // NB had to put the logic here rather than in the if below as we get runtime error messages saying the mapRowTarget cannot be found
+          // even though it is there .. this made me move this functionality to the post save handler, however, I've moved it back here as I need
+          // to know if we are in a reconcile TASK .. not just in an author task with the row transitioning to RECONCILE when both rows are put into 
+          // MAPPED state
+          mapRowTargetRepository.deleteAllByRow(siblingMapRow);
+        }
       }
     }
 
+    // NB this if logic is not functional, but it seems to work as it would only remove targets if noMap is true and they exist
+    if (mapRow.isNoMap() && !mapRow.isNoMapPrevious()) { 
+      log.debug("noMap has been change to true, removing dangling MapRowTargets");
+      // Clean up MapRowTargets if and only if noMap is true and was previously false
+      mapRowTargetRepository.deleteAllByRow(mapRow);
+    }
+    mapRow.setNoMapPrevious(mapRow.isNoMap());
   }
 
   private Note createNote(String noteText, Instant createdInstant, User createdByUser, MapRow mapRow, NoteCategory noteCategory, Boolean deleted) {
@@ -298,21 +316,6 @@ public class MapRowEventHandler {
       mapRow.setStatus(MapStatus.DRAFT);
     }
 
-    if (mapRow.isNoMap() && !mapRow.isNoMapPrevious()) {
-
-      log.debug("noMap has been change to true, removing dangling MapRowTargets");
-      // Clean up MapRowTargets if and only if noMap is true and was previously false
-
-      mapRowTargetRepository.deleteAllByRow(mapRow);
-      
-      if (mapRow.getMap().getProject().getDualMapMode()) {
-        MapRow siblingMapRow = mapRowRepository.findDualMapSiblingRow(mapRow.getMap().getId(), mapRow.getSourceCode().getId(), mapRow.getId());
-        mapRowTargetRepository.deleteAllByRow(siblingMapRow);
-
-      }
-
-    }
-    mapRow.setNoMapPrevious(mapRow.isNoMap());
   }
 
   @HandleBeforeLinkSave
