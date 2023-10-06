@@ -46,5 +46,9 @@ export class FooterComponent implements OnInit {
     });
     return false;
   }
+
+  openUserGuide(): void {
+    window.open(this.config.userGuideUrl, '_blank');
+  }
 }
 
