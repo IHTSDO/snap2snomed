@@ -21,6 +21,9 @@ import {DebugElement} from '@angular/core';
 import {By} from '@angular/platform-browser';
 import {APP_CONFIG} from "../app.config";
 import {MAT_DIALOG_DATA, MatDialogModule} from "@angular/material/dialog";
+import {TranslateLoader, TranslateModule, TranslateService} from '@ngx-translate/core';
+import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { HttpLoaderFactory } from '../app.module';
 
 describe('FooterComponent', () => {
   let component: FooterComponent;
@@ -29,10 +32,17 @@ describe('FooterComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [
-        MatDialogModule
+        MatDialogModule,
+        TranslateModule.forRoot({
+          loader: {
+            provide: TranslateLoader,
+            useFactory: HttpLoaderFactory,
+            deps: [HttpClientTestingModule]
+          }
+        })
       ],
       providers: [
-        { provide: APP_CONFIG, useValue: {} }
+        TranslateService, { provide: APP_CONFIG, useValue: {} }
       ],
       declarations: [FooterComponent]
     })
