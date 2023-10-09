@@ -33,6 +33,7 @@ describe('FooterComponent', () => {
     await TestBed.configureTestingModule({
       imports: [
         MatDialogModule,
+        HttpClientTestingModule,
         TranslateModule.forRoot({
           loader: {
             provide: TranslateLoader,
