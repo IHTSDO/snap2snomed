@@ -62,9 +62,8 @@ describe('FooterComponent', () => {
 
   it('should have footer links', () => {
     const el: DebugElement = fixture.debugElement.query(By.css('.footer-link'));
-    const expectedLabel = 'Copyright 2023 SNOMED International';
     const expectedUrl = 'http://www.snomed.org';
-    expect(el.nativeElement.textContent).toBe(expectedLabel);
+    expect(el.nativeElement.textContent).toBe('FOOTER.COPYRIGHT_SNOMED_INTERNATIONAL');
     expect(el.nativeElement.getAttribute('href')).toBe(expectedUrl);
   });
 });
