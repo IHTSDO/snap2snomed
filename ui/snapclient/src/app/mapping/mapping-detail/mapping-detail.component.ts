@@ -295,6 +295,7 @@ export class MappingDetailComponent implements OnInit, OnDestroy {
   backToTask(): void {
     this.clearLoading();
     this.nodes = [];
+    this.error.message = undefined;
     this.detailClose.emit(true);
   }
 
@@ -381,7 +382,6 @@ export class MappingDetailComponent implements OnInit, OnDestroy {
     const self = this;
     if (self.task?.type == TaskType.RECONCILE && $event == MapRowStatus.MAPPED) {
 
-      //TODO multiple rows?
       if (this.isNoMapChecked() && (this.selectedRowset?.mapRow?.targetCode || this.selectedRowset?.siblingRow?.targetCode)) {
         self.translate.get('ERROR.RECONCILE_NO_MAP_AND_TARGETS').subscribe((res: any) => {
           self.error.message = res;
@@ -464,6 +464,7 @@ export class MappingDetailComponent implements OnInit, OnDestroy {
   loadPrevious(): void {
     const self = this;
     if (self.task && self.selectedRowset?.previous) {
+      this.error.message = undefined;
       self.sourceNavigation.select(self.task, self.task.mapping, self.selectedRowset?.previous);
     }
   }
@@ -471,6 +472,7 @@ export class MappingDetailComponent implements OnInit, OnDestroy {
   loadNext(): void {
     const self = this;
     if (self.task && self.selectedRowset?.next) {
+      this.error.message = undefined;
       self.sourceNavigation.select(self.task, self.task.mapping, self.selectedRowset?.next);
     }
   }
