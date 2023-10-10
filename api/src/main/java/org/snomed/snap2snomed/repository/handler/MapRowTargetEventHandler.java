@@ -29,6 +29,7 @@ import org.snomed.snap2snomed.model.Project;
 import org.snomed.snap2snomed.model.QMapRowTarget;
 import org.snomed.snap2snomed.model.User;
 import org.snomed.snap2snomed.model.enumeration.MapStatus;
+import org.snomed.snap2snomed.model.enumeration.TaskType;
 import org.snomed.snap2snomed.problem.auth.NotAuthorisedProblem;
 import org.snomed.snap2snomed.problem.mapping.UnauthorisedMappingProblem;
 import org.snomed.snap2snomed.repository.MapRowRepository;
@@ -157,7 +158,7 @@ public class MapRowTargetEventHandler {
     boolean reviewer = EntityUtils.isTaskAssignee(currentUser, mapRow.getReviewTask());
     boolean reconciler = EntityUtils.isTaskAssignee(currentUser, mapRow.getReconcileTask());
 
-    if (!author && reviewer && (mapRow.getStatus().isAuthorState() || !isFlagOnlyChange(mapRowTarget))) {
+    if (!author && reviewer && mapRowTarget.getTaskType() == TaskType.REVIEW &&(mapRow.getStatus().isAuthorState() || !isFlagOnlyChange(mapRowTarget))) {
       throw new UnauthorisedMappingProblem(
           "A reviewer may only change the flagged attribute of target in a review state, state is " + mapRow.getStatus());
     } else if (!reviewer && author && !(mapRow.getStatus().isAuthorState() || mapRow.getStatus().equals(MapStatus.REJECTED) || mapRow.getStatus().isReconcileState())) {

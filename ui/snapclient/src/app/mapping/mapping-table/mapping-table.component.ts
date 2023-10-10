@@ -392,7 +392,7 @@ export class MappingTableComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   private doMapRowTargetUodate(self: this, mapView: MapView): void {
-    const [result, targetRow] = self.mapService.updateMapRowTarget(mapView);
+    const [result, targetRow] = self.mapService.updateMapRowTarget(mapView, self.task!.type);
     result.subscribe(
       (result) => {
         mapView.updateFromTarget(result);

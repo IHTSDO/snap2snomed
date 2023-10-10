@@ -346,7 +346,7 @@ export class MapService {
    * @param mapView
    * @private
    */
-  updateMapRowTarget(mapView: MapView): [Observable<any>, TargetRow] {
+  updateMapRowTarget(mapView: MapView, taskType: TaskType): [Observable<any>, TargetRow] {
     const header = ServiceUtils.getHTTPHeaders();
     const rowId = mapView.rowId;
 
@@ -358,13 +358,14 @@ export class MapService {
       getValidRelationship(mapView),
       mapView.flagged,
       mapView.targetOutOfScope,
-      mapView.tags
+      mapView.tags,
+      taskType
     );
     const targetUrl = `${this.config.apiBaseUrl}/mapRowTargets`;
 
     if (target.id) {
       return [this.http.put<any>(`${targetUrl}/${target.id}`, target, header).pipe(
-        map(toTargetRow),
+        map(toTargetRow)
       ), target];
     } else {
       return [this.http.post<TargetRow>(targetUrl, target, header).pipe(
@@ -583,5 +584,5 @@ function getValidRelationship(mapView: MapView): string | undefined {
 function toTargetRow(result: any): TargetRow {
   const id = ServiceUtils.extractIdFromHref(result._links?.self.href, null);
   return new TargetRow(undefined, id, result.targetCode, result.targetDisplay,
-    result.relationship, result.flagged, result.targetOutOfScope, result.tags);
+    result.relationship, result.flagged, result.targetOutOfScope, result.tags, result.type);
 }

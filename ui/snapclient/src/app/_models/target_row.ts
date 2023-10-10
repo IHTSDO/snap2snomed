@@ -21,6 +21,7 @@ import {SourceCode} from './source_code';
 import {Mapping} from './mapping';
 import {MapRow} from './map_row';
 import {User} from './user';
+import { TaskType } from './task';
 
 export class TargetRow {
   row?: string;
@@ -31,9 +32,11 @@ export class TargetRow {
   flagged?: boolean;
   targetOutOfScope?: boolean;
   tags?: string[];
+  taskType?: TaskType;
 
   constructor(row: string | undefined, id: string | undefined, targetCode: string | undefined, targetDisplay: string | undefined,
-              relationship: string | undefined, flagged: boolean | undefined, targetOutOfScope: boolean | undefined, tags: string[] | undefined) {
+              relationship: string | undefined, flagged: boolean | undefined, targetOutOfScope: boolean | undefined, tags: string[] | undefined,
+              taskType: TaskType | undefined) {
     this.row = row;
     this.id = id;
     this.targetCode = targetCode;
@@ -42,6 +45,7 @@ export class TargetRow {
     this.flagged = flagged;
     this.targetOutOfScope = targetOutOfScope;
     this.tags = tags;
+    this.taskType = taskType;
   }
 
   static replacer(key: string, value: any): any {
@@ -62,8 +66,8 @@ export class JSONTargetRow extends TargetRow {
 
   constructor(row: MapRow | undefined, id: string | undefined, targetCode: string | undefined, tags: string[] | undefined, targetDisplay: string | undefined,
               relationship: string | undefined, flagged: boolean, targetOutOfScope: boolean, source: SourceCode | undefined, mapping: Mapping | undefined, 
-              lastAuthor: User | undefined) {
-    super(row?.id || '', id, targetCode, targetDisplay, relationship, flagged, targetOutOfScope, tags);
+              lastAuthor: User | undefined, task: TaskType | undefined) {
+    super(row?.id || '', id, targetCode, targetDisplay, relationship, flagged, targetOutOfScope, tags, task);
     this.source = source;
     this.mapping = mapping;
     this.row = row;

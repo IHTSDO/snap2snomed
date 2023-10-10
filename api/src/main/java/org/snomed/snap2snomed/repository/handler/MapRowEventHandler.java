@@ -158,7 +158,7 @@ public class MapRowEventHandler {
           for (MapRowTarget siblingMapRowTarget : siblingMapRow.getMapRowTargets()) {
             MapRowTarget newMapRowTarget = new MapRowTarget(siblingMapRowTarget.getCreated(), siblingMapRowTarget.getModified(), siblingMapRowTarget.getCreatedBy(), 
               siblingMapRowTarget.getModifiedBy(), null, mapRow, siblingMapRowTarget.getTargetCode(), 
-              siblingMapRowTarget.getTargetDisplay(), siblingMapRowTarget.getRelationship(), siblingMapRowTarget.getTags(), siblingMapRowTarget.isFlagged(), siblingMapRowTarget.getLastAuthor());
+              siblingMapRowTarget.getTargetDisplay(), siblingMapRowTarget.getRelationship(), siblingMapRowTarget.getTags(), siblingMapRowTarget.isFlagged(), siblingMapRowTarget.getLastAuthor(), null);
             mapRowTargetRepository.save(newMapRowTarget);
           }
 
@@ -270,15 +270,12 @@ public class MapRowEventHandler {
             + " state, this row's state is " + mapRowFromDatabase.getStatus());
         }
       }
-      if (author) {
+      if (author || reconciler) {
         validateAuthorChanges(mapRow, mapRowFromDatabase);
       } else if (reviewer) {
         if (mapRowFromDatabase.isNoMap() != mapRow.isNoMap()) {
           throw new UnauthorisedMappingProblem("Reviewer cannot change no map status");
         }
-      }
-      else if (reconciler) {
-        validateReconcilerChanges(mapRow, mapRowFromDatabase);
       }
     } else {
       throw new UnauthorisedMappingProblem("User is not author / reviewer / reconciler for the requested update");
@@ -289,18 +286,13 @@ public class MapRowEventHandler {
     if (mapRowFromDatabase.getStatus().equals(MapStatus.REJECTED) && mapRow.getStatus().equals(MapStatus.REJECTED)
         && (mapRow.isNoMap() != mapRowFromDatabase.isNoMap())) {
       throw new UnauthorisedMappingProblem("Author cannot change mapping in the REJECTED state, change to DRAFT first");
-    } else if (!MapStatus.UNMAPPED.equals(mapRow.getStatus()) && !mapRow.isNoMap() && mapRow.getMapRowTargets().isEmpty()) {
+    } else if (!MapStatus.UNMAPPED.equals(mapRow.getStatus()) && !MapStatus.RECONCILE.equals(mapRow.getStatus()) && !mapRow.isNoMap() && mapRow.getMapRowTargets().isEmpty()) {
       throw new InvalidMappingProblem("Cannot change state from UNMAPPED for row with no mappings and 'no map' not set");
     } else if (MapStatus.UNMAPPED.equals(mapRow.getStatus()) && (mapRow.isNoMap() || !mapRow.getMapRowTargets().isEmpty())) {
       throw new InvalidMappingProblem("Cannot change state to UNMAPPED for row with mapping targets or 'no map' set");
     }
   }
 
-  private void validateReconcilerChanges(MapRow mapRow, MapRow mapRowFromDatabase) {
-        //TODO put reconciler limitations here
-        // prevent no map and target and setting status to mapped
-        // prevent multiple target and setting status to mapped
-  }
 
   private boolean immutableFieldChanged(MapRow mapRow, MapRow mapRowFromDatabase) {
     return !EntityUtils.areEqual(mapRowFromDatabase.getMap(), mapRow.getMap())

@@ -335,7 +335,7 @@ export class MappingDetailComponent implements OnInit, OnDestroy {
         mapView.rowId,
         mapView.targetId, mapView.targetCode, mapView.targetDisplay,
         mapView.relationship, mapView.flagged, mapView.targetOutOfScope,
-        mapView.targetOutOfScope ? [TARGET_OUT_OF_SCOPE_TAG]: undefined);
+        mapView.targetOutOfScope ? [TARGET_OUT_OF_SCOPE_TAG]: undefined, this.task?.type);
       this.mapService.createTarget(targetRow).subscribe((result) => {
           const targetId = ServiceUtils.extractIdFromHref(result._links.self.href, null);
           mapView.updateNoMap(mapView.noMap);
@@ -447,8 +447,19 @@ export class MappingDetailComponent implements OnInit, OnDestroy {
           }
         });
     } else if (self.rowId) {
-      self.mapService.updateNoMap(self.rowId, cbNoMap, self.task?.type == TaskType.RECONCILE).subscribe((result) => {
+
+      let rowId = self.rowId;
+      if (self.isDualMapMode() && self.selectedRowset?.siblingRow) {
+        if (self.selectedRowset.siblingRow.noMap != cbNoMap) {
+          rowId = self.selectedRowset?.siblingRow.rowId;
+        }
+      }
+
+      self.mapService.updateNoMap(rowId, cbNoMap, self.task?.type == TaskType.RECONCILE).subscribe((result) => {
         self.source.noMap = cbNoMap;
+        if (self.isDualMapMode() && self.selectedRowset?.siblingRow) {
+          self.selectedRowset.siblingRow.noMap = cbNoMap;
+        }
         self.source.status = result.status;
         if (self.selectedRowset?.mapRow) {
           self.selectedRowset.mapRow.updateFromRow(result as MapRow);
