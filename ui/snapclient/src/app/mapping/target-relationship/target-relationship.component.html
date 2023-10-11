@@ -26,7 +26,7 @@
                 <span class="selection-text">{{row.targetDisplay}}</span>
                 <span>    
                   <span #tooltip="matTooltip" matTooltip="{{getTargetOutOfScopeTooltip(row)}}">
-                    <button mat-icon-button *ngIf="row.targetOutOfScope" disabled="{{!isOutOfScopeWithSuggestions(row)}}"(click)="onMapMaintenance(row)" color="accent" 
+                    <button mat-icon-button *ngIf="row.targetOutOfScope" disabled="{{!isOutOfScopeWithSuggestions(row) || isReviewTask()}}"(click)="onMapMaintenance(row)" color="accent" 
                     ><mat-icon>warning</mat-icon></button>
                   </span>  
                   <button mat-icon-button (click)="updateFlag(row)" [disabled]="disableFlagging"

@@ -185,6 +185,13 @@ export class TargetRelationshipComponent implements OnInit {
     }
     return false;
   }
+
+  isReviewTask() : boolean {
+    if (this.task?.type === TaskType.REVIEW) {
+      return true;
+    }
+    return false;
+  }
   
   addSuggestedConcepts(suggestedConcepts : Coding[], row: MapView) {
     suggestedConcepts.forEach(suggestedConcept => {
@@ -287,11 +294,20 @@ export class TargetRelationshipComponent implements OnInit {
   }
 
   getTargetOutOfScopeTooltip(row: MapView) : string {
-
+    const self = this;
     if (row.tags?.includes(TARGET_NO_ACTIVE_SUGGESTIONS_TAG)) {
       return this.translate.instant("DETAILS.OUT_OF_SCOPE_NO_SUGGESTED_REPLACEMENTS");
     }
     else {
+      if (this.isReviewTask()) {
+        if (self.task?.mapping.project.dualMapMode) {
+          return this.translate.instant("DETAILS.OUT_OF_SCOPE_USE_AUTHOR_RECONCILE_TASK_TO_FIND_REPLACEMENTS");
+        }
+        else {
+          return this.translate.instant("DETAILS.OUT_OF_SCOPE_USE_AUTHOR_TASK_TO_FIND_REPLACEMENTS");
+        }
+
+      }
       return this.translate.instant("DETAILS.OUT_OF_SCOPE_FIND_REPLACEMENTS");
     }
   }
@@ -308,4 +324,5 @@ export class TargetRelationshipComponent implements OnInit {
 
     return outOfScopeWithSuggestions;
   }
+
 }
