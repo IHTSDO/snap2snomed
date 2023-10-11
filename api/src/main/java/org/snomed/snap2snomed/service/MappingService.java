@@ -591,6 +591,11 @@ public class MappingService {
     final Map mapCreated = mapRepository.save(newMap);
     final Long createdId = mapCreated.getId();
 
+    // NB, for dual maps where there can be multiple rows, there is no way of determining via SQL which new map_rows correspond with
+    // which original map_row.  As a temporary workaround, I've changed the modified date on the new map_row to be the same as the 
+    // original map_row to create something to link them.  Multiple rows should always have different dates once unblinded as both
+    // rows would have been modified by real people.
+
     if (newSourceId == originalSourceId) {
       // Copy all rows
       mapRowRepository.copyMapRows(createdId, mapId, userId, dateTime);
