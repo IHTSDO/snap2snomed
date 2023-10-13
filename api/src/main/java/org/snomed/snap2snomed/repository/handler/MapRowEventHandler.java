@@ -287,7 +287,18 @@ public class MapRowEventHandler {
         && (mapRow.isNoMap() != mapRowFromDatabase.isNoMap())) {
       throw new UnauthorisedMappingProblem("Author cannot change mapping in the REJECTED state, change to DRAFT first");
     } else if (!MapStatus.UNMAPPED.equals(mapRow.getStatus()) && !MapStatus.RECONCILE.equals(mapRow.getStatus()) && !mapRow.isNoMap() && mapRow.getMapRowTargets().isEmpty()) {
-      throw new InvalidMappingProblem("Cannot change state from UNMAPPED for row with no mappings and 'no map' not set");
+      if (mapRow.getMap().getProject().getDualMapMode()) {
+        // target or no map may be on the sibling row
+        if (MapStatus.MAPPED.equals(mapRow.getStatus())) {
+          MapRow siblingMapRow = mapRowRepository.findDualMapSiblingRow(mapRow.getMap().getId(), mapRow.getSourceCode().getId(), mapRow.getId());
+          if (siblingMapRow == null || (siblingMapRow.isNoMap() && siblingMapRow.getMapRowTargets().isEmpty())) {
+            throw new InvalidMappingProblem("Cannot change state to MAPPED for dual mapped rows with no mappings and 'no map' not set");
+          }
+        } 
+      }
+      else {
+        throw new InvalidMappingProblem("Cannot change state from UNMAPPED for row with no mappings and 'no map' not set");
+      }
     } else if (MapStatus.UNMAPPED.equals(mapRow.getStatus()) && (mapRow.isNoMap() || !mapRow.getMapRowTargets().isEmpty())) {
       throw new InvalidMappingProblem("Cannot change state to UNMAPPED for row with mapping targets or 'no map' set");
     }
