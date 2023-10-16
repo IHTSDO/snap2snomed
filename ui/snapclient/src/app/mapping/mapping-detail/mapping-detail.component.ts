@@ -404,7 +404,14 @@ export class MappingDetailComponent implements OnInit, OnDestroy {
         self.source.status = MapRowStatus.RECONCILE;
         return false;
       }
-      
+      else if ((this.selectedRowset?.mapRow?.targetCode === this.selectedRowset?.siblingRow?.targetCode) 
+        && (this.selectedRowset?.mapRow?.relationship === this.selectedRowset?.siblingRow?.relationship)) {
+        self.translate.get('ERROR.RECONCILE_DUPLICATE_TARGET').subscribe((res: any) => {
+          self.error.message = res;
+        });  
+        self.source.status = MapRowStatus.RECONCILE;
+        return false;
+      }
     }
     return true;
   }
