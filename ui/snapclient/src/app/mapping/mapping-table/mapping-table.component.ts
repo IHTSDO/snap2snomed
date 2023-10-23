@@ -138,10 +138,6 @@ export class MappingTableComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild(MappingTableSelectorComponent, {static: false})
   set concent(selector: MappingTableSelectorComponent) {
     this.mappingTableSelector = selector;
-    // reset in case of a browser refresh
-    if (this.mappingTableSelector) {
-      this.mappingTableSelector.clearAllSelectedRows();
-    }
   }
 
   page: Page = new Page();

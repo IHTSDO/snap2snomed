@@ -81,6 +81,11 @@ export class MappingTableSelectorComponent implements OnInit, OnDestroy, AfterVi
         }
       })
     );
+
+    // make sure ngOnDestroy is called if page is reloaded, otherwise the selection will behave strangely for the user
+    // e.g. a select all turns into every thing selected on the page due to selected rows containing the rows in the current
+    // page
+    window.onbeforeunload = () => this.ngOnDestroy();
   }
 
   ngAfterViewInit(): void {
@@ -164,6 +169,7 @@ export class MappingTableSelectorComponent implements OnInit, OnDestroy, AfterVi
       this.selectedRows = Object.assign([], this.allSourceDetails);
       this.isAllSelected = true;
       this.isAnySelected = true;
+      this.isPageSelected = false;
       this.lastSelected = 0;
       this.store.dispatch(new SelectMapRow({selectedrows: this.selectedRows}));
       this.allSelectedEvent.emit(true);
@@ -171,6 +177,7 @@ export class MappingTableSelectorComponent implements OnInit, OnDestroy, AfterVi
       this.clearAllSelectedRows();
       this.isAllSelected = false;
       this.isAnySelected = false;
+      this.isPageSelected = false;
       this.lastSelected = 0;
       this.store.dispatch(new SelectMapRow({selectedrows: []}));
       this.allSelectedEvent.emit(false);
@@ -212,10 +219,9 @@ export class MappingTableSelectorComponent implements OnInit, OnDestroy, AfterVi
   }
 
   checkSelected(row: MapView): boolean {
-    return this.selectedRows.filter(selectedRow =>
-      row.targetId
-      && selectedRow.sourceIndex === parseInt(row.sourceIndex)
-      && selectedRow.mapRowTargetId === parseInt(row.targetId)).length > 0;
+    return this.selectedRows.filter(selectedRow => {
+      return selectedRow.sourceIndex === parseInt(row.sourceIndex)
+      && (row.targetId ? selectedRow.mapRowTargetId === parseInt(row.targetId) : true)}).length > 0;
   }
 
   toggleSelection(event: any, row: MapView, index: number): void {
