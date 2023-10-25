@@ -85,7 +85,7 @@ export class SourceNavigationService {
    * @param row_idx Index of row in the view
    */
   loadSourceNav(task: Task, mapping : Mapping | null, params: ViewContext, row_idx: number): void {
-    this.setSourceNavigation(task, mapping, row_idx, params);
+    this.setSourceNavigation(task, mapping, row_idx, params, null);
   }
 
   private findAdjacentSource(task_id: string, params: ViewContext, sourceIndex: string,
@@ -131,7 +131,8 @@ export class SourceNavigationService {
   }
 
   select(task: Task, mapping: Mapping | null, row: MapViewParams): void {
-    this.setSourceNavigation(task, mapping, row.rowIndex, row.params);
+    let rowId = row.page.data[row.rowIndex].rowId;
+    this.setSourceNavigation(task, mapping, row.rowIndex, row.params, rowId);
   }
 
   /**
@@ -142,8 +143,9 @@ export class SourceNavigationService {
    * @param params - View filters and sorting
    * @param task - Current Task
    * @param page - Page representation of the view
+   * @param rowId - null unless for the reconcile task and if called from next / previous
    */
-  private setSourceNavigation(task: Task, mapping: Mapping | null, row_idx: number | null, params: ViewContext): void {
+  private setSourceNavigation(task: Task, mapping: Mapping | null, row_idx: number | null, params: ViewContext, rowId: string | null): void {
     if (row_idx !== null) {
       let siblingRow: MapView | null = null;
       // Refresh page.data to avoid bugs with changes to status or noMap
@@ -155,7 +157,15 @@ export class SourceNavigationService {
             return new Page(rows, result.page.number, result.page.size, result.page.totalElements, result.page.totalPages);
           }),
         ).subscribe((page: Page) => {
-        const selectedRow = page.data[row_idx];
+        let selectedRow = page.data[row_idx];
+        // This code is here because the above "refresh" can result in a smaller amount of rows if rows were
+        // removed (e.g. due to a row being reconciled and put into the mapped state)
+        if (task.type === TaskType.RECONCILE && rowId && (!selectedRow || selectedRow.rowId !== rowId)) {
+          let alternativeRow = page.data.find(row => row.rowId == rowId)
+          if (alternativeRow !== undefined) {
+            selectedRow = alternativeRow;
+          }
+        }
 
         if (mapping !== null && mapping.id && mapping.project.dualMapMode && task.type == TaskType.RECONCILE) {
           // call to get the sibling row as we may not have it (all) in the page of data retrieved
