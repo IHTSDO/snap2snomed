@@ -361,7 +361,6 @@ export class MappingDetailComponent implements OnInit, OnDestroy {
       this.mapService.deleteTarget(mapView.targetId).subscribe((result) => {
           self.mapRows = self.mapRows.map((r) => r).filter((row) => row !== mapView);
           self.updateSelectedRowSet(false);
-          ///TODO check after hear back from Kylynn RE: status for dual mapped rows
           if (!this.isReconcileTask()) {
             if (self.mapRows.length <= 0) {
               self.updateStatus(MapRowStatus.UNMAPPED);

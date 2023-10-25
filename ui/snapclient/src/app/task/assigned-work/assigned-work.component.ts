@@ -225,7 +225,6 @@ export class AssignedWorkComponent implements OnInit, AfterViewInit, OnDestroy {
     if (this.selectedTaskType !== $event) {
       this.selectedTaskType = $event;
     }
-    console.log("selectedtasktype", this.selectedTaskType);
     switch (this.selectedTaskType) {
       case TaskType.AUTHOR:
         this.authCurrentPage = 0;
