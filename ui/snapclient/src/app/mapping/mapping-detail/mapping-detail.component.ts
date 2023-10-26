@@ -377,6 +377,11 @@ export class MappingDetailComponent implements OnInit, OnDestroy {
     }
   }
 
+  isEditDisabled() : boolean {
+    return ((!this.isReconcileTask() && this.writeDisableUtils.isEditDisabled(this.task?.type, toMapRowStatus(this.source.status))) 
+      || (this.isReconcileTask() && toMapRowStatus(this.source.status) === MapRowStatus.MAPPED));
+  }
+
   canSaveTarget($event: MapRowStatus) : boolean {
     const self = this;
     if (self.task?.type == TaskType.RECONCILE && $event == MapRowStatus.MAPPED) {
@@ -403,7 +408,7 @@ export class MappingDetailComponent implements OnInit, OnDestroy {
         self.source.status = MapRowStatus.RECONCILE;
         return false;
       }
-      else if ((this.selectedRowset?.mapRow?.targetCode === this.selectedRowset?.siblingRow?.targetCode) 
+      else if (this.selectedRowset?.mapRow?.targetCode && (this.selectedRowset?.mapRow?.targetCode === this.selectedRowset?.siblingRow?.targetCode) 
         && (this.selectedRowset?.mapRow?.relationship === this.selectedRowset?.siblingRow?.relationship)) {
         self.translate.get('ERROR.RECONCILE_DUPLICATE_TARGET').subscribe((res: any) => {
           self.error.message = res;

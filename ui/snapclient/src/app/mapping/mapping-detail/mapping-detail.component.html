@@ -102,14 +102,14 @@
                 <app-user-chip id="targetLastAuthorUserChip" *ngIf="isReconcileTask() && isNoMapChecked()" 
                 [user]="getNoMapAuthor()" [font_size]="'12px'"></app-user-chip>
                 <mat-checkbox [checked]="isNoMapChecked()"
-                              [disabled]="!isReconcileTask() && writeDisableUtils.isEditDisabled(this.task?.type, toMapRowStatus(source.status))"
+                              [disabled]="isEditDisabled()"
                               (change)="updateNoMap($event)">{{'TABLE.NO_MAP' | translate}}</mat-checkbox>
               </span>
           </mat-card-header>
           <mat-card-content>
             <app-target-relationship [task]="task" [targetRows]="mapRows" [source]="getSource()" [sourceNavSet]="selectedRowset"
                                      (newTargetEvent)="saveTarget($event)"
-                                     [disableActions]="!isReconcileTask() && writeDisableUtils.isEditDisabled(this.task?.type, toMapRowStatus(source.status))"
+                                     [disableActions]="isEditDisabled()"
                                      [disableFlagging]="writeDisableUtils.isFlaggingDisabled(this.task?.type, toMapRowStatus(source.status))"
                                      (removeTargetEvent)="removeTarget($event)"
                                      (flagEvent)="updateFlag($event)"

@@ -119,20 +119,26 @@ export class TargetRelationshipComponent implements OnInit {
    * @param relationship String relationship
    */
   onDrop(event: DroppableEventObject, relationship: string): void {
-    console.log("on drop");
-    const self = this;
-    if (self.source && event.data && !StatusUtils.inReviewedState(self.source.status as MapRowStatus)) {
-      if (!event.data.rowId) {
-        self.addSelection(event.data.code, event.data.display, event.data.system, relationship);
-      } else {
-        const updatedTarget = self.targetRows.map((t) => t)
-          .filter((m) => m.targetCode === event.data.targetCode)[0];
-        updatedTarget.relationship = relationship;
-        updatedTarget.status = MapRowStatus.DRAFT;
-        updatedTarget.noMap = false;
-        self.newTargetEvent.emit(updatedTarget);
+    if (!this.isEditDisabled()) {
+      const self = this;
+      if (self.source && event.data && !StatusUtils.inReviewedState(self.source.status as MapRowStatus)) {
+        if (!event.data.rowId) {
+          self.addSelection(event.data.code, event.data.display, event.data.system, relationship);
+        } else {
+          const updatedTarget = self.targetRows.map((t) => t)
+            .filter((m) => m.targetCode === event.data.targetCode)[0];
+          updatedTarget.relationship = relationship;
+          updatedTarget.status = MapRowStatus.DRAFT;
+          updatedTarget.noMap = false;
+          self.newTargetEvent.emit(updatedTarget);
+        }
       }
     }
+  }
+
+  isEditDisabled() : boolean {
+    return ((!this.isReconcileTask() && this.writeDisableUtils.isEditDisabled(this.task?.type, toMapRowStatus(this.source?.status))) 
+      || (this.isReconcileTask() && toMapRowStatus(this.source?.status) === MapRowStatus.MAPPED));
   }
 
   filterRows(relationship: MapRowRelationship): MapView[] {
