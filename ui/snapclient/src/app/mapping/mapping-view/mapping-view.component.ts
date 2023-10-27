@@ -89,6 +89,7 @@ export class MappingViewComponent implements OnInit, AfterViewInit, OnDestroy {
   sort: MatSort | null | undefined;
   componentLoaded = false;
   mappingTableSelector: MappingTableSelectorComponent | null | undefined;
+  allSelected = false;
 
   // @ts-ignore
   @ViewChild(MatTable) table: MatTable<any>;
@@ -751,12 +752,17 @@ export class MappingViewComponent implements OnInit, AfterViewInit, OnDestroy {
     });
   }
 
+  onAllSelected(allSelected: boolean) {
+    this.allSelected = allSelected;
+  }
+
   getBulkChangeDialogData(): BulkChangeDialogData {
     return {
       task: null,
       map: this.mapping,
       isMapView: this.isOwner(),
-      selectedRows: this.mappingTableSelector?.selectedRows
+      selectedRows: this.mappingTableSelector?.selectedRows,
+      allSelected: this.allSelected
     };
   }
 

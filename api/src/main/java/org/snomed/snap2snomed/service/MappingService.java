@@ -203,6 +203,59 @@ public class MappingService {
         .build();
   }
 
+  void processMapRowUpdate(TargetDto targetDto, MapRow mapRow, MappingDetails mappingDetail, List<MappingDetails> mappingDetails, Long targetRowId) {
+    Long targetId;
+    Boolean noMap = mappingDetail.getMappingUpdate().getNoMap();
+    MapStatus mapStatus = mappingDetail.getMappingUpdate().getStatus();
+
+    if (targetDto == null) {
+      targetId = targetRowId;
+    }
+    else {
+      MappedRowDetailsDto mappedRowDetailsDto = MappedRowDetailsDto.builder().mapRowId(mapRow.getId()).sourceIndex(mappingDetail.getRowId()).mapRowTargetId(targetRowId).build();
+      targetId = createTarget(mappingDetail, mappedRowDetailsDto);
+      noMap = false;
+      mapStatus = MapStatus.DRAFT;
+    }
+    mappingDetails.add(
+      MappingDetails.builder()
+        .rowId(mapRow.getId())
+        .taskId(mappingDetail.getTaskId())
+        .mappingUpdate(MappingDto.builder()
+          .noMap(noMap)
+          .relationship(mappingDetail.getMappingUpdate().getRelationship())
+          .status(mapStatus)
+          .clearTarget(mappingDetail.getMappingUpdate().getClearTarget())
+          .targetId(targetId)
+          .target(targetDto)
+          .build()
+          )
+        .build());
+  }
+
+  @Transactional
+  public MappingResponse updateMappingForAll(Long mapId, MappingUpdateDto mappings) {
+    MappingUpdateDto mapUpdate = new MappingUpdateDto();
+    List<MappingDetails> mappingDetails = new ArrayList<>();
+    if (!(mappings.getMappingDetails() == null || mappings.getMappingDetails().isEmpty())) {
+      mappings.getMappingDetails().forEach(mappingDetail -> {
+        TargetDto targetDto = mappingDetail.getMappingUpdate().getTarget();
+        Collection<MapRow> mapRows = mapRowRepository.findMapRowsByMapId(mapId);
+        mapRows.forEach(mapRow -> {
+          if (mapRow.getMapRowTargets().size() <= 0) {
+            processMapRowUpdate(targetDto, mapRow, mappingDetail, mappingDetails, null);
+          }
+          mapRow.getMapRowTargets().forEach(subSelection -> {
+            processMapRowUpdate(targetDto, mapRow, mappingDetail, mappingDetails, subSelection.getId());
+          });
+        });
+      });
+      mapUpdate.setMappingDetails(mappingDetails);
+    }
+    return this.updateMapping(mapUpdate);
+
+  }
+
   @Transactional
   public MappingResponse updateMappingForSelection(MappingUpdateDto mappings) {
     MappingUpdateDto mapUpdate = new MappingUpdateDto();

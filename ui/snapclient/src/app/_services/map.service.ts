@@ -532,7 +532,7 @@ export class MapService {
   }
 
   /**
-   * Bulk Uodate Update mapping
+   * Bulk update mapping for selection of
    * @param mappingUpdate
    * @private
    */
@@ -560,10 +560,10 @@ export class MapService {
    * @param mappingUpdate
    * @private
    */
-  public bulkUpdateAllRowsForMap(mapId: string, mappingDto: MappingDto): Observable<any> {
+  public bulkUpdateAllRowsForMap(mapId: string, mappingUpdateDto: MappingUpdateDto): Observable<any> {
     const url = `${this.config.apiBaseUrl}/updateMapping/map/${mapId}`;
     const header = ServiceUtils.getHTTPHeaders();
-    const body = mappingDto;
+    const body = mappingUpdateDto;
     return this.http.post<any>(url, body, header);
   }
 

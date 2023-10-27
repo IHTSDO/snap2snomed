@@ -141,8 +141,13 @@ public class MappingControllerIT extends IntegrationTestBase {
 
   @Test
   public void failNoMapAndStatusChangeAllRows() throws Exception {
+
     MappingDto nomapDto = MappingDto.builder().noMap(true).status(MapStatus.UNMAPPED).build();
-    expectFail("/updateMapping/map/" + mapId, nomapDto, 400,
+    MappingUpdateDto mappingUpdate = new MappingUpdateDto();
+    List<MappingDetails> mappingDetails = new ArrayList<MappingDetails>();
+    mappingDetails.add(MappingDetails.builder().mappingUpdate(nomapDto).build());
+    mappingUpdate.setMappingDetails(mappingDetails);
+    expectFail("/updateMapping/map/" + mapId, mappingUpdate, 400,
         "Invalid combination of changes. Clear/set 'no map' and clearing targets must be done independently of any other changes");
     expectFail("/updateMapping/task/" + taskId, nomapDto, 400,
         "Invalid combination of changes. Clear/set 'no map' and clearing targets must be done independently of any other changes");
@@ -168,7 +173,11 @@ public class MappingControllerIT extends IntegrationTestBase {
   @Test
   public void shouldBulkNoMapAllRows() throws Exception {
     MappingDto nomapDto = MappingDto.builder().noMap(true).build();
-    checkRowCounts(DEFAULT_TEST_USER_SUBJECT, "/updateMapping/map/" + mapId, nomapDto, 35, 34);
+    MappingUpdateDto mappingUpdate = new MappingUpdateDto();
+    List<MappingDetails> mappingDetails = new ArrayList<MappingDetails>();
+    mappingDetails.add(MappingDetails.builder().mappingUpdate(nomapDto).build());
+    mappingUpdate.setMappingDetails(mappingDetails);
+    checkRowCounts(DEFAULT_TEST_USER_SUBJECT, "/updateMapping/map/" + mapId, mappingUpdate, 35, 34);
     checkRowCounts(DEFAULT_TEST_USER_SUBJECT, "/updateMapping/task/" + taskId, nomapDto, 17, 16);
   }
 
@@ -189,7 +198,11 @@ public class MappingControllerIT extends IntegrationTestBase {
   @Test
   public void shouldBulkChangeStatusAll() throws Exception {
     MappingDto nomapDto = MappingDto.builder().status(MapStatus.REJECTED).build();
-    checkRowCounts(DEFAULT_TEST_USER_SUBJECT, "/updateMapping/map/" + mapId, nomapDto, 35, 3);
+    MappingUpdateDto mappingUpdate = new MappingUpdateDto();
+    List<MappingDetails> mappingDetails = new ArrayList<MappingDetails>();
+    mappingDetails.add(MappingDetails.builder().mappingUpdate(nomapDto).build());
+    mappingUpdate.setMappingDetails(mappingDetails);
+    checkRowCounts(DEFAULT_TEST_USER_SUBJECT, "/updateMapping/map/" + mapId, mappingUpdate, 35, 3);
     // 3 updates - 1st row has two maprowtargets and there is an inreview status for row 11
     checkRowCounts(DEFAULT_TEST_USER_SUBJECT, "/updateMapping/task/" + taskId, nomapDto, 18, 0);
     checkRowCounts(user, "/updateMapping/task/" + task2Id, nomapDto, 5, 0);
@@ -238,7 +251,11 @@ public class MappingControllerIT extends IntegrationTestBase {
   @Test
   public void shouldClearTargetsForMap() throws Exception {
     MappingDto nomapDto = MappingDto.builder().clearTarget(true).build();
-    checkRowCounts(DEFAULT_TEST_USER_SUBJECT, "/updateMapping/map/" + mapId, nomapDto, 35, 9);
+    MappingUpdateDto mappingUpdate = new MappingUpdateDto();
+    List<MappingDetails> mappingDetails = new ArrayList<MappingDetails>();
+    mappingDetails.add(MappingDetails.builder().mappingUpdate(nomapDto).build());
+    mappingUpdate.setMappingDetails(mappingDetails);
+    checkRowCounts(DEFAULT_TEST_USER_SUBJECT, "/updateMapping/map/" + mapId, mappingUpdate, 35, 9);
   }
 
 
@@ -278,7 +295,11 @@ public class MappingControllerIT extends IntegrationTestBase {
   @Test
   public void shouldChangeRelationshipForMap() throws Exception {
     MappingDto nomapDto = MappingDto.builder().relationship(MappingRelationship.TARGET_NARROWER).build();
-    checkRowCounts(DEFAULT_TEST_USER_SUBJECT, "/updateMapping/map/" + mapId, nomapDto, 35, 9);
+    MappingUpdateDto mappingUpdate = new MappingUpdateDto();
+    List<MappingDetails> mappingDetails = new ArrayList<MappingDetails>();
+    mappingDetails.add(MappingDetails.builder().mappingUpdate(nomapDto).build());
+    mappingUpdate.setMappingDetails(mappingDetails);
+    checkRowCounts(DEFAULT_TEST_USER_SUBJECT, "/updateMapping/map/" + mapId, mappingUpdate, 35, 9);
     checkRelationships(
         getMapViews().stream().filter(mv -> mv.getTargetId() != null && mv.getSourceIndex() != 11)
             .collect(Collectors.toList()),
@@ -411,7 +432,7 @@ public class MappingControllerIT extends IntegrationTestBase {
     mappingUpdate.setMappingDetails(mappingDetails);
     expectFail("/updateMapping", mappingUpdate, 400, expectedDetail);
 
-    expectFail("/updateMapping/map/" + mapId, mappingDto, 400, expectedDetail);
+    expectFail("/updateMapping/map/" + mapId, mappingUpdate, 400, expectedDetail);
     expectFail("/updateMapping/task/" + taskId, mappingDto, 400, expectedDetail);
   }
 
