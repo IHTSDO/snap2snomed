@@ -48,7 +48,7 @@ export class TaskAddComponent implements OnInit, AfterViewInit, OnDestroy {
   error: ErrorInfo = {};
   task: Task | undefined = undefined;
   members: User[] = [];
-  type_options = [TaskType.AUTHOR, TaskType.REVIEW];
+  type_options: TaskType[] = [];
   row_options = ['ALL', 'SELECTED'];
   assignRows = '';
   isMember = false;
@@ -81,9 +81,12 @@ export class TaskAddComponent implements OnInit, AfterViewInit, OnDestroy {
     self.subscription.add(self.store.select(selectSelectedRows).subscribe(
       (selectedRows) => {
         if (self.task) {
-          if (selectedRows.length > 0) {
-            const sourceIndexes = selectedRows.map(selected => selected.sourceIndex);
-            self.task.sourceRowSpecification = ServiceUtils.convertNumberArrayToRangeString(sourceIndexes);
+          if (this.mappingTableSelector?.isAllSelected) {
+            self.task.sourceRowSpecification = '*';
+          }
+          else if (selectedRows.length > 0) {
+              const sourceIndexes = selectedRows.map(selected => selected.sourceIndex);
+              self.task.sourceRowSpecification = ServiceUtils.convertNumberArrayToRangeString(sourceIndexes);
           } else {
             self.assignRows = '';
             self.task.sourceRowSpecification = '';
@@ -108,6 +111,7 @@ export class TaskAddComponent implements OnInit, AfterViewInit, OnDestroy {
         self.mapping = mapping;
         self.initTask();
         self.loadMemberList();
+        self.initTaskTypeOptions(self.mapping);
       }
     }));
   }
@@ -132,8 +136,13 @@ export class TaskAddComponent implements OnInit, AfterViewInit, OnDestroy {
   updateSelectedRows(): void {
     if (this.mappingTableSelector && this.mappingTableSelector.selectedRows && this.task) {
       if (this.mappingTableSelector.selectedRows.length > 0) {
-        const sourceIndexes = this.mappingTableSelector.selectedRows.map(selected => selected.sourceIndex);
-        this.task.sourceRowSpecification = ServiceUtils.convertNumberArrayToRangeString(sourceIndexes);
+        if (this.mappingTableSelector.isAllSelected) {
+          this.task.sourceRowSpecification = '*';
+        }
+        else {
+          const sourceIndexes = this.mappingTableSelector.selectedRows.map(selected => selected.sourceIndex);
+          this.task.sourceRowSpecification = ServiceUtils.convertNumberArrayToRangeString(sourceIndexes);
+        }
       } else {
         this.assignRows = '';
         this.task.sourceRowSpecification = '';
@@ -144,7 +153,7 @@ export class TaskAddComponent implements OnInit, AfterViewInit, OnDestroy {
   initTask(): void {
     this.assignRows = '';
     if (this.mapping && this.currentUser?.id) {
-      this.task = new Task('', '', '',
+      this.task = new Task('', TaskType.AUTHOR, '',
         this.mapping, this.currentUser, '', 0, '', '', false, false);
     }
   }
@@ -157,6 +166,15 @@ export class TaskAddComponent implements OnInit, AfterViewInit, OnDestroy {
       this.isMember = this.mapping.project.members.filter((u) => u.id === this.currentUser.id).length > 0;
       // @ts-ignore
       this.isOwner = this.mapping.project.owners.filter((u) => u.id === this.currentUser.id).length > 0;
+    }
+  }
+
+  initTaskTypeOptions(mapping: Mapping): void {
+    if (mapping.project.dualMapMode) {
+      this.type_options = [TaskType.AUTHOR, TaskType.RECONCILE, TaskType.REVIEW];
+    }
+    else {
+      this.type_options = [TaskType.AUTHOR, TaskType.REVIEW];
     }
   }
 
@@ -183,10 +201,10 @@ export class TaskAddComponent implements OnInit, AfterViewInit, OnDestroy {
   onSubmit(form: NgForm, $event: Event): void {
     const self = this;
     try {
-      if (self.currentUser && self.task && self.task.type !== '' && form.form.valid) {
+      if (self.currentUser && self.task && form.form.valid) {
         if (self.task.assignee && self.task.assignee.id !== '') {
           self.store.dispatch(new AddTask(self.task));
-          self.newTaskEvent.emit(self.task?.type);
+          self.newTaskEvent.emit(self.task.type);
           self.mappingTableSelector?.clearAllSelectedRows();
         } else {
           throwError('TASK.ASSIGNEE_NOT_SET');

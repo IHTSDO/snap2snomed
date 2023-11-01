@@ -105,6 +105,9 @@ export class TaskCreateComponent implements OnInit {
     let type = '';
     switch (this.data.task.type) {
       // Note Opposite offending task
+      case TaskType.RECONCILE:
+        this.translate.get('TASK.TYPE_RECONCILE').subscribe((msg) => type = msg);
+        break;
       case TaskType.REVIEW:
         this.translate.get('TASK.TYPE_AUTHOR').subscribe((msg) => type = msg);
         break;

@@ -1,13 +1,13 @@
 <div id="target-relationship-container">
   <app-errormessage [error]="error"></app-errormessage>
   <div class="card-relationship">
-    <mat-card *ngIf="isNoMap(); else showRelationships">
+    <mat-card *ngIf="isNoMap() && !isReconcileTask(); else showRelationships">
       <mat-card-content>{{'MAP.NO_MAPPING_AVAILABLE' | translate}}</mat-card-content>
     </mat-card>
     <ng-template #showRelationships>
       <mat-card cdkDropList *ngFor="let relationship of relationships"
                 [appDroppable]="{zone: 'relationshipZone'}"
-                [dropDisabled]="writeDisableUtils.isEditDisabled(this.task?.type, toMapRowStatus(source?.status))"
+                [dropDisabled]="isEditDisabled()"
                 (onDroppableComplete)="onDrop($event, relationship)">
         <mat-card-title>
           <button color="any" mat-icon-button (click)="addFocusTarget(relationship)"
@@ -21,11 +21,14 @@
             <mat-option *ngFor="let row of filterRows(relationship)" (click)="click(row)">
               <span [appDraggable]="{data:row, zones:['relationshipZone']}"
                     class="row-target">
+                <app-user-chip id="targetLastAuthorUserChip" *ngIf="isReconcileTask() && row.targetLastAuthor" [user]="row.targetLastAuthor"
+                [font_size]="'12px'"></app-user-chip>
                 <span class="selection-text">{{row.targetDisplay}}</span>
-                <span>
-                  <button mat-icon-button *ngIf="row.targetOutOfScope" color="accent" #tooltip="matTooltip"
-                          matTooltip="{{'TABLE.TARGET_OUT_OF_SCOPE_TOOLTIP' | translate}}"
-                          ><mat-icon>warning</mat-icon></button>
+                <span>    
+                  <span #tooltip="matTooltip" matTooltip="{{getTargetOutOfScopeTooltip(row)}}">
+                    <button mat-icon-button *ngIf="row.targetOutOfScope" disabled="{{!isOutOfScopeWithSuggestions(row) || isReviewTask()}}"(click)="onMapMaintenance(row)" color="accent" 
+                    ><mat-icon>warning</mat-icon></button>
+                  </span>  
                   <button mat-icon-button (click)="updateFlag(row)" [disabled]="disableFlagging"
                           [ngClass]="['flag']"
                           #tooltip="matTooltip" matTooltip="{{'MAP.TARGET_FLAGGED' | translate}}"

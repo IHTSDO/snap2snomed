@@ -11,7 +11,8 @@
   <app-mapping-table-selector
       name="id"
       [allSourceDetails]="allSourceDetails"
-      [page]="page">
+      [page]="page"
+      (allSelectedEvent)="onAllSelected($event)">
   </app-mapping-table-selector>
   <!-- Source index Column -->
   <ng-container matColumnDef="sourceIndex">
@@ -115,6 +116,14 @@
           <mat-icon>outlined_flag</mat-icon>
         </ng-template>
       </button>
+    </td>
+  </ng-container>
+  <!-- Last Author Column -->
+  <ng-container matColumnDef="lastAuthorReviewer">
+    <th mat-header-cell *matHeaderCellDef mat-sort-header>{{'TABLE.LAST_AUTHOR' | translate}}</th>
+    <td mat-cell *matCellDef="let maprow">
+      <app-user-chip *ngIf="maprow.lastAuthor" [user]="maprow.lastAuthor"
+                      [font_size]="'12px'"></app-user-chip>
     </td>
   </ng-container>
   <!-- Actions Column -->
@@ -263,6 +272,22 @@
           <mat-option [value]="">---</mat-option>
           <mat-option *ngFor="let opt of yesNoOptions"
                       [value]="opt[1]">{{'NOMAP.' + opt[0] | translate}}</mat-option>
+        </mat-select>
+      </mat-form-field>
+    </th>
+  </ng-container>
+  <!-- Filter Last Author -->
+  <ng-container matColumnDef="filter-lastAuthorReviewer">
+    <th mat-header-cell [ngClass]="{'hide-filter': !isFilterColumnVisible('filter-lastAuthor')}" *matHeaderCellDef [attr.colspan]="1">
+      <mat-form-field appearance="outline">
+        <mat-select [(ngModel)]="filterEntity.lastAuthorReviewer" (selectionChange)="filterUpdate()"
+                    multiple>
+          <mat-option value="none">{{'TASK.UNASSIGNED' | translate}}</mat-option>
+          <!-- TODO populate 
+            <mat-option *ngFor="let member of mapRow" [value]="member.id">
+            <span class="userchip"><app-user-chip *ngIf="member" [user]="member"></app-user-chip></span>
+            {{member.givenName}} {{member.familyName}}
+          </mat-option> -->
         </mat-select>
       </mat-form-field>
     </th>

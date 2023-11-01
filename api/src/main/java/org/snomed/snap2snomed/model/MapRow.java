@@ -1,5 +1,5 @@
 /*
- * Copyright © 2022 SNOMED International
+ * Copyright © 2022-23 SNOMED International
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,8 @@ package org.snomed.snap2snomed.model;
 import static org.hibernate.envers.RelationTargetAuditMode.NOT_AUDITED;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+
+import java.io.Serializable;
 import java.time.Instant;
 import java.util.List;
 import java.util.SortedSet;
@@ -36,9 +38,7 @@ import javax.persistence.OneToOne;
 import javax.persistence.OrderBy;
 import javax.persistence.PostLoad;
 import javax.persistence.PrePersist;
-import javax.persistence.Table;
 import javax.persistence.Transient;
-import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -48,6 +48,7 @@ import lombok.NoArgsConstructor;
 import lombok.ToString.Exclude;
 import org.hibernate.envers.Audited;
 import org.snomed.snap2snomed.model.enumeration.MapStatus;
+import org.snomed.snap2snomed.model.enumeration.NoteCategory;
 import org.snomed.snap2snomed.problem.mapping.InvalidStateTransitionProblem;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
@@ -63,9 +64,11 @@ import org.springframework.data.rest.core.config.Projection;
 @NoArgsConstructor
 @Audited
 @EntityListeners(AuditingEntityListener.class)
-@Table(name = "map_row", uniqueConstraints = {
-    @UniqueConstraint(name = "UniqueMapAndSourceCode", columnNames = {"map_id", "source_code_id"})})
-public class MapRow implements Snap2SnomedEntity {
+//TODO get this working + unique
+// @Table(name = "map_row", uniqueConstraints = {
+//     @UniqueConstraint(name = "UniqueIdAndMasterMapRowId", columnNames = {"map_id", "master_map_row_id"})})
+public class MapRow implements Snap2SnomedEntity, Serializable {
+
   @Column(name = "created", nullable = false, updatable = false)
   @CreatedDate
   private Instant created;
@@ -84,7 +87,7 @@ public class MapRow implements Snap2SnomedEntity {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long id;
+  protected Long id;
 
   @NotNull
   @ManyToOne
@@ -102,6 +105,8 @@ public class MapRow implements Snap2SnomedEntity {
   @JsonIgnore
   @Transient
   @Builder.Default
+  // NB this does not seem to be functional and I can't find a workaround
+  // https://github.com/spring-projects/spring-data-rest/issues/753?focusedCommentId=127082&page=com.atlassian.jira.plugin.system.issuetabpanels:comment-tabpanel#comment-127082
   private boolean noMapPrevious = false;
 
   @NotNull
@@ -110,6 +115,7 @@ public class MapRow implements Snap2SnomedEntity {
 
   @OneToMany(mappedBy = "mapRow", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
   @EqualsAndHashCode.Exclude
+  @Exclude
   @OrderBy("modified DESC, created DESC")
   private SortedSet<@NotNull Note> notes;
 
@@ -120,6 +126,9 @@ public class MapRow implements Snap2SnomedEntity {
   private Task reviewTask;
 
   @ManyToOne
+  private Task reconcileTask;
+
+  @ManyToOne
   private User lastAuthor;
 
   @ManyToOne
@@ -128,6 +137,10 @@ public class MapRow implements Snap2SnomedEntity {
   @OneToMany(mappedBy = "row", fetch = FetchType.EAGER, cascade = CascadeType.REMOVE)
   @Exclude
   List<MapRowTarget> mapRowTargets;
+
+  @Column(name = "blind_map_flag")
+  @NotNull
+  private Boolean blindMapFlag;
 
   @Projection(name = "withLatestNote", types = {MapRow.class})
   public interface MapRowWithLatestNote {
@@ -151,7 +164,7 @@ public class MapRow implements Snap2SnomedEntity {
     Task getReviewTask();
 
     default Instant getLatestNote() {
-      Note note = getNotes().stream().filter(n -> !n.isDeleted()).findFirst().orElse(null);
+      Note note = getNotes().stream().filter(n -> !n.isDeleted() && n.getCategory() == NoteCategory.USER).findFirst().orElse(null);
       if (note != null) {
         return note.getModified();
       }

@@ -1,5 +1,5 @@
 /*
- * Copyright © 2022 SNOMED International
+ * Copyright © 2022-23 SNOMED International
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {authorStatuses, MapRowStatus, mapRowStatuses, MapView, reviewStatuses} from '../_models/map_row';
+import {authorStatuses, MapRowStatus, mapRowStatuses, MapView, reviewStatuses, reconcileStatuses} from '../_models/map_row';
 import {TaskType} from '../_models/task';
 
 export class StatusUtils {
@@ -25,6 +25,14 @@ export class StatusUtils {
   static inAuthoredState(status: MapRowStatus): boolean {
     return authorStatuses.filter((s) => s !== MapRowStatus.UNMAPPED)
       .includes(status);
+  }
+
+  /**
+   * Under Reconciliation (Dual Mapping)
+   */
+  static inReconcileState(status: MapRowStatus): boolean {
+    return reconcileStatuses.filter((s) => s !== MapRowStatus.MAPPED)
+    .includes(status);
   }
 
   /**
@@ -42,6 +50,11 @@ export class StatusUtils {
   static isStatusOptionDisabled(taskType: TaskType | string, mapView: MapView, statusOption: MapRowStatus): boolean {
     let disableStatus = false;
     switch (taskType) {
+      case TaskType.RECONCILE:
+        if (mapView.status === MapRowStatus.RECONCILE) {
+          disableStatus = true;
+        }
+        break;
       case TaskType.REVIEW:
         if (mapView.status === MapRowStatus.UNMAPPED || mapView.status === MapRowStatus.DRAFT) {
           disableStatus = true;
@@ -76,6 +89,8 @@ export class StatusUtils {
           statusList = [MapRowStatus.UNMAPPED];
         } else if (status === MapRowStatus.REJECTED) {
           statusList = authorStatuses.filter((m) => m !== MapRowStatus.UNMAPPED).concat([MapRowStatus.REJECTED])
+        } else if (status === MapRowStatus.RECONCILE) {
+          statusList = [MapRowStatus.RECONCILE];
         } else if (this.inAuthoredState(status)) {
           statusList = authorStatuses.filter((m) => m !== MapRowStatus.UNMAPPED);
         } else if (this.inReviewedState(status)) {
@@ -89,6 +104,13 @@ export class StatusUtils {
           statusList = [MapRowStatus.MAPPED].concat(reviewStatuses);
         } else {
           statusList = reviewStatuses;
+        }
+        break;
+      case TaskType.RECONCILE:
+        if (status === MapRowStatus.RECONCILE) {
+          statusList = reconcileStatuses;
+        } else if (status === MapRowStatus.MAPPED) {
+          statusList = [MapRowStatus.MAPPED];
         }
         break;
     }

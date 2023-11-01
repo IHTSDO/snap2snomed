@@ -60,6 +60,8 @@ const enum TaskMode {
   AUTHOR_DETAILS = 'AUTHOR_DETAILS_VIEW',
   REVIEW_TABLE = 'REVIEW_TABLE_VIEW',
   REVIEW_DETAILS = 'REVIEW_DETAILS_VIEW',
+  RECONCILE_TABLE = 'RECONCILE_TABLE_VIEW',
+  RECONCILE_DETAILS = 'RECONCILE_DETAILS_VIEW',
 }
 
 @Component({
@@ -99,7 +101,8 @@ export class MappingWorkComponent implements OnInit, OnDestroy {
   @ViewChild('mapTable', {static: false}) mapTable: MappingTableComponent | undefined;
   automapping = false;
   isAdmin = false;
-  private navigationSubscription: Subscription;
+  // private navigationSubscription: Subscription;
+  allSelected = false;
 
   targetConceptSearchText = '';
 
@@ -152,18 +155,20 @@ export class MappingWorkComponent implements OnInit, OnDestroy {
     this.tableParams = {};
     this.tableFilter = new MapViewFilter();
     this.isAdmin = this.authService.isAdmin();
-    this.navigationSubscription = this.router.events.subscribe((e: any) => {
-      // Refresh page re-load params and data
-      if (e instanceof NavigationEnd) {
-        this.handleParams();
-      }
-    });
+//     this.navigationSubscription = this.router.events.subscribe((e: any) => {
+//       // Refresh page re-load params and data
+//       if (e instanceof NavigationEnd) {
+// console.log('NAV END -> Handle params')
+//         this.handleParams();
+//       }
+//     });
   }
 
   ngOnInit(): void {
     const self = this;
 
     self.loadHeirarchy();
+    console.log('INIT -> Handle params')
     self.handleParams();
     self.automapping = false;
 
@@ -194,6 +199,11 @@ export class MappingWorkComponent implements OnInit, OnDestroy {
       if (res) {
         self.error = {};
         self.mapping = res;
+
+        // add in the author column to the table if it is a dual map
+        if (this.mapping?.project.dualMapMode && this.task?.type === 'RECONCILE') {
+          this.addAuthorTableColumn();
+        }
       }
     }));
 
@@ -234,6 +244,17 @@ export class MappingWorkComponent implements OnInit, OnDestroy {
         console.error('Selection error', error);
       }
     }));
+  }
+
+  private addAuthorTableColumn() {
+    
+    //check if already added as sometimes the column appears multiple times due to multiple mapping selection events
+    if (this.constantColumns.filter(column => column.columnId === 'lastAuthorReviewer').length < 1) {
+      this.constantHideShowColumns.push("lastAuthorReviewer");
+      // actions should be the final column
+      this.constantColumns.splice(-1, 0, {columnId: 'lastAuthorReviewer', columnDisplay: 'TABLE.LAST_AUTHOR', displayed: true});
+    }
+
   }
 
   private loadHeirarchy(): void {
@@ -287,9 +308,9 @@ export class MappingWorkComponent implements OnInit, OnDestroy {
     this.loading = false;
     this.automapping = false;
     this.subscription.unsubscribe();
-    if (this.navigationSubscription) {
-      this.navigationSubscription.unsubscribe();
-    }
+    // if (this.navigationSubscription) {
+    //   this.navigationSubscription.unsubscribe();
+    // }
   }
 
   onSelected(node: Coding): void {
@@ -331,35 +352,63 @@ export class MappingWorkComponent implements OnInit, OnDestroy {
       if (null !== self.task) {
         self.automapping = false;
         if (self.source) {
-          self.mode = self.task.type === TaskType.AUTHOR ? TaskMode.AUTHOR_DETAILS : TaskMode.REVIEW_DETAILS;
+          switch(self.task.type) { 
+            case TaskType.AUTHOR: { 
+               self.mode = TaskMode.AUTHOR_DETAILS;
+               break; 
+            } 
+            case TaskType.REVIEW: { 
+               self.mode = TaskMode.REVIEW_DETAILS;
+               break; 
+            } 
+            case TaskType.RECONCILE: { 
+               self.mode = TaskMode.RECONCILE_DETAILS;
+               break; 
+            } 
+         } 
         } else {
-          self.mode = self.task.type === TaskType.AUTHOR ? TaskMode.AUTHOR_TABLE : TaskMode.REVIEW_TABLE;
+          switch(self.task.type) { 
+            case TaskType.AUTHOR: { 
+               self.mode = TaskMode.AUTHOR_TABLE;
+               break; 
+            } 
+            case TaskType.REVIEW: { 
+               self.mode = TaskMode.REVIEW_TABLE;
+               break; 
+            } 
+            case TaskType.RECONCILE: { 
+               self.mode = TaskMode.RECONCILE_TABLE;
+               break; 
+            } 
+         } 
         }
       }
     }
   }
 
   handleParams(): void {
-    this.route.params.subscribe(params => {
+    this.subscription.add(this.route.params.subscribe(params => {
       const mappingid = ServiceUtils.cleanParamId(params.mappingid);
       const taskid = ServiceUtils.cleanParamId(params.taskid);
 
-      if (mappingid) {
+      if (mappingid && this.mapping_id !== mappingid) {
         this.mapping_id = mappingid;
         this.store.dispatch(new LoadMapping({id: mappingid}));
       }
 
-      if (this.task_id !== taskid && taskid) {
+      if (taskid && this.task_id !== taskid) {
         this.task_id = taskid;
         this.updateCurrentTask();
       }
-      this.route.queryParams.subscribe(qparams => {
-        this.tableFilter = ServiceUtils.paramsToFilterEntity(qparams);
-        this.filterEnabled = this.tableFilter.hasFilters();
-        this.tableParams = ServiceUtils.pagingParamsToTableParams(qparams);
-        this.loadPage();
-      });
-    });
+      this.loadPage();
+    }));
+
+    this.subscription.add(this.route.queryParams.subscribe(qparams => {
+      this.tableFilter = ServiceUtils.paramsToFilterEntity(qparams);
+      this.filterEnabled = this.tableFilter.hasFilters();
+      this.tableParams = ServiceUtils.pagingParamsToTableParams(qparams);
+      this.loadPage();
+    }));
   }
 
   private getContext(): ViewContext {
@@ -382,11 +431,11 @@ export class MappingWorkComponent implements OnInit, OnDestroy {
   }
 
   isTableView(): boolean {
-    return this.mode === TaskMode.AUTHOR_TABLE || this.mode === TaskMode.REVIEW_TABLE;
+    return this.mode === TaskMode.AUTHOR_TABLE || this.mode === TaskMode.REVIEW_TABLE || this.mode === TaskMode.RECONCILE_TABLE;
   }
 
   isDetailsView(): boolean {
-    return this.mode === TaskMode.AUTHOR_DETAILS || this.mode === TaskMode.REVIEW_DETAILS;
+    return this.mode === TaskMode.AUTHOR_DETAILS || this.mode === TaskMode.REVIEW_DETAILS || this.mode === TaskMode.RECONCILE_DETAILS;
   }
 
   filterRows(): void {
@@ -435,17 +484,47 @@ export class MappingWorkComponent implements OnInit, OnDestroy {
 
   showDetail(row_idx: number): void {
     const self = this;
-    if (self.task_id) {
-      self.sourceNavigation.loadSourceNav(self.task_id, this.getContext(), row_idx);
+    if (self.task_id && self.task) {
+      self.sourceNavigation.loadSourceNav(self.task, self.task.mapping, this.getContext(), row_idx);
       self.opened = true;
-      self.mode = self.task?.type === 'AUTHOR' ? TaskMode.AUTHOR_DETAILS : TaskMode.REVIEW_DETAILS;
+      switch(self.task?.type) { 
+        case 'AUTHOR': { 
+           self.mode = TaskMode.AUTHOR_DETAILS;
+           break; 
+        } 
+        case 'REVIEW': { 
+           self.mode = TaskMode.REVIEW_DETAILS;
+           break; 
+        } 
+        case 'RECONCILE': { 
+           self.mode = TaskMode.RECONCILE_DETAILS;
+           break; 
+        } 
+     } 
     } else {
-      self.mode = self.task?.type === 'AUTHOR' ? TaskMode.AUTHOR_TABLE : TaskMode.REVIEW_TABLE;
+      switch(self.task?.type) { 
+        case 'AUTHOR': { 
+           self.mode = TaskMode.AUTHOR_TABLE;
+           break; 
+        } 
+        case 'REVIEW': { 
+           self.mode = TaskMode.REVIEW_TABLE;
+           break; 
+        } 
+        case 'RECONCILE': { 
+           self.mode = TaskMode.RECONCILE_TABLE;
+           break; 
+        } 
+     } 
     }
   }
 
   targetConceptSearchString(text: string): void {
     this.targetConceptSearchText = text;
+  }
+
+  allSelectedChange(allSelected: boolean) {
+    this.allSelected = allSelected;
   }
 
   sortChange(event: Sort): void {
@@ -525,9 +604,10 @@ export class MappingWorkComponent implements OnInit, OnDestroy {
   getBulkChangeDialogData(): BulkChangeDialogData {
     return {
       task: this.task,
-      map: null,
+      map: this.mapping,
       isMapView: false,
-      selectedRows: this.mapTable?.mappingTableSelector?.selectedRows
+      selectedRows: this.mapTable?.mappingTableSelector?.selectedRows,
+      allSelected: this.allSelected
     };
   }
 

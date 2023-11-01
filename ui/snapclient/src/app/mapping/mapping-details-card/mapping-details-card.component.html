@@ -2,7 +2,7 @@
   <mat-card-content>
     <div class="row">
       <div class="col-project">
-        <h2 id="map-title" class="one-line-ellipse">{{mapping.project.title}}</h2>
+        <h2 id="map-title" class="one-line-ellipse">{{mapping.project.title}} <span class="dual-map-text">- ({{(mapping.project.dualMapMode ? 'MAP.DUAL_MAP' : 'MAP.SINGLE_MAP') | translate}})</span></h2>
         <ul class="sources-list">
           <li class="one-line-ellipse"><b>{{'SOURCE.SOURCE' | translate}}:</b>&nbsp;{{mapping.source.name}},
             <i>{{'MAP.VERSION' | translate}}</i> {{mapping.source.version}}

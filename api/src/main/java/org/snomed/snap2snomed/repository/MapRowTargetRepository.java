@@ -54,6 +54,7 @@ public interface MapRowTargetRepository
     QuerydslPredicateExecutor<MapRowTarget>, QuerydslBinderCustomizer<QMapRowTarget> {
 
   String TARGET_OUT_OF_SCOPE_TAG = "target-out-of-scope";
+  String TARGET_NO_ACTIVE_SUGGESTIONS_TAG = "target-no-active-suggestions-tag";
 
   // ---------------------------------
   // Exported in REST interface
@@ -117,6 +118,22 @@ public interface MapRowTargetRepository
   int copyMapRowTargets(Long mapId, Long sourceMapId, String user, Instant dateTime);
 
   @Query(value = "insert into map_row_target " +
+          "(created, created_by, modified, modified_by, flagged, relationship, target_code, target_display, row_id) " + 
+          "select :dateTime created, :user created_by, :dateTime modified, :user modified_by, " + 
+          "false, s.relationship, s.target_code, s.target_display, tr.id row_id from map_row_target s, " + 
+          "map_row sr, map_row tr " + 
+          "where (s.row_id = sr.id) " + 
+          "and (sr.map_id = :sourceMapId) " + 
+          "and (tr.map_id = :mapId) " + 
+          "and (sr.source_code_id = tr.source_code_id) " +
+          "and (sr.blind_map_flag = FALSE) " +
+          "and (sr.last_author_id = tr.last_author_id) " +
+          "and (sr.modified = tr.modified)", nativeQuery = true)
+  @Modifying
+  @RestResource(exported = false)
+  int copyMapRowTargetsForDualMap(Long mapId, Long sourceMapId, String user, Instant dateTime);
+
+  @Query(value = "insert into map_row_target " +
           "(created, created_by, modified, modified_by, flagged, relationship, target_code, " +
           "target_display, row_id) " +
           "select :dateTime created, :user created_by, :dateTime modified, :user modified_by, " +
@@ -127,6 +144,26 @@ public interface MapRowTargetRepository
   @Modifying
   @RestResource(exported = false)
   int copyMapRowTargetsForNewSource(Long mapId, Long sourceMapId, String user, Instant dateTime);
+
+  @Query(value = "insert into map_row_target " +
+          "(created, created_by, modified, modified_by, flagged, relationship, target_code, " +
+          "target_display, row_id) " +
+          "select :dateTime created, :user created_by, :dateTime modified, :user modified_by, " +
+          "false, s.relationship, s.target_code, s.target_display, tr.id row_id " + 
+          "from map_row_target s, " +
+          "map_row sr, map_row tr, imported_code sc, imported_code tc " + 
+          "where (s.row_id = sr.id) " +
+          "and (sr.map_id = :sourceMapId) " + 
+          "and (tr.map_id = :mapId) " + 
+          "and (sr.source_code_id = sc.id) " +
+          "and (sc.code = tc.code) " + 
+          "and (tr.source_code_id = tc.id)" + 
+          "and (sr.blind_map_flag = FALSE) " + 
+          "and (sr.last_author_id = tr.last_author_id) " + 
+          "and (sr.modified = tr.modified)", nativeQuery = true)
+  @Modifying
+  @RestResource(exported = false)
+  int copyMapRowTargetsForNewSourceForDualMap(Long mapId, Long sourceMapId, String user, Instant dateTime);
 
   @Override
   @RestResource(exported = false)

@@ -1,5 +1,5 @@
 /*
- * Copyright © 2022 SNOMED International
+ * Copyright © 2022-23 SNOMED International
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,10 @@
 import {User} from './user';
 import {MapRow} from './map_row';
 
+export const enum NoteCategory {
+  USER = 'USER',
+  STATUS = 'STATUS'
+}
 
 export class Note {
   id: number | null;
@@ -25,14 +29,16 @@ export class Note {
   created: Date;
   modified: Date;
   mapRow: MapRow;
+  category: NoteCategory;
 
-  constructor(id: number | null, noteText: string, noteBy: User, created: string, modified: string, mapRow: MapRow) {
+  constructor(id: number | null, noteText: string, noteBy: User, created: string, modified: string, mapRow: MapRow, category: NoteCategory) {
     this.id = id;
     this.noteText = noteText;
     this.noteBy = noteBy;
     this.created = new Date(created);
     this.modified = new Date(modified);
     this.mapRow = mapRow;
+    this.category = category
   }
 
   static replacer(key: string, value: any): any {

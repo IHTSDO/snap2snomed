@@ -136,8 +136,13 @@ public class MappingService {
           "Only an owner can perform bulk updates outside of the context of a task");
     }
 
+    List<Long> siblingMapRowIds = new ArrayList<Long>();
     mappings.getMappingDetails().forEach(mappingDetails -> {
       validateMappingUpdates(mappingDetails.getMappingUpdate());
+
+      if (mappingDetails.getMappingUpdate().isResetDualMap() && siblingMapRowIds.contains(mappingDetails.getRowId())) {
+          return; // skip this iteration as have already processed one of the two dual map rows
+      }
 
       MapRow mapRow = mapRowRepository
           .findById(mappingDetails.getRowId())
@@ -175,10 +180,17 @@ public class MappingService {
       rowCount.incrementAndGet(); // Increment row count for Row
       RowChange change = applyMapRowChanges(mapRow, mappingDetails.getMappingUpdate(), mapRowTargets, task);
       if ( change != RowChange.NO_CHANGE && (mapRowTargets.size() == 0
-          || (mapRowTargets.size() == 0 && mappingDetails.getMappingUpdate().getStatus() != null))) {
+          || (mappingDetails.getMappingUpdate().isResetDualMap()))) {
+        if (mappingDetails.getMappingUpdate().isResetDualMap()) {
+          MapRow siblingMapRow = mapRowRepository.findDualMapSiblingRow(mapRow.getMap().getId(), mapRow.getSourceCode().getId(), mapRow.getId());
+          if (siblingMapRow != null) {
+            // keep a track fo the sibling rows so we don't attempt to process them if multiple rows have been supplied
+            siblingMapRowIds.add(siblingMapRow.getId());
+          }
+        }
         updatedRowCount.incrementAndGet(); // Only add updated count if there is not MapRowTargets
       }
-      if (mapRowTargets.size() > 0) {
+      if (mapRowTargets.size() > 0 && !mappingDetails.getMappingUpdate().isResetDualMap()) {
         if (applyMapRowTargetChanges(mapRowTargets.get(0), mappingDetails.getMappingUpdate(), task, change)) {
           updatedRowCount.incrementAndGet();
         }
@@ -189,6 +201,59 @@ public class MappingService {
         .rowCount(rowCount.get())
         .updatedRowCount(updatedRowCount.get())
         .build();
+  }
+
+  void processMapRowUpdate(TargetDto targetDto, MapRow mapRow, MappingDetails mappingDetail, List<MappingDetails> mappingDetails, Long targetRowId) {
+    Long targetId;
+    Boolean noMap = mappingDetail.getMappingUpdate().getNoMap();
+    MapStatus mapStatus = mappingDetail.getMappingUpdate().getStatus();
+
+    if (targetDto == null) {
+      targetId = targetRowId;
+    }
+    else {
+      MappedRowDetailsDto mappedRowDetailsDto = MappedRowDetailsDto.builder().mapRowId(mapRow.getId()).sourceIndex(mappingDetail.getRowId()).mapRowTargetId(targetRowId).build();
+      targetId = createTarget(mappingDetail, mappedRowDetailsDto);
+      noMap = false;
+      mapStatus = MapStatus.DRAFT;
+    }
+    mappingDetails.add(
+      MappingDetails.builder()
+        .rowId(mapRow.getId())
+        .taskId(mappingDetail.getTaskId())
+        .mappingUpdate(MappingDto.builder()
+          .noMap(noMap)
+          .relationship(mappingDetail.getMappingUpdate().getRelationship())
+          .status(mapStatus)
+          .clearTarget(mappingDetail.getMappingUpdate().getClearTarget())
+          .targetId(targetId)
+          .target(targetDto)
+          .build()
+          )
+        .build());
+  }
+
+  @Transactional
+  public MappingResponse updateMappingForAll(Long mapId, MappingUpdateDto mappings) {
+    MappingUpdateDto mapUpdate = new MappingUpdateDto();
+    List<MappingDetails> mappingDetails = new ArrayList<>();
+    if (!(mappings.getMappingDetails() == null || mappings.getMappingDetails().isEmpty())) {
+      mappings.getMappingDetails().forEach(mappingDetail -> {
+        TargetDto targetDto = mappingDetail.getMappingUpdate().getTarget();
+        Collection<MapRow> mapRows = mapRowRepository.findMapRowsByMapId(mapId);
+        mapRows.forEach(mapRow -> {
+          if (mapRow.getMapRowTargets().size() <= 0) {
+            processMapRowUpdate(targetDto, mapRow, mappingDetail, mappingDetails, null);
+          }
+          mapRow.getMapRowTargets().forEach(subSelection -> {
+            processMapRowUpdate(targetDto, mapRow, mappingDetail, mappingDetails, subSelection.getId());
+          });
+        });
+      });
+      mapUpdate.setMappingDetails(mappingDetails);
+    }
+    return this.updateMapping(mapUpdate);
+
   }
 
   @Transactional
@@ -219,6 +284,7 @@ public class MappingService {
               .relationship(mappingDetail.getMappingUpdate().getRelationship())
               .status(mapStatus)
               .clearTarget(mappingDetail.getMappingUpdate().getClearTarget())
+              .resetDualMap(mappingDetail.getMappingUpdate().isResetDualMap())
               .targetId(targetId)
               .target(targetDto)
               .build()
@@ -334,6 +400,17 @@ public class MappingService {
         .build();
   }
 
+  private void resetDualMapRow(MapRow mapRow) {
+    mapRow.setNoMap(false);
+    mapRow.setStatus(MapStatus.UNMAPPED);
+    mapRow.setAuthorTask(null);
+    mapRow.setLastAuthor(null);
+    mapRow.setLastReviewer(null);
+    mapRow.setReviewTask(null);
+    mapRow.setBlindMapFlag(true);
+    mapRow.setReconcileTask(null);
+  }
+
   private RowChange applyMapRowChanges(@NotNull MapRow mapRow, MappingDto mappingUpd, List<MapRowTarget> mapRowTargets, Task task) {
     MappingDto mappingUpdate = mappingUpd.toBuilder().build();
     boolean updated = false;
@@ -368,9 +445,50 @@ public class MappingService {
           mapRow.setStatus(MapStatus.UNMAPPED);
         }
       }
-      // Repository.save doesn't fire MapRowEventHandler
-      mapRowEventHandler.performAutomaticUpdates(mapRow);
+      // Reset dual mapping requested
+      MapRow siblingMapRow = null;
+      if (mappingUpdate.isResetDualMap()) {
+
+        // locate the sibling row if it exists update it too
+        siblingMapRow = mapRowRepository.findDualMapSiblingRow(mapRow.getMap().getId(), mapRow.getSourceCode().getId(), mapRow.getId());
+        if (siblingMapRow == null) {
+          // re-create the sibling row
+          MapRow newSiblingMapRow = new MapRow();
+          newSiblingMapRow.setMap(mapRow.getMap());
+          newSiblingMapRow.setSourceCode(mapRow.getSourceCode());
+          newSiblingMapRow.setBlindMapFlag(true);
+          mapRowRepository.save(newSiblingMapRow);
+        }
+
+        // reset the MapRow
+        resetDualMapRow(mapRow);
+        if (siblingMapRow != null) {
+          resetDualMapRow(siblingMapRow);
+        }
+
+        // delete associated mapRowTargets
+        mapRowTargets.forEach(mapRowTarget -> {
+          mapRowTargetRepository.delete(mapRowTarget);
+        });
+        if (siblingMapRow != null) {
+          siblingMapRow.getMapRowTargets().forEach(mapRowTarget -> {
+            mapRowTargetRepository.delete(mapRowTarget);
+          });
+        }
+
+        updated = true;
+
+      }
+      else {
+        // Repository.save doesn't fire MapRowEventHandler
+        // none of these automatic updates apply to resetting a dual map
+        mapRowEventHandler.performAutomaticUpdates(mapRow);
+      }
+
       mapRowRepository.save(mapRow);
+      if (siblingMapRow != null) {
+        mapRowRepository.save(siblingMapRow);
+      }
       em.flush();
       em.clear();
     }
@@ -424,7 +542,7 @@ public class MappingService {
     } else {
       // no task, must be an owner
       return mappingUpd.isOnlyStatusChange() ? currentStatus.isValidTransition(mappingUpd.getStatus())
-          : currentStatus.isValidTransition(MapStatus.DRAFT);
+          : (currentStatus.isValidTransition(MapStatus.DRAFT) || currentStatus.isValidTransition(MapStatus.UNMAPPED));
     }
   }
 
@@ -487,6 +605,8 @@ public class MappingService {
         return mapRow.getAuthorTask() != null && mapRow.getAuthorTask().getId().equals(task.getId());
       case REVIEW:
         return mapRow.getReviewTask() != null && mapRow.getReviewTask().getId().equals(task.getId());
+      case RECONCILE:
+        return mapRow.getReconcileTask() != null && mapRow.getReconcileTask().getId().equals(task.getId());
       default:
         throw new IllegalArgumentException("Unknown task type " + task.getType());
     }
@@ -524,17 +644,45 @@ public class MappingService {
     final Map mapCreated = mapRepository.save(newMap);
     final Long createdId = mapCreated.getId();
 
+    // NB, for dual maps where there can be multiple rows, there is no way of determining via SQL which new map_rows correspond with
+    // which original map_row.  As a temporary workaround, I've changed the modified date on the new map_row to be the same as the 
+    // original map_row to create something to link them.  Multiple rows should always have different dates once unblinded as both
+    // rows would have been modified by real people.
+
     if (newSourceId == originalSourceId) {
       // Copy all rows
       mapRowRepository.copyMapRows(createdId, mapId, userId, dateTime);
-      mapRowTargetRepository.copyMapRowTargets(createdId, mapId, userId, dateTime);
+      if (originalMap.getProject().getDualMapMode()) {
+        mapRowTargetRepository.copyMapRowTargetsForDualMap(createdId, mapId, userId, dateTime);
+      }
+      else {
+        mapRowTargetRepository.copyMapRowTargets(createdId, mapId, userId, dateTime);
+      }
+
     } else {
       // Copy all rows where code in new Source
       mapRowRepository.copyMapRowsForNewSource(createdId, mapId, userId, dateTime, newSourceId);
       // Copy existing targets
-      mapRowTargetRepository.copyMapRowTargetsForNewSource(createdId, mapId, userId, dateTime);
+      if (originalMap.getProject().getDualMapMode()) {
+        mapRowTargetRepository.copyMapRowTargetsForNewSourceForDualMap(createdId, mapId, userId, dateTime);
+      }
+      else {
+        mapRowTargetRepository.copyMapRowTargetsForNewSource(createdId, mapId, userId, dateTime);
+      }
       // Add new rows where previously non-existing
-      mapRowRepository.createMapRowsForNewSource(createdId, userId, dateTime, newSourceId);
+
+      if (originalMap.getProject().getDualMapMode()) {
+        mapRowRepository.createMapRowsForNewSourceForDualMap(createdId, userId, dateTime, newSourceId);
+      }
+      else {
+        mapRowRepository.createMapRowsForNewSource(createdId, userId, dateTime, newSourceId);
+      }
+    }
+
+    if (originalMap.getProject().getDualMapMode()) {
+      // Any rows in draft state will be cleared and reblinded
+      mapRowRepository.resetMapRowResetRowsForNewMap(createdId);
+
     }
 
     validateMapTargets(createdId);

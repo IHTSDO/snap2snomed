@@ -54,6 +54,7 @@ import org.snomed.snap2snomed.controller.dto.ValidationResult;
 import org.snomed.snap2snomed.model.User;
 import org.snomed.snap2snomed.model.enumeration.MapStatus;
 import org.snomed.snap2snomed.model.enumeration.MappingRelationship;
+import org.snomed.snap2snomed.model.enumeration.NoteCategory;
 import org.snomed.snap2snomed.model.enumeration.TaskType;
 import org.snomed.snap2snomed.security.AuthenticationFacade;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -660,6 +661,7 @@ public class Snap2snomedRestClient {
     map.put("targetDisplay", targetDisplay);
     map.put("relationship", relationship);
     map.put("flagged", flagged);
+    map.put("blindMapFlag", false);
 
     final ValidatableResponse response = givenUser(user)
         .body(objectMapper.writeValueAsString(map))
@@ -735,6 +737,7 @@ public class Snap2snomedRestClient {
     final java.util.Map<String, Object> map = new HashMap<>();
     map.put("title", title);
     map.put("description", description);
+    map.put("dualMapMode", false);
     if (owners != null) {
       map.put("owners", owners.stream().map(o -> "/users/" + o).collect(Collectors.toList()));
     }
@@ -776,6 +779,7 @@ public class Snap2snomedRestClient {
     map.put("mapRow", "/mapRows/" + mapRowId);
     map.put("noteBy", "/users/" + userId);
     map.put("noteText", noteText);
+    map.put("category", NoteCategory.USER);
     return objectMapper.writeValueAsString(map);
   }
 

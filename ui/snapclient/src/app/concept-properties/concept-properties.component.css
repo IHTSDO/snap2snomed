@@ -1,5 +1,9 @@
 .properties {
   overflow: auto;
+  max-height: 200px;
+}
+
+.mat-card {
   max-height: 340px;
 }
 
@@ -14,6 +18,10 @@
 
 .mat-row:nth-child(even){
   background-color: #00000010;
+}
+
+.row-line-above {
+  border-top: 2px solid black;
 }
 
 .properties .mat-cell {
@@ -49,4 +57,9 @@
 
 .properties-header {
   width: 150px;
+}
+
+/* make date role group "fixed width" as it only ever contains a circle (or not) */
+.mat-column-roleGroup {
+  width: 10px;
 }

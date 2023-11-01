@@ -40,6 +40,8 @@ export class SourceImportComponent implements OnInit, OnDestroy, AfterViewChecke
   private readonly MAXFILESIZE: number;
   readonly MAX_NAME = 100;
   readonly MAX_VERSION = 30;
+  readonly MAX_CODESYSTEM = 255;
+  readonly MAX_VALUESET = 255;
   fileaccept = '.csv, .tsv, .txt';
   sourceType = '';
   contents = '';

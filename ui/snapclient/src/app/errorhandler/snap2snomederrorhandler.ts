@@ -98,6 +98,7 @@ export class Snap2SnomedErrorHandler implements ErrorHandler {
   }
 
   protected backendError(backendUrl: string | null, errorStatus: number): string {
+console.log('backendError', backendUrl, errorStatus);
     const matchedUrls = this.errorMessageMap.filter((error) => {
       return backendUrl?.indexOf(error.url) !== -1;
     });
@@ -148,7 +149,7 @@ export class Snap2SnomedErrorHandler implements ErrorHandler {
     // Log error to sentry
     if (error instanceof HttpErrorResponse) {
       // Don't report 4XX errors to Sentry
-      if (false && error.status >= 400 && error.status < 500 ) {       // temporarily log all - lawley & loi
+      if (error.status >= 400 && error.status < 500 ) {
         return;
       }
     }

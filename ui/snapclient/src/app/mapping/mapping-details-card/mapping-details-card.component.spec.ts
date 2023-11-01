@@ -79,6 +79,7 @@ describe('MappingDetailsCardComponent', () => {
     project = mapping.project;
     project.id = '1';
     project.title = 'Test Map';
+    project.dualMapMode = false;
 
     mapping.project.maps.push(mapping);
 
@@ -101,7 +102,7 @@ describe('MappingDetailsCardComponent', () => {
   it('should show Map title', () => {
     fixture.detectChanges();
     const el = fixture.debugElement.query(By.css('h2'));
-    expect(el.nativeElement.textContent).toBe('Test Map');
+    expect(el.nativeElement.textContent).toBe('Test Map - (MAP.SINGLE_MAP)');
     expect(el).toBeTruthy();
   });
 

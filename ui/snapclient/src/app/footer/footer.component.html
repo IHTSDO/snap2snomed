@@ -1,10 +1,12 @@
 <footer>
   <div class="container-fluid">
     <div>
-      <a class="footer-link" title="Snomed International" [href]="si">Copyright 2022 SNOMED International</a>
-      <a class="footer-link" title="Terms of service" [href]="tos">Terms Of Service</a>
-      <a class="footer-link" title= "Privacy policy" [href]="privacy">Privacy Policy</a>
-      <a class="footer-link" title= "Feedback" (click)="showFeedback()" href="">Feedback</a>
+      <a class="footer-link" title="{{'FOOTER.SNOMED_INTERNATIONAL' | translate}}" [href]="si">{{'FOOTER.COPYRIGHT_SNOMED_INTERNATIONAL' | translate}}</a>
+      <a class="footer-link" title="{{'FOOTER.TERMS_OF_SERVICE' | translate}}" [href]="tos">{{'FOOTER.TERMS_OF_SERVICE' | translate}}</a>
+      <a class="footer-link" title= "{{'FOOTER.PRIVACY_POLICY' | translate}}" [href]="privacy">{{'FOOTER.PRIVACY_POLICY' | translate}}</a>
+      <a class="footer-link" title= "{{'FOOTER.FEEDBACK' | translate}}" (click)="showFeedback()" href="">{{'FOOTER.FEEDBACK' | translate}}</a>
+      <a class="footer-link" title= "{{'FOOTER.USER_GUIDE' | translate}}" (click)="openUserGuide()" href="">{{'FOOTER.USER_GUIDE' | translate}}</a>
+
     </div>
   </div>
 </footer>

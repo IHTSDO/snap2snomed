@@ -50,3 +50,7 @@ a.mat-primary {
   bottom: 0.5em;
   right: 0.5em;
 }
+
+.dual-map-text {
+  font-size: 14px;
+}

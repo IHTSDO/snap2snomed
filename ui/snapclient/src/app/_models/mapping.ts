@@ -32,6 +32,7 @@ export class Mapping {
     this.toScope = '*'; // ECL for "all SNOMED concepts" - cannot use 'ANY' because SnowStorm
     this.created = new Date();
     this.modified = new Date();
+    this.blindMapFlag = false;
   }
 
   id: string | null;
@@ -43,6 +44,7 @@ export class Mapping {
   toScope: string;
   created: Date;
   modified: Date;
+  blindMapFlag: Boolean;
 
   static replacer(key: string, value: any): any {
     if (value !== null && key === 'project') {

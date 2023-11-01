@@ -53,13 +53,14 @@ describe('TargetRelationshipComponent', () => {
 
   const sourceCode = '1212121';
   const sourceDisplay = 'This is test';
+  const sourceId = '1';
   const sourceIndex = '1';
   const targetCode = '123456';
   const targetDisplay = 'Test target';
   const targetSystem = 'http://snomed.info/sct/900000000000207008/version/20220228'
   const relationship = MapRowRelationship.EQUIVALENT;
-  const target = new MapView('', '', sourceIndex, sourceCode, sourceDisplay, targetCode, targetDisplay, relationship,
-    'DRAFT', false, null, null, null, null, null, false, false, undefined, undefined);
+  const target = new MapView('', '', sourceId, sourceIndex, sourceCode, sourceDisplay, targetCode, targetDisplay, relationship,
+    'DRAFT', false, null, null, null, null, null, null, false, false, undefined, undefined, null);
   const parameterValue = [
     {
       name: 'designation',
@@ -185,8 +186,8 @@ describe('TargetRelationshipComponent', () => {
     el = fixture.debugElement.query(By.css('button'));
     expect(el).toBeTruthy();
     el.triggerEventHandler('click', null);
-    const calledWith = new MapView('', '', sourceIndex, sourceCode, sourceDisplay, code, display, relationship,
-      'DRAFT', false, null, null, null, null, null, false, false, undefined, undefined);
+    const calledWith = new MapView('', '', sourceId, sourceIndex, sourceCode, sourceDisplay, code, display, relationship,
+      'DRAFT', false, null, null, null, null, null, null, false, false, undefined, undefined, null);
 
     fixture.whenStable().then(() => {
       fixture.detectChanges();
@@ -201,8 +202,8 @@ describe('TargetRelationshipComponent', () => {
     const code = '1234567';
     const display = 'This is a test selection';
 
-    component.targetRows.push(new MapView('', '', sourceIndex, sourceCode, sourceDisplay, code, display, relationship,
-      'DRAFT', false, null, null, null, null, null, false, false, undefined, undefined));
+    component.targetRows.push(new MapView('', '', sourceId, sourceIndex, sourceCode, sourceDisplay, code, display, relationship,
+      'DRAFT', false, null, null, null, null, null, null, false, false, undefined, undefined, null));
     selectionService.select({code, display});
 
     spyOn(fhirService, 'getEnglishFsn').and.returnValue(of('Test English FSN'));

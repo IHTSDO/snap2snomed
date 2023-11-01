@@ -1,5 +1,5 @@
 /*
- * Copyright © 2022 SNOMED International
+ * Copyright © 2022-23 SNOMED International
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,11 +22,12 @@ import {Project} from '../_models/project';
 import {ServiceUtils} from '../_utils/service_utils';
 import {AdditionalColumn, MappedRowDetailsDto, MapRow, MapRowRelationship, MapRowStatus, MapView} from '../_models/map_row';
 import {JSONTargetRow, TargetRow} from '../_models/target_row';
-import {Note} from '../_models/note';
+import {Note, NoteCategory} from '../_models/note';
 import {APP_CONFIG, AppConfig} from '../app.config';
 import {map} from 'rxjs/operators';
 import {ImportMappingFileParams} from '../store/source-feature/source.actions';
 import {ValidationResult} from "../_models/validation_result";
+import { Task, TaskType } from '../_models/task';
 
 export interface TaskResults {
   _embedded: any;
@@ -115,6 +116,7 @@ export interface MappingDto {
   status: string | null | undefined;
   relationship: string | null | undefined;
   clearTarget: boolean | null | undefined;
+  resetDualMap: boolean | null |undefined;
 }
 
 export interface MappingUpdateDto {
@@ -124,6 +126,7 @@ export interface MappingUpdateDto {
 export interface CreateMappingParams {
   mapping: Mapping;
   importFile: ImportMappingFileParams | undefined | null;
+  dualMapMode: boolean;
 }
 
 @Injectable({
@@ -143,11 +146,12 @@ export class MapService {
     return this.http.post(url, body, header);
   }
 
-  createMapping(mapping: Mapping, projectid: string, sourceid: string): Observable<any> {
+  createMapping(mapping: Mapping, projectid: string, sourceid: string, dualMapMode: boolean): Observable<any> {
     const url = `${this.config.apiBaseUrl}/maps?projection=listView`;
     const header = ServiceUtils.getHTTPHeaders();
     mapping.project.id = projectid;
     mapping.source.id = sourceid;
+    mapping.project.dualMapMode = dualMapMode;
     const body = JSON.stringify(mapping, Mapping.replacer);
     return this.http.post(url, body, header);
   }
@@ -258,6 +262,19 @@ export class MapService {
     return this.getView(url, pageIndex, pageSize, sortColumn, sortDir, filter);
   }
 
+  getSiblingMapViewRow(mapId: string, sourceCodeId: string, mapRowId: string): Observable<any> {
+
+    const url = `${this.config.apiBaseUrl}/mapView/${mapId}/$dualMapSiblingRow`;
+    const header = ServiceUtils.getHTTPHeaders();
+
+    let params = new HttpParams();
+    params = params.set('sourceCodeId', sourceCodeId);
+    params = params.set('mapRowId', mapRowId);
+    header.params = params;
+
+    return this.http.get<MapViewResults>(url, header);
+  }
+
   /**
    * Server-side pagination and filtering of mapViews
    * 1. Pagination              ?map=3&sort=sourceCode,asc&page=1
@@ -329,7 +346,7 @@ export class MapService {
    * @param mapView
    * @private
    */
-  updateMapRowTarget(mapView: MapView): Observable<any> {
+  updateMapRowTarget(mapView: MapView, taskType: TaskType): [Observable<any>, TargetRow] {
     const header = ServiceUtils.getHTTPHeaders();
     const rowId = mapView.rowId;
 
@@ -341,18 +358,19 @@ export class MapService {
       getValidRelationship(mapView),
       mapView.flagged,
       mapView.targetOutOfScope,
-      mapView.tags
+      mapView.tags,
+      taskType
     );
     const targetUrl = `${this.config.apiBaseUrl}/mapRowTargets`;
 
     if (target.id) {
-      return this.http.put<any>(`${targetUrl}/${target.id}`, target, header).pipe(
-        map(toTargetRow),
-      );
+      return [this.http.put<any>(`${targetUrl}/${target.id}`, target, header).pipe(
+        map(toTargetRow)
+      ), target];
     } else {
-      return this.http.post<TargetRow>(targetUrl, target, header).pipe(
+      return [this.http.post<TargetRow>(targetUrl, target, header).pipe(
         map(toTargetRow),
-      );
+      ), target];
     }
   }
 
@@ -361,11 +379,17 @@ export class MapService {
    * @param rowId Id of row
    * @param noMap true or false
    */
-  updateNoMap(rowId: string, noMap: boolean): Observable<any> {
+  updateNoMap(rowId: string, noMap: boolean, reconcileTask: boolean): Observable<any> {
     const url = `${this.config.apiBaseUrl}/mapRows/${rowId}`;
     const header = ServiceUtils.getHTTPHeaders();
     const status = noMap ? MapRowStatus.DRAFT : MapRowStatus.UNMAPPED;
-    const body = {noMap, status};
+    let body : {};
+    if (reconcileTask) {
+      body = {noMap};
+    }
+    else {
+      body = {noMap, status};
+    }
     return this.http.patch<any>(url, body, header);
   }
 
@@ -382,6 +406,13 @@ export class MapService {
     const body = {flagged};
     return this.http.patch<any>(url, body, header);
   }
+
+  updateTags(targetId: string, tags: string[]): Observable<any> {
+    const url = `${this.config.apiBaseUrl}/mapRowTargets/${targetId}`;
+    const header = ServiceUtils.getHTTPHeaders();
+    const body = {tags};
+    return this.http.patch<any>(url, body, header);
+  }
   
   getTagCount(mapId: string, tag: string): Observable<MapRowTargetResults> {
     const url = `${this.config.apiBaseUrl}/mapRowTargets?tags=${tag}&mapId=${mapId}`;
@@ -389,8 +420,12 @@ export class MapService {
     return this.http.get<MapRowTargetResults>(url, header);
   }
 
-  exportMapView(mapping: string, contentType: string): Observable<Blob> {
-    return this.http.get(`${this.config.apiBaseUrl}/mapView/${mapping}`,
+  exportMapView(mapping: string, contentType: string, extraColumns: string[]): Observable<Blob> {
+    let url = `${this.config.apiBaseUrl}/mapView/${mapping}`;
+    if (extraColumns.length > 0) {
+      url += `?extraColumns=` + extraColumns.join(",");
+    }
+    return this.http.get(url,
       {
         headers: {Accept: contentType},
         responseType: 'blob'
@@ -413,13 +448,30 @@ export class MapService {
   /**
    * Get Targets for Source Code
    */
-  findTargetsBySourceIndex(map_id: string, source_idx: string): Observable<MapRowTargetResults> {
+  findTargetsBySourceIndex(map_id: string, source_idx: string, task: Task | undefined): Observable<MapRowTargetResults> {
     const url = `${this.config.apiBaseUrl}/mapRowTargets`;
     const header = ServiceUtils.getHTTPHeaders();
-    header.params = new HttpParams()
+
+    if (task?.type === TaskType.AUTHOR) {
+      header.params = new HttpParams()
+      .set('projection', 'targetView')
+      .set('mapId', map_id)
+      .set('row.sourceCode.index', source_idx)
+      .set('row.authorTask.id', task.id);
+    }
+    else if (task?.type === TaskType.RECONCILE) {
+      header.params = new HttpParams()
+      .set('projection', 'targetView')
+      .set('mapId', map_id)
+      .set('row.sourceCode.index', source_idx)
+      .set('row.reconcileTask.id', task.id);
+    }
+    else {
+      header.params = new HttpParams()
       .set('projection', 'targetView')
       .set('mapId', map_id)
       .set('row.sourceCode.index', source_idx);
+    }
     return this.http.get<MapRowTargetResults>(url, header);
   }
 
@@ -444,12 +496,25 @@ export class MapService {
    * Get all notes by Source Row ID
    * @param mapRow ID of MapRow
    */
-  getNotesByMapRow(mapRow: string): Observable<NoteResults> {
-    const url = `${this.config.apiBaseUrl}/notes/search/findByMapRowId`;
+  getNotesByMapRow(mapRow: string, category?: NoteCategory): Observable<NoteResults> {
+
+    let url: string;
     const header = ServiceUtils.getHTTPHeaders();
-    header.params = new HttpParams()
+    
+    if (category) {
+      url = `${this.config.apiBaseUrl}/notes/search/findByMapRowIdAndCategory`;
+      header.params = new HttpParams()
+      .set('projection', 'noteView')
+      .set('id', mapRow)
+      .set('category', category);
+    }
+    else {
+      url = `${this.config.apiBaseUrl}/notes/search/findByMapRowId`;
+      header.params = new HttpParams()
       .set('projection', 'noteView')
       .set('id', mapRow);
+    }
+
     return this.http.get<NoteResults>(url, header);
   }
 
@@ -467,7 +532,7 @@ export class MapService {
   }
 
   /**
-   * Bulk Uodate Update mapping
+   * Bulk update mapping for selection of
    * @param mappingUpdate
    * @private
    */
@@ -495,10 +560,10 @@ export class MapService {
    * @param mappingUpdate
    * @private
    */
-  public bulkUpdateAllRowsForMap(mapId: string, mappingDto: MappingDto): Observable<any> {
+  public bulkUpdateAllRowsForMap(mapId: string, mappingUpdateDto: MappingUpdateDto): Observable<any> {
     const url = `${this.config.apiBaseUrl}/updateMapping/map/${mapId}`;
     const header = ServiceUtils.getHTTPHeaders();
-    const body = mappingDto;
+    const body = mappingUpdateDto;
     return this.http.post<any>(url, body, header);
   }
 
@@ -519,5 +584,5 @@ function getValidRelationship(mapView: MapView): string | undefined {
 function toTargetRow(result: any): TargetRow {
   const id = ServiceUtils.extractIdFromHref(result._links?.self.href, null);
   return new TargetRow(undefined, id, result.targetCode, result.targetDisplay,
-    result.relationship, result.flagged, result.targetOutOfScope, result.tags);
+    result.relationship, result.flagged, result.targetOutOfScope, result.tags, result.type);
 }
