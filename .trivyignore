@@ -6,8 +6,10 @@ CVE-2022-30065
 CVE-2022-42003
 CVE-2022-42004
 
-# remove when spring-web (dependency of spring-boot-starter-web) is 6.0.0 or above
-CVE-2016-1000027
-
 # remove when spring boot > 3 .. risk seems to be of crashing rather than security
 CVE-2023-1370
+
+# Even the latest version of springboot-starter-web 3.0.2 have transitive dependencies: tomcat-embed-core-9.0.68.jar and spring-web-5.3.23.jar with these issues
+CVE-2022-45143
+# remove when spring-web (dependency of spring-boot-starter-web) is 6.0.0 or above
+CVE-2016-1000027

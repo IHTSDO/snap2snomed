@@ -7,7 +7,7 @@ variable "aws_region" {
 variable "write_address" {
   type        = string
   description = "This is the Loki Write API compatible endpoint that you want to write logs to, either promtail or Loki."
-  default     = "https://ontoserver-loki.australiaeast.cloudapp.azure.com/loki/api/v1/push"
+  default     = "https://loki.url/api/v1/push"
 }
 
 variable "username" {
