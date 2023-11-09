@@ -228,6 +228,7 @@ public class MappingService {
           .clearTarget(mappingDetail.getMappingUpdate().getClearTarget())
           .targetId(targetId)
           .target(targetDto)
+          .resetDualMap(mappingDetail.getMappingUpdate().isResetDualMap())
           .build()
           )
         .build());
