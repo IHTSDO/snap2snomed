@@ -110,7 +110,7 @@ export class BulkchangeComponent implements OnInit {
     @Inject(MAT_DIALOG_DATA) public data: BulkChangeDialogData) {
     dialogRef.disableClose = true;
     this.relationships = mapRowRelationships;
-    this.statuses = this.getStatuses(data.task);
+    this.statuses = [];
     this.noMapValue = null;
     this.noMap = false;
     this.clearNoMap = false;
@@ -121,6 +121,7 @@ export class BulkchangeComponent implements OnInit {
     this.resetDualMap = false;
     this.allSelected = this.data.allSelected;
   }
+
   getStatuses(task: Task | null | undefined): MapRowStatus[] {
     let authStatuses = authorStatuses.filter(stat => stat !== MapRowStatus.UNMAPPED);
     let dualMapViewStatuses = [MapRowStatus.ACCEPTED, MapRowStatus.REJECTED, MapRowStatus.RECONCILE, MapRowStatus.INREVIEW]
@@ -140,7 +141,10 @@ export class BulkchangeComponent implements OnInit {
 
   ngOnInit(): void {
     const self = this;
+
     self.isMapView = self.data.isMapView!;
+    this.statuses = this.getStatuses(self.data.task)
+
     if (!self.data.selectedRows || self.data.selectedRows.length == 0) {
       self.error = new Error("NO ROWS SELECTED")
     }
@@ -259,7 +263,7 @@ export class BulkchangeComponent implements OnInit {
   isDualMapView(): boolean {
     let isDualMapView = false;
     if (this.data.map) {
-      isDualMapView = this.data.map.project.dualMapMode;
+      isDualMapView = this.data.map.project.dualMapMode && this.isMapView;
     }
     return isDualMapView;
   }
