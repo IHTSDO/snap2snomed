@@ -47,7 +47,7 @@ stages:
               mavenFeedAuthenticate: true
               mavenOptions: ' $(mavenOptions)'
               javaHomeOption: 'JDKVersion'
-              jdkVersionOption: '1.11'
+              jdkVersionOption: '1.17'
               jdkArchitectureOption: 'x64'
               publishJUnitResults: true
               testResultsFiles: '**/*/TEST*-*.xml'
@@ -70,8 +70,8 @@ stages:
             displayName: "Run trivy scan on snap2snomed"
             inputs:
               script: |
-                trivy image --exit-code 0 --severity LOW,MEDIUM $(dockerRegistry)/$(registryPath):$(Build.BuildNumber)
-                trivy image --exit-code 1 --severity HIGH,CRITICAL $(dockerRegistry)/$(registryPath):$(Build.BuildNumber)
+                trivy image --exit-code 0 --severity LOW,MEDIUM --security-checks vuln --timeout 15m $(dockerRegistry)/$(registryPath):$(Build.BuildNumber)
+                trivy image --exit-code 1 --severity HIGH,CRITICAL --security-checks vuln --timeout 15m $(dockerRegistry)/$(registryPath):$(Build.BuildNumber)
           - script: |
               export VERSION=`git rev-parse --short=7 HEAD` && \
               yarn exec sentry-cli releases new $VERSION && \

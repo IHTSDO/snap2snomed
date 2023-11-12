@@ -21,6 +21,9 @@ import {DebugElement} from '@angular/core';
 import {By} from '@angular/platform-browser';
 import {APP_CONFIG} from "../app.config";
 import {MAT_DIALOG_DATA, MatDialogModule} from "@angular/material/dialog";
+import {TranslateLoader, TranslateModule, TranslateService} from '@ngx-translate/core';
+import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { HttpLoaderFactory } from '../app.module';
 
 describe('FooterComponent', () => {
   let component: FooterComponent;
@@ -29,10 +32,18 @@ describe('FooterComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [
-        MatDialogModule
+        MatDialogModule,
+        HttpClientTestingModule,
+        TranslateModule.forRoot({
+          loader: {
+            provide: TranslateLoader,
+            useFactory: HttpLoaderFactory,
+            deps: [HttpClientTestingModule]
+          }
+        })
       ],
       providers: [
-        { provide: APP_CONFIG, useValue: {} }
+        TranslateService, { provide: APP_CONFIG, useValue: {} }
       ],
       declarations: [FooterComponent]
     })
@@ -51,9 +62,8 @@ describe('FooterComponent', () => {
 
   it('should have footer links', () => {
     const el: DebugElement = fixture.debugElement.query(By.css('.footer-link'));
-    const expectedLabel = 'Copyright 2022 SNOMED International';
     const expectedUrl = 'http://www.snomed.org';
-    expect(el.nativeElement.textContent).toBe(expectedLabel);
+    expect(el.nativeElement.textContent).toBe('FOOTER.COPYRIGHT_SNOMED_INTERNATIONAL');
     expect(el.nativeElement.getAttribute('href')).toBe(expectedUrl);
   });
 });

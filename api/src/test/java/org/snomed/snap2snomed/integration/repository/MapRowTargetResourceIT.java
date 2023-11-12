@@ -22,21 +22,23 @@ import static org.hamcrest.Matchers.lessThanOrEqualTo;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.core.Is.is;
 
-import io.restassured.specification.RequestSpecification;
 import java.io.IOException;
-import java.util.List;
+import java.util.Collections;
 import java.util.Set;
+
 import org.apache.commons.lang3.tuple.Pair;
-import org.junit.Before;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.TestInstance.Lifecycle;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.snomed.snap2snomed.integration.IntegrationTestBase;
-import org.snomed.snap2snomed.model.MapRowTarget;
 import org.snomed.snap2snomed.model.enumeration.MapStatus;
 import org.snomed.snap2snomed.model.enumeration.MappingRelationship;
 import org.snomed.snap2snomed.model.enumeration.TaskType;
+
+import io.restassured.specification.RequestSpecification;
 
 @TestInstance(Lifecycle.PER_CLASS)
 public class MapRowTargetResourceIT extends IntegrationTestBase {
@@ -72,15 +74,34 @@ public class MapRowTargetResourceIT extends IntegrationTestBase {
 
   @Test
   public void shouldGetByMapIdAndSourceCode() throws Exception {
-    long taskId = restClient.createTask(TaskType.AUTHOR, mapId, DEFAULT_TEST_USER_SUBJECT, "1");
+      final Logger _log = LoggerFactory.getLogger(this.getClass());
+
+      System.err.flush();
+      _log.error("XX----------------------------------------------------------------");
+      System.err.flush();
+      restClient.givenDefaultUser()
+          .queryParam("projection", "targetView")
+//          .queryParam("row.sourceCode.index", "1")
+          .queryParam("mapId", 1+mapId).log().all()
+          .get("/mapRowTargets")
+          .then().log().body().statusCode(200);
+      System.err.flush();
+      _log.error("XX----------------------------------------------------------------");
+      System.err.flush();
+
+
+    final long taskId = restClient.createTask(TaskType.AUTHOR, mapId, DEFAULT_TEST_USER_SUBJECT, "1");
 
     restClient.createTarget(DEFAULT_TEST_USER_SUBJECT, mapId, "map row code 1.", "target", "display",
         MappingRelationship.TARGET_EQUIVALENT, false);
 
+    System.err.flush();
+    _log.error("------------------------------------------------------------------");
+    System.err.flush();
     restClient.givenDefaultUser()
         .queryParam("projection", "targetView")
         .queryParam("row.sourceCode.index", "1")
-        .queryParam("row.map.id", mapId).log().all()
+        .queryParam("mapId", mapId).log().all()
         .get("/mapRowTargets")
         .then().log().body().statusCode(200)
         .body("content", hasSize(1))
@@ -91,11 +112,14 @@ public class MapRowTargetResourceIT extends IntegrationTestBase {
         .body("content[0].targetDisplay", is("display"))
         .body("content[0].relationship", is("TARGET_EQUIVALENT"))
         .body("content[0].flagged", is(false));
+    System.err.flush();
+    _log.error("------------------------------------------------------------------");
+    System.err.flush();
 
     restClient.givenDefaultUser()
         .queryParam("projection", "targetView")
         .queryParam("row.sourceCode.index", "10")
-        .queryParam("row.map.id", mapId).log().all()
+        .queryParam("mapId", mapId).log().all()
         .get("/mapRowTargets")
         .then().log().body().statusCode(200)
         .body("content", hasSize(1))
@@ -106,19 +130,19 @@ public class MapRowTargetResourceIT extends IntegrationTestBase {
 
   @Test
   public void shouldSetLastAuthorEditMapRow() throws Exception {
-    long mapRowId = restClient.getMapRowId(mapId, "map row code 2.");
+    final long mapRowId = restClient.getMapRowId(mapId, "map row code 2.");
 
     restClient.checkLastModified(mapRowId, "lastAuthor", null);
     restClient.checkLastModified(mapRowId, "lastReviewer", null);
 
-    long authorTask = restClient.createTask(TaskType.AUTHOR, mapId, DEFAULT_TEST_USER_SUBJECT, "2");
+    final long authorTask = restClient.createTask(TaskType.AUTHOR, mapId, DEFAULT_TEST_USER_SUBJECT, "2");
 
     restClient.updateNoMapAndStatus(DEFAULT_TEST_USER_SUBJECT, mapRowId, true, MapStatus.MAPPED);
 
     restClient.checkLastModified(mapRowId, "lastAuthor", DEFAULT_TEST_USER_SUBJECT);
     restClient.checkLastModified(mapRowId, "lastReviewer", null);
 
-    long reviewTask = restClient.createTask(TaskType.REVIEW, mapId, MEMBER_TEST_USER, "2");
+    final long reviewTask = restClient.createTask(TaskType.REVIEW, mapId, MEMBER_TEST_USER, "2");
 
     restClient.updateStatus(MEMBER_TEST_USER, mapRowId, MapStatus.ACCEPTED);
 
@@ -132,9 +156,9 @@ public class MapRowTargetResourceIT extends IntegrationTestBase {
 
   @Test
   public void failUpdateMapRowIllegalStateChange() throws Exception {
-    long mapRowId = restClient.getMapRowId(mapId, "map row code 3.");
+    final long mapRowId = restClient.getMapRowId(mapId, "map row code 3.");
 
-    long authorTask = restClient.createTask(TaskType.AUTHOR, mapId, DEFAULT_TEST_USER_SUBJECT, "3");
+    final long authorTask = restClient.createTask(TaskType.AUTHOR, mapId, DEFAULT_TEST_USER_SUBJECT, "3");
 
     restClient.updateStatus(DEFAULT_TEST_USER_SUBJECT, mapRowId, MapStatus.MAPPED, 400,
         "Cannot change state from UNMAPPED for row with no mappings and 'no map' not set");
@@ -155,9 +179,9 @@ public class MapRowTargetResourceIT extends IntegrationTestBase {
 
   @Test
   public void failUpdateMapRowNotAuthor() throws Exception {
-    long mapRowId = restClient.getMapRowId(mapId, "map row code 3.");
+    final long mapRowId = restClient.getMapRowId(mapId, "map row code 3.");
 
-    long authorTask = restClient.createTask(TaskType.AUTHOR, mapId, MEMBER_TEST_USER, "3");
+    final long authorTask = restClient.createTask(TaskType.AUTHOR, mapId, MEMBER_TEST_USER, "3");
 
     restClient.updateNoMapAndStatus(MEMBER_TEST_USER, mapRowId, true, MapStatus.DRAFT);
 
@@ -172,31 +196,50 @@ public class MapRowTargetResourceIT extends IntegrationTestBase {
 
   @Test
   public void failUpdateMapRowTargetNoTask() throws Exception {
-      long mapRowId = restClient.getMapRowId(mapId, "map row code 4.");
-      long authorTask = restClient.createTask(TaskType.AUTHOR, mapId, MEMBER_TEST_USER, "4");
-      long targetId = restClient.createTarget(MEMBER_TEST_USER, mapRowId, "foo", "bar", MappingRelationship.TARGET_NARROWER, false, 201);
-      restClient.updateTarget(MEMBER_TEST_USER, targetId, "foo2", "bar2", MappingRelationship.TARGET_NARROWER, false, 200);
+      final long mapRowId = restClient.getMapRowId(mapId, "map row code 4.");
+      final long authorTask = restClient.createTask(TaskType.AUTHOR, mapId, MEMBER_TEST_USER, "4");
+      final long targetId = restClient.createTarget(MEMBER_TEST_USER, mapRowId, "foo", "bar", MappingRelationship.TARGET_NARROWER, false, 201);
+      restClient.updateTarget(MEMBER_TEST_USER, targetId, "foo2", "bar2", MappingRelationship.TARGET_NARROWER, false, Collections.emptySet(), 200);
       restClient.deleteTask(authorTask);
 
-      restClient.updateTarget(MEMBER_TEST_USER, targetId, "foo3", "bar3", MappingRelationship.TARGET_NARROWER, false, 403);
+      restClient.updateTarget(MEMBER_TEST_USER, targetId, "foo3", "bar3", MappingRelationship.TARGET_NARROWER, false, Collections.emptySet(), 403);
   }
 
   @Test
   public void shouldUpdateMapRowTargetFlagOwnerNoTask() throws Exception {
-      long mapRowId = restClient.getMapRowId(mapId, "map row code 4.");
-      long authorTask = restClient.createTask(TaskType.AUTHOR, mapId, MEMBER_TEST_USER, "4");
-      long targetId = restClient.createTarget(MEMBER_TEST_USER, mapRowId, "foo", "bar", MappingRelationship.TARGET_NARROWER, false, 201);
+      final long mapRowId = restClient.getMapRowId(mapId, "map row code 4.");
+      final long authorTask = restClient.createTask(TaskType.AUTHOR, mapId, MEMBER_TEST_USER, "4");
+      final long targetId = restClient.createTarget(MEMBER_TEST_USER, mapRowId, "foo", "bar", MappingRelationship.TARGET_NARROWER, false, 201);
       restClient.deleteTask(authorTask);
 
       restClient.updateTargetFlag(DEFAULT_TEST_USER_SUBJECT, targetId, true, 200);
-      restClient.updateTarget(MEMBER_TEST_USER, targetId, "foo2", "bar2", MappingRelationship.TARGET_NARROWER, false, 403);
+      restClient.updateTarget(MEMBER_TEST_USER, targetId, "foo2", "bar2",
+          MappingRelationship.TARGET_NARROWER, false, Collections.emptySet(), 403
+      );
+  }
+
+  @Test
+  public void shouldUpdateAndRetrieveMapRowTargetTags() throws Exception {
+    final long mapRowId = restClient.getMapRowId(mapId, "map row code 4.");
+    restClient.createTask(TaskType.AUTHOR, mapId, MEMBER_TEST_USER, "4");
+
+    final String targetCode = "foo";
+    final String targetDisplay = "bar";
+    final MappingRelationship relationship = MappingRelationship.TARGET_NARROWER;
+    final boolean flagged = false;
+
+    final long targetId = restClient.createTarget(MEMBER_TEST_USER, mapRowId, targetCode, targetDisplay,
+        relationship, flagged, 201);
+
+    restClient.updateTarget(MEMBER_TEST_USER, targetId, targetCode, targetDisplay, relationship,
+        flagged, Collections.singleton("some-tag"), 200);
   }
 
   @Test
   public void failUpdateMapRowTargetFlagNotOwnerNoTask() throws Exception {
-      long mapRowId = restClient.getMapRowId(mapId, "map row code 4.");
-      long authorTask = restClient.createTask(TaskType.AUTHOR, mapId, MEMBER_TEST_USER, "4");
-      long targetId = restClient.createTarget(MEMBER_TEST_USER, mapRowId, "foo", "bar", MappingRelationship.TARGET_NARROWER, false, 201);
+      final long mapRowId = restClient.getMapRowId(mapId, "map row code 4.");
+      final long authorTask = restClient.createTask(TaskType.AUTHOR, mapId, MEMBER_TEST_USER, "4");
+      final long targetId = restClient.createTarget(MEMBER_TEST_USER, mapRowId, "foo", "bar", MappingRelationship.TARGET_NARROWER, false, 201);
 
       restClient.deleteTask(authorTask);
 
@@ -211,9 +254,9 @@ public class MapRowTargetResourceIT extends IntegrationTestBase {
 
   @Test
   public void failUpdateMapRowTargetNotAuthor() throws Exception {
-    long mapRowId = restClient.getMapRowId(mapId, "map row code 4.");
+    final long mapRowId = restClient.getMapRowId(mapId, "map row code 4.");
 
-    long authorTask = restClient.createTask(TaskType.AUTHOR, mapId, MEMBER_TEST_USER, "4");
+    final long authorTask = restClient.createTask(TaskType.AUTHOR, mapId, MEMBER_TEST_USER, "4");
 
     restClient.updateNoMapAndStatus(MEMBER_TEST_USER, mapRowId, true, MapStatus.DRAFT);
 
@@ -231,10 +274,10 @@ public class MapRowTargetResourceIT extends IntegrationTestBase {
 
   @Test
   public void failUpdateMapRowNotReviewer() throws Exception {
-    long mapRowId = restClient.getMapRowId(mapId, "map row code 5.");
+    final long mapRowId = restClient.getMapRowId(mapId, "map row code 5.");
 
-    long authorTask = restClient.createTask(TaskType.AUTHOR, mapId, MEMBER_TEST_USER, "5");
-    long reviewTask = restClient.createTask(TaskType.REVIEW, mapId, GUEST_TEST_USER, "5");
+    final long authorTask = restClient.createTask(TaskType.AUTHOR, mapId, MEMBER_TEST_USER, "5");
+    final long reviewTask = restClient.createTask(TaskType.REVIEW, mapId, GUEST_TEST_USER, "5");
 
     restClient.updateNoMapAndStatus(MEMBER_TEST_USER, mapRowId, true, MapStatus.DRAFT);
 
@@ -269,14 +312,14 @@ public class MapRowTargetResourceIT extends IntegrationTestBase {
 
   @Test
   public void shouldGetTargetRowsFilterByUnassigned() throws Exception {
-    int expectedRowCountTotal = 34;
+    final int expectedRowCountTotal = 34;
 
-    long map2Id = restClient.createMap("Testing Map Version 2", "http://snomed.info/sct/32506021000036107/version/20210531",
+    final long map2Id = restClient.createMap("Testing Map Version 2", "http://snomed.info/sct/32506021000036107/version/20210531",
         "http://map.test.toscope", projectId, codesetId);
 
-    long authorTask = restClient.createTask(TaskType.AUTHOR, map2Id, MEMBER_TEST_USER, "11-13");
-    long reviewTask = restClient.createTask(TaskType.REVIEW, map2Id, GUEST_TEST_USER, "11-13");
-    long authorTask2 = restClient.createTask(TaskType.AUTHOR, map2Id, GUEST_TEST_USER, "14-16");
+    final long authorTask = restClient.createTask(TaskType.AUTHOR, map2Id, MEMBER_TEST_USER, "11-13");
+    final long reviewTask = restClient.createTask(TaskType.REVIEW, map2Id, GUEST_TEST_USER, "11-13");
+    final long authorTask2 = restClient.createTask(TaskType.AUTHOR, map2Id, GUEST_TEST_USER, "14-16");
 
     validateMapViewRowCountForFilter(map2Id, expectedRowCountTotal - 6, Pair.of("assignedAuthor", "none"));
 
@@ -304,11 +347,11 @@ public class MapRowTargetResourceIT extends IntegrationTestBase {
 
   @Test
   public void testSearchByMapId() throws Exception {
-    long mapId = restClient.createMap("testSearchByMapId Map Version", "http://snomed.info/sct/32506021000036107/version/20210531",
+    final long mapId = restClient.createMap("testSearchByMapId Map Version", "http://snomed.info/sct/32506021000036107/version/20210531",
         "http://map.test.toscope", projectId, codesetId);
 
-    long mapRowId = restClient.getMapRowId(mapId, "map row code 4.");
-    long authorTask = restClient.createTask(TaskType.AUTHOR, mapId, MEMBER_TEST_USER, "4");
+    final long mapRowId = restClient.getMapRowId(mapId, "map row code 4.");
+    final long authorTask = restClient.createTask(TaskType.AUTHOR, mapId, MEMBER_TEST_USER, "4");
     restClient.createTarget(MEMBER_TEST_USER, mapRowId, "foo", "bar2", MappingRelationship.TARGET_NARROWER, false, 201);
     restClient.deleteTask(authorTask);
     restClient.givenUser(MEMBER_TEST_USER).queryParam("mapId", mapId)
@@ -324,7 +367,7 @@ public class MapRowTargetResourceIT extends IntegrationTestBase {
   }
 
   private void validateMapViewRowCountForFilter(long mapId, int expectedRowCount, Pair<String, String>... param) {
-    RequestSpecification requestSpecification = restClient.givenDefaultUser();
+    final RequestSpecification requestSpecification = restClient.givenDefaultUser();
     for (int j = 0; j < param.length; j++) {
       requestSpecification.queryParam(param[j].getLeft(), param[j].getRight());
     }

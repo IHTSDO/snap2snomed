@@ -33,6 +33,7 @@ export interface BulkChangeDialogData {
   map: Mapping | null | undefined;
   isMapView: boolean | null | undefined;
   selectedRows: MappedRowDetailsDto[] | null | undefined;
+  allSelected: boolean;
 }
 
 export function getErrorMessage(translateService: TranslateService, err: any): string {
@@ -94,6 +95,8 @@ export class BulkchangeComponent implements OnInit {
   hasSearchValue: boolean;
   isMapView: boolean;
   processing: boolean;
+  resetDualMap: boolean;
+  allSelected: boolean;
 
   @ViewChild('searchComponent') searchComponent: ConceptSearchComponent | undefined;
 
@@ -107,7 +110,7 @@ export class BulkchangeComponent implements OnInit {
     @Inject(MAT_DIALOG_DATA) public data: BulkChangeDialogData) {
     dialogRef.disableClose = true;
     this.relationships = mapRowRelationships;
-    this.statuses = this.getStatuses(data.task);
+    this.statuses = [];
     this.noMapValue = null;
     this.noMap = false;
     this.clearNoMap = false;
@@ -115,11 +118,20 @@ export class BulkchangeComponent implements OnInit {
     this.hasSearchValue = false;
     this.isMapView = false;
     this.processing = false;
+    this.resetDualMap = false;
+    this.allSelected = this.data.allSelected;
   }
+
   getStatuses(task: Task | null | undefined): MapRowStatus[] {
     let authStatuses = authorStatuses.filter(stat => stat !== MapRowStatus.UNMAPPED);
+    let dualMapViewStatuses = [MapRowStatus.ACCEPTED, MapRowStatus.REJECTED, MapRowStatus.RECONCILE, MapRowStatus.INREVIEW]
     if (task == null) {
-      return authStatuses.concat(reviewStatuses);
+      if (this.isDualMapView()) {
+        return dualMapViewStatuses;
+      }
+      else {
+        return authStatuses.concat(reviewStatuses);
+      }
     }
     if (task && task.type === TaskType.REVIEW) {
       return reviewStatuses;
@@ -129,7 +141,10 @@ export class BulkchangeComponent implements OnInit {
 
   ngOnInit(): void {
     const self = this;
+
     self.isMapView = self.data.isMapView!;
+    this.statuses = this.getStatuses(self.data.task)
+
     if (!self.data.selectedRows || self.data.selectedRows.length == 0) {
       self.error = new Error("NO ROWS SELECTED")
     }
@@ -173,7 +188,8 @@ export class BulkchangeComponent implements OnInit {
       noMap: this.noMapValue,
       status: this.changedStatus,
       relationship: this.changedRelationship,
-      clearTarget: !this.clearTarget ? null : true
+      clearTarget: !this.clearTarget ? null : true,
+      resetDualMap: this.resetDualMap
     }
     let mappingDetail: MappingDetails = {
       rowId: null,
@@ -185,7 +201,15 @@ export class BulkchangeComponent implements OnInit {
     const mappingUpdateDto: MappingUpdateDto = {
       mappingDetails: mappingDetails
     }
-    this.doBulkChange(this.mapService.bulkUpdate(mappingUpdateDto));
+  
+    if (this.allSelected) {
+      if (this.data.map && this.data.map.id !== null) {
+        this.doBulkChange(this.mapService.bulkUpdateAllRowsForMap(this.data.map.id, mappingUpdateDto));
+      }
+    }
+    else {
+      this.doBulkChange(this.mapService.bulkUpdate(mappingUpdateDto));
+    }
   }
 
   doBulkChange(serviceFunction: any): void {
@@ -234,5 +258,13 @@ export class BulkchangeComponent implements OnInit {
       this.changedRelationship = null;
       this.noMapValue = null;
     }
+  }
+
+  isDualMapView(): boolean {
+    let isDualMapView = false;
+    if (this.data.map) {
+      isDualMapView = this.data.map.project.dualMapMode && this.isMapView;
+    }
+    return isDualMapView;
   }
 }

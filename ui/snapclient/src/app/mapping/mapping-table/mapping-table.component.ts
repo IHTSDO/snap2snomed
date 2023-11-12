@@ -25,12 +25,12 @@ import {
   mapRowStatuses,
   MapView,
   MapViewFilter,
-  Page
+  Page,
+  TARGET_OUT_OF_SCOPE_TAG
 } from '../../_models/map_row';
 import {MatPaginator, PageEvent} from '@angular/material/paginator';
 import {MatSort, Sort, SortDirection} from '@angular/material/sort';
 import {Subscription} from 'rxjs';
-import {debounceTime, distinctUntilChanged} from 'rxjs/operators';
 import {Store} from '@ngrx/store';
 import {IAppState} from '../../store/app.state';
 import {Task, TaskType} from '../../_models/task';
@@ -51,6 +51,7 @@ import {MatTable} from '@angular/material/table';
 import {WriteDisableUtils} from '../../_utils/write_disable_utils';
 import {FhirService} from "../../_services/fhir.service";
 import { MappingNotesComponent } from '../mapping-table-notes/mapping-notes.component';
+import { TargetChangedService } from 'src/app/_services/target-changed.service';
 
 export interface TableParams extends Params {
   pageIndex?: number;
@@ -89,8 +90,10 @@ export class MappingTableComponent implements OnInit, AfterViewInit, OnDestroy {
     {columnId: 'relationship', columnDisplay: 'TABLE.RELATIONSHIP', displayed: true},
     {columnId: 'noMap', columnDisplay: 'TABLE.NO_MAP', displayed: true},
     {columnId: 'status', columnDisplay: 'TABLE.STATUS', displayed: true},
+    {columnId: 'targetOutOfScope', columnDisplay: 'TABLE.TARGET_OUT_OF_SCOPE', displayed: true},
     {columnId: 'flagged', columnDisplay: 'TABLE.FLAG', displayed: true},
     {columnId: 'latestNote', columnDisplay: 'SOURCE.TABLE.NOTES', displayed: true},
+    {columnId: 'lastAuthorReviewer', columnDisplay: 'TABLE.LAST_AUTHOR_REVIEWER', displayed: true},
     {columnId: 'actions', columnDisplay: '', displayed: true}
   ];
   additionalDisplayedColumns: TableColumn[] = [];
@@ -106,8 +109,10 @@ export class MappingTableComponent implements OnInit, AfterViewInit, OnDestroy {
     'filter-relationship',
     'filter-noMap',
     'filter-status',
+    'filter-targetOutOfScope',
     'filter-flagged',
     'filter-notes',
+    'filter-lastAuthorReviewer',
     'filter-actions',
   ];
   additionalFilteredColumns: string[] = [];
@@ -119,6 +124,7 @@ export class MappingTableComponent implements OnInit, AfterViewInit, OnDestroy {
   @Output() showNotes = new EventEmitter<number>();
   @Output() updateTableEvent = new EventEmitter();
   @Output() targetConceptSearchString = new EventEmitter<string>();
+  @Output() allSelectedEvent = new EventEmitter<boolean>();
 
   mappingTableSelector: MappingTableSelectorComponent | null | undefined;
 
@@ -139,6 +145,8 @@ export class MappingTableComponent implements OnInit, AfterViewInit, OnDestroy {
   page: Page = new Page();
   allSourceDetails: MappedRowDetailsDto[] = [];
   writeDisableUtils = WriteDisableUtils;
+  
+  allSelected = false;
 
   private subscription = new Subscription();
   private debounce = 200;
@@ -172,7 +180,8 @@ export class MappingTableComponent implements OnInit, AfterViewInit, OnDestroy {
               public translate: TranslateService,
               private selectionService: SelectionService,
               private mapService: MapService,
-              public dialog: MatDialog) {
+              public dialog: MatDialog,
+              private targetChangedService: TargetChangedService) {
     const initialSelection: MapView[] = [];
     const allowMultiSelect = true;
     const emitChanges = true;
@@ -199,9 +208,11 @@ export class MappingTableComponent implements OnInit, AfterViewInit, OnDestroy {
 
         this.additionalDisplayedColumns = [];
         this.additionalFilteredColumns = [];
-        for (let i = 0; i <  this.page.additionalColumns.length; i++) {
-          this.additionalDisplayedColumns.push({columnId: "additionalColumn" + (i+1), columnDisplay:  this.page.additionalColumns[i].name, displayed: true});
-          this.additionalFilteredColumns.push("filter-additionalColumn" + (i+1));
+        if (this.page.additionalColumns) {
+          for (let i = 0; i <  this.page.additionalColumns.length; i++) {
+            this.additionalDisplayedColumns.push({columnId: "additionalColumn" + (i+1), columnDisplay:  this.page.additionalColumns[i].name, displayed: true});
+            this.additionalFilteredColumns.push("filter-additionalColumn" + (i+1));
+          }
         }
     
         // display additional columns at the end of the table
@@ -301,14 +312,14 @@ export class MappingTableComponent implements OnInit, AfterViewInit, OnDestroy {
     const self = this;
     const mapView: MapView = self.page?.data[index] as MapView;
     if (mapView) {
-      if ($event.checked && mapView.targetCode && mapView.targetCode !== '') {
+      if (($event.checked && mapView.targetCode && mapView.targetCode !== '') || ($event.checked && self.task!.type == TaskType.RECONCILE)) {
         // when noMap ON - remove any targets - confirm
         const confirmDialogRef = self.dialog.open(ConfirmDialogComponent,
           {data: self.getNomapConfirmDialogData()});
         confirmDialogRef.afterClosed().subscribe(
           (ok) => {
             if (ok) {
-              self.mapService.updateNoMap(mapView.rowId, mapView.noMap).subscribe((res) => {
+              self.mapService.updateNoMap(mapView.rowId, mapView.noMap, this.task!.type === TaskType.RECONCILE).subscribe((res) => {
                 mapView.updateFromRow(res);
                 self.updateTableEvent.emit();
               });
@@ -326,7 +337,7 @@ export class MappingTableComponent implements OnInit, AfterViewInit, OnDestroy {
           });
 
       } else {
-        self.mapService.updateNoMap(mapView.rowId, mapView.noMap).subscribe((res) => {
+        self.mapService.updateNoMap(mapView.rowId, mapView.noMap, this.task!.type === TaskType.RECONCILE).subscribe((res) => {
           mapView.updateFromRow(res);
           self.updateTableEvent.emit();
         });
@@ -368,7 +379,7 @@ export class MappingTableComponent implements OnInit, AfterViewInit, OnDestroy {
     const self = this;
     const mapView: MapView = $event ? $event as MapView : self.page?.data[index] as MapView;
     if (mapView) {
-      if (mapView.hasTargetOrRelationshipChanged()) {
+      if (mapView.hasTargetOrRelationshipChanged() && !(self.task!.type == TaskType.RECONCILE)) {
         mapView.status = MapRowStatus.DRAFT;
       }
       this.doMapRowTargetUodate(self, mapView);
@@ -384,13 +395,15 @@ export class MappingTableComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   private doMapRowTargetUodate(self: this, mapView: MapView): void {
-    self.mapService.updateMapRowTarget(mapView).subscribe(
+    const [result, targetRow] = self.mapService.updateMapRowTarget(mapView, self.task!.type);
+    result.subscribe(
       (result) => {
         mapView.updateFromTarget(result);
         self.mapService.updateStatus(mapView.rowId, mapView.status as MapRowStatus).subscribe((saved) => {
           mapView.updateStatus(saved.status);
           self.updateTableEvent.emit();
         });
+        this.targetChangedService.changeTarget(targetRow);
       },
       (error) => {
         mapView.reset();
@@ -402,10 +415,11 @@ export class MappingTableComponent implements OnInit, AfterViewInit, OnDestroy {
     const self = this;
     const row = self.page?.data[index];
     if (row && self.task.mapping.id) {
-      self.mapService.findTargetsBySourceIndex(self.task.mapping.id, row.sourceIndex)
+      self.mapService.findTargetsBySourceIndex(self.task.mapping.id, row.sourceIndex, undefined)
       .subscribe(rows => {
-        const targetCodes = rows._embedded.mapRowTargets.map(target => target.targetCode);
-        if (targetCodes.includes(event.data?.code)) {
+        const matchingTargetCodes = rows._embedded.mapRowTargets.filter(target => target.targetCode==event.data?.code);
+        if ((this.task?.mapping.project.dualMapMode && matchingTargetCodes.length > 1) || 
+            (!this.task?.mapping.project.dualMapMode && matchingTargetCodes.length > 0)) {
           self.dialog.open(ConfirmDialogComponent, {data: self.getDuplicateTargetDialogData()});
         } else {
           self.fhirService.getEnglishFsn(event.data?.code, event.data?.system, self.task?.mapping?.toVersion || '').subscribe(englishFsn => {
@@ -416,8 +430,17 @@ export class MappingTableComponent implements OnInit, AfterViewInit, OnDestroy {
 
             row.targetCode = event.data?.code;
             row.targetDisplay = displayTerm;
-            row.status = MapRowStatus.DRAFT;
+            if (this.task!.type !== TaskType.RECONCILE) {
+              row.status = MapRowStatus.DRAFT;
+            }
             row.relationship = MapRowRelationship.INEXACT;
+            row.targetOutOfScope = false;
+
+            const tagIndex = row.tags?.indexOf(TARGET_OUT_OF_SCOPE_TAG, 0);
+            if (tagIndex !== undefined && tagIndex > -1) {
+              row.tags?.splice(tagIndex, 1);
+            }
+            
             self.updateMapRowTarget(row, index);
           });
         }
@@ -505,6 +528,11 @@ export class MappingTableComponent implements OnInit, AfterViewInit, OnDestroy {
 
   getStatuses(mapRow: MapView): MapRowStatus[] {
     return this.task ? StatusUtils.getAvailableStatusOptions(this.task.type as TaskType, mapRow.status as MapRowStatus) : mapRowStatuses;
+  }
+
+    onAllSelected(allSelected: boolean) {
+    this.allSelected = allSelected
+    this.allSelectedEvent.emit(allSelected);
   }
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright © 2022 SNOMED International
+ * Copyright © 2022-23 SNOMED International
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,8 @@ import {User} from './user';
 
 export const enum TaskType {
   AUTHOR = 'AUTHOR',
-  REVIEW = 'REVIEW'
+  REVIEW = 'REVIEW',
+  RECONCILE = 'RECONCILE'
 }
 
 export const enum TaskConflictType {
@@ -30,7 +31,7 @@ export const enum TaskConflictType {
 
 export class Task {
   id: string;
-  type: TaskType | string;
+  type: TaskType;
   description?: string;
   mapping: Mapping;
   assignee: User;
@@ -51,7 +52,7 @@ export class Task {
   }
 
 
-  constructor(id: string, type: TaskType | string, description: string | undefined,
+  constructor(id: string, type: TaskType, description: string | undefined,
               mapping: Mapping, assignee: User, sourceRowSpecification: string, sourceRowCount: number,
               createdString: string | undefined, modifiedString: string | undefined,
               reassignAlreadyAssignedRows: boolean,
@@ -79,6 +80,10 @@ export class Task {
 
   public isReview(): boolean {
     return this.type === TaskType.REVIEW;
+  }
+
+  public isReconcile(): boolean {
+    return this.type === TaskType.RECONCILE;
   }
 }
 

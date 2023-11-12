@@ -9,6 +9,17 @@
   overflow: hidden;
 }
 
+.col-middle {
+  flex: 2; /* make col-middle content appear in the middle */
+  /* align-content: end; display: grid; aligns to bottom of column */ 
+  align-content: end;
+  display: grid;
+}
+
+.out-of-scope-text {
+  padding: 12px;
+}
+
 .col-action {
   max-width: 20%;
   flex: 1;
@@ -38,4 +49,8 @@ a.mat-primary {
   position: absolute;
   bottom: 0.5em;
   right: 0.5em;
+}
+
+.dual-map-text {
+  font-size: 14px;
 }

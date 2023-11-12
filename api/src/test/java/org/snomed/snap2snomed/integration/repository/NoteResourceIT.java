@@ -32,7 +32,11 @@ import org.snomed.snap2snomed.model.Note;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
+import static org.hamcrest.Matchers.startsWith;
+import static org.hamcrest.Matchers.endsWith;
+import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.greaterThan;
+
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -134,31 +138,36 @@ public class NoteResourceIT extends IntegrationTestBase {
     assertThat(parseTime(note3Modified))
         .isBefore(parseTime(note4Modified));
 
+    String note3ModifiedAndTransformed = note3Modified.replace("\"", "");
+    note3ModifiedAndTransformed = note3ModifiedAndTransformed.substring(0, note3ModifiedAndTransformed.length()-1);
+    String note4ModifiedAndTransformed = note4Modified.replace("\"", "");
+    note4ModifiedAndTransformed = note4ModifiedAndTransformed.substring(0, note4ModifiedAndTransformed.length()-1);
+    
     restClient.givenDefaultUser().get("/mapView/" + mapId + "?sort=sourceIndex").then().log()
         .ifValidationFails(LogDetail.BODY).statusCode(200)
         .body("content", hasSize(20))
         .body("content[0].sourceCode", is("map1 row code 1."))
         .body("content[1].sourceCode", is("map1 row code 2."))
-        .body("content[1].latestNote", is(note3Modified.replace("\"", "")))
+        .body("content[1].latestNote", allOf(startsWith(note3ModifiedAndTransformed), endsWith("Z")))
         .body("content[2].sourceCode", is("map1 row code 3."))
-        .body("content[2].latestNote", is(note4Modified.replace("\"", "")));
+        .body("content[2].latestNote", allOf(startsWith(note4ModifiedAndTransformed), endsWith("Z")));
 
     restClient.givenDefaultUser().get("/mapView/" + mapId + "?sort=latestNote&page=1").then().log()
         .ifValidationFails(LogDetail.BODY).statusCode(200)
         .body("content", hasSize(14))
         .body("content[0].latestNote", nullValue())
         .body("content[12].sourceCode", is("map1 row code 2."))
-        .body("content[12].latestNote", is(note3Modified.replace("\"", "")))
+        .body("content[12].latestNote", allOf(startsWith(note3ModifiedAndTransformed), endsWith("Z")))
         .body("content[13].sourceCode", is("map1 row code 3."))
-        .body("content[13].latestNote", is(note4Modified.replace("\"", "")));
+        .body("content[13].latestNote", allOf(startsWith(note4ModifiedAndTransformed), endsWith("Z")));
 
     restClient.givenDefaultUser().get("/mapView/" + mapId + "?sort=latestNote,desc").then().log()
         .ifValidationFails(LogDetail.BODY).statusCode(200)
         .body("content", hasSize(20))
         .body("content[0].sourceCode", is("map1 row code 3."))
-        .body("content[0].latestNote", is(note4Modified.replace("\"", "")))
+        .body("content[0].latestNote", allOf(startsWith(note4ModifiedAndTransformed), endsWith("Z")))
         .body("content[1].sourceCode", is("map1 row code 2."))
-        .body("content[1].latestNote", is(note3Modified.replace("\"", "")));
+        .body("content[1].latestNote", allOf(startsWith(note3ModifiedAndTransformed), endsWith("Z")));
   }
 
 

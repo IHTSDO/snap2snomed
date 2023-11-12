@@ -17,7 +17,10 @@
 package org.snomed.snap2snomed.model;
 
 import java.time.Instant;
+import java.util.Collection;
+import java.util.Set;
 import javax.persistence.Column;
+import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
 import javax.persistence.GeneratedValue;
@@ -25,6 +28,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
@@ -35,6 +39,7 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import org.hibernate.envers.Audited;
 import org.snomed.snap2snomed.model.enumeration.MappingRelationship;
+import org.snomed.snap2snomed.model.enumeration.TaskType;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
@@ -51,7 +56,7 @@ import org.springframework.data.rest.core.config.Projection;
 @Audited
 @EntityListeners(AuditingEntityListener.class)
 @Table(name = "map_row_target")
-public class MapRowTarget implements Snap2SnomedEntity {
+public class MapRowTarget implements Snap2SnomedEntity, java.lang.Comparable<MapRowTarget> {
     @Column(name = "created", nullable = false, updatable = false)
     @CreatedDate
     private Instant created;
@@ -89,7 +94,19 @@ public class MapRowTarget implements Snap2SnomedEntity {
     @Builder.Default
     private MappingRelationship relationship = MappingRelationship.TARGET_INEXACT;
 
+    /**
+     * A set of string tag values that can be used for a wide variety of purposes.
+     */
+    @ElementCollection
+    private Set<String> tags;
+
     boolean flagged;
+
+    @ManyToOne
+    private User lastAuthor;
+
+    @Transient
+    private TaskType taskType;
 
 
     @Projection(name = "targetView", types = {MapRowTarget.class})
@@ -114,5 +131,14 @@ public class MapRowTarget implements Snap2SnomedEntity {
 
         boolean getFlagged();
 
+        Set<String> getTags();
+
+        User getLastAuthor();
+
+    }
+
+    @Override
+    public int compareTo(MapRowTarget o) {
+        return targetCode.compareTo(o.getTargetCode());
     }
 }

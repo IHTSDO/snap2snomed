@@ -1,5 +1,5 @@
 <mat-drawer-container>
-  <mat-drawer class="mapping-add" mode="over" position="end" [(opened)]="opened">
+  <mat-drawer *ngIf="opened" class="mapping-add" mode="over" position="end" [(opened)]="opened">
     <app-mapping-add [drawerOpen]="opened" (closed)="closeCreate()" [mapping]="newMapping" [mode]="mode"></app-mapping-add>
   </mat-drawer>
   <mat-toolbar>

@@ -14,5 +14,5 @@
  * limitations under the License.
  */
 
-alter table imported_code alter column display VARCHAR(2048);
-
+alter table map_row_target_tags drop constraint FKf8qe9o6u78cpkogwk5x0bsyui;
+alter table map_row_target_tags add constraint FKf8qe9o6u78cpkogwk5x0bsyui foreign key (map_row_target_id) references map_row_target (id) on delete cascade;

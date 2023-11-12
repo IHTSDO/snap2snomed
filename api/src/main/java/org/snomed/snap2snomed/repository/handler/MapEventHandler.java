@@ -89,7 +89,15 @@ public class MapEventHandler {
 
   @HandleAfterCreate
   public void handleMapAfterCreate(Map map) {
-    mapRowRepository.createMapRows(map.getId(), map.getSource().getId(), Instant.now(), authenticationFacade.getPrincipalSubject());
+
+    if (map.getProject().getDualMapMode()) {
+      mapRowRepository.createMapRows(map.getId(), map.getSource().getId(), Instant.now(), authenticationFacade.getPrincipalSubject(), true); 
+      mapRowRepository.createMapRowsDualMap(map.getId());
+    }
+    else {
+      mapRowRepository.createMapRows(map.getId(), map.getSource().getId(), Instant.now(), authenticationFacade.getPrincipalSubject(), false); 
+    }
+
   }
 
 

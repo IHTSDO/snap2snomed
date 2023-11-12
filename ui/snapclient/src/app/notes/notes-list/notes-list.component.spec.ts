@@ -36,7 +36,7 @@ import {DebugElement} from '@angular/core';
 import {Mapping} from '../../_models/mapping';
 import {MatInputModule} from '@angular/material/input';
 import {By} from '@angular/platform-browser';
-import {Note} from '../../_models/note';
+import {Note, NoteCategory} from '../../_models/note';
 import {User} from '../../_models/user';
 import {SourceCode} from '../../_models/source_code';
 import {Source} from '../../_models/source';
@@ -102,7 +102,7 @@ describe('NotesListComponent', () => {
       id: '1', noMap: false, sourceCode: new SourceCode('code', 'display',
         new Source(), '1', []), status: 'DRAFT'
     } as MapRow;
-    component.newNote = new Note(null, '', new User(), '', '', row);
+    component.newNote = new Note(null, '', new User(), '', '', row, NoteCategory.USER);
     fixture.detectChanges();
   });
 

@@ -51,9 +51,11 @@ export class SourceService {
 
   /** List of sources
    * API is Set to return max page size of 1000  - TODO return all
+   * Update: increased limit to 10K in line with altering application.properties spring.data.rest.max-page-size=10000 for the user query
+   * but potentially still need paging if that limit is exceeded.
    */
   fetchSources(): Observable<Results> {
-    const url = `${this.config.apiBaseUrl}/importedCodeSets?size=1000&sort=name,asc`;
+    const url = `${this.config.apiBaseUrl}/importedCodeSets?size=10000&sort=name,asc`;
     const header = ServiceUtils.getHTTPHeaders();
     return this.http.get<Results>(url, header);
   }

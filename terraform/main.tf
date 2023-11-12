@@ -2,7 +2,7 @@ terraform {
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = "4.30.0"
+      version = "4.58.0"
     }
   }
   backend "remote" {
@@ -61,6 +61,7 @@ module "api" {
   force_dex_deployment             = var.force_dex_deployment
   database_backup_retention_period = var.database_backup_retention_period
   jumpbox_ami_id                   = var.jumpbox_ami_id
+  identity_provider                = var.identity_provider
 }
 
 module "ui" {
@@ -99,5 +100,6 @@ module "lambda-promtail" {
   password      = var.loki_password
   log_groups    = [module.api.dex_log_group_name, module.api.api_log_group_name]
   write_address = var.loki_url
+
 }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright © 2022 SNOMED International
+ * Copyright © 2023 SNOMED International
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,5 +14,8 @@
  * limitations under the License.
  */
 
-CREATE INDEX IF NOT EXISTS author_task_idx ON map_row(author_task_id);
-CREATE INDEX IF NOT EXISTS review_task_idx ON map_row(review_task_id);
+alter table imported_codeset add system_uri VARCHAR(255);
+alter table imported_codeset add valueset_uri VARCHAR(255);
+
+alter table imported_codeset_aud add system_uri VARCHAR(255);
+alter table imported_codeset_aud add valueset_uri VARCHAR(255);

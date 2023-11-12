@@ -20,6 +20,7 @@ import {By} from '@angular/platform-browser';
 import {RouterTestingModule} from '@angular/router/testing';
 import { provideMockStore } from '@ngrx/store/testing';
 import {TranslateLoader, TranslateModule} from '@ngx-translate/core';
+import { APP_CONFIG } from 'src/app/app.config';
 import {HttpLoaderFactory} from 'src/app/app.module';
 import { selectAuthorizedProjects } from 'src/app/store/app.selectors';
 import { initialAppState } from 'src/app/store/app.state';
@@ -51,6 +52,7 @@ describe('MappingDetailsCardComponent', () => {
         })
       ],
       providers: [
+        {provide: APP_CONFIG, useValue: {appName: 'Snap2SNOMED', authDomainUrl: 'anything'}},
         provideMockStore({
           initialState: initialAppState,
           selectors: [
@@ -77,6 +79,7 @@ describe('MappingDetailsCardComponent', () => {
     project = mapping.project;
     project.id = '1';
     project.title = 'Test Map';
+    project.dualMapMode = false;
 
     mapping.project.maps.push(mapping);
 
@@ -99,7 +102,7 @@ describe('MappingDetailsCardComponent', () => {
   it('should show Map title', () => {
     fixture.detectChanges();
     const el = fixture.debugElement.query(By.css('h2'));
-    expect(el.nativeElement.textContent).toBe('Test Map');
+    expect(el.nativeElement.textContent).toBe('Test Map - (MAP.SINGLE_MAP)');
     expect(el).toBeTruthy();
   });
 

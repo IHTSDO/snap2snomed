@@ -114,6 +114,6 @@ describe('MappingWorkComponent', () => {
     component.task = task;
     fixture.detectChanges();
     el = fixture.debugElement.query(By.css('h2#map-title'));
-    expect(el.nativeElement.textContent).toBe(task.mapping.project.title);
+    expect(el.nativeElement.textContent).toBe(task.mapping.project.title + ' - (MAP.SINGLE_MAP)');
   });
 });
