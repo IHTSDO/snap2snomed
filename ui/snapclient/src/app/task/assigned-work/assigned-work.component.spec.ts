@@ -47,7 +47,7 @@ describe('AssignedWorkComponent', () => {
   mapping.project.title = 'Test Map';
   const task = new Task('1', TaskType.AUTHOR, 'test', mapping, user, '1-10', 10, '', '', false, false);
 
-  const expectedTabLabels = ['add_taskTASK.ADD_TASK', 'editTASK.TAB_AUTHOR', 'checklistTASK.TAB_REVIEW'];
+  const expectedTabLabels = ['add_taskTASK.ADD_TASK', 'editTASK.TAB_AUTHOR', 'checklistTASK.TAB_REVIEW', 'compare_arrowsTASK.TAB_RECONCILE'];
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({

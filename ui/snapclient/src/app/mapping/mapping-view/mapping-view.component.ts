@@ -67,6 +67,8 @@ import {MappingImportComponent} from '../mapping-import/mapping-import.component
 import { MappingNotesComponent } from '../mapping-table-notes/mapping-notes.component';
 import { MatCheckboxChange } from '@angular/material/checkbox';
 import { TableColumn } from '../mapping-table/mapping-table.component';
+import { TargetChangedService } from 'src/app/_services/target-changed.service';
+import { cloneDeep } from 'lodash';
 
 @Component({
   selector: 'app-mapping-view',
@@ -87,6 +89,7 @@ export class MappingViewComponent implements OnInit, AfterViewInit, OnDestroy {
   sort: MatSort | null | undefined;
   componentLoaded = false;
   mappingTableSelector: MappingTableSelectorComponent | null | undefined;
+  allSelected = false;
 
   // @ts-ignore
   @ViewChild(MatTable) table: MatTable<any>;
@@ -125,11 +128,12 @@ export class MappingViewComponent implements OnInit, AfterViewInit, OnDestroy {
     {columnId: 'relationship', columnDisplay: 'TABLE.RELATIONSHIP', displayed: true},
     {columnId: 'noMap', columnDisplay: 'TABLE.NO_MAP', displayed: true},
     {columnId: 'status', columnDisplay: 'TABLE.STATUS', displayed: true},
+    {columnId: 'targetOutOfScope', columnDisplay: 'TABLE.TARGET_OUT_OF_SCOPE', displayed: true},
     {columnId: 'flagged', columnDisplay: 'TABLE.FLAG', displayed: true},
     {columnId: 'latestNote', columnDisplay: 'SOURCE.TABLE.NOTES', displayed: true},
     {columnId: 'lastAuthorReviewer', columnDisplay: 'TABLE.LAST_AUTHOR_REVIEWER', displayed: true},
     {columnId: 'assignedAuthor', columnDisplay: 'TABLE.AUTHOR', displayed: true},
-    {columnId: 'assignedReviewer', columnDisplay: 'TABLE.REVIEWER', displayed: true},
+    {columnId: 'assignedReviewer', columnDisplay: 'TABLE.REVIEWER', displayed: true}
   ];
   // columns that are eligable for user controlling the hiding / displaying
   hideShowColumns: string[] = [
@@ -159,6 +163,7 @@ export class MappingViewComponent implements OnInit, AfterViewInit, OnDestroy {
     'filter-relationship',
     'filter-noMap',
     'filter-status',
+    'filter-targetOutOfScope',
     'filter-flagged',
     'filter-notes',
     'filter-lastAuthorReviewer',
@@ -188,6 +193,8 @@ export class MappingViewComponent implements OnInit, AfterViewInit, OnDestroy {
   authCurrentPage = 0;
   reviewPageSize = 10;
   reviewCurrentPage = 0;
+  reconcilePageSize = 10;
+  reconcileCurrentPage = 0;
 
   private timeout: NodeJS.Timeout | null = null;
 
@@ -213,7 +220,8 @@ export class MappingViewComponent implements OnInit, AfterViewInit, OnDestroy {
               private store: Store<IAppState>,
               private translate: TranslateService,
               private mapService: MapService,
-              private authService: AuthService,) {
+              private authService: AuthService,
+              private targetChangedService: TargetChangedService) {
     this.translate.get('TASK.SELECT_A_TASK').subscribe((res) => this.selectedLabel = res);
 
     this.paging = new MapViewPaging();
@@ -382,9 +390,17 @@ export class MappingViewComponent implements OnInit, AfterViewInit, OnDestroy {
       (mapping) => {
         if (this.mapping_id === mapping?.id) {
           self.mapping = mapping;
+
+          // add in the reconciler column to the table if it is a dual map
+          if (this.mapping?.project.dualMapMode) {
+            this.addReconcilerTableColumn();
+          }
+
           if (self.mapping && self.mapping.id && self.mapping_id === self.mapping.id) {
-            self.store.dispatch(new LoadTasksForMap({id: self.mapping.id, authPageSize: self.authPageSize,
-              authCurrentPage: self.authCurrentPage, reviewPageSize: self.reviewPageSize, reviewCurrentPage: self.reviewCurrentPage}));
+            self.store.dispatch(new LoadTasksForMap({id: self.mapping.id, 
+                authPageSize: self.authPageSize, authCurrentPage: self.authCurrentPage, 
+                reviewPageSize: self.reviewPageSize, reviewCurrentPage: self.reviewCurrentPage,
+                reconcilePageSize: self.reconcilePageSize, reconcileCurrentPage: self.reconcileCurrentPage}));
             self.members = self.mapping.project.owners.concat(self.mapping.project.members).concat(self.mapping.project.guests);
           }
         }
@@ -497,7 +513,7 @@ export class MappingViewComponent implements OnInit, AfterViewInit, OnDestroy {
     this.opened = false;
   }
 
-  exportMapView(type: string): void {
+  exportMapViewAdditionalColumns(type: string, additionalColumns: string[]) {
     this.setLoading();
     let contentType: string;
     let extension: string;
@@ -513,6 +529,11 @@ export class MappingViewComponent implements OnInit, AfterViewInit, OnDestroy {
         extension = '.xlsx';
         break;
 
+      case 'fhir-json':
+        contentType = 'application/fhir+json';
+        extension = '.json';
+        break;
+  
       case 'csv':
       default:
         contentType = 'text/csv';
@@ -520,13 +541,17 @@ export class MappingViewComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     if (this.mapping && this.mapping.id) {
-      this.mapService.exportMapView(this.mapping.id, contentType)
+      this.mapService.exportMapView(this.mapping.id, contentType, additionalColumns)
         .subscribe(blob => saveAs(blob, this.mapping?.project.title + '_' + this.mapping?.mapVersion + extension),
           (error) => {
             console.log(error);
             this.translate.get('ERROR.EXPORT_FAILED').subscribe((msg) => this.error = msg);
           }).add(() => this.clearLoading());
     }
+  }
+
+  exportMapView(type: string): void {
+    this.exportMapViewAdditionalColumns(type, []);
   }
 
   loadTaskList(): void {
@@ -542,6 +567,17 @@ export class MappingViewComponent implements OnInit, AfterViewInit, OnDestroy {
         self.error.detail = error;
       })
     ));
+  }
+
+  addReconcilerTableColumn() {
+    
+    // check if already added as sometimes the column appears multiple times due to multiple mapping selection events
+    if (this.constantFilteredColumns[this.constantFilteredColumns.length-1] !== "filter-assignedReconciler") {
+      this.constantFilteredColumns.push("filter-assignedReconciler");
+      this.constantHideShowColumns.push("assignedReconciler");
+      this.constantColumns.push({columnId: 'assignedReconciler', columnDisplay: 'TABLE.RECONCILER', displayed: true});
+    }
+
   }
 
   explainRelationship(relationship: string | null): string {
@@ -610,6 +646,15 @@ export class MappingViewComponent implements OnInit, AfterViewInit, OnDestroy {
     return this.mapping?.project.owners.map(u => u.id).includes(this.currentUser.id) ?? false;
   }
 
+  isDualMapMode(): boolean {
+    let isDualMapMode = false;
+
+    if (this.mapping && this.mapping.project.dualMapMode) {
+      isDualMapMode = this.mapping.project.dualMapMode;
+    }
+    return isDualMapMode;
+  }
+
   private setLoading(): void {
     // in case action is taking some time, display spinner
     this.timeout = setTimeout(() => {
@@ -646,6 +691,7 @@ export class MappingViewComponent implements OnInit, AfterViewInit, OnDestroy {
         if ((validationResult.inactive.length + validationResult.absent.length + validationResult.invalid.length) > 0) {
           this.refreshTable('validated');
         }
+        this.targetChangedService.changeTarget({}); // needs to update on a zero count
         this.clearLoading();
       }, err => {
         this.validateError(err);
@@ -706,12 +752,17 @@ export class MappingViewComponent implements OnInit, AfterViewInit, OnDestroy {
     });
   }
 
+  onAllSelected(allSelected: boolean) {
+    this.allSelected = allSelected;
+  }
+
   getBulkChangeDialogData(): BulkChangeDialogData {
     return {
       task: null,
       map: this.mapping,
       isMapView: this.isOwner(),
-      selectedRows: this.mappingTableSelector?.selectedRows
+      selectedRows: this.mappingTableSelector?.selectedRows,
+      allSelected: this.allSelected
     };
   }
 
@@ -729,6 +780,9 @@ export class MappingViewComponent implements OnInit, AfterViewInit, OnDestroy {
         break;
       case TaskType.REVIEW:
         this.reviewCurrentPage = 0;
+        break;
+      case TaskType.RECONCILE:
+        this.reconcileCurrentPage = 0;
         break;
     }
   }

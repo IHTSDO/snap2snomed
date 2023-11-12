@@ -41,7 +41,7 @@ export class ServiceUtils {
     return {
       headers: new HttpHeaders({
         'Content-Type': 'application/json',
-        Accept: '*/*',
+        Accept: 'application/hal+json, application/json',
       })
     };
   }
@@ -49,7 +49,7 @@ export class ServiceUtils {
   static getHTTPUploadHeaders(): { headers: HttpHeaders, params?: any } {
     return {
       headers: new HttpHeaders({
-        Accept: '*/*',
+        Accept: 'application/json',
       })
     };
   }
@@ -182,6 +182,9 @@ export class ServiceUtils {
         params = params.append('status', value.toString());
       });
     }
+    if (filterEntity.targetOutOfScope !== undefined) {
+      params = params.append('targetOutOfScope', filterEntity.targetOutOfScope.toString());
+    }
     if (filterEntity.flagged !== undefined) {
       params = params.append('flagged', filterEntity.flagged.toString());
     }
@@ -193,6 +196,9 @@ export class ServiceUtils {
     }
     if (filterEntity.assignedReviewer && filterEntity.assignedReviewer.length > 0) {
       params = params.append('assignedReviewer', filterEntity.assignedReviewer.toString());
+    }
+    if (filterEntity.assignedReconciler && filterEntity.assignedReconciler.length > 0) {
+      params = params.append('assignedReconciler', filterEntity.assignedReconciler.toString());
     }
     if (filterEntity.additionalColumns && filterEntity.additionalColumns.length > 0) {
       params = params.append('additionalColumns', filterEntity.additionalColumns.join(','));
@@ -210,6 +216,9 @@ export class ServiceUtils {
         // filter
         case 'noMap':
           mapViewFilter.noMap = typeof v === 'string' ? v.toUpperCase() === 'TRUE' : v[0].toUpperCase() === 'TRUE';
+          break;
+        case 'targetOutOfScope':
+          mapViewFilter.targetOutOfScope = typeof v === 'string' ? v.toUpperCase() === 'TRUE' : v[0].toUpperCase() === 'TRUE';
           break;
         case 'flagged':
           mapViewFilter.flagged = typeof v === 'string' ? v.toUpperCase() === 'TRUE' : v[0].toUpperCase() === 'TRUE';
@@ -240,6 +249,9 @@ export class ServiceUtils {
           break;
         case 'assignedReviewer':
           mapViewFilter.assignedReviewer = v;
+          break;
+        case 'assignedReconciler':
+          mapViewFilter.assignedReconciler = v;
           break;
         case "additionalColumns":
           if (v !== undefined) {
@@ -341,7 +353,7 @@ export class ServiceUtils {
     if (result) {
       return result[0];
     }
-    return result;
+    return null;
   }
 
   // TODO: Maybe deprecate this as backend does the same thing

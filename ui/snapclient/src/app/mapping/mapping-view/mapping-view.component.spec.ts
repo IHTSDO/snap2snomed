@@ -185,7 +185,7 @@ describe('MappingViewComponent', () => {
   it('should show Map title', () => {
     fixture.detectChanges();
     el = fixture.debugElement.query(By.css('h2'));
-    expect(el.nativeElement.textContent).toBe('Test Map');
+    expect(el.nativeElement.textContent).toBe('Test Map - (MAP.SINGLE_MAP)');
     expect(el).toBeTruthy();
   });
 
@@ -209,7 +209,7 @@ describe('MappingViewComponent', () => {
     el.triggerEventHandler('click', null);
     const menu = fixture.debugElement.query(By.css('.mat-menu-panel'));
     expect(menu).toBeTruthy();
-    expect(menu.nativeElement.textContent).toBe('MAP.EXPORT_CSVMAP.EXPORT_TSVMAP.EXPORT_XLSX');
+    expect(menu.nativeElement.textContent).toBe('MAP.EXPORT_CSVMAP.EXPORT_TSVMAP.EXPORT_XLSXMAP.EXPORT_FHIR_JSONMAP.EXPORT_XLSX_EXTENDED');
   });
 
 });

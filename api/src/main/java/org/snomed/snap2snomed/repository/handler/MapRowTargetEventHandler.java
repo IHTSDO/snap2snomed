@@ -25,11 +25,11 @@ import javax.validation.constraints.NotNull;
 import org.snomed.snap2snomed.model.Map;
 import org.snomed.snap2snomed.model.MapRow;
 import org.snomed.snap2snomed.model.MapRowTarget;
-import org.snomed.snap2snomed.model.Note;
 import org.snomed.snap2snomed.model.Project;
 import org.snomed.snap2snomed.model.QMapRowTarget;
 import org.snomed.snap2snomed.model.User;
 import org.snomed.snap2snomed.model.enumeration.MapStatus;
+import org.snomed.snap2snomed.model.enumeration.TaskType;
 import org.snomed.snap2snomed.problem.auth.NotAuthorisedProblem;
 import org.snomed.snap2snomed.problem.mapping.UnauthorisedMappingProblem;
 import org.snomed.snap2snomed.repository.MapRowRepository;
@@ -105,18 +105,20 @@ public class MapRowTargetEventHandler {
    * @param mapRowTarget
    */
   public void performAutomaticUpdates(MapRowTarget mapRowTarget) {
-    MapRowTarget storedMapRowTarget = null;
-    if (mapRowTarget.getId() != null) {
-      em.detach(mapRowTarget);
-      storedMapRowTarget = mapRowTargetRepository.findById(mapRowTarget.getId()).orElse(null);
-      em.merge(mapRowTarget);
-    }
-    if (storedMapRowTarget == null ||
-        !storedMapRowTarget.getRelationship().equals(mapRowTarget.getRelationship())
-        || !storedMapRowTarget.getTargetCode().equals(mapRowTarget.getTargetCode())
-        || !storedMapRowTarget.getTargetDisplay().equals(mapRowTarget.getTargetDisplay())) {
-      // only revert to DRAFT state for a change other than being flagged
-      mapRowTarget.getRow().setStatus(MapStatus.DRAFT);
+    if (mapRowTarget.getRow().getStatus() != MapStatus.RECONCILE) {
+      MapRowTarget storedMapRowTarget = null;
+      if (mapRowTarget.getId() != null) {
+        em.detach(mapRowTarget);
+        storedMapRowTarget = mapRowTargetRepository.findById(mapRowTarget.getId()).orElse(null);
+        em.merge(mapRowTarget);
+      }
+      if (storedMapRowTarget == null ||
+          !storedMapRowTarget.getRelationship().equals(mapRowTarget.getRelationship())
+          || !storedMapRowTarget.getTargetCode().equals(mapRowTarget.getTargetCode())
+          || !storedMapRowTarget.getTargetDisplay().equals(mapRowTarget.getTargetDisplay())) {
+        // only revert to DRAFT state for a change other than being flagged
+        mapRowTarget.getRow().setStatus(MapStatus.DRAFT);
+      }
     }
     updateLastAuthorOrReviewed(mapRowTarget, false);
   }
@@ -154,16 +156,17 @@ public class MapRowTargetEventHandler {
     MapRow mapRow = mapRowRepository.findById(mapRowTarget.getRow().getId()).orElseThrow();
     boolean author = EntityUtils.isTaskAssignee(currentUser, mapRow.getAuthorTask());
     boolean reviewer = EntityUtils.isTaskAssignee(currentUser, mapRow.getReviewTask());
+    boolean reconciler = EntityUtils.isTaskAssignee(currentUser, mapRow.getReconcileTask());
 
-    if (!author && reviewer && (mapRow.getStatus().isAuthorState() || !isFlagOnlyChange(mapRowTarget))) {
+    if (!author && reviewer && mapRowTarget.getTaskType() == TaskType.REVIEW &&(mapRow.getStatus().isAuthorState() || !isFlagOnlyChange(mapRowTarget))) {
       throw new UnauthorisedMappingProblem(
           "A reviewer may only change the flagged attribute of target in a review state, state is " + mapRow.getStatus());
-    } else if (!reviewer && author && !(mapRow.getStatus().isAuthorState() || mapRow.getStatus().equals(MapStatus.REJECTED))) {
+    } else if (!reviewer && author && !(mapRow.getStatus().isAuthorState() || mapRow.getStatus().equals(MapStatus.REJECTED) || mapRow.getStatus().isReconcileState())) {
       throw new UnauthorisedMappingProblem(
           "An author may only change targets for rows in an author state, state is " + mapRow.getStatus());
-    } else if (!author && !reviewer) {
+    } else if (!author && !reviewer && !reconciler) {
       throw new UnauthorisedMappingProblem(
-          "User must be a reviewer or an author to create or modify a map row target");
+          "User must be a reviewer or an author or a reconciler to create or modify a map row target");
     }
   }
 
@@ -192,7 +195,10 @@ public class MapRowTargetEventHandler {
   private void updateLastAuthorOrReviewed(MapRowTarget mapRowTarget, boolean isDelete) {
     MapRow mapRow = mapRowTarget.getRow();
 
-    if (isDelete || mapRow.getStatus().isAuthorState()) {
+    if (isDelete || mapRow.getStatus().isAuthorState() || mapRow.getStatus().isReconcileState()) {
+      if (!isDelete) {
+        mapRowTarget.setLastAuthor(authenticationFacade.getAuthenticatedUser());
+      }
       mapRow.setLastAuthor(authenticationFacade.getAuthenticatedUser());
     } else {
       mapRow.setLastReviewer(authenticationFacade.getAuthenticatedUser());

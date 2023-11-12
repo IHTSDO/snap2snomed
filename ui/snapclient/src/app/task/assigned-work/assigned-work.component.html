@@ -38,6 +38,27 @@
         </div>
       </mat-tab>
 
+      <mat-tab *ngIf="mapping?.project?.dualMapMode">
+        <ng-template mat-tab-label>
+          <mat-icon class="tab-icon">compare_arrows</mat-icon>
+          <span matBadge="{{reconcileTotalElements}}" matBadgeSize="small"
+                matBadgeOverlap="false">{{'TASK.TAB_RECONCILE' | translate }}</span>
+        </ng-template>
+        <mat-paginator #reconcilepaginator
+          [length]="reconcileTotalElements || 0"
+          [pageIndex]="reconcileCurrentPage"
+          [pageSize]="reconcilePageSize"
+          [pageSizeOptions]="pageSizeOptions"
+          (page)="reconcilePageChanged($event)"
+          [showFirstLastButtons]="true">
+        </mat-paginator>
+        <div *ngFor="let task of reconcileTasks">
+          <app-task-card [task]="task" [isClickable]="isAssigned(task)"
+                         [currentUser]="currentUser" [isOwner]="isOwner()"
+                         (updateTaskEvent)="selectTaskTab($event)"></app-task-card>
+        </div>
+      </mat-tab>
+
       <mat-tab>
         <ng-template mat-tab-label>
           <mat-icon class="tab-icon">checklist</mat-icon>

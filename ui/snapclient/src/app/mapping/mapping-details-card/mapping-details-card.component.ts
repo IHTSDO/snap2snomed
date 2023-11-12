@@ -19,6 +19,9 @@ import { MatSelectChange } from '@angular/material/select';
 import { Router } from '@angular/router';
 import {TranslateService} from '@ngx-translate/core';
 import {Mapping} from 'src/app/_models/mapping';
+import { TARGET_OUT_OF_SCOPE_TAG } from 'src/app/_models/map_row';
+import { MapService } from 'src/app/_services/map.service';
+import { TargetChangedService } from 'src/app/_services/target-changed.service';
 
 @Component({
   selector: 'app-mapping-details-card',
@@ -32,8 +35,30 @@ export class MappingDetailsCardComponent {
 
   @Output() clicked = new EventEmitter();
 
+  outOfScopeTargetCount: number | string = "";
+
   constructor(private translate: TranslateService,
-              private router: Router) {
+              private router: Router,
+              private mapService: MapService,
+              private targetChangedService: TargetChangedService) {
+  }
+
+  ngOnInit() {
+
+    this.targetChangedService.targetChanged$.subscribe(row => {
+      this.updateNumOutOfScopeTargets();
+    })
+
+    this.updateNumOutOfScopeTargets();
+
+  }
+
+  updateNumOutOfScopeTargets() {
+    if (this.mapping.id) {
+      this.mapService.getTagCount(this.mapping.id, TARGET_OUT_OF_SCOPE_TAG).subscribe((result) => {
+        this.outOfScopeTargetCount = result.page.totalElements;
+      });
+    }
   }
 
   ngOnChanges(changes: SimpleChanges): void {

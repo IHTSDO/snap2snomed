@@ -35,7 +35,7 @@ import {UserChipComponent} from '../../user/user-chip/user-chip.component';
 import {SourceCode} from '../../_models/source_code';
 import {Source} from '../../_models/source';
 import {MapRow} from '../../_models/map_row';
-import {Note} from '../../_models/note';
+import {Note, NoteCategory} from '../../_models/note';
 import {User} from '../../_models/user';
 import {DebugElement} from '@angular/core';
 import {By} from '@angular/platform-browser';
@@ -89,7 +89,7 @@ describe('NotesItemComponent', () => {
       id: '1', noMap: false, sourceCode: new SourceCode('code', 'display',
         new Source(), '1', []), status: 'DRAFT'
     } as MapRow;
-    component.note = new Note(1, 'Test notes', new User(), '', '', row);
+    component.note = new Note(1, 'Test notes', new User(), '', '', row, NoteCategory.USER);
     fixture.detectChanges();
   });
 

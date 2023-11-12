@@ -91,8 +91,16 @@ ul.sources-list li {
 
 }
 
+.mat-column-targetOutOfScope,
+.mat-column-filter-targetOutOfScope {
+  width: 60px;
+  text-align: center;
+}
+
 .mat-column-filter-assignedAuthor,
 .mat-column-assignedAuthor,
+.mat-column-filter-assignedReconciler,
+.mat-column-assignedReconciler,
 .mat-column-filter-assignedReviewer,
 .mat-column-assignedReviewer,
 .mat-column-filter-lastAuthorReviewer,
@@ -137,6 +145,12 @@ ul.sources-list li {
   width: 100px;
 }
 
+
+::ng-deep .mat-column-filter-targetOutOfScope .mat-form-field{
+  width: 60px;
+}
+
+
 ::ng-deep .mat-column-filter-flagged .mat-form-field{
   width: 60px;
 }
@@ -146,6 +160,11 @@ ul.sources-list li {
 }
 
 ::ng-deep .mat-column-filter-assignedAuthor .mat-form-field {
+  width: 60px;
+  text-align: center;
+}
+
+::ng-deep .mat-column-filter-assignedReconciler .mat-form-field {
   width: 60px;
   text-align: center;
 }

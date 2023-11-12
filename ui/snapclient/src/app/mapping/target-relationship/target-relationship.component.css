@@ -75,3 +75,7 @@
 .flag {
   color: rgba(0,0,0,0.45);
 }
+
+#targetLastAuthorUserChip {
+  margin-right: 0.5em;
+}

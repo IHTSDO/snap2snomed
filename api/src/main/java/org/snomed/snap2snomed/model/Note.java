@@ -1,5 +1,5 @@
 /*
- * Copyright © 2022 SNOMED International
+ * Copyright © 2022-23 SNOMED International
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,12 +34,16 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.apache.commons.lang3.builder.CompareToBuilder;
 import org.hibernate.envers.Audited;
+import org.snomed.snap2snomed.model.enumeration.NoteCategory;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.annotation.ReadOnlyProperty;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.data.rest.core.config.Projection;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
 
 @Entity
 @Data
@@ -54,6 +58,7 @@ public class Note implements Comparable<Note>, Snap2SnomedEntity {
     @CreatedDate
     private Instant created;
 
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSXXX", timezone = "UTC")
     @Column(name = "modified")
     @LastModifiedDate
     private Instant modified;
@@ -87,13 +92,17 @@ public class Note implements Comparable<Note>, Snap2SnomedEntity {
     @Builder.Default
     private boolean deleted = false;
 
+    @ReadOnlyProperty
+    @NotNull(message = "A note must have a category")
+    NoteCategory category;
+
     @Override
     public int compareTo(Note o) {
         // NB other fields are included to prevent collisions in sorted sets
         return new CompareToBuilder().append(o.getModified(), this.getModified())
             .append(o.getCreated(), this.getCreated()).append(o.getId(), this.getId())
             .append(this.getMapRow(), o.getMapRow()).append(this.getNoteBy(), o.getNoteBy())
-            .append(this.getNoteText(), o.getNoteText())
+            .append(this.getNoteText(), o.getNoteText()).append(this.getCategory(), o.getCategory())
             .toComparison();
     }
 
@@ -111,6 +120,8 @@ public class Note implements Comparable<Note>, Snap2SnomedEntity {
         Instant getCreated();
 
         Instant getModified();
+
+        NoteCategory getCategory();
     }
 
 }

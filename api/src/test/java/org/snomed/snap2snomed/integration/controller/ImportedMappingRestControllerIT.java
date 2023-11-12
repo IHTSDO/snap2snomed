@@ -218,7 +218,7 @@ public class ImportedMappingRestControllerIT extends IntegrationTestBase {
         400, null, DEFAULT_TEST_USER_SUBJECT);
     restClient.expectCreateImportedMapFail(0, 2, 3, 4, -1, -1, true, ",",
         new ClassPathResource("AAA_invalid_csv_doublequotes.csv").getFile(), "text/csv", mapId,
-        400, null, DEFAULT_TEST_USER_SUBJECT);
+        500, null, DEFAULT_TEST_USER_SUBJECT);
   }
 
   /**

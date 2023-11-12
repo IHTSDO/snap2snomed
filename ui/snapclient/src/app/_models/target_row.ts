@@ -20,6 +20,8 @@
 import {SourceCode} from './source_code';
 import {Mapping} from './mapping';
 import {MapRow} from './map_row';
+import {User} from './user';
+import { TaskType } from './task';
 
 export class TargetRow {
   row?: string;
@@ -28,15 +30,22 @@ export class TargetRow {
   targetDisplay?: string;
   relationship?: string;
   flagged?: boolean;
+  targetOutOfScope?: boolean;
+  tags?: string[];
+  taskType?: TaskType;
 
   constructor(row: string | undefined, id: string | undefined, targetCode: string | undefined, targetDisplay: string | undefined,
-              relationship: string | undefined, flagged: boolean | undefined) {
+              relationship: string | undefined, flagged: boolean | undefined, targetOutOfScope: boolean | undefined, tags: string[] | undefined,
+              taskType: TaskType | undefined) {
     this.row = row;
     this.id = id;
     this.targetCode = targetCode;
     this.targetDisplay = targetDisplay;
     this.relationship = relationship;
     this.flagged = flagged;
+    this.targetOutOfScope = targetOutOfScope;
+    this.tags = tags;
+    this.taskType = taskType;
   }
 
   static replacer(key: string, value: any): any {
@@ -50,14 +59,19 @@ export class TargetRow {
 export class JSONTargetRow extends TargetRow {
   source?: SourceCode;
   mapping?: Mapping;
+  lastAuthor?: User;
   // @ts-ignore
   row?: MapRow;
+  tags?: string[];
 
-  constructor(row: MapRow | undefined, id: string | undefined, targetCode: string | undefined, targetDisplay: string | undefined,
-              relationship: string | undefined, flagged: boolean, source: SourceCode | undefined, mapping: Mapping | undefined) {
-    super(row?.id || '', id, targetCode, targetDisplay, relationship, flagged);
+  constructor(row: MapRow | undefined, id: string | undefined, targetCode: string | undefined, tags: string[] | undefined, targetDisplay: string | undefined,
+              relationship: string | undefined, flagged: boolean, targetOutOfScope: boolean, source: SourceCode | undefined, mapping: Mapping | undefined, 
+              lastAuthor: User | undefined, task: TaskType | undefined) {
+    super(row?.id || '', id, targetCode, targetDisplay, relationship, flagged, targetOutOfScope, tags, task);
     this.source = source;
     this.mapping = mapping;
     this.row = row;
+    this.tags = tags;
+    this.lastAuthor = lastAuthor
   }
 }

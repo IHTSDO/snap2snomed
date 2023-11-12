@@ -40,10 +40,13 @@ export class WriteDisableUtils {
    * Used to control when noMap and the row target are editable
    * @param task
    * @param status
+   * Note that this is used for both the details screen and the table screen, in situations where the behviour is different
+   * e.g. reconcile where reconcile is only allowed via the details screen, this will not represent the complete logic
    */
   static isEditDisabled(taskType: TaskType | string | undefined, status: MapRowStatus | null | undefined): boolean {
     return taskType && status ? taskType as TaskType === TaskType.REVIEW ||
-      StatusUtils.inReviewedState(status as MapRowStatus) : false;
+      StatusUtils.inReviewedState(status as MapRowStatus) || taskType as TaskType === TaskType.RECONCILE ||
+      StatusUtils.inReconcileState(status as MapRowStatus) : false;
   }
 
   /**

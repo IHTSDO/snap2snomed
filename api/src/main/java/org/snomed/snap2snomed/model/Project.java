@@ -88,6 +88,10 @@ public class Project implements Snap2SnomedEntity {
   @Size(max = 200, message = "Description must be less than 200 characters")
   private String description;
 
+  @Column(name = "dual_map_mode")
+  @NotNull
+  private Boolean dualMapMode;
+
   @OneToMany(mappedBy = "project", cascade = {CascadeType.PERSIST, CascadeType.REMOVE}, orphanRemoval = true)
   @ToString.Exclude
   @EqualsAndHashCode.Exclude
@@ -119,6 +123,8 @@ public class Project implements Snap2SnomedEntity {
     Instant getCreated();
 
     Instant getModified();
+
+    Boolean getDualMapMode();
 
     @Value("#{target.getMaps().size()}")
     long getMapCount();

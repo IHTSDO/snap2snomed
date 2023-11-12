@@ -105,9 +105,11 @@ public class TaskRestController {
     Instant modified = Instant.now();
     if (task.getType().equals(TaskType.AUTHOR)) {
       mapRowRepository.setAuthorTaskToNull(task, modified, principalSubject);
-    } else {
+    } else if (task.getType().equals(TaskType.REVIEW)) {
       mapRowRepository.setReviewTaskToNull(task, modified, principalSubject);
-    }
+    } else if (task.getType().equals(TaskType.RECONCILE)) {
+      mapRowRepository.setReconcileTaskToNull(task, modified, principalSubject);
+    }    
     taskRepository.delete(task);
   }
 
@@ -134,6 +136,8 @@ public class TaskRestController {
       statuses = MapStatus.getCompletedAuthorStatuses();
     } else if (task.getType().equals(TaskType.REVIEW)) {
       statuses = MapStatus.getCompletedReviewStatuses();
+    } else if (task.getType().equals(TaskType.RECONCILE)) {
+      statuses = MapStatus.getCompletedReconcileStatuses();
     } else {
       throw new IllegalArgumentException("Unexpected task type " + task.getType());
     }

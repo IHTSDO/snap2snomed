@@ -44,6 +44,12 @@
   text-align: center;
 }
 
+.mat-column-filter-lastAuthorReviewer,
+.mat-column-lastAuthorReviewer {
+  width: 60px;
+  text-align: left;
+}
+
 .mat-column-filter-sourceCode, .mat-column-filter-targetCode,
 .mat-column-bulk-source-code, .mat-column-bulk-target-code,
 .mat-column-filter-sourceCode .mat-form-field, .mat-column-filter-targetCode .mat-form-field,
@@ -67,11 +73,21 @@
   width: 95% !important;
 }
 
-.mat-column-noMap, mat-column-bulk-noMap, .mat-column-filter-noMap, .mat-column-flagged, .mat-column-filter-flagged, .mat-column-notes, .mat-column-filter-notes {
+.mat-column-targetOutOfScope,
+.mat-column-filter-targetOutOfScope,
+.mat-column-noMap, 
+mat-column-bulk-noMap, 
+.mat-column-filter-noMap, 
+.mat-column-flagged, 
+.mat-column-filter-flagged {
   width: 60px;
 }
 
 ::ng-deep .mat-column-filter-noMap .mat-form-field{
+  width: 60px;
+}
+
+::ng-deep .mat-column-filter-targetOutOfScope .mat-form-field{
   width: 60px;
 }
 
@@ -83,6 +99,10 @@
   width: 60px;
 }
 
+::ng-deep .mat-column-filter-lastAuthorReviewer .mat-form-field {
+  width: 60px;
+}
+
 .mat-column-relationship, .mat-column-bulk-relationship, .mat-column-status {
   width: 120px;
   font-size: 0.8em;
@@ -90,7 +110,7 @@
 
 .mat-column-latestNote, .mat-column-actions {
   width: 60px;
-  text-align: right;
+  text-align: left;
 }
 
 ::ng-deep .mat-column-filter-relationship .mat-form-field,

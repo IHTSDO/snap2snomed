@@ -24,7 +24,7 @@ button.add {
   gap: 20px;
 }
 
-#notes-list {
+#notes-list, #system-notes-list {
   max-height: 305px;
   overflow-y: auto;
 }

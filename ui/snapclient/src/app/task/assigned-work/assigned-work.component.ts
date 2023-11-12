@@ -41,6 +41,7 @@ export class AssignedWorkComponent implements OnInit, AfterViewInit, OnDestroy {
   private subscription = new Subscription();
   authorTasks: Task[] | null | undefined;
   reviewTasks: Task[] | null | undefined;
+  reconcileTasks: Task[] | null | undefined;
   loading = true;
   currentUser: User = new User();
   error: ErrorInfo = {};
@@ -56,8 +57,13 @@ export class AssignedWorkComponent implements OnInit, AfterViewInit, OnDestroy {
   @Output() reviewPageSizeChange = new EventEmitter<number>();
   @Input() reviewCurrentPage: number | undefined;
   @Output() reviewCurrentPageChange = new EventEmitter<number>();
+  @Input() reconcilePageSize: number | undefined;
+  @Output() reconcilePageSizeChange = new EventEmitter<number>();
+  @Input() reconcileCurrentPage: number | undefined;
+  @Output() reconcileCurrentPageChange = new EventEmitter<number>();
   authTotalElements = 0;
   reviewTotalElements = 0;
+  reconcileTotalElements = 0;
   pageSizeOptions: number[] = [10, 25, 50, 100];
   @Input() mapping: Mapping | undefined;
   @Input() mappingTableSelector: MappingTableSelectorComponent | null | undefined;
@@ -112,15 +118,21 @@ export class AssignedWorkComponent implements OnInit, AfterViewInit, OnDestroy {
       data => {
         let authPage = data.find(taskPage => taskPage.type === TaskType.AUTHOR);
         let reviewPage = data.find(taskPage => taskPage.type === TaskType.REVIEW);
+        let reconcilePage = data.find(taskPage => taskPage.type === TaskType.RECONCILE);
         self.authorTasks = authPage?.page.tasks
           .sort((a, b) => AssignedWorkComponent.sortTasks(a, b));
         self.reviewTasks = reviewPage?.page.tasks
+          .sort((a, b) => AssignedWorkComponent.sortTasks(a, b));
+        self.reconcileTasks = reconcilePage?.page.tasks
           .sort((a, b) => AssignedWorkComponent.sortTasks(a, b));
         if (authPage?.page) {
           self.authTotalElements = authPage.page.page.totalElements;
         }
         if (reviewPage?.page) {
           self.reviewTotalElements = reviewPage.page.page.totalElements;
+        }
+        if (reconcilePage?.page) {
+          self.reconcileTotalElements = reconcilePage.page.page.totalElements;
         }
         self.loading = false;
         self.setTab();
@@ -146,8 +158,10 @@ export class AssignedWorkComponent implements OnInit, AfterViewInit, OnDestroy {
     this.authCurrentPage = event.pageIndex;
     this.authPageSizeChange.emit(this.authPageSize);
     this.authCurrentPageChange.emit(this.authCurrentPage);
-    this.store.dispatch(new LoadTasksForMap({id: this.mapping?.id, authPageSize: this.authPageSize,
-        authCurrentPage: this.authCurrentPage, reviewPageSize: this.reviewPageSize, reviewCurrentPage: this.reviewCurrentPage}));
+    this.store.dispatch(new LoadTasksForMap({id: this.mapping?.id, 
+      authPageSize: this.authPageSize, authCurrentPage: this.authCurrentPage, 
+      reviewPageSize: this.reviewPageSize, reviewCurrentPage: this.reviewCurrentPage,
+      reconcilePageSize: this.reconcilePageSize, reconcileCurrentPage: this.reconcileCurrentPage}));
   }
 
   reviewPageChanged(event: PageEvent): void {
@@ -155,8 +169,21 @@ export class AssignedWorkComponent implements OnInit, AfterViewInit, OnDestroy {
     this.reviewCurrentPage = event.pageIndex;
     this.reviewCurrentPageChange.emit(this.reviewCurrentPage);
     this.reviewPageSizeChange.emit(this.reviewPageSize);
-    this.store.dispatch(new LoadTasksForMap({id: this.mapping?.id, authPageSize: this.authPageSize,
-        authCurrentPage: this.authCurrentPage, reviewPageSize: this.reviewPageSize, reviewCurrentPage: this.reviewCurrentPage}));
+    this.store.dispatch(new LoadTasksForMap({id: this.mapping?.id, 
+      authPageSize: this.authPageSize, authCurrentPage: this.authCurrentPage, 
+      reviewPageSize: this.reviewPageSize, reviewCurrentPage: this.reviewCurrentPage,
+      reconcilePageSize: this.reconcilePageSize, reconcileCurrentPage: this.reconcileCurrentPage}));
+  }
+
+  reconcilePageChanged(event: PageEvent): void {
+    this.reconcilePageSize = event.pageSize;
+    this.reconcileCurrentPage = event.pageIndex;
+    this.reconcileCurrentPageChange.emit(this.reconcileCurrentPage);
+    this.reconcilePageSizeChange.emit(this.reconcilePageSize);
+    this.store.dispatch(new LoadTasksForMap({id: this.mapping?.id, 
+      authPageSize: this.authPageSize, authCurrentPage: this.authCurrentPage, 
+      reviewPageSize: this.reviewPageSize, reviewCurrentPage: this.reviewCurrentPage,
+      reconcilePageSize: this.reconcilePageSize, reconcileCurrentPage: this.reconcileCurrentPage}));
   }
 
   setTab(): void {
@@ -166,6 +193,15 @@ export class AssignedWorkComponent implements OnInit, AfterViewInit, OnDestroy {
         self.activeTab = 1;
         break;
       case TaskType.REVIEW:
+        if (this.mapping?.project.dualMapMode) {
+          self.activeTab = 3;
+        }
+        else {
+          self.activeTab = 2;
+        }
+  
+        break;
+      case TaskType.RECONCILE:
         self.activeTab = 2;
         break;
       default:
@@ -196,6 +232,9 @@ export class AssignedWorkComponent implements OnInit, AfterViewInit, OnDestroy {
       case TaskType.REVIEW:
         this.reviewCurrentPage = 0;
         break;
+      case TaskType.RECONCILE:
+        this.reconcileCurrentPage = 0;
+        break;
     }
     this.updateCurrentTaskPage.emit(this.selectedTaskType);
     this.updateTableEvent.emit(this.selectedTaskType);
@@ -210,6 +249,9 @@ export class AssignedWorkComponent implements OnInit, AfterViewInit, OnDestroy {
         break;
       case 2:
         this.selectedTaskType = TaskType.REVIEW;
+        break;
+      case 3:
+        this.selectedTaskType = TaskType.RECONCILE;
         break;
       default:
         this.selectedTaskType = '';

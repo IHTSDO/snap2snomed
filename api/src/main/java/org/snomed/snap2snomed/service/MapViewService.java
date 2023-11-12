@@ -1,5 +1,5 @@
 /*
- * Copyright © 2022 SNOMED International
+ * Copyright © 2022-23 SNOMED International
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.snomed.snap2snomed.service;
 
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.BiFunction;
@@ -32,6 +33,7 @@ import org.snomed.snap2snomed.controller.dto.Snap2SnomedPagedModel;
 import org.snomed.snap2snomed.model.AdditionalCodeColumn;
 import org.snomed.snap2snomed.model.Map;
 import org.snomed.snap2snomed.model.MapView;
+import org.snomed.snap2snomed.model.QDbMapView;
 import org.snomed.snap2snomed.model.QImportedCode;
 import org.snomed.snap2snomed.model.QMapRow;
 import org.snomed.snap2snomed.model.QMapRowTarget;
@@ -41,10 +43,13 @@ import org.snomed.snap2snomed.model.Task;
 import org.snomed.snap2snomed.model.enumeration.ColumnType;
 import org.snomed.snap2snomed.model.enumeration.MapStatus;
 import org.snomed.snap2snomed.model.enumeration.MappingRelationship;
+import org.snomed.snap2snomed.model.enumeration.NoteCategory;
 import org.snomed.snap2snomed.model.enumeration.TaskType;
 import org.snomed.snap2snomed.problem.auth.NotAuthorisedProblem;
+import org.snomed.snap2snomed.repository.DbMapViewRepository;
 import org.snomed.snap2snomed.repository.MapRepository;
 import org.snomed.snap2snomed.repository.TaskRepository;
+import org.snomed.snap2snomed.security.AuthenticationFacade;
 import org.snomed.snap2snomed.security.WebSecurity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -79,6 +84,7 @@ import lombok.extern.slf4j.Slf4j;
 public class MapViewService {
 
   private static final String ADDITIONAL_COLUMN_NAME = "additionalColumn";
+  private static final String TARGET_OUT_OF_SCOPE_TAG = "target-out-of-scope";
 
   public class MapViewFilter {
 
@@ -94,13 +100,16 @@ public class MapViewService {
     private final List<String> lastAuthorReviewer;
     private final List<String> assignedAuthor;
     private final List<String> assignedReviewer;
+    private final List<String> assignedReconciler;
+    private final Boolean targetOutOfScope;
     private final Boolean flagged;
     private final List<String> additionalColumns;
 
     public MapViewFilter(List<String> sourceCodes, List<String> sourceDisplays, Boolean noMap, List<String> targetCodes,
-        List<String> targetDisplays, List<MappingRelationship> relationshipTypes, List<MapStatus> statuses, List<String> lastAuthor,
-        List<String> lastReviewer, List<String> lastAuthorReviewer, List<String> assignedAuthor, List<String> assignedReviewer,
-        Boolean flagged, List<String> additionalColumns) {
+        List<String> targetDisplays, List<MappingRelationship> relationshipTypes, List<MapStatus> statuses, 
+        List<String> lastAuthor, List<String> lastReviewer, List<String> lastAuthorReviewer, 
+        List<String> assignedAuthor, List<String> assignedReviewer, List<String> assignedReconciler,
+        Boolean targetOutOfScope, Boolean flagged, List<String> additionalColumns) {
       this.sourceCodes = sourceCodes;
       this.sourceDisplays = sourceDisplays;
       this.noMap = noMap;
@@ -113,23 +122,26 @@ public class MapViewService {
       this.lastAuthorReviewer = lastAuthorReviewer;
       this.assignedAuthor = assignedAuthor;
       this.assignedReviewer = assignedReviewer;
+      this.assignedReconciler = assignedReconciler;
+      this.targetOutOfScope = targetOutOfScope;
       this.flagged = flagged;
       this.additionalColumns  = additionalColumns;
     }
 
-    public BooleanExpression getExpression() {
+    public BooleanExpression getExpression(boolean useDualView) {
+      var _mapRow = useDualView ? QDbMapView.dbMapView.mapRow : QMapRow.mapRow;
 
       BooleanExpression expression = null;
-
+        
       expression = stringCollectionToOrStatements(expression, sourceCodes,
-          s -> QMapRow.mapRow.sourceCode.code.startsWithIgnoreCase(s),
+          s -> _mapRow.sourceCode.code.startsWithIgnoreCase(s),
           (a, b) -> collectOrStatement(a, b));
       expression = stringCollectionToOrStatements(expression, sourceDisplays,
-          s -> QMapRow.mapRow.sourceCode.display.containsIgnoreCase(s),
+          s -> _mapRow.sourceCode.display.containsIgnoreCase(s),
           (a, b) -> collectAndStatement(a, b));
 
       if (noMap != null) {
-        expression = collectAndStatement(expression, QMapRow.mapRow.noMap.eq(noMap));
+        expression = collectAndStatement(expression, _mapRow.noMap.eq(noMap));
       }
 
       expression = stringCollectionToOrStatements(expression, targetCodes,
@@ -144,46 +156,65 @@ public class MapViewService {
       }
 
       if (!CollectionUtils.isEmpty(statuses)) {
-        expression = collectAndStatement(expression, QMapRow.mapRow.status.in(statuses));
+        expression = collectAndStatement(expression, _mapRow.status.in(statuses));
       }
 
       if (!CollectionUtils.isEmpty(lastAuthor)) {
-        expression = collectAndStatement(expression, QMapRow.mapRow.lastAuthor.id.in(lastAuthor));
+        expression = collectAndStatement(expression, _mapRow.lastAuthor.id.in(lastAuthor));
       }
 
       if (!CollectionUtils.isEmpty(lastReviewer)) {
-        expression = collectAndStatement(expression, QMapRow.mapRow.lastReviewer.id.in(lastReviewer));
+        expression = collectAndStatement(expression, _mapRow.lastReviewer.id.in(lastReviewer));
       }
 
       if (!CollectionUtils.isEmpty(lastAuthorReviewer)) {
         BooleanExpression noneMatch = null;
         if (lastAuthorReviewer.contains("none")) {
-          noneMatch = QMapRow.mapRow.lastAuthor.isNull().and(QMapRow.mapRow.lastReviewer.isNull());
+          noneMatch = _mapRow.lastAuthor.isNull().and(_mapRow.lastReviewer.isNull());
         }
 
         expression = collectAndStatement(expression,
-            collectOrStatement(QMapRow.mapRow.lastAuthor.id.in(lastAuthorReviewer).or(QMapRow.mapRow.lastReviewer.id.in(lastAuthorReviewer)),
+            collectOrStatement(_mapRow.lastAuthor.id.in(lastAuthorReviewer).or(_mapRow.lastReviewer.id.in(lastAuthorReviewer)),
                 noneMatch));
       }
 
       if (!CollectionUtils.isEmpty(assignedAuthor)) {
         BooleanExpression noneMatch = null;
         if (assignedAuthor.contains("none")) {
-          noneMatch = QMapRow.mapRow.authorTask.isNull();
+          noneMatch = _mapRow.authorTask.isNull();
         }
 
-        expression = collectAndStatement(expression, collectOrStatement(QMapRow.mapRow.authorTask.assignee.id.in(assignedAuthor),
+        expression = collectAndStatement(expression, collectOrStatement(_mapRow.authorTask.assignee.id.in(assignedAuthor),
             noneMatch));
       }
 
       if (!CollectionUtils.isEmpty(assignedReviewer)) {
         BooleanExpression noneMatch = null;
         if (assignedReviewer.contains("none")) {
-          noneMatch = QMapRow.mapRow.reviewTask.assignee.isNull();
+          noneMatch = _mapRow.reviewTask.assignee.isNull();
         }
 
-        expression = collectAndStatement(expression, collectOrStatement(QMapRow.mapRow.reviewTask.assignee.id.in(assignedReviewer),
+        expression = collectAndStatement(expression, collectOrStatement(_mapRow.reviewTask.assignee.id.in(assignedReviewer),
             noneMatch));
+      }
+
+      if (!CollectionUtils.isEmpty(assignedReconciler)) {
+        BooleanExpression noneMatch = null;
+        if (assignedReconciler.contains("none")) {
+          noneMatch = _mapRow.reconcileTask.assignee.isNull();
+        }
+
+        expression = collectAndStatement(expression, collectOrStatement(_mapRow.reconcileTask.assignee.id.in(assignedReconciler),
+            noneMatch));
+      }
+
+      if (targetOutOfScope != null) {
+        if (targetOutOfScope) {
+          expression = collectAndStatement(expression, QMapRowTarget.mapRowTarget.tags.contains(TARGET_OUT_OF_SCOPE_TAG));
+        }
+        else {
+          expression = collectAndStatement(expression, QMapRowTarget.mapRowTarget.tags.contains(TARGET_OUT_OF_SCOPE_TAG).not());
+        }
       }
 
       if (flagged != null) {
@@ -194,7 +225,7 @@ public class MapViewService {
         for (int i = 0; i < additionalColumns.size(); i++) {
           final String string = additionalColumns.get(i);
           if (!string.isEmpty()) {
-            expression = collectAndStatement(expression, QMapRow.mapRow.sourceCode.additionalColumns.get(i).value.containsIgnoreCase(string));
+            expression = collectAndStatement(expression, _mapRow.sourceCode.additionalColumns.get(i).value.containsIgnoreCase(string));
           }
         }
       }
@@ -228,6 +259,13 @@ public class MapViewService {
   @Autowired
   WebSecurity webSecurity;
 
+  @Autowired 
+  AuthenticationFacade authenticationFacade;
+
+  @Autowired
+  DbMapViewRepository mapViewRepository;
+
+  private final QDbMapView mapView = QDbMapView.dbMapView;
   private final QMapRow mapRow = QMapRow.mapRow;
   private final QMapRowTarget mapTarget = QMapRowTarget.mapRowTarget;
   private final QNote note = QNote.note;
@@ -267,23 +305,87 @@ public class MapViewService {
         extension = ".xlsx";
         break;
 
+      case MapViewRestController.FHIR_JSON:
+        extension = ".json";
+        break;
+
       default:
-        throw Problem.valueOf(Status.UNSUPPORTED_MEDIA_TYPE, "Content type " + contentType + " is not supported");
+        throw Problem.valueOf(Status.UNSUPPORTED_MEDIA_TYPE, "Content type " + contentType + " is not supported for map export");
     }
 
     return "map-" + map.getProject().getTitle() + "_" + map.getMapVersion() + extension;
   }
 
+  public List<AdditionalCodeColumn> getAdditionalColumnsMetadata(Long mapId) {
+    return mapRepository.findSourceByMapId(mapId).get().getAdditionalColumnsMetadata();
+  }
+
+  public String[] getExportHeader(Long mapId, List<String> extraColumns) {
+    
+    ArrayList<String> exportHeader = new ArrayList<String>(Arrays.asList("\ufeff" + "Source code", "Source display"));
+
+    final List<AdditionalCodeColumn> additionalCodeColumnList = this.getAdditionalColumnsMetadata(mapId);
+    if (additionalCodeColumnList != null && additionalCodeColumnList.size() > 0) {
+      for (AdditionalCodeColumn additionalColumn : additionalCodeColumnList) {
+        exportHeader.add(additionalColumn.getName());
+      }
+    }
+    exportHeader.addAll(Arrays.asList("Target code", "Target display", "Relationship type code", "Relationship type display", "No map flag", "Status"));
+
+    if (extraColumns != null) {
+      for (String extraColumn : extraColumns) {
+        switch(extraColumn.toUpperCase()) {
+          case "NOTES":
+            exportHeader.add("Notes");
+            break;
+          case "ASSIGNEDAUTHOR":
+            exportHeader.add("Assigned author");
+            break;
+          case "ASSIGNEDREVIEWER":
+            exportHeader.add("Assigned reviewer");
+            break;
+          case "LASTAUTHOR":
+            exportHeader.add("Last author");
+            break;
+          case "LASTREVIEWER":
+            exportHeader.add("Last reviewer");
+            break;
+        }
+      }
+    }
+
+    return exportHeader.toArray(new String[0]);
+
+  }
+
   public List<MapView> getAllMapViewForMap(Long mapId) {
-    return getQueryForMap(mapId, null, null).orderBy(mapRow.sourceCode.index.asc()).orderBy(mapTarget.id.asc()).fetch();
+    final Map map = mapRepository.findById(mapId).orElseThrow(() -> Problem.valueOf(Status.NOT_FOUND, "No Map found with id " + mapId));
+    Boolean dualMapMode = map.getProject().getDualMapMode();
+    if (dualMapMode) {
+      return getDualMapQueryForMap(mapId, null, null, null).fetch();
+    }
+    else {
+      return getQueryForMap(mapId, null, null).orderBy(mapRow.sourceCode.index.asc()).orderBy(mapTarget.id.asc()).fetch();
+    }
+    
   }
 
   private  Snap2SnomedPagedModel<EntityModel<MapView>> getMapResults(Long mapId, Task task, Pageable pageable,
       PagedResourcesAssembler<MapView> assembler, MapViewFilter filter) {
     final List<AdditionalCodeColumn> additionalColumns = mapRepository.findSourceByMapId(mapId).get().getAdditionalColumnsMetadata();
 
-    JPAQuery<MapView> query = getQueryForMap(mapId, task, filter);
-    query = transformSortable(query, pageable.getSort(), additionalColumns);
+    final Map map = mapRepository.findById(mapId).orElseThrow(() -> Problem.valueOf(Status.NOT_FOUND, "No Map found with id " + mapId));
+    Boolean dualMapMode = map.getProject().getDualMapMode();
+
+    JPAQuery<MapView> query;
+    if (dualMapMode) {
+      query = getDualMapQueryForMap(mapId, task, filter, pageable.getSort());
+    }
+    else {
+      query = getQueryForMap(mapId, task, filter);
+    }
+
+    query = transformSortable(query, pageable.getSort(), additionalColumns, dualMapMode, task);
     query = transformPageable(query, pageable);
 
     final QueryResults<MapView> results = query.fetchResults();
@@ -305,25 +407,27 @@ public class MapViewService {
     return query;
   }
 
-  protected JPAQuery<MapView> transformSortable(JPAQuery<MapView> query, Sort sort, List<AdditionalCodeColumn> additionalColumns) {
+  protected JPAQuery<MapView> transformSortable(JPAQuery<MapView> query, Sort sort, List<AdditionalCodeColumn> additionalColumns, Boolean dualMapMode,
+          Task task) {
     if (sort != null) {
+      var _mapRow = dualMapMode && task == null ? mapView.mapRow : mapRow;
       for (final Order s : sort) {
         List<ComparableExpressionBase<?>> field;
         switch (s.getProperty()) {
           case "rowId":
-            field = Arrays.asList(mapRow.id);
+            field = Arrays.asList(_mapRow.id);
             break;
           case "sourceIndex":
-            field = Arrays.asList(mapRow.sourceCode.index);
+            field = Arrays.asList(_mapRow.sourceCode.index);
             break;
           case "sourceCode":
-            field = Arrays.asList(mapRow.sourceCode.code);
+            field = Arrays.asList(_mapRow.sourceCode.code);
             break;
           case "sourceDisplay":
-            field = Arrays.asList(mapRow.sourceCode.display);
+            field = Arrays.asList(_mapRow.sourceCode.display);
             break;
           case "noMap":
-            field = Arrays.asList(mapRow.noMap);
+            field = Arrays.asList(_mapRow.noMap);
             break;
           case "targetId":
             field = Arrays.asList(mapTarget.id);
@@ -338,27 +442,35 @@ public class MapViewService {
             field = Arrays.asList(mapTarget.relationship);
             break;
           case "status":
-            field = Arrays.asList(mapRow.status);
+            field = Arrays.asList(_mapRow.status);
             break;
           case "latestNote":
             field = Arrays.asList(Expressions.dateTimePath(ZonedDateTime.class, "latestNote"));
             break;
           case "assignedAuthor":
-            field = Arrays.asList(getUserSortComparison(mapRow.authorTask.assignee));
+            field = Arrays.asList(getUserSortComparison(_mapRow.authorTask.assignee));
+            break;
+          case "assignedReconciler":
+            field = Arrays.asList(getUserSortComparison(_mapRow.reconcileTask.assignee));
             break;
           case "assignedReviewer":
-            field = Arrays.asList(getUserSortComparison(mapRow.reviewTask.assignee));
+            field = Arrays.asList(getUserSortComparison(_mapRow.reviewTask.assignee));
             break;
           case "lastAuthor":
-            field = Arrays.asList(getUserSortComparison(mapRow.lastAuthor));
+            field = Arrays.asList(getUserSortComparison(_mapRow.lastAuthor));
             break;
           case "lastReviewer":
-            field = Arrays.asList(getUserSortComparison(mapRow.lastReviewer));
+            field = Arrays.asList(getUserSortComparison(_mapRow.lastReviewer));
             break;
           case "lastAuthorReviewer":
             field = Arrays.asList(
-                getUserSortComparison(mapRow.lastAuthor),
-                getUserSortComparison(mapRow.lastReviewer));
+                getUserSortComparison(_mapRow.lastAuthor),
+                getUserSortComparison(_mapRow.lastReviewer));
+            break;
+          case "targetOutOfScope":
+            field = null;
+            // it does not make sense to sort by this flag so it is not supported
+            log.warn("Unsupported MapView sort field '" + s.getProperty() + "' - ignored");
             break;
           case "flagged":
             field = Arrays.asList(mapTarget.flagged);
@@ -368,7 +480,7 @@ public class MapViewService {
             if (s.getProperty().startsWith(ADDITIONAL_COLUMN_NAME)) {
               final int index = Integer.parseInt(s.getProperty().substring(ADDITIONAL_COLUMN_NAME.length())) - 1;
               final ColumnType type = additionalColumns.get(index).getType();
-              field = Arrays.asList(getSortExpression(mapRow.sourceCode, type, index));
+              field = Arrays.asList(getSortExpression(_mapRow.sourceCode, type, index));
             } else {
               field = null;
               log.warn("Unknown MapView sort field '" + s.getProperty() + "' - ignored");
@@ -406,23 +518,77 @@ public class MapViewService {
     return stream.map(RepresentationModel::of).collect(Collectors.toList());
   }
 
+  private JPAQuery<MapView> getDualMapQueryForMap(Long mapId, Task task, MapViewFilter filter, Sort sort) {
+
+    if (task != null) {
+
+      //TODO maybe two queries here removing unneeded joins?
+      
+      // details / task screen .. don't display reconcile state or reconciled (mapped)
+      JPAQuery<MapView> query = new JPAQuery<MapView>(entityManager)
+      .select(Projections.constructor(MapView.class, mapRow, mapTarget,
+          ExpressionUtils.as(JPAExpressions.select(note.modified.max()).from(note)
+              .where(note.mapRow.eq(mapRow).and(note.category.eq(NoteCategory.USER)).and(note.deleted.isFalse())), "latestNote"),
+              mapRow.status))
+      .from(mapRow)
+      .leftJoin(mapTarget).on(mapTarget.row.eq(mapRow))
+      .leftJoin(mapRow.authorTask)
+      .leftJoin(mapRow.reviewTask)
+      .leftJoin(mapRow.reconcileTask)
+      .leftJoin(mapRow.lastAuthor)
+      .leftJoin(mapRow.lastReviewer)
+      .where(getWhereClause(mapId, task, filter, false));
+
+      if ((task.getType().equals(TaskType.RECONCILE) || task.getType().equals(TaskType.AUTHOR)) && sort != null && sort.isUnsorted()) {
+        query = query.orderBy(mapRow.sourceCode.index.asc()).orderBy((mapRow.lastAuthor.id.asc()));
+      }
+
+      return query;
+    }
+    else {
+      // view screen
+      JPAQuery<MapView> query = new JPAQuery<MapView>(entityManager)
+      .select(Projections.constructor(MapView.class, mapView.mapRow, mapTarget,
+          ExpressionUtils.as(JPAExpressions.select(note.modified.max()).from(note)
+              .where(note.mapRow.eq(mapView.mapRow).and(note.category.eq(NoteCategory.USER)).and(note.deleted.isFalse())), "latestNote"),
+              mapView.status, mapView.siblingRowAuthorTask))
+      .from(mapView)
+      .leftJoin(mapTarget).on(mapTarget.row.eq(mapView.mapRow).and(mapView.blindMapFlag.eq(false)))
+      .leftJoin(mapView.mapRow.authorTask)
+      .leftJoin(mapView.mapRow.reviewTask)
+      .leftJoin(mapView.mapRow.reconcileTask)
+      .leftJoin(mapView.mapRow.lastAuthor)
+      .leftJoin(mapView.mapRow.lastReviewer)
+      .leftJoin(mapView.siblingRowAuthorTask)
+      .where(getMapViewWhereClause(mapId, task, filter));
+
+      if (sort == null || sort.isUnsorted()) {
+        query = query.orderBy(mapView.mapRow.sourceCode.index.asc()).orderBy(mapView.mapRow.lastAuthor.id.asc());
+      }
+
+      return query;
+    }
+  }
+
   protected JPAQuery<MapView> getQueryForMap(Long mapId, Task task, MapViewFilter filter) {
 
     return new JPAQuery<MapView>(entityManager)
         .select(Projections.constructor(MapView.class, mapRow, mapTarget,
             ExpressionUtils.as(JPAExpressions.select(note.modified.max()).from(note)
-                .where(note.mapRow.eq(mapRow).and(note.deleted.isFalse())), "latestNote")))
+                .where(note.mapRow.eq(mapRow).and(note.category.eq(NoteCategory.USER)).and(note.deleted.isFalse())), "latestNote")))
         .from(mapRow)
         .leftJoin(mapTarget).on(mapTarget.row.eq(mapRow))
         .leftJoin(mapRow.authorTask)
         .leftJoin(mapRow.reviewTask)
         .leftJoin(mapRow.lastAuthor)
         .leftJoin(mapRow.lastReviewer)
-        .where(getWhereClause(mapId, task, filter));
+        .where(getWhereClause(mapId, task, filter, false))
+        .where(mapRow.blindMapFlag.eq(false));
   }
 
   protected JPAQuery<MappedRowDetailsDto> getQueryMappedRowDetailsForMap(Long mapId, Task task, MapViewFilter filter,
-                                                                         Pageable pageable                                                                      ) {
+                                                                         Pageable pageable) {
+
     final JPAQuery<MappedRowDetailsDto> query = new JPAQuery<MapView>(entityManager)
             .select(Projections.constructor(MappedRowDetailsDto.class, mapRow.id, mapRow.sourceCode.index, mapTarget.id))
             .from(mapRow)
@@ -430,27 +596,53 @@ public class MapViewService {
     if (task != null) {
       query.leftJoin(mapRow.authorTask)
            .leftJoin(mapRow.reviewTask)
+           .leftJoin(mapRow.reconcileTask)
            .leftJoin(mapRow.lastAuthor)
            .leftJoin(mapRow.lastReviewer);
     }
-    query.where(getWhereClause(mapId, task, filter));
+    query.where(getWhereClause(mapId, task, filter, false));
     query.offset(pageable.getOffset()).limit(pageable.getPageSize());
     return query;
   }
 
-  private BooleanExpression getWhereClause(Long mapId, Task task, MapViewFilter filter) {
+  private BooleanExpression getMapViewWhereClause(Long mapId, Task task, MapViewFilter filter) {
+    BooleanExpression whereClause = mapView.mapRow.map.id.eq(mapId);
+
+    if (filter != null) {
+      final BooleanExpression filterExpression = filter.getExpression(true);
+      if (filterExpression != null) {
+        whereClause = whereClause.and(filterExpression);
+      }
+    }
+
+    return whereClause;
+  }
+
+  private BooleanExpression getWhereClause(Long mapId, Task task, MapViewFilter filter, boolean useDualView) {
     BooleanExpression whereClause = mapRow.map.id.eq(mapId);
 
     if (task != null) {
       if (task.getType().equals(TaskType.AUTHOR)) {
         whereClause = whereClause.and(mapRow.authorTask.eq(task));
-      } else {
+        if (task.getMap().getProject().getDualMapMode()) {
+          whereClause = whereClause.and(mapRow.blindMapFlag.eq(true));
+        }
+      } else if (task.getType().equals(TaskType.REVIEW)) {
         whereClause = whereClause.and(mapRow.reviewTask.eq(task));
+        whereClause = whereClause.and(mapRow.status.ne(MapStatus.RECONCILE));
+        if (task.getMap().getProject().getDualMapMode()) {
+          whereClause = whereClause.and(mapRow.blindMapFlag.ne(true));
+        }
+      }
+      else if (task.getType().equals(TaskType.RECONCILE)) {
+        whereClause = whereClause.and(mapRow.blindMapFlag.eq(false));
+        whereClause = whereClause.and(mapRow.reconcileTask.eq(task));
+        whereClause = whereClause.and(mapRow.status.eq(MapStatus.RECONCILE));
       }
     }
 
     if (filter != null) {
-      final BooleanExpression filterExpression = filter.getExpression();
+      final BooleanExpression filterExpression = filter.getExpression(useDualView);
       if (filterExpression != null) {
         whereClause = whereClause.and(filterExpression);
       }
@@ -471,6 +663,30 @@ public class MapViewService {
       return betweenStatement;
     }
     return expression.and(betweenStatement);
+  }
+
+  public MapView getDualMapSiblingRow(Long mapId, Long sourceCodeId, Long mapRowId) {
+
+    if (!mapRepository.existsById(mapId)) {
+      throw Problem.valueOf(Status.NOT_FOUND, "No Map found with id " + mapId);
+    }
+
+    JPAQuery<MapView> query = new JPAQuery<MapView>(entityManager)
+        .select(Projections.constructor(MapView.class, mapRow, mapTarget,
+            ExpressionUtils.as(JPAExpressions.select(note.modified.max()).from(note)
+                .where(note.mapRow.eq(mapRow).and(note.category.eq(NoteCategory.USER)).and(note.deleted.isFalse())), "latestNote")))
+        .from(mapRow)
+        .leftJoin(mapTarget).on(mapTarget.row.eq(mapRow))
+        .where(mapRow.map.id.eq(mapId))
+        .where(mapRow.id.ne(mapRowId))
+        .where(mapRow.sourceCode.id.eq(sourceCodeId));
+
+    QueryResults<MapView> queryResults = query.fetchResults();
+    if (queryResults.getResults().size() > 0) {
+      return queryResults.getResults().get(0);
+    }
+    return null;
+
   }
 
 }

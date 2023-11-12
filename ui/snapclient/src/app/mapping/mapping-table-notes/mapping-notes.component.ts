@@ -1,5 +1,5 @@
 /*
- * Copyright © 2022 SNOMED International
+ * Copyright © 2022-23 SNOMED International
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 
 import { Component, Inject, Input, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import { Subscription } from 'rxjs';
-import { Note } from 'src/app/_models/note';
+import { Note, NoteCategory } from 'src/app/_models/note';
 import { MapService, NoteResults } from 'src/app/_services/map.service';
 
 import { MatTable, MatTableDataSource } from '@angular/material/table';
@@ -60,7 +60,7 @@ export class MappingNotesComponent implements OnInit, OnDestroy {
     const self = this;
 
     if (this.data.rowId) {
-      this.mapService.getNotesByMapRow(this.data.rowId).subscribe((results: NoteResults) => {
+      this.mapService.getNotesByMapRow(this.data.rowId, NoteCategory.USER).subscribe((results: NoteResults) => {
           self.notes = results._embedded.notes.map((note) => {
             note.noteBy.givenName = note.noteBy.givenName ?? '';
             note.noteBy.familyName = note.noteBy.familyName ?? '';

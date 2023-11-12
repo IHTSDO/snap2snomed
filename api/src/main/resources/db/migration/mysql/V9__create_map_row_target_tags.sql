@@ -14,7 +14,5 @@
  * limitations under the License.
  */
 
-alter table "user" add accepted_terms_version VARCHAR(255);
-alter table map_row_target_aud alter column target_display VARCHAR(2048);
-alter table user_aud add accepted_terms_version VARCHAR(255);
-
+create table map_row_target_tags_aud (rev integer not null, map_row_target_id bigint not null, tags varchar(255) not null, revtype tinyint, primary key (rev, map_row_target_id, tags)) engine=InnoDB;
+create table map_row_target_tags (map_row_target_id bigint not null, tags varchar(255)) engine=InnoDB;

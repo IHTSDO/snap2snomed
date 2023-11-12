@@ -19,6 +19,9 @@ import {SourceCode} from './source_code';
 import {Mapping} from './mapping';
 import {User} from './user';
 
+export const TARGET_OUT_OF_SCOPE_TAG = "target-out-of-scope";
+export const TARGET_NO_ACTIVE_SUGGESTIONS_TAG = "target-no-active-suggestions-tag";
+
 export interface MapRow {
   id: string | null;
   map?: Mapping;
@@ -27,19 +30,23 @@ export interface MapRow {
   status: string;
   created: Date;
   modified: Date;
+  modifiedBy: User;
   latestNote: Date | null;
 }
 
 /** Outer join of MapRow and MapRowTarget */
 export class MapView {
   rowId: string;           // MapRow ID
+  sourceId: string;
   sourceIndex: string;
   sourceCode: string;
   sourceDisplay: string;
-  assignedAuthor?: User | null;
+  assignedAuthor?: User[] | null;
+  assignedReconciler?: User | null;
   assignedReviewer?: User | null;
   lastAuthor?: User | null;
   lastReviewer?: User | null;
+  targetLastAuthor?: User | null;
 
   targetId?: string;        // TargetRow ID
   targetCode?: string;
@@ -49,6 +56,8 @@ export class MapView {
   noMap: boolean;
   latestNote?: Date | null;
   flagged?: boolean;
+  targetOutOfScope?: boolean;
+  tags?: string[];
 
   additionalColumnValues: string[];
 
@@ -60,13 +69,15 @@ export class MapView {
   private prevNoMap: boolean;
   private prevFlagged?: boolean;
 
-  constructor(rowId: string, targetId: string | undefined, sourceIndex: string, sourceCode: string, sourceDisplay: string,
+  constructor(rowId: string, targetId: string | undefined, sourceId: string, sourceIndex: string, sourceCode: string, sourceDisplay: string,
               targetCode: string | undefined, targetDisplay: string | undefined, relationship: string | undefined,
-              status: string, noMap: boolean, latestNote: Date | null | undefined, assignedAuthor: User | null | undefined,
-              assignedReviewer: User | null | undefined, lastAuthor: User | null | undefined,
-              lastReviewer: User | null | undefined, flagged: boolean | undefined, additionalColumnValues: string[] | undefined) {
+              status: string, noMap: boolean, latestNote: Date | null | undefined, assignedAuthor: User[] | null | undefined,
+              assignedReconciler: User | null | undefined, assignedReviewer: User | null | undefined, lastAuthor: User | null | undefined,
+              lastReviewer: User | null | undefined, flagged: boolean | undefined, targetOutOfScope: boolean | undefined, tags: string[] | undefined, 
+              additionalColumnValues: string[] | undefined, targetLastAuthor: User | null | undefined) {
     this.rowId = rowId;
     this.targetId = targetId;
+    this.sourceId = sourceId;
     this.sourceIndex = sourceIndex;
     this.sourceCode = sourceCode;
     this.sourceDisplay = sourceDisplay;
@@ -76,12 +87,18 @@ export class MapView {
     this.prevStatus = this.status = status;
     this.prevNoMap = this.noMap = noMap;
     this.prevFlagged = this.flagged = flagged;
+    this.targetOutOfScope = targetOutOfScope;
+    this.tags = tags;
+
     this.latestNote = latestNote;
     this.assignedAuthor = assignedAuthor;
+    this.assignedReconciler = assignedReconciler;
     this.assignedReviewer = assignedReviewer;
+    this.assignedReconciler = assignedReconciler;
     this.lastAuthor = lastAuthor;
     this.lastReviewer = lastReviewer;
     this.additionalColumnValues = additionalColumnValues || [];
+    this.targetLastAuthor = targetLastAuthor;
   }
 
   static create(mv: any): MapView {
@@ -89,11 +106,13 @@ export class MapView {
     const rowId = mv.rowId === null ? '' : mv.rowId.toString();
     const additionalColumnValues = mv.additionalColumns ?
       mv.additionalColumns.map((ac: {value: string}) => ac.value) : [];
+    const targetOutOfScope = mv.targetTags?.includes(TARGET_OUT_OF_SCOPE_TAG);
 
     return new MapView(
-      rowId, mv.targetId, mv.sourceIndex, mv.sourceCode, mv.sourceDisplay,
+      rowId, mv.targetId, mv.sourceId, mv.sourceIndex, mv.sourceCode, mv.sourceDisplay,
       mv.targetCode, mv.targetDisplay, mv.relationship, mv.status, mv.noMap, mv.latestNote,
-      mv.assignedAuthor, mv.assignedReviewer, mv.lastAuthor, mv.lastReviewer, mv.flagged, additionalColumnValues
+      mv.assignedAuthor, mv.assignedReconciler, mv.assignedReviewer, mv.lastAuthor, mv.lastReviewer, 
+      mv.flagged, targetOutOfScope, mv.targetTags, additionalColumnValues, mv.targetLastAuthor
     );
   }
 
@@ -124,6 +143,7 @@ export class MapView {
     this.prevTargetDisplay = this.targetDisplay = targetRow.targetDisplay;
     this.prevRelationship = this.relationship = targetRow.relationship;
     this.prevFlagged = this.flagged = targetRow.flagged;
+    this.targetOutOfScope = targetRow.targetOutOfScope;
   }
 
   reset(): void {
@@ -166,8 +186,10 @@ export class MapViewFilter {
   noMap?: boolean | undefined;
   lastAuthorReviewer: string[] | string = '';
   assignedAuthor: string[] | string = '';
+  assignedReconciler: string[] | string = '';
   assignedReviewer: string[] | string = '';
   flagged?: boolean | undefined;
+  targetOutOfScope?: boolean | undefined;
   notes?: boolean | undefined;
   additionalColumns : string[] = [];
 
@@ -175,8 +197,9 @@ export class MapViewFilter {
     const filteredAdditionalColumns: string[] = this.additionalColumns.length > 0 ? this.additionalColumns.filter((s): s is string => Boolean(s)) : [];
 
     return this.sourceCode !== '' || this.sourceDisplay !== '' || this.targetCode !== '' || this.targetDisplay !== ''
-      || this.relationship !== '' || this.status !== '' || this.noMap !== undefined || this.flagged !== undefined
-      || this.lastAuthorReviewer !== '' || this.assignedAuthor !== '' || this.assignedReviewer !== '' || this.notes !== undefined || filteredAdditionalColumns.length > 0;
+      || this.relationship !== '' || this.status !== '' || this.noMap !== undefined || this.flagged !== undefined || this.targetOutOfScope !== undefined
+      || this.lastAuthorReviewer !== '' || this.assignedAuthor !== '' || this.assignedReconciler !== '' || this.assignedReviewer !== '' 
+      || this.notes !== undefined || filteredAdditionalColumns.length > 0;
   }
 }
 
@@ -253,7 +276,8 @@ export const enum MapRowStatus {
   MAPPED = 'MAPPED',
   INREVIEW = 'INREVIEW',
   ACCEPTED = 'ACCEPTED',
-  REJECTED = 'REJECTED'
+  REJECTED = 'REJECTED',
+  RECONCILE = 'RECONCILE'
 }
 
 export function toMapRowStatus(statusString?: string): MapRowStatus | null {
@@ -274,6 +298,8 @@ export function mapRowStatusToIconName(status: MapRowStatus): string {
       return 'done_all';
     case MapRowStatus.REJECTED:
       return 'cancel';
+    case MapRowStatus.RECONCILE:
+      return 'compare_arrows';
     default:
       return 'circle';
   }
@@ -291,7 +317,12 @@ export const reviewStatuses = [
   MapRowStatus.REJECTED
 ];
 
-export const mapRowStatuses: MapRowStatus[] = authorStatuses.concat(reviewStatuses);
+export const reconcileStatuses = [
+  MapRowStatus.RECONCILE,
+  MapRowStatus.MAPPED
+]
+
+export const mapRowStatuses: MapRowStatus[] = authorStatuses.concat(reviewStatuses).concat(reconcileStatuses);
 
 export const mapRowRelationships = [
   MapRowRelationship.EQUIVALENT,

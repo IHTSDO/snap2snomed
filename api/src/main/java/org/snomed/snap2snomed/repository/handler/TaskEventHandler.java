@@ -116,8 +116,10 @@ public class TaskEventHandler {
     Instant modified = Instant.now();
     if (task.getType().equals(TaskType.AUTHOR)) {
       mapRowRepository.setAuthorTaskToNull(task, modified, principalSubject);
-    } else {
+    } else if (task.getType().equals(TaskType.REVIEW)) {
       mapRowRepository.setReviewTaskToNull(task, modified, principalSubject);
+    } else if (task.getType().equals(TaskType.RECONCILE)) {
+      mapRowRepository.setReconcileTaskToNull(task, modified, principalSubject);
     }
     setMapRows(task);
   }
@@ -139,8 +141,10 @@ public class TaskEventHandler {
 
     if (task.getType().equals(TaskType.AUTHOR)) {
       mapRowRepository.setAuthorTaskToNull(task, modified, principalSubject);
-    } else {
+    } else if (task.getType().equals(TaskType.REVIEW)) {
       mapRowRepository.setReviewTaskToNull(task, modified, principalSubject);
+    } else if (task.getType().equals(TaskType.RECONCILE)) {
+      mapRowRepository.setReconcileTaskToNull(task, modified, principalSubject);
     }
   }
 
@@ -234,6 +238,11 @@ public class TaskEventHandler {
           indexesWithRoleConflict.addAll(
               findIndexesIncompatiblyAssigned(task,
                   mapRow.authorTask.assignee.id.eq(assigneeId).or(mapRow.lastAuthor.id.eq(assigneeId))));
+        } else if (task.getType().equals(TaskType.RECONCILE)) {
+          // TODO: any restrictions?
+          // indexesWithRoleConflict.addAll(
+          //     findIndexesIncompatiblyAssigned(task,
+          //         mapRow.authorTask.assignee.id.eq(assigneeId).or(mapRow.lastAuthor.id.eq(assigneeId))));
         }
       }
 
@@ -249,6 +258,10 @@ public class TaskEventHandler {
           // cannot assign rows already assigned to a review task
           indexesWithExistingTask.addAll(
               findIndexesIncompatiblyAssigned(task, mapRow.reviewTask.isNotNull()));
+        } else if (task.getType().equals(TaskType.RECONCILE)) {
+          // cannot assign rows already assigned to a reconcile task
+          indexesWithExistingTask.addAll(
+              findIndexesIncompatiblyAssigned(task, mapRow.reconcileTask.isNotNull()));
         }
       }
 
@@ -268,16 +281,31 @@ public class TaskEventHandler {
           .and(mapRow.reviewTask.id.ne(task.getId()));
     }
     whereClause = getSourceIndexWhereClause(task, whereClause).and(expression);
+    if (task.getType() == TaskType.AUTHOR && task.getMap().getProject().getDualMapMode()) {
+      return new JPAQuery<User>(entityManager)
+      .select(mapRow.sourceCode.index)
+      .from(mapRow)
+      .leftJoin(mapRow.lastAuthor)
+      .leftJoin(mapRow.lastReviewer)
+      .leftJoin(mapRow.authorTask)
+      .leftJoin(mapRow.reviewTask)
+      .where(whereClause)
+      .groupBy(mapRow.sourceCode.index)
+      .having(mapRow.sourceCode.index.count().gt(Integer.valueOf(1)))
+      .fetch();
+    }
+    else {
+      return new JPAQuery<User>(entityManager)
+      .select(mapRow.sourceCode.index).distinct()
+      .from(mapRow)
+      .leftJoin(mapRow.lastAuthor)
+      .leftJoin(mapRow.lastReviewer)
+      .leftJoin(mapRow.authorTask)
+      .leftJoin(mapRow.reviewTask)
+      .where(whereClause)
+      .fetch();
+    }
 
-    return new JPAQuery<User>(entityManager)
-        .select(mapRow.sourceCode.index).distinct()
-        .from(mapRow)
-        .leftJoin(mapRow.lastAuthor)
-        .leftJoin(mapRow.lastReviewer)
-        .leftJoin(mapRow.authorTask)
-        .leftJoin(mapRow.reviewTask)
-        .where(whereClause)
-        .fetch();
   }
 
   private BooleanExpression getSourceIndexWhereClause(Task task, BooleanExpression whereClause) {
@@ -330,6 +358,7 @@ public class TaskEventHandler {
      * By reassigning rows to different tasks, it is possible for a task to become "empty" i.e. have no rows associated with it. This case
      * will be handled by deleting these tasks.
      */
+
     taskRepository.deleteTasksWithNoMapRows();
   }
 
@@ -340,14 +369,29 @@ public class TaskEventHandler {
     Instant modified = Instant.now();
     String user = authenticationFacade.getPrincipalSubject();
     if (task.getType().equals(TaskType.AUTHOR)) {
-      addRange = (lower, upper) ->
+      if (task.getMap().getProject().getDualMapMode()) {
+        // dual mapping mode
+        addRange = (lower, upper) -> mapRowRepository.setAuthorTaskBySourceCodeRangeDualMap(task.getId(), task.getMap().getId(), user, modified, lower, upper, 
+          task.getMap().getSource().getId());
+        addCollection = (ids) -> mapRowRepository.setAuthorTaskBySourceCodeDualMap(task.getId(), task.getMap().getId(), user, modified, ids, 
+          task.getMap().getSource().getId());
+      }
+      else {
+        // single mapping mode
+        addRange = (lower, upper) ->
           mapRowRepository.setAuthorTaskBySourceCodeRange(task, lower, upper, modified, user);
-      addCollection = (ids) -> mapRowRepository.setAuthorTaskBySourceCode(task, ids, modified, user);
+        addCollection = (ids) -> mapRowRepository.setAuthorTaskBySourceCode(task, ids, modified, user);
+      }
     } else if (task.getType().equals(TaskType.REVIEW)) {
       addRange = (lower, upper) ->
           mapRowRepository.setReviewTaskBySourceCodeRange(task, lower, upper, modified, user);
       addCollection = (ids) ->
           mapRowRepository.setReviewTaskBySourceCode(task, ids, modified, user);
+    } else if (task.getType().equals(TaskType.RECONCILE)) {
+      addRange = (lower, upper) ->
+        mapRowRepository.setReconcileTaskBySourceCodeRange(task, lower, upper, modified, user);
+      addCollection = (ids) ->
+        mapRowRepository.setReconcileTaskBySourceCode(task, ids, modified, user);
     } else {
       throw Problem.builder().withTitle("Unknown task type " + task.getType()).withStatus(
           Status.INTERNAL_SERVER_ERROR).build();

@@ -73,13 +73,22 @@ export class TaskEffects {
           switchMap((resp: TaskPage) => of(new LoadTasksSuccess(resp))),
           catchError((err) => of(new LoadTasksFailure({error: err})))
         )
-        return forkJoin([authTasks, reviewTasks]).pipe(
-          switchMap(([authTasks, reviewTasks]) => {
-            if (authTasks instanceof LoadTasksSuccess && reviewTasks instanceof LoadTasksSuccess) {
+        let reconcileTasks = this.taskService.getTasksByMapAndType(payload.id, TaskType.RECONCILE, payload.reconcilePageSize, payload.reconcileCurrentPage).pipe(
+          map((resp: TaskResults) => {
+            let tasks_conv: Task[] = resp._embedded.tasks.map((task: any) => TaskEffects.mapTaskFromPayload(task));
+            let taskPage: TaskPageDetails = resp.page;
+            return new TaskPage(taskPage, tasks_conv);
+          }),
+          switchMap((resp: TaskPage) => of(new LoadTasksSuccess(resp))),
+          catchError((err) => of(new LoadTasksFailure({error: err})))
+        )
+        return forkJoin([authTasks, reviewTasks, reconcileTasks]).pipe(
+          switchMap(([authTasks, reviewTasks, reconcileTasks]) => {
+            if (authTasks instanceof LoadTasksSuccess && reviewTasks instanceof LoadTasksSuccess && reconcileTasks instanceof LoadTasksSuccess) {
               let taskPages: TaskPageForType[] = [];
               let tasks: Task[] = [];
-              taskPages = [{type: TaskType.AUTHOR, page: authTasks.payload}, {type: TaskType.REVIEW, page: reviewTasks.payload}];
-              tasks = [...authTasks.payload.tasks, ...reviewTasks.payload.tasks];
+              taskPages = [{type: TaskType.AUTHOR, page: authTasks.payload}, {type: TaskType.REVIEW, page: reviewTasks.payload}, {type: TaskType.RECONCILE, page: reconcileTasks.payload}];
+              tasks = [...authTasks.payload.tasks, ...reviewTasks.payload.tasks, ...reconcileTasks.payload.tasks];
               return of(new LoadAllTasksSuccess({ taskPages: taskPages, tasks: tasks }));
             } else {
               return EMPTY;

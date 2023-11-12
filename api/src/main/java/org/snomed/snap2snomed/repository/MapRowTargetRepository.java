@@ -18,17 +18,17 @@ package org.snomed.snap2snomed.repository;
 
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Predicate;
+import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.SimpleExpression;
 import com.querydsl.core.types.dsl.StringExpression;
 import com.querydsl.core.types.dsl.StringPath;
 import java.time.Instant;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
-import org.snomed.snap2snomed.model.ImportedCode;
 import org.snomed.snap2snomed.model.MapRow;
 import org.snomed.snap2snomed.model.MapRowTarget;
-import org.snomed.snap2snomed.model.QImportedCode;
 import org.snomed.snap2snomed.model.QMapRowTarget;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -45,12 +45,16 @@ import org.springframework.data.repository.query.FluentQuery.FetchableFluentQuer
 import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 import org.springframework.data.rest.core.annotation.RestResource;
 import org.springframework.security.access.prepost.PostFilter;
+import org.springframework.transaction.annotation.Transactional;
 
 // @ PreAuthorize("isValidUser()")
 @RepositoryRestResource
 public interface MapRowTargetRepository
     extends RevisionRepository<MapRowTarget, Long, Integer>, CrudRepository<MapRowTarget, Long>,
     QuerydslPredicateExecutor<MapRowTarget>, QuerydslBinderCustomizer<QMapRowTarget> {
+
+  String TARGET_OUT_OF_SCOPE_TAG = "target-out-of-scope";
+  String TARGET_NO_ACTIVE_SUGGESTIONS_TAG = "target-no-active-suggestions-tag";
 
   // ---------------------------------
   // Exported in REST interface
@@ -114,6 +118,22 @@ public interface MapRowTargetRepository
   int copyMapRowTargets(Long mapId, Long sourceMapId, String user, Instant dateTime);
 
   @Query(value = "insert into map_row_target " +
+          "(created, created_by, modified, modified_by, flagged, relationship, target_code, target_display, row_id) " + 
+          "select :dateTime created, :user created_by, :dateTime modified, :user modified_by, " + 
+          "false, s.relationship, s.target_code, s.target_display, tr.id row_id from map_row_target s, " + 
+          "map_row sr, map_row tr " + 
+          "where (s.row_id = sr.id) " + 
+          "and (sr.map_id = :sourceMapId) " + 
+          "and (tr.map_id = :mapId) " + 
+          "and (sr.source_code_id = tr.source_code_id) " +
+          "and (sr.blind_map_flag = FALSE) " +
+          "and (sr.last_author_id = tr.last_author_id) " +
+          "and (sr.modified = tr.modified)", nativeQuery = true)
+  @Modifying
+  @RestResource(exported = false)
+  int copyMapRowTargetsForDualMap(Long mapId, Long sourceMapId, String user, Instant dateTime);
+
+  @Query(value = "insert into map_row_target " +
           "(created, created_by, modified, modified_by, flagged, relationship, target_code, " +
           "target_display, row_id) " +
           "select :dateTime created, :user created_by, :dateTime modified, :user modified_by, " +
@@ -124,6 +144,26 @@ public interface MapRowTargetRepository
   @Modifying
   @RestResource(exported = false)
   int copyMapRowTargetsForNewSource(Long mapId, Long sourceMapId, String user, Instant dateTime);
+
+  @Query(value = "insert into map_row_target " +
+          "(created, created_by, modified, modified_by, flagged, relationship, target_code, " +
+          "target_display, row_id) " +
+          "select :dateTime created, :user created_by, :dateTime modified, :user modified_by, " +
+          "false, s.relationship, s.target_code, s.target_display, tr.id row_id " + 
+          "from map_row_target s, " +
+          "map_row sr, map_row tr, imported_code sc, imported_code tc " + 
+          "where (s.row_id = sr.id) " +
+          "and (sr.map_id = :sourceMapId) " + 
+          "and (tr.map_id = :mapId) " + 
+          "and (sr.source_code_id = sc.id) " +
+          "and (sc.code = tc.code) " + 
+          "and (tr.source_code_id = tc.id)" + 
+          "and (sr.blind_map_flag = FALSE) " + 
+          "and (sr.last_author_id = tr.last_author_id) " + 
+          "and (sr.modified = tr.modified)", nativeQuery = true)
+  @Modifying
+  @RestResource(exported = false)
+  int copyMapRowTargetsForNewSourceForDualMap(Long mapId, Long sourceMapId, String user, Instant dateTime);
 
   @Override
   @RestResource(exported = false)
@@ -142,19 +182,28 @@ public interface MapRowTargetRepository
   @RestResource(exported = false)
   long count();
 
-  @Query(value = "update map_row_target mt set mt.flagged = true, mt.modified = :dateTime, mt.modified_by = :user " +
-          " where mt.id in (:ids)", nativeQuery = true)
+  @Transactional
   @Modifying
   @RestResource(exported = false)
-  int flagMapTargets(List<Long> ids, String user, Instant dateTime);
+  @Query(value = "insert ignore into map_row_target_tags "
+      + "select id, '" + TARGET_OUT_OF_SCOPE_TAG + "' "
+      + "from map_row_target "
+      + "where id in :ids",
+      nativeQuery = true)
+  int addOutOfScopeTag(Collection<Long> ids);
 
   // Query DSL is used internally, don't want to expose it externally because we'd need to secure it
   // hence disable following methods
 
   @Override
-  default public void customize(QuerydslBindings bindings, QMapRowTarget root) {
+  default void customize(QuerydslBindings bindings, QMapRowTarget root) {
     bindings.bind(String.class).first((SingleValueBinding<StringPath, String>) StringExpression::containsIgnoreCase);
-    bindings.bind(root.row.sourceCode).first((SingleValueBinding<QImportedCode, ImportedCode>) SimpleExpression::eq);
+    bindings.bind(root.row.sourceCode).first(SimpleExpression::eq);
+    bindings.bind(root.tags).first((path, value) -> value.stream()
+        .map(path::contains)
+        .reduce(BooleanExpression::and)
+        .orElseThrow());
+    bindings.bind(root.row.map.id).as("mapId").first(SimpleExpression::eq);
   }
 
   @Override
@@ -192,4 +241,5 @@ public interface MapRowTargetRepository
   @Override
   @RestResource(exported = false)
   <S extends MapRowTarget, R> R findBy(Predicate predicate, Function<FetchableFluentQuery<S>, R> queryFunction);
+
 }

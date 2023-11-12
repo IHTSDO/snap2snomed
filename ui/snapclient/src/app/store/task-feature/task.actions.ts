@@ -41,7 +41,9 @@ export class LoadTasksForMap implements Action {
     authPageSize: number | undefined,
     authCurrentPage: number | undefined
     reviewPageSize: number | undefined,
-    reviewCurrentPage: number | undefined
+    reviewCurrentPage: number | undefined,
+    reconcilePageSize: number | undefined,
+    reconcileCurrentPage: number | undefined
   }) {
   }
 }

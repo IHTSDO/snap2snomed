@@ -11,15 +11,17 @@
     <mat-checkbox class="select-all-on-page" color="primary"
                   matTooltip="{{ isPageSelected ? ('SELECTION.CLEAR_PAGE_SELECTION' | translate) : ('SELECTION.SELECT_ALL_ON_PAGE' | translate) }}"
                   (change)="$event ? selectPageToggle($event) : null"
-                  [checked]="isPageSelected"
+                  [checked]="isAllSelected || isPageSelected"
+                  [disabled]="isAllSelected"
                   [indeterminate]="(isAnySelected && !isPageSelected)">
     </mat-checkbox>
   </th>
   <td class="table-selector-cell" mat-cell *matCellDef="let row; let idx = index">
-    <mat-checkbox [ngClass]="{'highlight-check': isSelectionFocus(idx)}"
+    <mat-checkbox [ngClass]="{'highlight-check': !isAllSelected && isSelectionFocus(idx)}"
                   (click)="$event.stopPropagation(); shiftKeySelect($event, row);"
                   (change)="$event ? toggleSelection($event, row, idx) : null"
-                  [checked]="checkSelected(row)">
+                  [checked]="isAllSelected || checkSelected(row)"
+                  [disabled]="isAllSelected">
     </mat-checkbox>
   </td>
 </ng-container>

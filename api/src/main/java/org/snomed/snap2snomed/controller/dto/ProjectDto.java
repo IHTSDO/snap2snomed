@@ -34,6 +34,9 @@ public class ProjectDto {
   private List<@NotNull Map> maps;
 
   @NotNull
+  private Boolean dualMapMode;
+
+  @NotNull
   private Set<@NotNull User> owners;
 
   private Set<@NotNull User> members;
@@ -48,6 +51,7 @@ public class ProjectDto {
     this.description = project.getDescription();
     this.maps = project.getMaps();
     this.mapCount = project.getMaps().size();
+    this.dualMapMode = project.getDualMapMode();
     this.owners = project.getOwners();
     this.members = project.getMembers();
     this.guests = project.getGuests();
