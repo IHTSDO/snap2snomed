@@ -11,9 +11,9 @@
 </p>
 
 ## About The Project
-This project is a mapping tool designed to allow users to collaboratively create and maintain simple maps to FHIR CodeSystems.
+This project is a mapping tool designed to allow users to collaboratively create and maintain simple maps to SNOMED CT.
 
-It is a fork from Snap2Snomed for which the following is the current vision of that project
+Below is the current vision for the project
 <img src="images/vision.png" alt="Vision">
 
 ### Built With
