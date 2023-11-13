@@ -62,6 +62,7 @@ module "api" {
   database_backup_retention_period = var.database_backup_retention_period
   jumpbox_ami_id                   = var.jumpbox_ami_id
   identity_provider                = var.identity_provider
+  db_log_level                     = var.db_log_level
 }
 
 module "ui" {

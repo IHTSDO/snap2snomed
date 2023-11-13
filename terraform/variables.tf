@@ -274,3 +274,8 @@ variable "loki_url" {
   type        = string
   sensitive   = true
 }
+
+variable "db_log_level" {
+  type        = string
+  default     = "INFO"
+}
