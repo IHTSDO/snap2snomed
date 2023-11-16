@@ -606,7 +606,7 @@ public class MapViewService {
   }
 
   private BooleanExpression getMapViewWhereClause(Long mapId, Task task, MapViewFilter filter) {
-    BooleanExpression whereClause = mapView.mapRow.map.id.eq(mapId);
+    BooleanExpression whereClause = mapView.mapId.eq(mapId);//mapView.mapRow.map.id.eq(mapId);
 
     if (filter != null) {
       final BooleanExpression filterExpression = filter.getExpression(true);
