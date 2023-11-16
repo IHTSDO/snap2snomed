@@ -64,6 +64,7 @@ export class MappingDetailsCardComponent {
   ngOnChanges(changes: SimpleChanges): void {
     if (changes.mapping?.currentValue && !changes.mapping?.isFirstChange()) {
       this.mapping = changes.mapping.currentValue;
+      this.updateNumOutOfScopeTargets();
     }
   }
 
