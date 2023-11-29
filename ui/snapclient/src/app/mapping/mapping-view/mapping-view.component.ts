@@ -323,21 +323,31 @@ export class MappingViewComponent implements OnInit, AfterViewInit, OnDestroy {
       }
     }));    
 
-    this.subscription.add(this.route.queryParams
-      .subscribe(qparams => {
-        // subscription emits a value immediately  .. ignore if empty
-        // note that you can't simply ignore the first value here as it may be a page refresh and the
-        // value may be the selected filters
-        if (Object.keys(qparams).length > 0) { 
-          this.filterEntity = ServiceUtils.paramsToFilterEntity(qparams);
-          if (this.filterEntity.hasFilters()) {
-            this._filterEnabled = true;
-          }
-          this.filterParams = ServiceUtils.filtersToParam(this.filterEntity);
-          this.paging = ServiceUtils.pagingParamsToMapViewPaging(qparams);
-          this.refreshPage();
-        }
+    this.subscription.add(this.route.queryParams.subscribe(qparams => {
+        this.filterEntity = ServiceUtils.paramsToFilterEntity(qparams);
+      if (this.filterEntity.hasFilters()) {
+        this._filterEnabled = true;
+      }
+      this.filterParams = ServiceUtils.filtersToParam(this.filterEntity);
+      this.paging = ServiceUtils.pagingParamsToMapViewPaging(qparams);
+      this.refreshPage();
     }));
+    // TODO this potentially caused problems on creating a new map, investigate further    
+    // this.subscription.add(this.route.queryParams
+    //   .subscribe(qparams => {
+    //     // subscription emits a value immediately  .. ignore if empty
+    //     // note that you can't simply ignore the first value here as it may be a page refresh and the
+    //     // value may be the selected filters
+    //     if (Object.keys(qparams).length > 0) { 
+    //       this.filterEntity = ServiceUtils.paramsToFilterEntity(qparams);
+    //       if (this.filterEntity.hasFilters()) {
+    //         this._filterEnabled = true;
+    //       }
+    //       this.filterParams = ServiceUtils.filtersToParam(this.filterEntity);
+    //       this.paging = ServiceUtils.pagingParamsToMapViewPaging(qparams);
+    //       this.refreshPage();
+    //     }
+    // }));
   }
 
   /**
@@ -582,6 +592,27 @@ export class MappingViewComponent implements OnInit, AfterViewInit, OnDestroy {
         self.error.detail = error;
       })
     ));
+    // TODO this potentially cause new maps to not load, investigate further before reinstating
+    // this.subscription.add(self.store.select(selectTaskList).pipe(startWith(null), debounceTime(200)).subscribe(
+    //   data => {
+    //     if (data) { // cannot ignore empty lists here as it could indicate all tasks being removed
+
+    //       const newTasks = data.filter(task => task.assignee?.id === self.currentUser?.id)
+    //         .sort((a, b) => AssignedWorkComponent.sortTasks(a, b));
+    //       // TODO this equals checking is not working due to a slight time difference in times reported
+    //       // it would remove unnecessry calls to refreshpage and improve responsiveness
+    //       // if it could be fixed 
+    //       if (JSON.stringify(self.myTasks) !== JSON.stringify(newTasks)) {
+    //         self.myTasks = newTasks;
+    //         this.refreshPage();
+    //       } 
+    //     }
+    //   },
+    //   (error) => self.translate.get('TASK.FAILED_TO_LOAD_TASKS').subscribe((err) => {
+    //     self.error.message = err;
+    //     self.error.detail = error;
+    //   })
+    // ));
   }
 
   addReconcilerTableColumn() {
@@ -591,7 +622,8 @@ export class MappingViewComponent implements OnInit, AfterViewInit, OnDestroy {
       this.constantFilteredColumns.push("filter-assignedReconciler");
       this.constantHideShowColumns.push("assignedReconciler");
       this.constantColumns.push({columnId: 'assignedReconciler', columnDisplay: 'TABLE.RECONCILER', displayed: true});
-      this.refreshPage();
+      //TODO reinvestigate if this is needed following investigation of excessive refresh improvements
+      //this.refreshPage();
     }
 
   }
