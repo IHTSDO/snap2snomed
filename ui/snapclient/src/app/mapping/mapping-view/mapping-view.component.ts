@@ -402,6 +402,7 @@ export class MappingViewComponent implements OnInit, AfterViewInit, OnDestroy {
             this.addReconcilerTableColumn();
           }
 
+          // this refreshes the task component when new tasks are added
           if (self.mapping && self.mapping.id && self.mapping_id === self.mapping.id) {
             self.store.dispatch(new LoadTasksForMap({id: self.mapping.id, 
                 authPageSize: self.authPageSize, authCurrentPage: self.authCurrentPage, 
@@ -571,6 +572,8 @@ export class MappingViewComponent implements OnInit, AfterViewInit, OnDestroy {
           // TODO this equals checking is not working due to a slight time difference in times reported
           // it would remove unnecessry calls to refreshpage and improve responsiveness
           // if it could be fixed 
+
+          // ensure notifications are distinct, unecessary expensive refreshes are made
           if (JSON.stringify(self.myTasks) !== JSON.stringify(newTasks)) {
             self.myTasks = newTasks;
             this.refreshPage();

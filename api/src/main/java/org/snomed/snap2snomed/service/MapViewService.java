@@ -16,6 +16,7 @@
 
 package org.snomed.snap2snomed.service;
 
+import java.time.Instant;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -26,12 +27,16 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.persistence.EntityManager;
+import javax.persistence.Query;
 
 import org.snomed.snap2snomed.controller.MapViewRestController;
 import org.snomed.snap2snomed.controller.dto.MappedRowDetailsDto;
 import org.snomed.snap2snomed.controller.dto.Snap2SnomedPagedModel;
 import org.snomed.snap2snomed.model.AdditionalCodeColumn;
+import org.snomed.snap2snomed.model.DbMapView;
 import org.snomed.snap2snomed.model.Map;
+import org.snomed.snap2snomed.model.MapRow;
+import org.snomed.snap2snomed.model.MapRowTarget;
 import org.snomed.snap2snomed.model.MapView;
 import org.snomed.snap2snomed.model.QDbMapView;
 import org.snomed.snap2snomed.model.QImportedCode;
@@ -233,6 +238,117 @@ public class MapViewService {
       return expression;
     }
 
+    // TODO finish
+    public String getNativeExpression(boolean useDualView) {
+      //var _mapRow = useDualView ? QDbMapView.dbMapView.mapRow : QMapRow.mapRow;
+
+      String expression = null;
+        
+      // expression = stringCollectionToOrStatements(expression, sourceCodes,
+      //     s -> _mapRow.sourceCode.code.startsWithIgnoreCase(s),
+      //     (a, b) -> collectOrStatement(a, b));
+      // expression = stringCollectionToOrStatements(expression, sourceDisplays,
+      //     s -> _mapRow.sourceCode.display.containsIgnoreCase(s),
+      //     (a, b) -> collectAndStatement(a, b));
+
+      if (noMap != null) {
+        expression = collectNativeQueryAndStatement(expression, " maprow15_.no_map = " + noMap);
+      }
+
+      // expression = stringCollectionToOrStatements(expression, targetCodes,
+      //     s -> QMapRowTarget.mapRowTarget.targetCode.startsWithIgnoreCase(s),
+      //     (a, b) -> collectOrStatement(a, b));
+      // expression = stringCollectionToOrStatements(expression, targetDisplays,
+      //     s -> QMapRowTarget.mapRowTarget.targetDisplay.containsIgnoreCase(s),
+      //     (a, b) -> collectAndStatement(a, b));
+
+      // if (!CollectionUtils.isEmpty(relationshipTypes)) {
+      //   expression += collectAndStatement(expression, " maprowtarg1_.relationship IN (" + relationshipTypes + ")");
+      // }
+
+      // if (!CollectionUtils.isEmpty(statuses)) {
+      //   expression = collectAndStatement(expression, _mapRow.status.in(statuses));
+      // }
+
+      // if (!CollectionUtils.isEmpty(lastAuthor)) {
+      //   expression = collectAndStatement(expression, _mapRow.lastAuthor.id.in(lastAuthor));
+      // }
+
+      // if (!CollectionUtils.isEmpty(lastReviewer)) {
+      //   expression = collectAndStatement(expression, _mapRow.lastReviewer.id.in(lastReviewer));
+      // }
+
+      if (!CollectionUtils.isEmpty(lastAuthorReviewer)) {
+        String noneMatch = null;
+        if (lastAuthorReviewer.contains("none")) {
+          noneMatch = " maprow15_.`last_author_id` IS NULL AND maprow15_.`last_reviewer_id` IS NULL ";
+        }
+
+        expression = collectNativeQueryAndStatement(expression,
+            collectNativeQueryOrStatement(" maprow15_.`last_author_id` in (" + "'" + String.join("', '", lastAuthorReviewer) + "'" + ")" +
+            " OR maprow15_.`last_reviewer_id` in ("  + "'" + String.join("', '", lastAuthorReviewer) + "'" + ") ",
+                noneMatch));
+      }
+
+      if (!CollectionUtils.isEmpty(assignedAuthor)) {
+        String noneMatch = null;
+        if (assignedAuthor.contains("none")) {
+          noneMatch = " assigned_author_user.id IS NULL ";
+        }
+
+        //TODO assigned author not picking up second author
+        expression = collectNativeQueryAndStatement(expression, 
+            collectNativeQueryOrStatement(" assigned_author_user.id in(" + "'" + String.join("', '", assignedAuthor) + "'" + ")", 
+            noneMatch));
+      }
+
+      if (!CollectionUtils.isEmpty(assignedReviewer)) {
+        String noneMatch = null;
+        if (assignedReviewer.contains("none")) {
+          noneMatch = " assigned_reviewer_user.id IS NULL ";
+        }
+
+        expression = collectNativeQueryAndStatement(expression, 
+            collectNativeQueryOrStatement(" assigned_reviewer_user.id in(" + "'" + String.join("', '", assignedReviewer) + "'" + ")",
+            noneMatch));
+      }
+
+      if (!CollectionUtils.isEmpty(assignedReconciler)) {
+        String noneMatch = null;
+        if (assignedReconciler.contains("none")) {
+          noneMatch = " assigned_reconciler_user.id IS NULL";
+        }
+
+        expression = collectNativeQueryAndStatement(expression, 
+            collectNativeQueryOrStatement(" assigned_reconciler_user.id in(" + "'" + String.join("', '", assignedReconciler) + "'" + ")",
+            noneMatch));
+      }
+
+      // if (targetOutOfScope != null) {
+      //   if (targetOutOfScope) {
+      //     expression = collectNativeQueryAndStatement(expression, QMapRowTarget.mapRowTarget.tags.contains(TARGET_OUT_OF_SCOPE_TAG));
+      //   }
+      //   else {
+      //     expression = collectNativeQueryAndStatement(expression, QMapRowTarget.mapRowTarget.tags.contains(TARGET_OUT_OF_SCOPE_TAG).not());
+      //   }
+      // }
+
+      if (flagged != null) {
+        expression = collectNativeQueryAndStatement(expression, " maprowtarg1_.flagged = " + flagged);
+      }
+
+      // if (!CollectionUtils.isEmpty(additionalColumns)) {
+      //   for (int i = 0; i < additionalColumns.size(); i++) {
+      //     final String string = additionalColumns.get(i);
+      //     if (!string.isEmpty()) {
+      //       expression = collectAndStatement(expression, _mapRow.sourceCode.additionalColumns.get(i).value.containsIgnoreCase(string));
+      //     }
+      //   }
+      // }
+
+      return expression;
+    }
+
     private BooleanExpression stringCollectionToOrStatements(BooleanExpression expression, List<String> stringCollection,
         Function<String, BooleanExpression> function, BiFunction<BooleanExpression, BooleanExpression, BooleanExpression> collector) {
       if (!CollectionUtils.isEmpty(stringCollection)) {
@@ -370,34 +486,142 @@ public class MapViewService {
     
   }
 
-  private  Snap2SnomedPagedModel<EntityModel<MapView>> getMapResults(Long mapId, Task task, Pageable pageable,
+  private Snap2SnomedPagedModel<EntityModel<MapView>> getMapResults(Long mapId, Task task, Pageable pageable,
       PagedResourcesAssembler<MapView> assembler, MapViewFilter filter) {
-    final List<AdditionalCodeColumn> additionalColumns = mapRepository.findSourceByMapId(mapId).get().getAdditionalColumnsMetadata();
+    final List<AdditionalCodeColumn> additionalColumns = mapRepository.findSourceByMapId(mapId).get()
+        .getAdditionalColumnsMetadata();
 
-    final Map map = mapRepository.findById(mapId).orElseThrow(() -> Problem.valueOf(Status.NOT_FOUND, "No Map found with id " + mapId));
+    final Map map = mapRepository.findById(mapId)
+        .orElseThrow(() -> Problem.valueOf(Status.NOT_FOUND, "No Map found with id " + mapId));
     Boolean dualMapMode = map.getProject().getDualMapMode();
 
-    JPAQuery<MapView> query;
-    if (dualMapMode) {
-      query = getDualMapQueryForMap(mapId, task, filter, pageable.getSort());
+    if (dualMapMode && task == null) {
+
+      StringBuilder queryStrBuilder = new StringBuilder("select map_view.map_row_id as col_0_0_, maprowtarg1_.id as col_1_0_, (select max(note18_.modified) from note note18_ where note18_.maprow_id=map_view.map_row_id and note18_.category=0 and note18_.deleted=0) as col_2_0_, map_view.status as col_3_0_, map_view.sibling_row_author_task_id as col_4_0_, maprow15_.id as id1_13_0_, maprowtarg1_.id as id1_9_1_, task12_.id as id1_26_2_, maprow15_.author_task_id as author_t9_13_0_, maprow15_.blind_map_flag as blind_ma2_13_0_, maprow15_.created as created3_13_0_, maprow15_.created_by as created_4_13_0_, maprow15_.`last_author_id` as last_au10_13_0_, maprow15_.`last_reviewer_id` as last_re11_13_0_, maprow15_.map_id as map_id12_13_0_, maprow15_.modified as modified5_13_0_, maprow15_.modified_by as modified6_13_0_, maprow15_.no_map as no_map7_13_0_, maprow15_.reconcile_task_id as reconci13_13_0_, maprow15_.review_task_id as review_14_13_0_, maprow15_.source_code_id as source_15_13_0_, maprow15_.status as status8_13_0_, maprowtarg1_.created as created2_9_1_, maprowtarg1_.created_by as created_3_9_1_, maprowtarg1_.flagged as flagged4_9_1_, maprowtarg1_.`last_author_id` as last_au10_9_1_, maprowtarg1_.modified as modified5_9_1_, maprowtarg1_.modified_by as modified6_9_1_, maprowtarg1_.relationship as relation7_9_1_, maprowtarg1_.row_id as row_id11_9_1_, maprowtarg1_.target_code as target_c8_9_1_, maprowtarg1_.target_display as target_d9_9_1_, task12_.`assignee_id` as assignee8_26_2_, task12_.created as created2_26_2_, task12_.created_by as created_3_26_2_, task12_.description as descript4_26_2_, task12_.map_id as map_id9_26_2_, task12_.modified as modified5_26_2_, task12_.modified_by as modified6_26_2_, task12_.type as type7_26_2_, ");
+      queryStrBuilder.append("assigned_author_user.family_name as assigned_author_family_name, ");
+      queryStrBuilder.append("assigned_author_user.given_name as assigned_author_given_name, ");
+      queryStrBuilder.append("assigned_author_user.email as assigned_author_email, ");
+      queryStrBuilder.append("assigned_reviewer_user.family_name as assigned_reviewer_family_name, ");
+      queryStrBuilder.append("assigned_reviewer_user.given_name as assigned_reviewer_given_name, ");
+      queryStrBuilder.append("assigned_reviewer_user.email as assigned_reviewer_email, ");
+      queryStrBuilder.append("assigned_reconciler_user.family_name as assigned_reconciler_family_name, ");
+      queryStrBuilder.append("assigned_reconciler_user.given_name as assigned_reconiler_given_name, ");
+      queryStrBuilder.append("assigned_reconciler_user.email as assigned_reconciler_email, ");
+      queryStrBuilder.append("user9_.given_name as last_author_given_name, ");
+      queryStrBuilder.append("user9_.family_name as last_author_family_name, ");
+      queryStrBuilder.append("user9_.email as last_author_email, ");
+      queryStrBuilder.append("user11_.given_name as last_reviewer_given_name, ");
+      queryStrBuilder.append("user11_.family_name as last_reviewer_family_name, ");
+      queryStrBuilder.append("user11_.email as last_reviewer_email ");
+      queryStrBuilder.append("FROM ");
+      queryStrBuilder.append("(SELECT UUID() as 'id', map_row.id AS map_row_id, map_row.map_id, status, blind_map_flag, null as sibling_row_author_task_id ");
+      queryStrBuilder.append("FROM map_row ");
+      queryStrBuilder.append("WHERE map_id = :mapId ");
+      queryStrBuilder.append("AND map_row.blind_map_flag = false  ");
+      queryStrBuilder.append("UNION  ");
+      queryStrBuilder.append("SELECT UUID() as 'id', mr1.id AS map_row_id, mr1.map_id, (CASE WHEN mr1.status != mr2.status THEN '1' ELSE mr1.status END), ");
+      queryStrBuilder.append("mr1.blind_map_flag, mr2.author_task_id  ");
+      queryStrBuilder.append("FROM map_row mr1, map_row mr2 ");
+      queryStrBuilder.append("WHERE mr1.map_id = :mapId  ");
+      queryStrBuilder.append("AND mr1.source_code_id = mr2.source_code_id  ");
+      queryStrBuilder.append("AND mr1.id < mr2.id  ");
+      queryStrBuilder.append("AND mr1.map_id = mr2.map_id  ");
+      queryStrBuilder.append("AND mr1.blind_map_flag = true) as map_view ");
+      queryStrBuilder.append("LEFT OUTER JOIN map_row_target maprowtarg1_ on (maprowtarg1_.row_id = map_view.map_row_id AND map_view.blind_map_flag = 0) ");
+      queryStrBuilder.append("left outer join map_row maprow2_ on map_view.map_row_id=maprow2_.id  ");
+      queryStrBuilder.append("left outer join task task3_ on maprow2_.author_task_id=task3_.id  ");
+      queryStrBuilder.append("left outer join map_row maprow4_ on map_view.map_row_id=maprow4_.id ");
+      queryStrBuilder.append("left outer join task task5_ on maprow4_.review_task_id=task5_.id ");
+      queryStrBuilder.append("left outer join map_row maprow6_ on map_view.map_row_id=maprow6_.id ");
+      queryStrBuilder.append("left outer join task task7_ on maprow6_.reconcile_task_id=task7_.id ");
+      queryStrBuilder.append("left outer join map_row maprow8_ on map_view.map_row_id=maprow8_.id ");
+      queryStrBuilder.append("left outer join `user` user9_ on maprow8_.`last_author_id`=user9_.id ");
+      queryStrBuilder.append("left outer join map_row maprow10_ on map_view.map_row_id=maprow10_.id  ");
+      queryStrBuilder.append("left outer join `user` user11_ on maprow10_.`last_reviewer_id`=user11_.id  ");
+      queryStrBuilder.append("left outer join task task12_ on map_view.sibling_row_author_task_id=task12_.id  ");
+      queryStrBuilder.append("left outer join map_row maprow13_ on map_view.map_row_id=maprow13_.id  ");
+      queryStrBuilder.append("left outer join imported_code importedco14_ on maprow13_.source_code_id=importedco14_.id  ");
+      queryStrBuilder.append("left outer join map_row maprow15_ on map_view.map_row_id=maprow15_.id  ");
+      queryStrBuilder.append("left outer join `user` user16_ on maprow15_.`last_author_id`=user16_.id  ");
+      queryStrBuilder.append("left outer join `user` assigned_author_user on  task3_.assignee_id=assigned_author_user.id  ");
+      queryStrBuilder.append("left outer join `user` assigned_reviewer_user on task5_.assignee_id=assigned_reviewer_user.id ");
+      queryStrBuilder.append("left outer join `user` assigned_reconciler_user on task7_.assignee_id=assigned_reconciler_user.id ");
+
+      if (filter != null) {
+        final String filterExpression = filter.getNativeExpression(true);
+        if (filterExpression != null) {
+          queryStrBuilder.append(" WHERE ").append(filterExpression);
+        }
+      }
+
+      System.err.println("!!!query=" + queryStrBuilder.toString());
+
+      // TODO can this count query be simplified to potentially speed it up .. just the union itself will give the correct count
+      Query totalRowCountQuery = entityManager.createNativeQuery("SELECT COUNT(*) FROM ( " + queryStrBuilder.toString() + " ) AS COUNT_ROWS");
+      totalRowCountQuery.setParameter("mapId", map.getId());
+      totalRowCountQuery.toString();
+      int totalRowCount = ((Number) totalRowCountQuery.getSingleResult()).intValue();
+
+      if (pageable.getSort() == null || pageable.getSort().isUnsorted()) {
+        // equivalent to mapView.mapRow.sourceCode.index.asc()).orderBy(mapView.mapRow.lastAuthor.id.asc());
+        queryStrBuilder.append(" order by importedco14_._index asc, user16_.id ");
+      }
+      else {
+        queryStrBuilder = transformSortableForNativeQuery(queryStrBuilder, pageable.getSort(), additionalColumns, dualMapMode, task);
+      }
+
+      Query q = entityManager.createNativeQuery(queryStrBuilder.toString(), "DualMapViewResult");
+      q.setParameter("mapId", map.getId());
+      q.setFirstResult((int) pageable.getOffset());
+      q.setMaxResults((int) pageable.getPageSize());
+
+      List<MapView> mapViewList = new ArrayList<MapView>();
+      @SuppressWarnings("unchecked")
+      List<Object[]> resultsList = q.getResultList();
+      resultsList.stream().forEach((record) -> {
+        MapRow mapRow = (MapRow) record[0];
+        MapRowTarget mapRowTarget = (MapRowTarget) record[1];
+        Task siblingRowAuthorTask = (Task) record[2];
+        Instant latestNote = (Instant) record[3];
+        Integer mapStatusStr = (Integer) record[4];
+        MapStatus mapStatus = MapStatus.values()[mapStatusStr];
+        MapView mapView = new MapView(mapRow, mapRowTarget, latestNote, mapStatus, siblingRowAuthorTask);
+        mapViewList.add(mapView);
+      });
+
+      final JPAQuery<MappedRowDetailsDto> mappingRowDetailsQuery = getQueryMappedRowDetailsForMap(mapId, task, filter,
+          pageable);
+      final List<MappedRowDetailsDto> sourceIndexResults = mappingRowDetailsQuery.fetch();
+
+      final Page<MapView> page = new PageImpl<>(mapViewList, pageable, totalRowCount);
+      final PagedModel<EntityModel<MapView>> pagedModel = assembler.toModel(page);
+      final Snap2SnomedPagedModel<EntityModel<MapView>> _results = new Snap2SnomedPagedModel<>(pagedModel,
+          sourceIndexResults, additionalColumns);
+      return _results;
+
+    } else {
+      JPAQuery<MapView> query;
+      if (dualMapMode) {
+        query = getDualMapQueryForMap(mapId, task, filter, pageable.getSort());
+      } else {
+        query = getQueryForMap(mapId, task, filter);
+      }
+
+      query = transformSortable(query, pageable.getSort(), additionalColumns, dualMapMode, task);
+      query = transformPageable(query, pageable);
+
+      final QueryResults<MapView> results = query.fetchResults();
+
+      final JPAQuery<MappedRowDetailsDto> mappingRowDetailsQuery = getQueryMappedRowDetailsForMap(mapId, task, filter,
+          pageable);
+      final List<MappedRowDetailsDto> sourceIndexResults = mappingRowDetailsQuery.fetch();
+
+      final Page<MapView> page = new PageImpl<>(results.getResults(), pageable, results.getTotal());
+      final PagedModel<EntityModel<MapView>> pagedModel = assembler.toModel(page);
+      final Snap2SnomedPagedModel<EntityModel<MapView>> _results = new Snap2SnomedPagedModel<>(pagedModel,
+          sourceIndexResults, additionalColumns);
+      return _results;
     }
-    else {
-      query = getQueryForMap(mapId, task, filter);
-    }
-
-    query = transformSortable(query, pageable.getSort(), additionalColumns, dualMapMode, task);
-    query = transformPageable(query, pageable);
-
-    final QueryResults<MapView> results = query.fetchResults();
-
-    final JPAQuery<MappedRowDetailsDto> mappingRowDetailsQuery = getQueryMappedRowDetailsForMap(mapId, task, filter,
-            pageable);
-    final List<MappedRowDetailsDto> sourceIndexResults = mappingRowDetailsQuery.fetch();
-
-    final Page<MapView> page = new PageImpl<>(results.getResults(), pageable, results.getTotal());
-    final PagedModel<EntityModel<MapView>> pagedModel = assembler.toModel(page);
-    final Snap2SnomedPagedModel<EntityModel<MapView>> _results = new Snap2SnomedPagedModel<>(pagedModel, sourceIndexResults, additionalColumns);
-    return _results;
   }
 
   protected JPAQuery<MapView> transformPageable(JPAQuery<MapView> query, Pageable pageable) {
@@ -405,6 +629,116 @@ public class MapViewService {
       query = query.offset(pageable.getOffset()).limit(pageable.getPageSize());
     }
     return query;
+  }
+
+  //TODO finish additional columns
+  protected StringBuilder transformSortableForNativeQuery(StringBuilder queryStringBuilder, Sort sort, List<AdditionalCodeColumn> additionalColumns, Boolean dualMapMode,
+          Task task) {
+
+    if (sort != null) {
+      for (final Order s : sort) {
+        List<String> field;
+        switch (s.getProperty()) {
+          case "rowId":
+            field = Arrays.asList("maprow15_.id");
+            break;
+          case "sourceIndex":
+            field = Arrays.asList("importedco14_._index");
+            break;
+          case "sourceCode":
+            field = Arrays.asList("importedco14_.code");
+            break;
+          case "sourceDisplay":
+            field = Arrays.asList("importedco14_.display");
+            break;
+          case "noMap":
+            field = Arrays.asList("maprow15_.no_map");
+            break;
+          case "targetId":
+            field = Arrays.asList("maprowtarg1_.id");
+            break;
+          case "targetCode":
+            field = Arrays.asList("maprowtarg1_.target_code");
+            break;
+          case "targetDisplay":
+            field = Arrays.asList("maprowtarg1_.target_display");
+            break;
+          case "relationship":
+            field = Arrays.asList("maprowtarg1_.relationship");
+            break;
+          case "status":
+            field = Arrays.asList("maprow15_.status");
+            break;
+          case "latestNote":
+          field = null;
+            field = Arrays.asList("col_2_0_");
+            break;
+          case "assignedAuthor":
+            field = Arrays.asList("CONCAT(assigned_author_given_name, assigned_author_family_name, assigned_author_email)");
+            break;
+          case "assignedReconciler":
+          field = null;
+            field = Arrays.asList("CONCAT(assigned_reconciler_given_name, assigned_reconciler_family_name, assigned_reconciler_email)");
+            break;
+          case "assignedReviewer":
+            field = Arrays.asList("CONCAT(assigned_reviewer_given_name, assigned_reviewer_family_name, assigned_reviewer_email)");
+            break;
+          // not used
+          // case "lastAuthor":
+          //   field = Arrays.asList("concat(concat(user9_.given_name, user9_.family_name), user9_.email)");
+          //   break;
+          // case "lastReviewer":
+          //   field = Arrays.asList("concat(concat(user11_.given_name, user11_.family_name), user11_.email)");
+          //   break;
+          case "lastAuthorReviewer":
+            field = Arrays.asList(
+              "CONCAT(last_author_given_name, last_author_family_name, last_author_email)",
+              "CONCAT(last_reviewer_given_name, last_reviewer_family_name, last_reviewer_email)"); 
+            break;
+          case "targetOutOfScope":
+            field = null;
+            // it does not make sense to sort by this flag so it is not supported
+            log.warn("Unsupported MapView sort field '" + s.getProperty() + "' - ignored");
+            break;
+          case "flagged":
+            field = Arrays.asList("maprowtarg1_.flagged");
+            break;
+
+          default:
+          field = null;
+            if (s.getProperty().startsWith(ADDITIONAL_COLUMN_NAME)) {
+              final int index = Integer.parseInt(s.getProperty().substring(ADDITIONAL_COLUMN_NAME.length())) - 1;
+              final ColumnType type = additionalColumns.get(index).getType();
+              //TODO!!!
+              field = Arrays.asList("");
+              //field = Arrays.asList(getSortExpression(_mapRow.sourceCode, type, index));
+            } else {
+              field = null;
+              log.warn("Unknown MapView sort field '" + s.getProperty() + "' - ignored");
+            }
+        }
+
+        if (null != field) {
+          boolean firstInList = true;
+          for (final String f : field) {
+            if (firstInList) {
+              queryStringBuilder.append(" ORDER BY ").append(f);
+            }
+            else {
+              queryStringBuilder.append(", ").append(f);
+            }
+            if (s.isAscending()) {
+              queryStringBuilder.append(" ASC ");
+            } else {
+              queryStringBuilder.append(" DESC ");
+            }
+            firstInList = false;
+          }
+          System.err.println("query!!" + queryStringBuilder.toString());
+        }
+      }
+    }
+    return queryStringBuilder;
   }
 
   protected JPAQuery<MapView> transformSortable(JPAQuery<MapView> query, Sort sort, List<AdditionalCodeColumn> additionalColumns, Boolean dualMapMode,
@@ -477,6 +811,7 @@ public class MapViewService {
             break;
 
           default:
+          // left outer join imported_code_additional_columns additional7_ on importedco6_.id=additional7_.imported_code_id and (additional7_.collection_order=1) 
             if (s.getProperty().startsWith(ADDITIONAL_COLUMN_NAME)) {
               final int index = Integer.parseInt(s.getProperty().substring(ADDITIONAL_COLUMN_NAME.length())) - 1;
               final ColumnType type = additionalColumns.get(index).getType();
@@ -520,54 +855,62 @@ public class MapViewService {
 
   private JPAQuery<MapView> getDualMapQueryForMap(Long mapId, Task task, MapViewFilter filter, Sort sort) {
 
-    if (task != null) {
+    //if (task != null) {
+    
+    // details / task screen .. don't display reconcile state or reconciled (mapped)
+    JPAQuery<MapView> query = new JPAQuery<MapView>(entityManager)
+    .select(Projections.constructor(MapView.class, mapRow, mapTarget,
+        ExpressionUtils.as(JPAExpressions.select(note.modified.max()).from(note)
+            .where(note.mapRow.eq(mapRow).and(note.category.eq(NoteCategory.USER)).and(note.deleted.isFalse())), "latestNote"),
+            mapRow.status))
+    .from(mapRow)
+    .leftJoin(mapTarget).on(mapTarget.row.eq(mapRow))
+    .leftJoin(mapRow.authorTask)
+    .leftJoin(mapRow.reviewTask)
+    .leftJoin(mapRow.reconcileTask)
+    .leftJoin(mapRow.lastAuthor)
+    .leftJoin(mapRow.lastReviewer)
+    .where(getWhereClause(mapId, task, filter, false));
 
-      //TODO maybe two queries here removing unneeded joins?
-      
-      // details / task screen .. don't display reconcile state or reconciled (mapped)
-      JPAQuery<MapView> query = new JPAQuery<MapView>(entityManager)
-      .select(Projections.constructor(MapView.class, mapRow, mapTarget,
-          ExpressionUtils.as(JPAExpressions.select(note.modified.max()).from(note)
-              .where(note.mapRow.eq(mapRow).and(note.category.eq(NoteCategory.USER)).and(note.deleted.isFalse())), "latestNote"),
-              mapRow.status))
-      .from(mapRow)
-      .leftJoin(mapTarget).on(mapTarget.row.eq(mapRow))
-      .leftJoin(mapRow.authorTask)
-      .leftJoin(mapRow.reviewTask)
-      .leftJoin(mapRow.reconcileTask)
-      .leftJoin(mapRow.lastAuthor)
-      .leftJoin(mapRow.lastReviewer)
-      .where(getWhereClause(mapId, task, filter, false));
-
-      if ((task.getType().equals(TaskType.RECONCILE) || task.getType().equals(TaskType.AUTHOR)) && sort != null && sort.isUnsorted()) {
-        query = query.orderBy(mapRow.sourceCode.index.asc()).orderBy((mapRow.lastAuthor.id.asc()));
-      }
-
-      return query;
+    if ((task.getType().equals(TaskType.RECONCILE) || task.getType().equals(TaskType.AUTHOR)) && sort != null && sort.isUnsorted()) {
+      query = query.orderBy(mapRow.sourceCode.index.asc()).orderBy((mapRow.lastAuthor.id.asc()));
     }
-    else {
-      // view screen
-      JPAQuery<MapView> query = new JPAQuery<MapView>(entityManager)
-      .select(Projections.constructor(MapView.class, mapView.mapRow, mapTarget,
-          ExpressionUtils.as(JPAExpressions.select(note.modified.max()).from(note)
-              .where(note.mapRow.eq(mapView.mapRow).and(note.category.eq(NoteCategory.USER)).and(note.deleted.isFalse())), "latestNote"),
-              mapView.status, mapView.siblingRowAuthorTask))
-      .from(mapView)
-      .leftJoin(mapTarget).on(mapTarget.row.eq(mapView.mapRow).and(mapView.blindMapFlag.eq(false)))
-      .leftJoin(mapView.mapRow.authorTask)
-      .leftJoin(mapView.mapRow.reviewTask)
-      .leftJoin(mapView.mapRow.reconcileTask)
-      .leftJoin(mapView.mapRow.lastAuthor)
-      .leftJoin(mapView.mapRow.lastReviewer)
-      .leftJoin(mapView.siblingRowAuthorTask)
-      .where(getMapViewWhereClause(mapId, task, filter));
 
-      if (sort == null || sort.isUnsorted()) {
-        query = query.orderBy(mapView.mapRow.sourceCode.index.asc()).orderBy(mapView.mapRow.lastAuthor.id.asc());
-      }
+    return query;
 
-      return query;
-    }
+    //}
+    // Could not achieve performance this way so now run a native query which is very messy / duplication of code but it is the best
+    // we can do for now.
+    //
+    // This could be a limitation with aurora which may not be present in other dbs .. or just with the current version of aurora mysql 
+    // .. it looks like it could be addressed in the future when aurora db comes into line with mysql.  Performance would be fixed by a db
+    // that is capable of optimizing the "where mapid = X" clause into the view, rather than applying it to the results of the view.
+    //
+    // Need this supported in aurora .. "CREATE OR REPLACE ALGORITHM = MERGE VIEW myView AS"
+    //
+    // else {
+    //   // view screen
+    //   JPAQuery<MapView> query = new JPAQuery<MapView>(entityManager)
+    //   .select(Projections.constructor(MapView.class, mapView.mapRow, mapTarget,
+    //       ExpressionUtils.as(JPAExpressions.select(note.modified.max()).from(note)
+    //           .where(note.mapRow.eq(mapView.mapRow).and(note.category.eq(NoteCategory.USER)).and(note.deleted.isFalse())), "latestNote"),
+    //           mapView.status, mapView.siblingRowAuthorTask))
+    //   .from(mapView)
+    //   .leftJoin(mapTarget).on(mapTarget.row.eq(mapView.mapRow).and(mapView.blindMapFlag.eq(false)))
+    //   .leftJoin(mapView.mapRow.authorTask)
+    //   .leftJoin(mapView.mapRow.reviewTask)
+    //   .leftJoin(mapView.mapRow.reconcileTask)
+    //   .leftJoin(mapView.mapRow.lastAuthor)
+    //   .leftJoin(mapView.mapRow.lastReviewer)
+    //   .leftJoin(mapView.siblingRowAuthorTask)
+    //   .where(getMapViewWhereClause(mapId, task, filter));
+
+    //   if (sort == null || sort.isUnsorted()) {
+    //     query = query.orderBy(mapView.mapRow.sourceCode.index.asc()).orderBy(mapView.mapRow.lastAuthor.id.asc());
+    //   }
+
+    //   return query;
+    // }
   }
 
   protected JPAQuery<MapView> getQueryForMap(Long mapId, Task task, MapViewFilter filter) {
@@ -658,11 +1001,31 @@ public class MapViewService {
     return expression.or(betweenStatement);
   }
 
+  private String collectNativeQueryOrStatement(String expression, String betweenStatement) {
+    if (expression == null) {
+      return betweenStatement;
+    }
+    if (betweenStatement == null) {
+      return expression;
+    }
+    return expression + " OR " + betweenStatement;
+  }
+
   private BooleanExpression collectAndStatement(BooleanExpression expression, BooleanExpression betweenStatement) {
     if (expression == null) {
       return betweenStatement;
     }
     return expression.and(betweenStatement);
+  }
+
+  private String collectNativeQueryAndStatement(String expression, String betweenStatement) {
+    if (expression == null) {
+      return betweenStatement;
+    }
+    if (betweenStatement == null) {
+      return expression;
+    }
+    return expression + " AND " + betweenStatement;
   }
 
   public MapView getDualMapSiblingRow(Long mapId, Long sourceCodeId, Long mapRowId) {
