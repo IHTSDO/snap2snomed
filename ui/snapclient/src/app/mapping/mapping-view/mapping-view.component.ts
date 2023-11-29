@@ -323,21 +323,31 @@ export class MappingViewComponent implements OnInit, AfterViewInit, OnDestroy {
       }
     }));    
 
-    this.subscription.add(this.route.queryParams
-      .subscribe(qparams => {
-        // subscription emits a value immediately  .. ignore if empty
-        // note that you can't simply ignore the first value here as it may be a page refresh and the
-        // value may be the selected filters
-        if (Object.keys(qparams).length > 0) { 
-          this.filterEntity = ServiceUtils.paramsToFilterEntity(qparams);
-          if (this.filterEntity.hasFilters()) {
-            this._filterEnabled = true;
-          }
-          this.filterParams = ServiceUtils.filtersToParam(this.filterEntity);
-          this.paging = ServiceUtils.pagingParamsToMapViewPaging(qparams);
-          this.refreshPage();
-        }
+    this.subscription.add(this.route.queryParams.subscribe(qparams => {
+        this.filterEntity = ServiceUtils.paramsToFilterEntity(qparams);
+      if (this.filterEntity.hasFilters()) {
+        this._filterEnabled = true;
+      }
+      this.filterParams = ServiceUtils.filtersToParam(this.filterEntity);
+      this.paging = ServiceUtils.pagingParamsToMapViewPaging(qparams);
+      this.refreshPage();
     }));
+    // TODO this potentially caused problems on creating a new map, investigate further    
+    // this.subscription.add(this.route.queryParams
+    //   .subscribe(qparams => {
+    //     // subscription emits a value immediately  .. ignore if empty
+    //     // note that you can't simply ignore the first value here as it may be a page refresh and the
+    //     // value may be the selected filters
+    //     if (Object.keys(qparams).length > 0) { 
+    //       this.filterEntity = ServiceUtils.paramsToFilterEntity(qparams);
+    //       if (this.filterEntity.hasFilters()) {
+    //         this._filterEnabled = true;
+    //       }
+    //       this.filterParams = ServiceUtils.filtersToParam(this.filterEntity);
+    //       this.paging = ServiceUtils.pagingParamsToMapViewPaging(qparams);
+    //       this.refreshPage();
+    //     }
+    // }));
   }
 
   /**
@@ -413,40 +423,41 @@ export class MappingViewComponent implements OnInit, AfterViewInit, OnDestroy {
         }
       })
     );
-    self.subscription.add(this.store.select(selectCurrentView).subscribe(
+    self.subscription.add(this.store.select(selectCurrentView).pipe(startWith(null)).subscribe(
       (page) => {
+        if (page) {
+          // TODO: find out why this triggers with the previously selected map first, and then
+          // the current map
 
-        // TODO: find out why this triggers with the previously selected map first, and then
-        // the current map
+          // This code has been written to cater for this being executed multiple times (which is the case)
 
-        // This code has been written to cater for this being executed multiple times (which is the case)
+          self.page = page ?? new Page();
 
-        self.page = page ?? new Page();
+          this.additionalDisplayedColumns = [];
+          this.additionalFilteredColumns = [];
+          this.additionalHideShowColumns = [];
 
-        this.additionalDisplayedColumns = [];
-        this.additionalFilteredColumns = [];
-        this.additionalHideShowColumns = [];
+          // NB: additionalDisplayedColumns and displayedColumns must be set together or the table will error
+          // as the html will be out of sync with the model (same applies to additionalFilteredColumns and filteredColumns)
+          for (let i = 0; i <  this.page.additionalColumns.length; i++) {
+            this.additionalDisplayedColumns.push({columnId: "additionalColumn" + (i+1), columnDisplay: this.page.additionalColumns[i].name, displayed: true});
+            this.additionalFilteredColumns.push("filter-additionalColumn" + (i+1));
+            this.additionalHideShowColumns.push("additionalColumn" + (i+1));
+          }
 
-        // NB: additionalDisplayedColumns and displayedColumns must be set together or the table will error
-        // as the html will be out of sync with the model (same applies to additionalFilteredColumns and filteredColumns)
-        for (let i = 0; i <  this.page.additionalColumns.length; i++) {
-          this.additionalDisplayedColumns.push({columnId: "additionalColumn" + (i+1), columnDisplay: this.page.additionalColumns[i].name, displayed: true});
-          this.additionalFilteredColumns.push("filter-additionalColumn" + (i+1));
-          this.additionalHideShowColumns.push("additionalColumn" + (i+1));
-        }
+          // display additional columns at the end of the table
+          //this.displayedColumns = this.constantColumns.concat(this.additionalDisplayedColumns);
+          //this.filteredColumns = this.constantFilteredColumns.concat(this.additionalFilteredColumns);
+          //this.hideShowColumns = this.constantHideShowColumns.concat(this.additionalHideShowColumns);
 
-        // display additional columns at the end of the table
-        //this.displayedColumns = this.constantColumns.concat(this.additionalDisplayedColumns);
-        //this.filteredColumns = this.constantFilteredColumns.concat(this.additionalFilteredColumns);
-        //this.hideShowColumns = this.constantHideShowColumns.concat(this.additionalHideShowColumns);
-
-        // display additional columns after source columns
-        this.displayedColumns = this.constantColumns.slice(0,4).concat(this.additionalDisplayedColumns).concat(this.constantColumns.slice(4));
-        this.filteredColumns = this.constantFilteredColumns.slice(0,4).concat(this.additionalFilteredColumns).concat(this.constantFilteredColumns.slice(4));
-        this.hideShowColumns = this.constantHideShowColumns.slice(0,3).concat(this.additionalHideShowColumns).concat(this.constantHideShowColumns.slice(3));
-        
-        if (page?.sourceDetails) {
-          self.allSourceDetails = page.sourceDetails;
+          // display additional columns after source columns
+          this.displayedColumns = this.constantColumns.slice(0,4).concat(this.additionalDisplayedColumns).concat(this.constantColumns.slice(4));
+          this.filteredColumns = this.constantFilteredColumns.slice(0,4).concat(this.additionalFilteredColumns).concat(this.constantFilteredColumns.slice(4));
+          this.hideShowColumns = this.constantHideShowColumns.slice(0,3).concat(this.additionalHideShowColumns).concat(this.constantHideShowColumns.slice(3));
+          
+          if (page?.sourceDetails) {
+            self.allSourceDetails = page.sourceDetails;
+          }
         }
       })
     );
@@ -563,28 +574,38 @@ export class MappingViewComponent implements OnInit, AfterViewInit, OnDestroy {
 
   loadTaskList(): void {
     const self = this;
-    this.subscription.add(self.store.select(selectTaskList).pipe(startWith(null), debounceTime(200)).subscribe(
+    this.subscription.add(self.store.select(selectTaskList).pipe(debounceTime(200)).subscribe(
       data => {
-        if (data) { // cannot ignore empty lists here as it could indicate all tasks being removed
-
-          const newTasks = data.filter(task => task.assignee?.id === self.currentUser?.id)
-            .sort((a, b) => AssignedWorkComponent.sortTasks(a, b));
-          // TODO this equals checking is not working due to a slight time difference in times reported
-          // it would remove unnecessry calls to refreshpage and improve responsiveness
-          // if it could be fixed 
-
-          // ensure notifications are distinct, unecessary expensive refreshes are made
-          if (JSON.stringify(self.myTasks) !== JSON.stringify(newTasks)) {
-            self.myTasks = newTasks;
-            this.refreshPage();
-          } 
-        }
+        this.refreshPage();
+        self.myTasks = data.filter(task => task.assignee?.id === self.currentUser?.id)
+          .sort((a, b) => AssignedWorkComponent.sortTasks(a, b));
       },
       (error) => self.translate.get('TASK.FAILED_TO_LOAD_TASKS').subscribe((err) => {
         self.error.message = err;
         self.error.detail = error;
       })
     ));
+    // TODO this potentially cause new maps to not load, investigate further before reinstating
+    // this.subscription.add(self.store.select(selectTaskList).pipe(startWith(null), debounceTime(200)).subscribe(
+    //   data => {
+    //     if (data) { // cannot ignore empty lists here as it could indicate all tasks being removed
+
+    //       const newTasks = data.filter(task => task.assignee?.id === self.currentUser?.id)
+    //         .sort((a, b) => AssignedWorkComponent.sortTasks(a, b));
+    //       // TODO this equals checking is not working due to a slight time difference in times reported
+    //       // it would remove unnecessry calls to refreshpage and improve responsiveness
+    //       // if it could be fixed 
+    //       if (JSON.stringify(self.myTasks) !== JSON.stringify(newTasks)) {
+    //         self.myTasks = newTasks;
+    //         this.refreshPage();
+    //       } 
+    //     }
+    //   },
+    //   (error) => self.translate.get('TASK.FAILED_TO_LOAD_TASKS').subscribe((err) => {
+    //     self.error.message = err;
+    //     self.error.detail = error;
+    //   })
+    // ));
   }
 
   addReconcilerTableColumn() {
@@ -594,7 +615,8 @@ export class MappingViewComponent implements OnInit, AfterViewInit, OnDestroy {
       this.constantFilteredColumns.push("filter-assignedReconciler");
       this.constantHideShowColumns.push("assignedReconciler");
       this.constantColumns.push({columnId: 'assignedReconciler', columnDisplay: 'TABLE.RECONCILER', displayed: true});
-      this.refreshPage();
+      //TODO reinvestigate if this is needed following investigation of excessive refresh improvements
+      //this.refreshPage();
     }
 
   }
@@ -788,7 +810,6 @@ export class MappingViewComponent implements OnInit, AfterViewInit, OnDestroy {
   refreshTable($event: string): void {
     if (this.mapping_id) {
       // this.store.dispatch(new LoadMapping({id: this.mapping_id}));
-      console.log("refresh table");
       this.refreshPage();
     }
   }
