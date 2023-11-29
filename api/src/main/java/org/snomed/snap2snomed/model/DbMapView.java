@@ -1,7 +1,9 @@
 package org.snomed.snap2snomed.model;
 
+
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
 import org.hibernate.annotations.Immutable;
-import org.hibernate.annotations.Where;
 import org.snomed.snap2snomed.model.enumeration.MapStatus;
 
 import javax.persistence.Column;
