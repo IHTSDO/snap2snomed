@@ -536,7 +536,7 @@ public class MapViewService {
       queryStrBuilder.append("assigned_reviewer_user.given_name as assigned_reviewer_given_name, ");
       queryStrBuilder.append("assigned_reviewer_user.email as assigned_reviewer_email, ");
       queryStrBuilder.append("assigned_reconciler_user.family_name as assigned_reconciler_family_name, ");
-      queryStrBuilder.append("assigned_reconciler_user.given_name as assigned_reconiler_given_name, ");
+      queryStrBuilder.append("assigned_reconciler_user.given_name as assigned_reconciler_given_name, ");
       queryStrBuilder.append("assigned_reconciler_user.email as assigned_reconciler_email, ");
       queryStrBuilder.append("user9_.given_name as last_author_given_name, ");
       queryStrBuilder.append("user9_.family_name as last_author_family_name, ");
