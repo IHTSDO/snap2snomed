@@ -238,45 +238,53 @@ public class MapViewService {
       return expression;
     }
 
-    // TODO finish
+    private String getInListExpression(List<String> stringList) {
+      return "IN (" + "'" + String.join("', '", stringList) + "'" + ") ";
+    }
+
     public String getNativeExpression(boolean useDualView) {
-      //var _mapRow = useDualView ? QDbMapView.dbMapView.mapRow : QMapRow.mapRow;
 
       String expression = null;
         
-      // expression = stringCollectionToOrStatements(expression, sourceCodes,
-      //     s -> _mapRow.sourceCode.code.startsWithIgnoreCase(s),
-      //     (a, b) -> collectOrStatement(a, b));
-      // expression = stringCollectionToOrStatements(expression, sourceDisplays,
-      //     s -> _mapRow.sourceCode.display.containsIgnoreCase(s),
-      //     (a, b) -> collectAndStatement(a, b));
+      expression = stringCollectionToNativeQueryOrStatements(expression, sourceCodes,
+          s -> " importedco14_.code LIKE '" + s + "%' ",
+          (a, b) -> collectNativeQueryOrStatement(a, b));
+      expression = stringCollectionToNativeQueryOrStatements(expression, sourceDisplays,
+          s -> " importedco14_.display LIKE '%" + s + "%' ",
+          (a, b) -> collectNativeQueryAndStatement(a, b));
 
       if (noMap != null) {
         expression = collectNativeQueryAndStatement(expression, " maprow15_.no_map = " + noMap);
       }
 
-      // expression = stringCollectionToOrStatements(expression, targetCodes,
-      //     s -> QMapRowTarget.mapRowTarget.targetCode.startsWithIgnoreCase(s),
-      //     (a, b) -> collectOrStatement(a, b));
-      // expression = stringCollectionToOrStatements(expression, targetDisplays,
-      //     s -> QMapRowTarget.mapRowTarget.targetDisplay.containsIgnoreCase(s),
-      //     (a, b) -> collectAndStatement(a, b));
+      expression = stringCollectionToNativeQueryOrStatements(expression, targetCodes,
+          s -> " maprowtarg1_.target_code LIKE '" + s + "%' ",
+          (a, b) -> collectNativeQueryOrStatement(a, b));
+      expression = stringCollectionToNativeQueryOrStatements(expression, targetDisplays,
+          s -> " maprowtarg1_.target_display LIKE '%" + s + "%' ",
+          (a, b) -> collectNativeQueryAndStatement(a, b));
 
-      // if (!CollectionUtils.isEmpty(relationshipTypes)) {
-      //   expression += collectAndStatement(expression, " maprowtarg1_.relationship IN (" + relationshipTypes + ")");
-      // }
+      if (!CollectionUtils.isEmpty(relationshipTypes)) {
+        List<String> stringRelationshipTypes = relationshipTypes.stream()
+          .map(rel -> Integer.toString(rel.ordinal()))
+          .collect(Collectors.toList());
+        expression = collectNativeQueryAndStatement(expression, " maprowtarg1_.relationship " + getInListExpression(stringRelationshipTypes));
+      }
 
-      // if (!CollectionUtils.isEmpty(statuses)) {
-      //   expression = collectAndStatement(expression, _mapRow.status.in(statuses));
-      // }
+      if (!CollectionUtils.isEmpty(statuses)) {
+        List<String> stringStatuses = statuses.stream()
+          .map(status -> Integer.toString(status.ordinal()))
+          .collect(Collectors.toList());
+        expression = collectNativeQueryAndStatement(expression, " maprow15_.status " + getInListExpression(stringStatuses));
+      }
 
-      // if (!CollectionUtils.isEmpty(lastAuthor)) {
-      //   expression = collectAndStatement(expression, _mapRow.lastAuthor.id.in(lastAuthor));
-      // }
+      if (!CollectionUtils.isEmpty(lastAuthor)) {
+        expression = collectNativeQueryAndStatement(expression, " maprow15_.`last_author_id` " + getInListExpression(lastAuthor));
+      }
 
-      // if (!CollectionUtils.isEmpty(lastReviewer)) {
-      //   expression = collectAndStatement(expression, _mapRow.lastReviewer.id.in(lastReviewer));
-      // }
+      if (!CollectionUtils.isEmpty(lastReviewer)) {
+        expression = collectNativeQueryAndStatement(expression, " maprow15_.`last_reviewer_id` " +  getInListExpression(lastReviewer));
+      }
 
       if (!CollectionUtils.isEmpty(lastAuthorReviewer)) {
         String noneMatch = null;
@@ -285,8 +293,8 @@ public class MapViewService {
         }
 
         expression = collectNativeQueryAndStatement(expression,
-            collectNativeQueryOrStatement(" maprow15_.`last_author_id` in (" + "'" + String.join("', '", lastAuthorReviewer) + "'" + ")" +
-            " OR maprow15_.`last_reviewer_id` in ("  + "'" + String.join("', '", lastAuthorReviewer) + "'" + ") ",
+            collectNativeQueryOrStatement(" maprow15_.`last_author_id` " +  getInListExpression(lastAuthorReviewer) +
+            " OR maprow15_.`last_reviewer_id` " + getInListExpression(lastAuthorReviewer),
                 noneMatch));
       }
 
@@ -296,9 +304,9 @@ public class MapViewService {
           noneMatch = " assigned_author_user.id IS NULL ";
         }
 
-        //TODO assigned author not picking up second author
+        //TODO assigned author not picking up second author .. existing issue not caused by this code
         expression = collectNativeQueryAndStatement(expression, 
-            collectNativeQueryOrStatement(" assigned_author_user.id in(" + "'" + String.join("', '", assignedAuthor) + "'" + ")", 
+            collectNativeQueryOrStatement(" assigned_author_user.id " + getInListExpression(assignedAuthor), 
             noneMatch));
       }
 
@@ -309,7 +317,7 @@ public class MapViewService {
         }
 
         expression = collectNativeQueryAndStatement(expression, 
-            collectNativeQueryOrStatement(" assigned_reviewer_user.id in(" + "'" + String.join("', '", assignedReviewer) + "'" + ")",
+            collectNativeQueryOrStatement(" assigned_reviewer_user.id " + getInListExpression(assignedReviewer),
             noneMatch));
       }
 
@@ -320,31 +328,54 @@ public class MapViewService {
         }
 
         expression = collectNativeQueryAndStatement(expression, 
-            collectNativeQueryOrStatement(" assigned_reconciler_user.id in(" + "'" + String.join("', '", assignedReconciler) + "'" + ")",
+            collectNativeQueryOrStatement(" assigned_reconciler_user.id " + getInListExpression(assignedReconciler),
             noneMatch));
       }
 
-      // if (targetOutOfScope != null) {
-      //   if (targetOutOfScope) {
-      //     expression = collectNativeQueryAndStatement(expression, QMapRowTarget.mapRowTarget.tags.contains(TARGET_OUT_OF_SCOPE_TAG));
-      //   }
-      //   else {
-      //     expression = collectNativeQueryAndStatement(expression, QMapRowTarget.mapRowTarget.tags.contains(TARGET_OUT_OF_SCOPE_TAG).not());
-      //   }
-      // }
-
-      if (flagged != null) {
-        expression = collectNativeQueryAndStatement(expression, " maprowtarg1_.flagged = " + flagged);
+      if (targetOutOfScope != null) {
+        if (targetOutOfScope) {
+          expression = collectNativeQueryAndStatement(expression, 
+            " ('target-out-of-scope' IN (select tags7_.tags from map_row_target_tags tags7_ where maprowtarg1_.id=tags7_.map_row_target_id)) ");
+        }
+        else {
+          expression = collectNativeQueryAndStatement(expression, " ('target-out-of-scope' NOT IN (select tags7_.tags from map_row_target_tags tags7_ where maprowtarg1_.id=tags7_.map_row_target_id)) ");
+        }
       }
 
-      // if (!CollectionUtils.isEmpty(additionalColumns)) {
-      //   for (int i = 0; i < additionalColumns.size(); i++) {
-      //     final String string = additionalColumns.get(i);
-      //     if (!string.isEmpty()) {
-      //       expression = collectAndStatement(expression, _mapRow.sourceCode.additionalColumns.get(i).value.containsIgnoreCase(string));
-      //     }
-      //   }
-      // }
+
+      if (flagged != null) {
+        String flagMatch = null;
+        if (flagged == false) {
+          flagMatch = " maprowtarg1_.flagged IS NULL ";
+        }
+
+        expression = collectNativeQueryAndStatement(expression, 
+            collectNativeQueryOrStatement(" maprowtarg1_.flagged = " + flagged + " ", flagMatch)); 
+      }
+
+      if (!CollectionUtils.isEmpty(additionalColumns)) {
+        for (int i = 0; i < additionalColumns.size(); i++) {
+          final String string = additionalColumns.get(i);
+          if (!string.isEmpty()) {
+            expression = collectNativeQueryAndStatement(expression, 
+                collectNativeQueryAndStatement(" imported_code_additional_columns.collection_order = " + i  + " ",
+                " imported_code_additional_columns.value LIKE '%" + string + "%' "));
+          }
+        }
+      }
+
+      return expression;
+    }
+
+    private String stringCollectionToNativeQueryOrStatements(String expression, List<String> stringCollection,
+        Function<String, String> function, BiFunction<String, String, String> collector) {
+      if (!CollectionUtils.isEmpty(stringCollection)) {
+        String innerExpression = null;
+        for (final String string : stringCollection) {
+          innerExpression = collector.apply(innerExpression, function.apply(string));
+        }
+        return collectNativeQueryAndStatement(expression, innerExpression);
+      }
 
       return expression;
     }
@@ -513,6 +544,16 @@ public class MapViewService {
       queryStrBuilder.append("user11_.given_name as last_reviewer_given_name, ");
       queryStrBuilder.append("user11_.family_name as last_reviewer_family_name, ");
       queryStrBuilder.append("user11_.email as last_reviewer_email ");
+      
+      // required by additional column sort
+      if (pageable.getSort() != null && !pageable.getSort().isUnsorted()) {
+        for (final Order s : pageable.getSort()) {
+          if (s.getProperty().startsWith(ADDITIONAL_COLUMN_NAME)) {
+            queryStrBuilder.append(", additional7_.value ");
+          }
+        }
+      }
+
       queryStrBuilder.append("FROM ");
       queryStrBuilder.append("(SELECT UUID() as 'id', map_row.id AS map_row_id, map_row.map_id, status, blind_map_flag, null as sibling_row_author_task_id ");
       queryStrBuilder.append("FROM map_row ");
@@ -546,6 +587,21 @@ public class MapViewService {
       queryStrBuilder.append("left outer join `user` assigned_author_user on  task3_.assignee_id=assigned_author_user.id  ");
       queryStrBuilder.append("left outer join `user` assigned_reviewer_user on task5_.assignee_id=assigned_reviewer_user.id ");
       queryStrBuilder.append("left outer join `user` assigned_reconciler_user on task7_.assignee_id=assigned_reconciler_user.id ");
+      
+      // required by filters
+      if (!CollectionUtils.isEmpty(additionalColumns)) {
+        queryStrBuilder.append("left outer join imported_code_additional_columns on importedco14_.id = imported_code_additional_columns.imported_code_id ");        
+      }
+
+      // required by sort
+      if (pageable.getSort() != null && !pageable.getSort().isUnsorted()) {
+        for (final Order s : pageable.getSort()) {
+          if (s.getProperty().startsWith(ADDITIONAL_COLUMN_NAME)) {
+            final int index = Integer.parseInt(s.getProperty().substring(ADDITIONAL_COLUMN_NAME.length())) - 1;
+            queryStrBuilder.append("left outer join imported_code_additional_columns additional7_ on importedco14_.id=additional7_.imported_code_id and (additional7_.collection_order=" + index + ") ");
+          }
+        }
+      }
 
       if (filter != null) {
         final String filterExpression = filter.getNativeExpression(true);
@@ -553,8 +609,6 @@ public class MapViewService {
           queryStrBuilder.append(" WHERE ").append(filterExpression);
         }
       }
-
-      System.err.println("!!!query=" + queryStrBuilder.toString());
 
       // TODO can this count query be simplified to potentially speed it up .. just the union itself will give the correct count
       Query totalRowCountQuery = entityManager.createNativeQuery("SELECT COUNT(*) FROM ( " + queryStrBuilder.toString() + " ) AS COUNT_ROWS");
@@ -631,7 +685,6 @@ public class MapViewService {
     return query;
   }
 
-  //TODO finish additional columns
   protected StringBuilder transformSortableForNativeQuery(StringBuilder queryStringBuilder, Sort sort, List<AdditionalCodeColumn> additionalColumns, Boolean dualMapMode,
           Task task) {
 
@@ -707,11 +760,7 @@ public class MapViewService {
           default:
           field = null;
             if (s.getProperty().startsWith(ADDITIONAL_COLUMN_NAME)) {
-              final int index = Integer.parseInt(s.getProperty().substring(ADDITIONAL_COLUMN_NAME.length())) - 1;
-              final ColumnType type = additionalColumns.get(index).getType();
-              //TODO!!!
-              field = Arrays.asList("");
-              //field = Arrays.asList(getSortExpression(_mapRow.sourceCode, type, index));
+              field = Arrays.asList("additional7_.value");
             } else {
               field = null;
               log.warn("Unknown MapView sort field '" + s.getProperty() + "' - ignored");
@@ -734,7 +783,6 @@ public class MapViewService {
             }
             firstInList = false;
           }
-          System.err.println("query!!" + queryStringBuilder.toString());
         }
       }
     }

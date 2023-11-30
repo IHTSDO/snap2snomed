@@ -426,8 +426,6 @@ export class MappingViewComponent implements OnInit, AfterViewInit, OnDestroy {
     self.subscription.add(this.store.select(selectCurrentView).pipe(startWith(null)).subscribe(
       (page) => {
         if (page) {
-          // TODO: find out why this triggers with the previously selected map first, and then
-          // the current map
 
           // This code has been written to cater for this being executed multiple times (which is the case)
 
