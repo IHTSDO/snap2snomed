@@ -572,11 +572,20 @@ export class MappingViewComponent implements OnInit, AfterViewInit, OnDestroy {
 
   loadTaskList(): void {
     const self = this;
-    this.subscription.add(self.store.select(selectTaskList).pipe(debounceTime(200)).subscribe(
+    this.subscription.add(self.store.select(selectTaskList).pipe(startWith(null), debounceTime(200)).subscribe(
       data => {
-        this.refreshPage();
-        self.myTasks = data.filter(task => task.assignee?.id === self.currentUser?.id)
-          .sort((a, b) => AssignedWorkComponent.sortTasks(a, b));
+        if (data) { // cannot ignore empty lists here as it could indicate all tasks being removed
+
+          const newTasks = data.filter(task => task.assignee?.id === self.currentUser?.id)
+            .sort((a, b) => AssignedWorkComponent.sortTasks(a, b));
+          // TODO this equals checking is not working due to a slight time difference in times reported
+          // it would remove unnecessry calls to refreshpage and improve responsiveness
+          // if it could be fixed 
+          if (JSON.stringify(self.myTasks) !== JSON.stringify(newTasks)) {
+            self.myTasks = newTasks;
+            this.refreshPage();
+          } 
+        }
       },
       (error) => self.translate.get('TASK.FAILED_TO_LOAD_TASKS').subscribe((err) => {
         self.error.message = err;
@@ -808,6 +817,7 @@ export class MappingViewComponent implements OnInit, AfterViewInit, OnDestroy {
   refreshTable($event: string): void {
     if (this.mapping_id) {
       // this.store.dispatch(new LoadMapping({id: this.mapping_id}));
+      console.log("refresh table");
       this.refreshPage();
     }
   }
