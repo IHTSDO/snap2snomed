@@ -2,7 +2,7 @@ locals {
   api_ecs_environment = [
     {
       name = "logging.level.org.hibernate.SQL"
-      value = "DEBUG"
+      value = var.db_log_level
     },
     {
       name = "spring.datasource.url"
