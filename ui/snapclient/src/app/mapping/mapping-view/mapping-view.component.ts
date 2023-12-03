@@ -412,6 +412,7 @@ export class MappingViewComponent implements OnInit, AfterViewInit, OnDestroy {
             this.addReconcilerTableColumn();
           }
 
+          // this refreshes the task component when new tasks are added
           if (self.mapping && self.mapping.id && self.mapping_id === self.mapping.id) {
             self.store.dispatch(new LoadTasksForMap({id: self.mapping.id, 
                 authPageSize: self.authPageSize, authCurrentPage: self.authCurrentPage, 
@@ -422,40 +423,39 @@ export class MappingViewComponent implements OnInit, AfterViewInit, OnDestroy {
         }
       })
     );
-    self.subscription.add(this.store.select(selectCurrentView).subscribe(
+    self.subscription.add(this.store.select(selectCurrentView).pipe(startWith(null)).subscribe(
       (page) => {
+        if (page) {
 
-        // TODO: find out why this triggers with the previously selected map first, and then
-        // the current map
+          // This code has been written to cater for this being executed multiple times (which is the case)
 
-        // This code has been written to cater for this being executed multiple times (which is the case)
+          self.page = page ?? new Page();
 
-        self.page = page ?? new Page();
+          this.additionalDisplayedColumns = [];
+          this.additionalFilteredColumns = [];
+          this.additionalHideShowColumns = [];
 
-        this.additionalDisplayedColumns = [];
-        this.additionalFilteredColumns = [];
-        this.additionalHideShowColumns = [];
+          // NB: additionalDisplayedColumns and displayedColumns must be set together or the table will error
+          // as the html will be out of sync with the model (same applies to additionalFilteredColumns and filteredColumns)
+          for (let i = 0; i <  this.page.additionalColumns.length; i++) {
+            this.additionalDisplayedColumns.push({columnId: "additionalColumn" + (i+1), columnDisplay: this.page.additionalColumns[i].name, displayed: true});
+            this.additionalFilteredColumns.push("filter-additionalColumn" + (i+1));
+            this.additionalHideShowColumns.push("additionalColumn" + (i+1));
+          }
 
-        // NB: additionalDisplayedColumns and displayedColumns must be set together or the table will error
-        // as the html will be out of sync with the model (same applies to additionalFilteredColumns and filteredColumns)
-        for (let i = 0; i <  this.page.additionalColumns.length; i++) {
-          this.additionalDisplayedColumns.push({columnId: "additionalColumn" + (i+1), columnDisplay: this.page.additionalColumns[i].name, displayed: true});
-          this.additionalFilteredColumns.push("filter-additionalColumn" + (i+1));
-          this.additionalHideShowColumns.push("additionalColumn" + (i+1));
-        }
+          // display additional columns at the end of the table
+          //this.displayedColumns = this.constantColumns.concat(this.additionalDisplayedColumns);
+          //this.filteredColumns = this.constantFilteredColumns.concat(this.additionalFilteredColumns);
+          //this.hideShowColumns = this.constantHideShowColumns.concat(this.additionalHideShowColumns);
 
-        // display additional columns at the end of the table
-        //this.displayedColumns = this.constantColumns.concat(this.additionalDisplayedColumns);
-        //this.filteredColumns = this.constantFilteredColumns.concat(this.additionalFilteredColumns);
-        //this.hideShowColumns = this.constantHideShowColumns.concat(this.additionalHideShowColumns);
-
-        // display additional columns after source columns
-        this.displayedColumns = this.constantColumns.slice(0,4).concat(this.additionalDisplayedColumns).concat(this.constantColumns.slice(4));
-        this.filteredColumns = this.constantFilteredColumns.slice(0,4).concat(this.additionalFilteredColumns).concat(this.constantFilteredColumns.slice(4));
-        this.hideShowColumns = this.constantHideShowColumns.slice(0,3).concat(this.additionalHideShowColumns).concat(this.constantHideShowColumns.slice(3));
-        
-        if (page?.sourceDetails) {
-          self.allSourceDetails = page.sourceDetails;
+          // display additional columns after source columns
+          this.displayedColumns = this.constantColumns.slice(0,4).concat(this.additionalDisplayedColumns).concat(this.constantColumns.slice(4));
+          this.filteredColumns = this.constantFilteredColumns.slice(0,4).concat(this.additionalFilteredColumns).concat(this.constantFilteredColumns.slice(4));
+          this.hideShowColumns = this.constantHideShowColumns.slice(0,3).concat(this.additionalHideShowColumns).concat(this.constantHideShowColumns.slice(3));
+          
+          if (page?.sourceDetails) {
+            self.allSourceDetails = page.sourceDetails;
+          }
         }
       })
     );
