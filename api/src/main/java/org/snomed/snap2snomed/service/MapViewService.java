@@ -357,9 +357,7 @@ public class MapViewService {
         for (int i = 0; i < additionalColumns.size(); i++) {
           final String string = additionalColumns.get(i);
           if (!string.isEmpty()) {
-            expression = collectNativeQueryAndStatement(expression, 
-                collectNativeQueryAndStatement(" imported_code_additional_columns.collection_order = " + i  + " ",
-                " imported_code_additional_columns.value LIKE '%" + string + "%' "));
+            expression = collectNativeQueryAndStatement(expression, " additionalColumn" + (i+1)  + ".value LIKE '%" + string + "%' ");
           }
         }
       }
@@ -549,7 +547,7 @@ public class MapViewService {
       if (pageable.getSort() != null && !pageable.getSort().isUnsorted()) {
         for (final Order s : pageable.getSort()) {
           if (s.getProperty().startsWith(ADDITIONAL_COLUMN_NAME)) {
-            queryStrBuilder.append(", additional7_.value ");
+            queryStrBuilder.append(", " + s.getProperty() + ".value ");
           }
         }
       }
@@ -588,19 +586,11 @@ public class MapViewService {
       queryStrBuilder.append("left outer join `user` assigned_reviewer_user on task5_.assignee_id=assigned_reviewer_user.id ");
       queryStrBuilder.append("left outer join `user` assigned_reconciler_user on task7_.assignee_id=assigned_reconciler_user.id ");
       
-      // required by filters
+      // required by filters and sort
       if (!CollectionUtils.isEmpty(additionalColumns)) {
-        queryStrBuilder.append("left outer join imported_code_additional_columns on importedco14_.id = imported_code_additional_columns.imported_code_id ");        
-      }
-
-      // required by sort
-      if (pageable.getSort() != null && !pageable.getSort().isUnsorted()) {
-        for (final Order s : pageable.getSort()) {
-          if (s.getProperty().startsWith(ADDITIONAL_COLUMN_NAME)) {
-            final int index = Integer.parseInt(s.getProperty().substring(ADDITIONAL_COLUMN_NAME.length())) - 1;
-            queryStrBuilder.append("left outer join imported_code_additional_columns additional7_ on importedco14_.id=additional7_.imported_code_id and (additional7_.collection_order=" + index + ") ");
-          }
-        }
+        for (int i = 0; i < additionalColumns.size(); i++) { 
+            queryStrBuilder.append("left outer join imported_code_additional_columns additionalColumn" + (i+1) + " on (importedco14_.id = additionalColumn" + (i+1) + ".imported_code_id AND additionalColumn" + (i+1) + ".collection_order = " + i + ") ");  
+        }     
       }
 
       if (filter != null) {
@@ -760,7 +750,14 @@ public class MapViewService {
           default:
           field = null;
             if (s.getProperty().startsWith(ADDITIONAL_COLUMN_NAME)) {
-              field = Arrays.asList("additional7_.value");
+              final int index = Integer.parseInt(s.getProperty().substring(ADDITIONAL_COLUMN_NAME.length())) - 1;
+              final ColumnType type = additionalColumns.get(index).getType();
+              if (ColumnType.NUMBER.equals(type)) {
+                field = Arrays.asList("CAST(" + s.getProperty() + ".value as double)");
+              }
+              else {
+                field = Arrays.asList(s.getProperty() + ".value");
+              }
             } else {
               field = null;
               log.warn("Unknown MapView sort field '" + s.getProperty() + "' - ignored");
