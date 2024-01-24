@@ -33,6 +33,7 @@ import org.snomed.snap2snomed.controller.MapViewRestController;
 import org.snomed.snap2snomed.controller.dto.MappedRowDetailsDto;
 import org.snomed.snap2snomed.controller.dto.Snap2SnomedPagedModel;
 import org.snomed.snap2snomed.model.AdditionalCodeColumn;
+import org.snomed.snap2snomed.model.DbMapView;
 import org.snomed.snap2snomed.model.Map;
 import org.snomed.snap2snomed.model.MapRow;
 import org.snomed.snap2snomed.model.MapRowTarget;
@@ -855,6 +856,7 @@ public class MapViewService {
             break;
 
           default:
+          // left outer join imported_code_additional_columns additional7_ on importedco6_.id=additional7_.imported_code_id and (additional7_.collection_order=1) 
             if (s.getProperty().startsWith(ADDITIONAL_COLUMN_NAME)) {
               final int index = Integer.parseInt(s.getProperty().substring(ADDITIONAL_COLUMN_NAME.length())) - 1;
               final ColumnType type = additionalColumns.get(index).getType();
