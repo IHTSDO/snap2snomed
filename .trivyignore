@@ -3,8 +3,8 @@ CVE-2022-27191
 CVE-2022-30065
 
 # resource exhaustion attack on jackson-databind, a transitive dependency of problem-spring-web-starter (api) remove when problem-spring-web-starter updates dependency to 2.14.0-rc1 or greater
-# CVE-2022-42003
-# CVE-2022-42004
+CVE-2022-42003
+CVE-2022-42004
 
 # remove when spring boot > 3 .. risk seems to be of crashing rather than security
 CVE-2023-1370
