@@ -15,4 +15,4 @@ CVE-2022-45143
 CVE-2016-1000027
 
 # dependency of spring-boot-starter-actuator with no available fix
-CVE-2023-6378
+# CVE-2023-6378
