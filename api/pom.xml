@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  ~ Copyright © 2022 SNOMED International
+  ~ Copyright © 2022-24 SNOMED International
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -52,14 +52,15 @@
     <hapi.version>6.6.2</hapi.version>
     <spring-security-core.version>6.1.5</spring-security-core.version>
     <spring-core.version>5.3.29</spring-core.version>
+    <snomed-utilities.version>2.1.0</snomed-utilities.version>
   </properties>
 
   <dependencyManagement>
     <dependencies>
       <dependency>
-        <groupId>org.apache.commons</groupId>
-        <artifactId>commons-text</artifactId>
-        <version>1.10.0</version> <!-- force version for CVE-2022-42889 ; remove when mockserver-netty updates -->
+        <groupId>ch.qos.logback</groupId>
+        <artifactId>logback-core</artifactId>
+        <version>1.2.13</version> <!-- force version for CVE-2023-6481 ; remove when spring-boot-starter-actuator updates to have a dependency >= 1.2.13 -->
       </dependency>
     </dependencies>
   </dependencyManagement>
@@ -256,7 +257,8 @@
       <version>${mockserver.version}</version>
       <scope>test</scope>
     </dependency>
-    <!-- included to work around trivy issue with mock-server dependency  CVE-2023-2976 in 31.1-jre .. remove when mock-server updates dependency -->
+    <!-- included to work around trivy issue with mock-server dependency  CVE-2023-2976 in 31.1-jre .. remove when mock-server updates dependency 
+         01/2024: still an issue -->
     <dependency>
         <groupId>com.google.guava</groupId>
         <artifactId>guava</artifactId>
@@ -289,14 +291,7 @@
     <dependency>
       <groupId>org.ihtsdo.snomed.util</groupId>
       <artifactId>snomed-utilities</artifactId>
-      <version>1.4.1</version>
-    </dependency>
-    <!-- included to work around snomed-utilities which includes (transitively) an older version
-        PR open on SNOMED International to update snomed-utilities and this can be removed -->
-    <dependency>
-      <groupId>commons-validator</groupId>
-      <artifactId>commons-validator</artifactId>
-      <version>1.7</version>
+      <version>${snomed-utilities.version}</version>
     </dependency>
 
   </dependencies>
