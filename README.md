@@ -11,9 +11,9 @@
 </p>
 
 ## About The Project
-This project is a mapping tool designed to allow users to collaboratively create and maintain simple maps to SNOMED CT.
+This project is a mapping tool designed to allow users to collaboratively create and maintain simple maps to FHIR CodeSystems.
 
-Below is the current vision for the project
+It is a fork from Snap2Snomed for which the following is the current vision of that project
 <img src="images/vision.png" alt="Vision">
 
 ### Built With
@@ -36,7 +36,7 @@ This is an example of how to list things you need to use the software and how to
 
 1. Clone the repo
    ```sh
-   git clone https://github.com/IHTSDO/snap2snomed.git
+   git clone https://github.com/aehrc/snap2snomed.git
    ```
 2. Run the Maven build
    ```sh

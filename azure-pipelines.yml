@@ -1,4 +1,4 @@
-name: snap2snomed-$(Date:yyyyMMdd)$(Rev:.r)_$(SourceBranchName)
+name: snapagogo-$(Date:yyyyMMdd)$(Rev:.r)_$(SourceBranchName)
 
 trigger:
   branches:
@@ -67,7 +67,7 @@ stages:
               trivy -v
             displayName: 'Download and install Trivy'
           - task: CmdLine@2
-            displayName: "Run trivy scan on snap2snomed"
+            displayName: "Run trivy scan on snapagogo"
             inputs:
               script: |
                 trivy image --exit-code 0 --severity LOW,MEDIUM --security-checks vuln --timeout 15m $(dockerRegistry)/$(registryPath):$(Build.BuildNumber)
@@ -104,10 +104,10 @@ stages:
           - task: PublishPipelineArtifact@1
             inputs:
               targetPath: '$(System.DefaultWorkingDirectory)/ui/target/site'
-              artifact: 'snap2snomed-ui'
+              artifact: 'snapagogo-ui'
               publishLocation: 'pipeline'
           - task: PublishPipelineArtifact@1
             inputs:
               targetPath: '$(System.DefaultWorkingDirectory)/terraform'
-              artifact: 'snap2snomed-terraform'
+              artifact: 'snapagogo-terraform'
               publishLocation: 'pipeline'
