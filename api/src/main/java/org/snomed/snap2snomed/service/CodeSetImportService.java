@@ -365,7 +365,7 @@ public class CodeSetImportService {
             }
           }
 
-          validateRecord(importedCodes, code, display, recordNumber);
+          validateRecord(importedCodes, code, display, recordNumber, additionalColumnValues);
 
           final ImportedCode importedCode = new ImportedCode(null, code, importedCodeSet, recordNumber, display, additionalColumnValues);
 
@@ -441,10 +441,11 @@ public class CodeSetImportService {
     checkStatus(targetCode, status);
   }
 
-  private void validateRecord(Set<String> importedCodes, String code, String display, long recordNumber) {
+  private void validateRecord(Set<String> importedCodes, String code, String display, long recordNumber, List<AdditionalCodeValue> additionalColumnValues) {
     checkCode(code, recordNumber);
     checkDuplicateCodes(importedCodes, code);
     checkDisplay(display, recordNumber);
+    checkAdditionalColumn(additionalColumnValues, recordNumber);
   }
 
   private void checkCode(String code, long recordNumber) {
@@ -492,6 +493,17 @@ public class CodeSetImportService {
     if ((status != null) && (status.equals(MapStatus.UNMAPPED) == true) && (targetCode != null && !(targetCode.isBlank()))) {
       throw new CodeSetImportProblem("map-with-unmapped-status", "The import file contains rows with a target and an unmapped status",
           "A row with target code " + targetCode + " has a status of UNMAPPED specified. Rows with a target must have a status of MAPPED or DRAFT.");
+    }
+  }
+
+  private void checkAdditionalColumn(List<AdditionalCodeValue> additionalColumnValues, long recordNumber) {
+    for (AdditionalCodeValue additionalColumnValue : additionalColumnValues) 
+    { 
+      if (additionalColumnValue.getValue().length() > ImportedCode.ADDITIONAL_COLUMN_SIZE_LIMIT) {
+        throw new CodeSetImportProblem("additional-column-size", "Additional Column in the import file is too large",
+            "The code value for record " + recordNumber + " is " + additionalColumnValue.getValue().length() + " which longer than the allowed limit of "
+                + ImportedCode.ADDITIONAL_COLUMN_SIZE_LIMIT + " " + additionalColumnValue.getValue());
+      }
     }
   }
 

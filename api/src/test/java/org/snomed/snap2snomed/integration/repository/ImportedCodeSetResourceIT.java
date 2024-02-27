@@ -59,6 +59,7 @@ public class ImportedCodeSetResourceIT extends IntegrationTestBase {
   private static final String CODE_SIZE_PROBLEM_URI = "http://snap2snomed.app/problem/codeset-import/code-size";
   private static final String DISPLAY_SIZE_PROBLEM_URI = "http://snap2snomed.app/problem/codeset-import/display-size";
   private static final String DELIMITER_PROBLEM_URI = "http://snap2snomed.app/problem/codeset-import/invalid-delimiter";
+  private static final String ADDITIONAL_COLUMN_LENGTH_PROBLEM_URI = "http://snap2snomed.app/problem/codeset-import/additional-column-size";
 
   private static final String CONSTRAINT_VALIDATION_PROBLEM_URI = "https://zalando.github.io/problem/constraint-violation";
 
@@ -328,6 +329,15 @@ public class ImportedCodeSetResourceIT extends IntegrationTestBase {
   public void failCreateEntityBlankDisplay() throws Exception {
     restClient.expectCreateImportedCodeSetFail("badAAA", "2", 0, 2, true, ",",
         new ClassPathResource("AAA_blank_display_term.csv").getFile(), "text/csv", 400, DISPLAY_BLANK_PROBLEM_URI);
+  }
+
+  /**
+   * Test additional column > 1000 chars
+   */
+  @Test
+  public void failCreateEntityLargeAdditionalColumn() throws Exception {
+    restClient.expectCreateImportedCodeSetFail("badAAA", "2", 0, 0, true, "\t",
+        new ClassPathResource("AAA-extra-columns-too-long.tsv").getFile(), "text/tsv", 400, ADDITIONAL_COLUMN_LENGTH_PROBLEM_URI);
   }
 
   /**
