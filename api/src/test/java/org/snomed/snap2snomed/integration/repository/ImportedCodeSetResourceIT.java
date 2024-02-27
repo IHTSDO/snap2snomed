@@ -336,7 +336,7 @@ public class ImportedCodeSetResourceIT extends IntegrationTestBase {
    */
   @Test
   public void failCreateEntityLargeAdditionalColumn() throws Exception {
-    restClient.expectCreateImportedCodeSetFail("badAAA", "2", 0, 0, true, "\t",
+    restClient.expectCreateImportedCodeSetFail("badAAA", "2", 0, 1, true, "\t",
         new ClassPathResource("AAA-extra-columns-too-long.tsv").getFile(), "text/tsv", 400, ADDITIONAL_COLUMN_LENGTH_PROBLEM_URI);
   }
 
