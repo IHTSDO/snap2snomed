@@ -62,6 +62,16 @@
         <artifactId>logback-core</artifactId>
         <version>1.2.13</version> <!-- force version for CVE-2023-6481 ; remove when spring-boot-starter-actuator updates to have a dependency >= 1.2.13 -->
       </dependency>
+      <dependency>
+        <groupId>org.springframework</groupId>
+        <artifactId>spring-web</artifactId>
+        <version>5.3.32</version> <!-- force version for CVE-2024-22243; remove when spring-boot-starter-web updates to this (currently 2.7.18) -->
+      </dependency>
+      <dependency>
+        <groupId>org.apache.commons</groupId>
+        <artifactId>commons-compress</artifactId>
+        <version>1.26.0</version> <!-- force version for  CVE-2024-25710 & CVE-2024-26308; remove when org.apache.poi:poi-ooxml updates to this (currently 5.2.3)-->
+      </dependency>
     </dependencies>
   </dependencyManagement>
 
