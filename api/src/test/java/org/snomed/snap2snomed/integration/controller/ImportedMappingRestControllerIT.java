@@ -226,9 +226,9 @@ public class ImportedMappingRestControllerIT extends IntegrationTestBase {
    */
   @Test
   public void failCreateEntityInvalidTsv() throws Exception {
-    restClient.expectCreateImportedCodeSetFail("badAAA", "2", 0, 2, true, "\t",
+    restClient.expectCreateImportedCodeSetFail("badAAA", "2", 0, 2, true, null, null, "\t",
         new ClassPathResource("AAA_invalid_csv_mixeddelimiters.csv").getFile(), "text/tsv", 400, null);
-    restClient.expectCreateImportedCodeSetFail("badAAA", "2", 0, 2, true, ",",
+    restClient.expectCreateImportedCodeSetFail("badAAA", "2", 0, 2, true, null, null, ",",
         new ClassPathResource("AAA_invalid_csv_doublequotes.tsv").getFile(), "text/tsv", 400, null);
   }
 
