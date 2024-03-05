@@ -164,6 +164,8 @@ export class SourceImportComponent implements OnInit, OnDestroy, AfterViewChecke
               if (this.csvHeaders) {
                 this.data.displayColumnIndex = this.csvHeaders.length > 1 ? 1 : 0;
               }
+              this.data.additionalColumnIndexes = [];
+              this.data.additionalColumnTypes = [];
             } else {
               this.translate.get('ERROR.FILE_CONTENTS_INVALID').subscribe((msg) => this.error.message = msg);
             }
@@ -221,8 +223,11 @@ export class SourceImportComponent implements OnInit, OnDestroy, AfterViewChecke
    */
   allTypeFieldsSupplied() : boolean {
     for (let i=0; i< this.data.additionalColumnIndexes.length; i++) {
-      if (this.data.additionalColumnIndexes[i] !== undefined) {
-        if (this.data.additionalColumnTypes[i] === undefined) {
+      if (!this.data.additionalColumnIndexes[i]) {
+        return false;
+      }
+      if (this.data.additionalColumnIndexes[i]) {
+        if (!this.data.additionalColumnTypes[i]) {
           return false;
         }
       }

@@ -365,7 +365,7 @@ public class CodeSetImportService {
             }
           }
 
-          validateRecord(importedCodes, code, display, recordNumber, additionalColumnValues);
+          validateRecord(importedCodes, code, display, recordNumber, additionalColumnValues, importDetails);
 
           final ImportedCode importedCode = new ImportedCode(null, code, importedCodeSet, recordNumber, display, additionalColumnValues);
 
@@ -441,11 +441,12 @@ public class CodeSetImportService {
     checkStatus(targetCode, status);
   }
 
-  private void validateRecord(Set<String> importedCodes, String code, String display, long recordNumber, List<AdditionalCodeValue> additionalColumnValues) {
+  private void validateRecord(Set<String> importedCodes, String code, String display, long recordNumber, List<AdditionalCodeValue> additionalColumnValues,
+      ImportDetails importDetails) {
     checkCode(code, recordNumber);
     checkDuplicateCodes(importedCodes, code);
     checkDisplay(display, recordNumber);
-    checkAdditionalColumn(additionalColumnValues, recordNumber);
+    checkAdditionalColumn(additionalColumnValues, importDetails.getAdditionalColumnIndexes(), recordNumber);
   }
 
   private void checkCode(String code, long recordNumber) {
@@ -454,7 +455,7 @@ public class CodeSetImportService {
           "The code value for record " + recordNumber + " is blank in the import file");
     } else if (code.length() > ImportedCode.CODE_SIZE_LIMIT) {
       throw new CodeSetImportProblem("code-size", "Code in the import file is too large",
-          "The code value for record " + recordNumber + " is " + code.length() + " which longer than the allowed limit of "
+          "The code value for record " + recordNumber + " is too long: " + code.length() + " is greater than the limit of "
               + ImportedCode.CODE_SIZE_LIMIT + " " + code);
     }
   }
@@ -472,8 +473,7 @@ public class CodeSetImportService {
           "The display value for record " + recordNumber + " is blank in the import file");
     } else if (display.length() > ImportedCode.DISPLAY_SIZE_LIMIT) {
       throw new CodeSetImportProblem("display-size", "Display in the import file is too large",
-          "The display value for record " + recordNumber + " is " + display.length() + " which is longer than the allowed limit of "
-              + ImportedCode.DISPLAY_SIZE_LIMIT);
+          "The display value of record " + recordNumber + " is too long: " + display.length() + " is greater than the limit of " + ImportedCode.DISPLAY_SIZE_LIMIT);
     }
   }
 
@@ -496,14 +496,16 @@ public class CodeSetImportService {
     }
   }
 
-  private void checkAdditionalColumn(List<AdditionalCodeValue> additionalColumnValues, long recordNumber) {
+  private void checkAdditionalColumn(List<AdditionalCodeValue> additionalColumnValues, List<Integer> additionalColumnIndexes, long recordNumber) {
+    Integer additionalColumnCount = 1;
     for (AdditionalCodeValue additionalColumnValue : additionalColumnValues) 
     { 
       if (additionalColumnValue.getValue().length() > ImportedCode.ADDITIONAL_COLUMN_SIZE_LIMIT) {
         throw new CodeSetImportProblem("additional-column-size", "Additional Column in the import file is too large",
-            "The code value for record " + recordNumber + " is " + additionalColumnValue.getValue().length() + " which longer than the allowed limit of "
-                + ImportedCode.ADDITIONAL_COLUMN_SIZE_LIMIT + " " + additionalColumnValue.getValue());
+            "Column " + (additionalColumnIndexes.get(additionalColumnCount-1)+1) + " of record " + recordNumber + " is too long: " + additionalColumnValue.getValue().length() + " is greater than the limit of "
+                + ImportedCode.ADDITIONAL_COLUMN_SIZE_LIMIT);
       }
+      additionalColumnCount++;
     }
   }
 
