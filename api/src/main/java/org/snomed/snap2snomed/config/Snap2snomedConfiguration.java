@@ -49,6 +49,7 @@ public class Snap2snomedConfiguration {
   String defaultLanguage = "en";
 
   int maximumImportedCodeSetRows = 200000;
+  int importBatchSize = 10000;
 
   @URL
   String userRegistrationUrl = "http://snomed.org/account-apply";
