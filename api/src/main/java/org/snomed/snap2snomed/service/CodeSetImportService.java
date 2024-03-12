@@ -49,6 +49,7 @@ import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 import org.hibernate.Session;
+import org.hibernate.exception.GenericJDBCException;
 import org.hibernate.jdbc.Work;
 import org.snomed.snap2snomed.config.Snap2snomedConfiguration;
 import org.snomed.snap2snomed.controller.dto.ImportDetails;
@@ -117,6 +118,11 @@ public class CodeSetImportService {
   private static class InsertCodeWork implements Work {
 
     private final List<ImportedCode> codes = new ArrayList<>();
+    private int importBatchSize;
+
+    public InsertCodeWork(int importBatchSize) {
+      this.importBatchSize = importBatchSize;
+    }
 
     public void add(ImportedCode code) {
       codes.add(code);
@@ -138,20 +144,26 @@ public class CodeSetImportService {
       final PreparedStatement additionalColumnsStatement2 = connection.prepareStatement("insert into imported_code_additional_columns (imported_code_id, value, collection_order) values (?, ?, ?)");
       final ResultSet generatedKeys2 = statement.getGeneratedKeys();
 
-            for (final ImportedCode code : codes) {
-              generatedKeys2.next();
-              for (int i=0; i < code.getAdditionalColumns().size(); i++) {
-                final String additionalColumnVal = code.getAdditionalColumns().get(i).getValue();
-                additionalColumnsStatement2.setLong(1, generatedKeys2.getLong(1));
-                additionalColumnsStatement2.setString(2, additionalColumnVal);
-                additionalColumnsStatement2.setInt(3, i);
-                additionalColumnsStatement2.addBatch();
-              }
+      int batchCount = 0;
+      for (final ImportedCode code : codes) {
+        generatedKeys2.next();
+        for (int i=0; i < code.getAdditionalColumns().size(); i++) {
+          final String additionalColumnVal = code.getAdditionalColumns().get(i).getValue();
+          additionalColumnsStatement2.setLong(1, generatedKeys2.getLong(1));
+          additionalColumnsStatement2.setString(2, additionalColumnVal);
+          additionalColumnsStatement2.setInt(3, i);
+          additionalColumnsStatement2.addBatch();
+          batchCount++; 
+        }
 
-            }
-        //}
+        if (batchCount >= importBatchSize) {
+          additionalColumnsStatement2.executeLargeBatch();
+          batchCount = 0;
+        }
 
-      additionalColumnsStatement2.executeLargeBatch();
+      }
+
+      additionalColumnsStatement2.executeLargeBatch(); // flush the last few records.
 
     }
   }
@@ -298,7 +310,7 @@ public class CodeSetImportService {
       final Set<String> importedCodes = new HashSet<>();
       final MessageDigest md = MessageDigest.getInstance("MD5");
 
-      final InsertCodeWork insertCodeWork = new InsertCodeWork();
+      final InsertCodeWork insertCodeWork = new InsertCodeWork(configuration.getImportBatchSize());
       try (CSVParser parser = format.parse(reader)) {
         importedCodeSet = importedCodeSetRepository.save(importDetails.toImportedCodeSetEntity(parser.getHeaderNames()));
 
@@ -365,7 +377,7 @@ public class CodeSetImportService {
             }
           }
 
-          validateRecord(importedCodes, code, display, recordNumber);
+          validateRecord(importedCodes, code, display, recordNumber, additionalColumnValues, importDetails);
 
           final ImportedCode importedCode = new ImportedCode(null, code, importedCodeSet, recordNumber, display, additionalColumnValues);
 
@@ -380,12 +392,14 @@ public class CodeSetImportService {
       throw new CodeSetImportProblem("invalid-column", "Invalid column specfied", e.getLocalizedMessage());
     } catch (final NoSuchAlgorithmException e ) {
       log.error("Unecpected error creating MD5 hash for code", e);
-      throw Problem.valueOf(Status.INTERNAL_SERVER_ERROR, "Unecpected error creating MD5 hash for code");
+      throw Problem.valueOf(Status.INTERNAL_SERVER_ERROR, "Unexpected error creating MD5 hash for code");
     } catch (final IOException e) {
       log.error("Failed reading code set from an import request", e);
       throw Problem.valueOf(Status.INTERNAL_SERVER_ERROR, "Unable to read the file in the request due to an I/O error");
     } catch (IllegalStateException|IllegalArgumentException e) {
       throw new CodeSetImportProblem("invalid-file", "Invalid data encountered in source file", e.getLocalizedMessage());
+    } catch (final GenericJDBCException e) {
+      throw Problem.valueOf(Status.INTERNAL_SERVER_ERROR, "JDBC Exception:" + e.getLocalizedMessage());
     }
     entityManager.flush();
     entityManager.clear();
@@ -441,10 +455,12 @@ public class CodeSetImportService {
     checkStatus(targetCode, status);
   }
 
-  private void validateRecord(Set<String> importedCodes, String code, String display, long recordNumber) {
+  private void validateRecord(Set<String> importedCodes, String code, String display, long recordNumber, List<AdditionalCodeValue> additionalColumnValues,
+      ImportDetails importDetails) {
     checkCode(code, recordNumber);
     checkDuplicateCodes(importedCodes, code);
     checkDisplay(display, recordNumber);
+    checkAdditionalColumn(additionalColumnValues, importDetails.getAdditionalColumnIndexes(), recordNumber);
   }
 
   private void checkCode(String code, long recordNumber) {
@@ -453,7 +469,7 @@ public class CodeSetImportService {
           "The code value for record " + recordNumber + " is blank in the import file");
     } else if (code.length() > ImportedCode.CODE_SIZE_LIMIT) {
       throw new CodeSetImportProblem("code-size", "Code in the import file is too large",
-          "The code value for record " + recordNumber + " is " + code.length() + " which longer than the allowed limit of "
+          "The code value for record " + recordNumber + " is too long: " + code.length() + " is greater than the limit of "
               + ImportedCode.CODE_SIZE_LIMIT + " " + code);
     }
   }
@@ -471,8 +487,7 @@ public class CodeSetImportService {
           "The display value for record " + recordNumber + " is blank in the import file");
     } else if (display.length() > ImportedCode.DISPLAY_SIZE_LIMIT) {
       throw new CodeSetImportProblem("display-size", "Display in the import file is too large",
-          "The display value for record " + recordNumber + " is " + display.length() + " which is longer than the allowed limit of "
-              + ImportedCode.DISPLAY_SIZE_LIMIT);
+          "The display value of record " + recordNumber + " is too long: " + display.length() + " is greater than the limit of " + ImportedCode.DISPLAY_SIZE_LIMIT);
     }
   }
 
@@ -492,6 +507,19 @@ public class CodeSetImportService {
     if ((status != null) && (status.equals(MapStatus.UNMAPPED) == true) && (targetCode != null && !(targetCode.isBlank()))) {
       throw new CodeSetImportProblem("map-with-unmapped-status", "The import file contains rows with a target and an unmapped status",
           "A row with target code " + targetCode + " has a status of UNMAPPED specified. Rows with a target must have a status of MAPPED or DRAFT.");
+    }
+  }
+
+  private void checkAdditionalColumn(List<AdditionalCodeValue> additionalColumnValues, List<Integer> additionalColumnIndexes, long recordNumber) {
+    Integer additionalColumnCount = 1;
+    for (AdditionalCodeValue additionalColumnValue : additionalColumnValues) 
+    { 
+      if (additionalColumnValue.getValue().length() > ImportedCode.ADDITIONAL_COLUMN_SIZE_LIMIT) {
+        throw new CodeSetImportProblem("additional-column-size", "Additional Column in the import file is too large",
+            "Column " + (additionalColumnIndexes.get(additionalColumnCount-1)+1) + " of record " + recordNumber + " is too long: " + additionalColumnValue.getValue().length() + " is greater than the limit of "
+                + ImportedCode.ADDITIONAL_COLUMN_SIZE_LIMIT);
+      }
+      additionalColumnCount++;
     }
   }
 

@@ -1,7 +1,7 @@
 resource "aws_rds_cluster" "api" {
   cluster_identifier              = replace(var.host_name, "/[.]/", "-")
   engine                          = "aurora-mysql"
-  engine_version                  = "8.0.mysql_aurora.3.02.2"
+  engine_version                  = "8.0.mysql_aurora.3.04.1"
   db_cluster_parameter_group_name = aws_rds_cluster_parameter_group.snapdbcluster.id
   backup_retention_period         = var.database_backup_retention_period
   database_name                   = replace(var.host_name, "/[.]/", "")

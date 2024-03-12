@@ -22,6 +22,7 @@ import javax.persistence.CollectionTable;
 import javax.persistence.Column;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -52,6 +53,7 @@ public class ImportedCode implements Snap2SnomedEntity {
 
   public static final int DISPLAY_SIZE_LIMIT = 2048;
   public static final int CODE_SIZE_LIMIT = 50;
+  public static final int ADDITIONAL_COLUMN_SIZE_LIMIT = 1000;
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -79,7 +81,7 @@ public class ImportedCode implements Snap2SnomedEntity {
   String display;
 
   @ReadOnlyProperty
-  @ElementCollection
+  @ElementCollection(fetch = FetchType.LAZY)
   @OrderColumn(name = "collection_order")
   @CollectionTable(
     name="IMPORTED_CODE_ADDITIONAL_COLUMNS",
