@@ -85,6 +85,10 @@ locals {
       value = "200000"
     },
     {
+      name = "snap2snomed.importBatchSize",
+      value = "10000"
+    },
+    {
       name = "snap2snomed.userRegistrationUrl",
       value = var.user_registration_url
     },

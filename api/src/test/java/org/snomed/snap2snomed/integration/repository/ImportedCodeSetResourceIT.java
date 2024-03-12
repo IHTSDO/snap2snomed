@@ -59,6 +59,7 @@ public class ImportedCodeSetResourceIT extends IntegrationTestBase {
   private static final String CODE_SIZE_PROBLEM_URI = "http://snap2snomed.app/problem/codeset-import/code-size";
   private static final String DISPLAY_SIZE_PROBLEM_URI = "http://snap2snomed.app/problem/codeset-import/display-size";
   private static final String DELIMITER_PROBLEM_URI = "http://snap2snomed.app/problem/codeset-import/invalid-delimiter";
+  private static final String ADDITIONAL_COLUMN_LENGTH_PROBLEM_URI = "http://snap2snomed.app/problem/codeset-import/additional-column-size";
 
   private static final String CONSTRAINT_VALIDATION_PROBLEM_URI = "https://zalando.github.io/problem/constraint-violation";
 
@@ -156,7 +157,7 @@ public class ImportedCodeSetResourceIT extends IntegrationTestBase {
    */
   @Test
   public void failCreateEntityBadDetails() throws Exception {
-    restClient.expectCreateImportedCodeSetFail("badAAA", null, 0, 2, true, "\t", new ClassPathResource("AAA.tsv").getFile(), "text/tsv",
+    restClient.expectCreateImportedCodeSetFail("badAAA", null, 0, 2, true, null, null, "\t", new ClassPathResource("AAA.tsv").getFile(), "text/tsv",
         400,
         CONSTRAINT_VALIDATION_PROBLEM_URI);
   }
@@ -167,7 +168,7 @@ public class ImportedCodeSetResourceIT extends IntegrationTestBase {
    */
   @Test
   public void failCreateEntityIllegalContentType() throws Exception {
-    restClient.expectCreateImportedCodeSetFail("badAAA", "2", 0, 2, true, "\t", new ClassPathResource("AAA.tsv").getFile(),
+    restClient.expectCreateImportedCodeSetFail("badAAA", "2", 0, 2, true, null, null, "\t", new ClassPathResource("AAA.tsv").getFile(),
         "application/json", 406, null);
   }
 
@@ -176,7 +177,7 @@ public class ImportedCodeSetResourceIT extends IntegrationTestBase {
    */
   @Test
   public void failCreateEntityEmptyFileTextPlain() throws Exception {
-    restClient.expectCreateImportedCodeSetFail("badAAA", "2", 0, 2, true, null, new ClassPathResource("empty.txt").getFile(),
+    restClient.expectCreateImportedCodeSetFail("badAAA", "2", 0, 2, true, null, null, null, new ClassPathResource("empty.txt").getFile(),
         "text/plain", 400, null);
   }
 
@@ -186,7 +187,7 @@ public class ImportedCodeSetResourceIT extends IntegrationTestBase {
    */
   @Test
   public void failCreateEntityEmptyFileTextCsv() throws Exception {
-    restClient.expectCreateImportedCodeSetFail("badAAA", "2", 0, 2, true, null, new ClassPathResource("empty.txt").getFile(),
+    restClient.expectCreateImportedCodeSetFail("badAAA", "2", 0, 2, true, null, null, null, new ClassPathResource("empty.txt").getFile(),
         "text/csv", 400, null);
   }
 
@@ -195,7 +196,7 @@ public class ImportedCodeSetResourceIT extends IntegrationTestBase {
    */
   @Test
   public void failCreateEntityEmptyFileTextTsv() throws Exception {
-    restClient.expectCreateImportedCodeSetFail("badAAA", "2", 0, 2, true, null, new ClassPathResource("empty.txt").getFile(),
+    restClient.expectCreateImportedCodeSetFail("badAAA", "2", 0, 2, true, null, null, null, new ClassPathResource("empty.txt").getFile(),
         "text/tsv", 400, null);
   }
 
@@ -205,7 +206,7 @@ public class ImportedCodeSetResourceIT extends IntegrationTestBase {
    */
   @Test
   public void failCreateEntityRubbishFileTextPlain() throws Exception {
-    restClient.expectCreateImportedCodeSetFail("badAAA", "2", 0, 2, true, null, new ClassPathResource("rubbish.tsv").getFile(),
+    restClient.expectCreateImportedCodeSetFail("badAAA", "2", 0, 2, true, null, null, null, new ClassPathResource("rubbish.tsv").getFile(),
         "text/plain", 400, null);
   }
 
@@ -214,7 +215,7 @@ public class ImportedCodeSetResourceIT extends IntegrationTestBase {
    */
   @Test
   public void failCreateEntityRubbishFileTsv() throws Exception {
-    restClient.expectCreateImportedCodeSetFail("badAAA", "2", 0, 2, true, null, new ClassPathResource("rubbish.tsv").getFile(),
+    restClient.expectCreateImportedCodeSetFail("badAAA", "2", 0, 2, true, null, null, null, new ClassPathResource("rubbish.tsv").getFile(),
         "text/tsv", 400, null);
   }
 
@@ -223,7 +224,7 @@ public class ImportedCodeSetResourceIT extends IntegrationTestBase {
    */
   @Test
   public void failCreateEntityRubbishFileCsv() throws Exception {
-    restClient.expectCreateImportedCodeSetFail("badAAA", "2", 0, 2, true, null, new ClassPathResource("rubbish.tsv").getFile(),
+    restClient.expectCreateImportedCodeSetFail("badAAA", "2", 0, 2, true, null, null, null, new ClassPathResource("rubbish.tsv").getFile(),
         "text/csv", 400, null);
   }
 
@@ -232,9 +233,9 @@ public class ImportedCodeSetResourceIT extends IntegrationTestBase {
    */
   @Test
   public void failCreateEntityInvalidCsv() throws Exception {
-    restClient.expectCreateImportedCodeSetFail("badAAA", "2", 0, 2, true, ",",
+    restClient.expectCreateImportedCodeSetFail("badAAA", "2", 0, 2, true, null, null, ",",
         new ClassPathResource("AAA_invalid_csv_mixeddelimiters.csv").getFile(), "text/csv", 400, null);
-    restClient.expectCreateImportedCodeSetFail("badAAA", "2", 0, 2, true, ",",
+    restClient.expectCreateImportedCodeSetFail("badAAA", "2", 0, 2, true, null, null, ",",
         new ClassPathResource("AAA_invalid_csv_doublequotes.csv").getFile(), "text/csv", 500, null);
   }
 
@@ -243,9 +244,9 @@ public class ImportedCodeSetResourceIT extends IntegrationTestBase {
    */
   @Test
   public void failCreateEntityInvalidTsv() throws Exception {
-    restClient.expectCreateImportedCodeSetFail("badAAA", "2", 0, 2, true, "\t",
+    restClient.expectCreateImportedCodeSetFail("badAAA", "2", 0, 2, true, null, null, "\t",
         new ClassPathResource("AAA_invalid_csv_mixeddelimiters.csv").getFile(), "text/tsv", 400, null);
-    restClient.expectCreateImportedCodeSetFail("badAAA", "2", 0, 2, true, ",",
+    restClient.expectCreateImportedCodeSetFail("badAAA", "2", 0, 2, true, null, null, ",",
         new ClassPathResource("AAA_invalid_csv_doublequotes.tsv").getFile(), "text/tsv", 400, null);
   }
 
@@ -262,7 +263,7 @@ public class ImportedCodeSetResourceIT extends IntegrationTestBase {
    */
   @Test
   public void failCreateEntityFromTooLargeFile() throws Exception {
-    restClient.expectCreateImportedCodeSetFail("badAAA", "2", 0, 1, true, ",",
+    restClient.expectCreateImportedCodeSetFail("badAAA", "2", 0, 1, true, null, null, ",",
             new ClassPathResource("too-large-new.csv").getFile(),
         "text/csv", 400, TOO_LARGE_FILE_PROBLEM_URI);
   }
@@ -272,7 +273,7 @@ public class ImportedCodeSetResourceIT extends IntegrationTestBase {
    */
   @Test
   public void failCreateEntityCodeTooLong() throws Exception {
-    restClient.expectCreateImportedCodeSetFail("badAAA", "2", 0, 2, true, ",", new ClassPathResource("AAA_code_too_long.csv").getFile(),
+    restClient.expectCreateImportedCodeSetFail("badAAA", "2", 0, 2, true, null, null, ",", new ClassPathResource("AAA_code_too_long.csv").getFile(),
         "text/csv", 400, CODE_SIZE_PROBLEM_URI);
   }
 
@@ -281,7 +282,7 @@ public class ImportedCodeSetResourceIT extends IntegrationTestBase {
    */
   @Test
   public void failCreateEntityDisplayTooLong() throws Exception {
-    restClient.expectCreateImportedCodeSetFail("badAAA", "2", 0, 1, true, ",", new ClassPathResource("AAA_display_too_long.csv").getFile(),
+    restClient.expectCreateImportedCodeSetFail("badAAA", "2", 0, 1, true, null, null, ",", new ClassPathResource("AAA_display_too_long.csv").getFile(),
         "text/csv", 400, DISPLAY_SIZE_PROBLEM_URI);
   }
 
@@ -290,7 +291,7 @@ public class ImportedCodeSetResourceIT extends IntegrationTestBase {
    */
   @Test
   public void failCreateEntityDisplayIndex() throws Exception {
-    restClient.expectCreateImportedCodeSetFail("badAAA", "2", 0, 4, true, ",", new ClassPathResource("AAA.csv").getFile(),
+    restClient.expectCreateImportedCodeSetFail("badAAA", "2", 0, 4, true, null, null, ",", new ClassPathResource("AAA.csv").getFile(),
         "text/csv", 400, DISPLAY_INDEX_PROBLEM_URI);
   }
 
@@ -299,7 +300,7 @@ public class ImportedCodeSetResourceIT extends IntegrationTestBase {
    */
   @Test
   public void failCreateEntityCodeIndex() throws Exception {
-    restClient.expectCreateImportedCodeSetFail("badAAA", "2", 4, 2, true, ",", new ClassPathResource("AAA.csv").getFile(),
+    restClient.expectCreateImportedCodeSetFail("badAAA", "2", 4, 2, true, null, null, ",", new ClassPathResource("AAA.csv").getFile(),
         "text/csv", 400, CODE_INDEX_PROBLEM_URI);
   }
 
@@ -308,7 +309,7 @@ public class ImportedCodeSetResourceIT extends IntegrationTestBase {
    */
   @Test
   public void failCreateEntityDuplicateCode() throws Exception {
-    restClient.expectCreateImportedCodeSetFail("badAAA", "2", 0, 2, true, ",", new ClassPathResource("AAA_duplicate_code.csv").getFile(),
+    restClient.expectCreateImportedCodeSetFail("badAAA", "2", 0, 2, true, null, null, ",", new ClassPathResource("AAA_duplicate_code.csv").getFile(),
         "text/csv", 400, DUPLICATE_CODE_PROBLEM_URI);
   }
 
@@ -317,7 +318,7 @@ public class ImportedCodeSetResourceIT extends IntegrationTestBase {
    */
   @Test
   public void failCreateEntityBlankCode() throws Exception {
-    restClient.expectCreateImportedCodeSetFail("badAAA", "2", 0, 2, true, ",", new ClassPathResource("AAA_blank_code.csv").getFile(),
+    restClient.expectCreateImportedCodeSetFail("badAAA", "2", 0, 2, true, null, null, ",", new ClassPathResource("AAA_blank_code.csv").getFile(),
         "text/csv", 400, CODE_BLANK_PROBLEM_URI);
   }
 
@@ -326,8 +327,19 @@ public class ImportedCodeSetResourceIT extends IntegrationTestBase {
    */
   @Test
   public void failCreateEntityBlankDisplay() throws Exception {
-    restClient.expectCreateImportedCodeSetFail("badAAA", "2", 0, 2, true, ",",
+    restClient.expectCreateImportedCodeSetFail("badAAA", "2", 0, 2, true, null, null, ",",
         new ClassPathResource("AAA_blank_display_term.csv").getFile(), "text/csv", 400, DISPLAY_BLANK_PROBLEM_URI);
+  }
+
+  /**
+   * Test additional column > 1000 chars
+   */
+  @Test
+  public void failCreateEntityLargeAdditionalColumn() throws Exception {
+    String[] additionalColumnIndexes = {"4"};
+    String[] additionalColumnTypes = {"TEXT"};
+    restClient.expectCreateImportedCodeSetFail("badAAA", "2", 0, 1, true, additionalColumnIndexes, additionalColumnTypes, "\t",
+        new ClassPathResource("AAA-extra-columns-too-long.tsv").getFile(), "text/tsv", 400, ADDITIONAL_COLUMN_LENGTH_PROBLEM_URI);
   }
 
   /**
@@ -423,7 +435,7 @@ public class ImportedCodeSetResourceIT extends IntegrationTestBase {
    */
   @Test
   public void shouldImportCSVFileWithTabDelimiter() throws Exception {
-    restClient.expectCreateImportedCodeSetFail("badAAA", "2", 0, 2, true, "\t",
+    restClient.expectCreateImportedCodeSetFail("badAAA", "2", 0, 2, true, null, null, "\t",
         new ClassPathResource("AAA-semi.csv").getFile(), "text/tsv", 400, DELIMITER_PROBLEM_URI);
   }
 

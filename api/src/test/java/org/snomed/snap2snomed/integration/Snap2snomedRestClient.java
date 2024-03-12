@@ -394,7 +394,8 @@ public class Snap2snomedRestClient {
   }
 
   public void expectCreateImportedCodeSetFail(String name, String version, int codeColumnIndex, int displayColumnIndex, boolean hasHeader,
-      String delimiter, File file, String fileType, int status, String errorUri)
+  String[] additionalColumnIndexes, String[] additionalColumnTypes,
+  String delimiter, File file, String fileType, int status, String errorUri)
       throws JsonProcessingException {
     final java.util.Map<String, Object> map = new HashMap<>();
     map.put("name", name);
@@ -403,6 +404,10 @@ public class Snap2snomedRestClient {
     map.put("displayColumnIndex", displayColumnIndex);
     map.put("hasHeader", hasHeader);
     map.put("delimiter", delimiter);
+    if (null != additionalColumnIndexes) {
+      map.put("additionalColumnIndexes", additionalColumnIndexes);
+      map.put("additionalColumnTypes", additionalColumnTypes);
+    }
 
     given().headers(
             "Authorization", "Bearer " + createAccessToken(IntegrationTestBase.DEFAULT_TEST_USER_SUBJECT,

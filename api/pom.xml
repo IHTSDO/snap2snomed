@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  ~ Copyright © 2022 SNOMED International
+  ~ Copyright © 2022-24 SNOMED International
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -33,16 +33,16 @@
     <java.version>17</java.version>
     <docker.repository>aehrc/snap2snomed</docker.repository>
     <docker.registry.host>quay.io</docker.registry.host>
-    <sentry.version>6.34.0</sentry.version>
+    <sentry.version>7.2.0</sentry.version>
     <jacoco.version>0.8.8</jacoco.version>
     <commons-csv.version>1.10.0</commons-csv.version>
-    <aws-mysql-jdbc.version>1.1.10</aws-mysql-jdbc.version>
+    <aws-mysql-jdbc.version>1.1.13</aws-mysql-jdbc.version>
     <org.springdoc.version>1.6.15</org.springdoc.version>
-    <jib.version>3.3.1</jib.version>
+    <jib.version>3.4.0</jib.version>
     <apt-maven-plugin.version>1.1.3</apt-maven-plugin.version>
     <problem-spring-web.version>0.27.0</problem-spring-web.version>
-    <swagger-request-validator.version>2.34.0</swagger-request-validator.version>
-    <apache-poi.version>5.2.3</apache-poi.version>
+    <swagger-request-validator.version>2.38.1</swagger-request-validator.version>
+    <apache-poi.version>5.2.5</apache-poi.version>
     <rest-assured.version>4.5.1</rest-assured.version>
     <jjwt.version>0.11.5</jjwt.version>
     <tc-mysql.version>1.17.2</tc-mysql.version>
@@ -50,16 +50,27 @@
     <hamcrest-test.version>1.3</hamcrest-test.version>
     <hamcrest-date.version>2.0.8</hamcrest-date.version>
     <hapi.version>6.6.2</hapi.version>
-    <spring-security-core.version>6.1.5</spring-security-core.version>
+    <spring-security-core.version>6.2.2</spring-security-core.version>
     <spring-core.version>5.3.29</spring-core.version>
+    <snomed-utilities.version>2.1.0</snomed-utilities.version>
   </properties>
 
   <dependencyManagement>
     <dependencies>
       <dependency>
+        <groupId>ch.qos.logback</groupId>
+        <artifactId>logback-core</artifactId>
+        <version>1.2.13</version> <!-- force version for CVE-2023-6481 ; remove when spring-boot-starter-actuator updates to have a dependency >= 1.2.13 -->
+      </dependency>
+      <dependency>
+        <groupId>org.springframework</groupId>
+        <artifactId>spring-web</artifactId>
+        <version>5.3.32</version> <!-- force version for CVE-2024-22243; remove when spring-boot-starter-web updates to this (currently 2.7.18) -->
+      </dependency>
+      <dependency>
         <groupId>org.apache.commons</groupId>
-        <artifactId>commons-text</artifactId>
-        <version>1.10.0</version> <!-- force version for CVE-2022-42889 ; remove when mockserver-netty updates -->
+        <artifactId>commons-compress</artifactId>
+        <version>1.26.0</version> <!-- force version for  CVE-2024-25710 & CVE-2024-26308; remove when org.apache.poi:poi-ooxml updates to this (currently 5.2.3)-->
       </dependency>
     </dependencies>
   </dependencyManagement>
@@ -256,7 +267,8 @@
       <version>${mockserver.version}</version>
       <scope>test</scope>
     </dependency>
-    <!-- included to work around trivy issue with mock-server dependency  CVE-2023-2976 in 31.1-jre .. remove when mock-server updates dependency -->
+    <!-- included to work around trivy issue with mock-server dependency  CVE-2023-2976 in 31.1-jre .. remove when mock-server updates dependency 
+         01/2024: still an issue -->
     <dependency>
         <groupId>com.google.guava</groupId>
         <artifactId>guava</artifactId>
@@ -289,14 +301,7 @@
     <dependency>
       <groupId>org.ihtsdo.snomed.util</groupId>
       <artifactId>snomed-utilities</artifactId>
-      <version>1.4.1</version>
-    </dependency>
-    <!-- included to work around snomed-utilities which includes (transitively) an older version
-        PR open on SNOMED International to update snomed-utilities and this can be removed -->
-    <dependency>
-      <groupId>commons-validator</groupId>
-      <artifactId>commons-validator</artifactId>
-      <version>1.7</version>
+      <version>${snomed-utilities.version}</version>
     </dependency>
 
   </dependencies>
