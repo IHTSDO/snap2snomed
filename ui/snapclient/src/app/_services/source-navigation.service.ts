@@ -23,7 +23,7 @@ import {ViewContext} from '../store/mapping-feature/mapping.actions';
 import { Mapping } from '../_models/mapping';
 import { Task, TaskType } from '../_models/task';
 
-interface MapViewParams {
+export interface MapViewParams {
   page: Page;
   rowIndex: number;
   params: ViewContext;
