@@ -37,7 +37,7 @@ import {ConfirmDialogComponent, DialogType} from '../../dialog/confirm-dialog/co
 import {MatCheckboxChange} from '@angular/material/checkbox';
 import {TableColumn, TableParams} from '../mapping-table/mapping-table.component';
 import {selectCurrentView} from 'src/app/store/mapping-feature/mapping.selectors';
-import {SourceNavigationService, SourceNavSet} from 'src/app/_services/source-navigation.service';
+import {MapViewParams, SourceNavigationService, SourceNavSet} from 'src/app/_services/source-navigation.service';
 import {Subscription} from 'rxjs';
 import {ViewContext} from 'src/app/store/mapping-feature/mapping.actions';
 import {ConceptNode} from '@csiro/shrimp-hierarchy-view';
@@ -210,6 +210,13 @@ export class MappingDetailComponent implements OnInit, OnDestroy {
   private isDualMapMode() : boolean {
     if (this.task) {
       return this.task.mapping.project.dualMapMode;
+    }
+    return false;
+  }
+
+  isAuthorTask() : boolean {
+    if (this.task?.type === TaskType.AUTHOR) {
+      return true;
     }
     return false;
   }
@@ -495,7 +502,18 @@ export class MappingDetailComponent implements OnInit, OnDestroy {
     const self = this;
     if (self.task && self.selectedRowset?.next) {
       this.error.message = undefined;
-      self.sourceNavigation.select(self.task, self.task.mapping, self.selectedRowset?.next);
+      if (self.isDualMapMode() && self.isAuthorTask() && self.selectedRowset?.mapRow?.status === MapRowStatus.RECONCILE.valueOf() ) {
+        let newNext : MapViewParams = {
+          page: self.selectedRowset?.next.page,
+          rowIndex: self.selectedRowset?.next.rowIndex-1,
+          params: self.selectedRowset?.next.params
+        };
+        self.sourceNavigation.select(self.task, self.task.mapping, newNext);
+      }
+      else {
+        self.sourceNavigation.select(self.task, self.task.mapping, self.selectedRowset?.next);
+      }
+
     }
   }
 
