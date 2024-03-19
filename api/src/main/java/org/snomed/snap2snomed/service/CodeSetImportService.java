@@ -232,9 +232,13 @@ public class CodeSetImportService {
           .distinct()
           .count();
       if(rowIds.size() != rowsToMapCount) {
-        throw new MappingImportProblem("invalid-data", "The import result record count does not match " +
-        "the number of source codes supplied to it [" + rowIds.size() + " vs " +rowsToMapCount + "] " +
-        "Check that the source code column has correct codes.");
+        Set<String> missing = mapRowTargetParams.stream()
+          .map(MapRowTargetParams::getSourceCode)
+          .filter(element -> !rowIds.containsKey(element))
+          .collect(Collectors.toSet());
+        throw new MappingImportProblem("invalid-data", "The imported mapping file contains source codes " +
+        " that are not in this map " + missing + ".  These codes need to be removed from the mapping file " +
+        " before attempting to import it again.");
       }
       mapRowTargetParams.forEach(param -> {
         final MapRow row = new MapRow();
