@@ -453,7 +453,7 @@ public class CodeSetImportService {
                               String targetDisplay, long recordNumber, Integer noMapFlag, MapStatus status) {
     checkCode(code, recordNumber);
     checkCode(targetCode, recordNumber);
-    checkDuplicateCodes(importedCodes, code + targetCode);
+    checkDuplicateCodes(importedCodes, code, targetCode);
     checkDisplay(targetDisplay, recordNumber);
     checkNoMapFlag(targetCode, noMapFlag);
     checkStatus(targetCode, status);
@@ -462,7 +462,7 @@ public class CodeSetImportService {
   private void validateRecord(Set<String> importedCodes, String code, String display, long recordNumber, List<AdditionalCodeValue> additionalColumnValues,
       ImportDetails importDetails) {
     checkCode(code, recordNumber);
-    checkDuplicateCodes(importedCodes, code);
+    checkDuplicateCodes(importedCodes, code, null);
     checkDisplay(display, recordNumber);
     checkAdditionalColumn(additionalColumnValues, importDetails.getAdditionalColumnIndexes(), recordNumber);
   }
@@ -478,11 +478,24 @@ public class CodeSetImportService {
     }
   }
 
-  private void checkDuplicateCodes(Set<String> importedCodes, String code) {
-    if (importedCodes.contains(code)) {
-      throw new CodeSetImportProblem("duplicate-code", "Code value is duplicated in the import file",
-          "The code value '" + code + "' is duplicated in the import file");
+  /**
+   * targetCode: can be null for code system imports
+   */
+  private void checkDuplicateCodes(Set<String> importedCodes, String sourceCode, String targetCode) {
+
+    if (targetCode == null) {
+      if (importedCodes.contains(sourceCode)) {
+        throw new CodeSetImportProblem("duplicate-code", "Code value is duplicated in the import file",
+            "The source code value:'" + sourceCode + "' is duplicated in the import file");
+      }
     }
+    else {
+      if (importedCodes.contains(sourceCode + targetCode)) {
+        throw new CodeSetImportProblem("duplicate-code", "Code value is duplicated in the import file",
+            "The source code value:'" + sourceCode + "' target code value:'" + targetCode + "' pair is duplicated in the import file");
+      }
+    }
+
   }
 
   private void checkDisplay(String display, long recordNumber) {
