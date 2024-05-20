@@ -348,19 +348,23 @@ export class MappingImportComponent implements OnInit, OnDestroy, AfterViewCheck
       let fileColHeader = this.csvHeaders[i];
       
       switch(fileColHeader.toLowerCase()) { 
-        case (SOURCE_CODE_OPTION_LABEL.toLowerCase() || ALT_SOURCE_CODE_OPTION_LABEL): { 
+        case SOURCE_CODE_OPTION_LABEL.toLowerCase():
+        case ALT_SOURCE_CODE_OPTION_LABEL: { 
           return this.SOURCE_CODE_OPTION_VALUE; 
         } 
         // case SOURCE_DISPLAY_OPTION_LABEL.toLowerCase(): { 
         //    return SOURCE_DISPLAY_OPTION_VALUE;
         // } 
-        case (TARGET_CODE_OPTION_LABEL.toLowerCase() || ALT_TARGET_CODE_OPTION_LABEL): { 
+        case TARGET_CODE_OPTION_LABEL.toLowerCase():
+        case ALT_TARGET_CODE_OPTION_LABEL: { 
           return this.TARGET_CODE_OPTION_VALUE;
         } 
-        case (TARGET_DISPLAY_OPTION_LABEL.toLowerCase() || ALT_TARGET_DISPLAY_OPTION_LABEL): {
+        case TARGET_DISPLAY_OPTION_LABEL.toLowerCase():
+        case ALT_TARGET_DISPLAY_OPTION_LABEL: {
           return this.TARGET_DISPLAY_OPTION_VALUE;
         } 
-        case (RELATIONSHIP_TYPE_CODE_OPTION_LABEL.toLowerCase() || ALT_RELATIONSHIP_TYPE_CODE_OPTION_LABEL): { 
+        case RELATIONSHIP_TYPE_CODE_OPTION_LABEL.toLowerCase():
+        case ALT_RELATIONSHIP_TYPE_CODE_OPTION_LABEL: { 
           return this.RELATIONSHIP_TYPE_CODE_OPTION_VALUE;
         } 
         case NO_MAP_FLAG_OPTION_LABEL.toLowerCase(): {
