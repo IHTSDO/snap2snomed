@@ -511,6 +511,7 @@ export class MappingImportComponent implements OnInit, OnDestroy, AfterViewCheck
       this.statusColumnIndexArray.splice(arrayIndex, 1);
     }
 
+    console.log("newValue", newValue);
     switch(newValue) { 
       case this.SOURCE_CODE_OPTION_VALUE: { 
         this.codeColumnIndexArray.push(index);
@@ -529,6 +530,7 @@ export class MappingImportComponent implements OnInit, OnDestroy, AfterViewCheck
         break;
       } 
       case this.RELATIONSHIP_TYPE_CODE_OPTION_VALUE: { 
+        console.log("adding to exists 2");
         this.relationshipColumnIndexArray.push(index);
         break;
       } 
