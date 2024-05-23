@@ -334,10 +334,10 @@ public class CodeSetImportService {
           // If delimiter is null we only read lines and auto-generate ids
           if (importDetails.getDelimiter() == null) {
             code = DatatypeConverter.printHexBinary(md.digest(csvRecord.get(importDetails.getDisplayColumnIndex()).getBytes()))
-                .toLowerCase();
+                .toLowerCase().trim();
             importDetails.setDisplayColumnIndex(0);
           } else {
-            code = csvRecord.get(importDetails.getCodeColumnIndex());
+            code = csvRecord.get(importDetails.getCodeColumnIndex()).trim();
           }
           final String display = csvRecord.get(importDetails.getDisplayColumnIndex());
           final long recordNumber = csvRecord.getRecordNumber();
@@ -631,8 +631,8 @@ public class CodeSetImportService {
           }
           validateColumnIndexes(importDetails, csvRecord);
           testLineForBinary(csvRecord.toString());
-          final String code = csvRecord.get(importDetails.getCodeColumnIndex());
-          final String targetCode = csvRecord.get(importDetails.getTargetCodeColumnIndex());
+          final String code = csvRecord.get(importDetails.getCodeColumnIndex()).trim();
+          final String targetCode = csvRecord.get(importDetails.getTargetCodeColumnIndex()).trim();
           final String targetDisplay = csvRecord.get(importDetails.getTargetDisplayColumnIndex());
           final String relationship = csvRecord.get(importDetails.getRelationshipColumnIndex());
           // optional

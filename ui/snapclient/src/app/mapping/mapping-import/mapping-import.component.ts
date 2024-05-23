@@ -635,8 +635,9 @@ export class MappingImportComponent implements OnInit, OnDestroy, AfterViewCheck
 
     if (this.data.source.source_file == null) {
       this.translate.get('SOURCE.FILE_REQUIRED').subscribe((msg) => this.error.message = msg);
-    } else if (ServiceUtils.hasDuplicateCodes(this.contents, this.data.source, this.sourceType)) {
-      this.translate.get('ERROR.FILE_CONTENTS_DUPLICATES_SOURCE_AND_TARGET').subscribe((msg) => this.error.message = msg);
+    // retired, api to perform
+    // } else if (ServiceUtils.hasDuplicateCodes(this.contents, this.data.source, this.sourceType)) {
+    //   this.translate.get('ERROR.FILE_CONTENTS_DUPLICATES_SOURCE_AND_TARGET').subscribe((msg) => this.error.message = msg);
     } else {
       this.error = {};
       this.store.dispatch(new SelectMappingFile({source: this.data.source, sourceType: this.sourceType}));
