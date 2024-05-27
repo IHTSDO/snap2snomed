@@ -356,42 +356,50 @@ export class ServiceUtils {
     return null;
   }
 
-  // TODO: Maybe deprecate this as backend does the same thing
-  /** Quick check of duplicates for small files - backend for full check */
-  static hasDuplicateCodes(contents: string, data: Source | MappingImportSource, sourceType: string): boolean {
-    const theContent = contents.split(this.getEOL());
-    if (data.hasHeader) {
-      theContent.splice(0, 1);
-    }
-    if (data.displayColumnIndex !== null && data.displayColumnIndex === 0) {
-      if (theContent.length > 0 && theContent.length < 1000 && data !== null) {
-        return this.checkDuplicates(theContent);
-      }
-      return false;
-    }
-    if (theContent.length > 0 && theContent.length < 1000 && data !== null
-        && data.codeColumnIndex !== null) {
-      let separator = sourceType === 'CSV' ? ',' : '\t';
-      if (data.delimiter) {
-        separator = data.delimiter;
-      }
-      const codeCol = data.codeColumnIndex;
-      if (data instanceof Source) {
-        return this.checkDuplicates(theContent.map((line) => line.split(separator)[codeCol]));
-      } else {
-        const displayCol = data.targetCodeColumnIndex;
-        return this.checkDuplicates(theContent.map((line) =>  {
-          const codelines = line.split(separator)[codeCol];
-          let displaylines = '';
-          if (displayCol) {
-            displaylines = line.split(separator)[displayCol];
-          }
-          return codelines + displaylines;
-        }));
-      }
-    }
-    return false;
-  }
+  // DU: 2024/05/22 Have retired this method as it works on just the first chunk of the file (and incomplete rows),
+  // the server runs these checks anyway and does a better job (reports on codes rather than just saying duplicated)
+  // it does mean that the user needs to open the import dialog again and enter the data again, but maybe in the
+  // future a validate button is added.  Chances are if problems are found, a thorough investigation is needed 
+  // anyway 
+  //
+  // /** Quick check of duplicates for small files - backend for full check */
+  // static hasDuplicateCodes(contents: string, data: Source | MappingImportSource, sourceType: string): boolean {
+  //   const theContent = contents.split(this.getEOL());
+  //   if (data.hasHeader) {
+  //     theContent.splice(0, 1);
+  //   }
+  //   if (data.displayColumnIndex !== null && data.displayColumnIndex === 0) {
+  //     if (theContent.length > 0 && theContent.length < 1000 && data !== null) {
+  //       return this.checkDuplicates(theContent);
+  //     }
+  //     return false;
+  //   }
+  //   if (theContent.length > 0 && theContent.length < 1000 && data !== null
+  //       && data.codeColumnIndex !== null) {
+  //     let separator = sourceType === 'CSV' ? ',' : '\t';
+  //     if (data.delimiter) {
+  //       separator = data.delimiter;
+  //     }
+  //     const codeCol = data.codeColumnIndex;
+  //     if (data instanceof Source) {
+  //       return this.checkDuplicates(theContent.map((line) => line.split(separator)[codeCol]));
+  //     } else {
+  //       const displayCol = data.targetCodeColumnIndex;
+  //       return this.checkDuplicates(theContent.map((line) =>  {
+  //         const codelines = line.split(separator)[codeCol];
+  //         let displaylines = '';
+  //         if (displayCol) {
+  //           displaylines = line.split(separator)[displayCol];
+  //           if (displaylines) { // guard for undefined due to only a chunk of the file supplied which results in incomplete lines
+  //             displaylines = displaylines.trim();
+  //           }
+  //         }
+  //         return codelines + displaylines;
+  //       }));
+  //     }
+  //   }
+  //   return false;
+  // }
 
   private static checkDuplicates(lines: any): boolean {
     const uniqueLines = lines.filter((v: any, i: any, a: any) => a.indexOf(v) === i);

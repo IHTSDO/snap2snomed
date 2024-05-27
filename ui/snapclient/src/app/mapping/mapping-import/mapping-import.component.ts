@@ -44,7 +44,7 @@ const SOURCE_CODE_OPTION_LABEL = 'Source code';
 const TARGET_CODE_OPTION_LABEL = 'Target code';
 const TARGET_DISPLAY_OPTION_LABEL = 'Target display';
 const RELATIONSHIP_TYPE_CODE_OPTION_LABEL = 'Relationship type code';
-const NO_MAP_FLAG_OPTION_LABEL = "No map";
+const NO_MAP_FLAG_OPTION_LABEL = "No map flag";
 const STATUS_OPTION_LABEL = "Status";
 
 const ALT_SOURCE_CODE_OPTION_LABEL = 'source_code';
@@ -348,19 +348,23 @@ export class MappingImportComponent implements OnInit, OnDestroy, AfterViewCheck
       let fileColHeader = this.csvHeaders[i];
       
       switch(fileColHeader.toLowerCase()) { 
-        case (SOURCE_CODE_OPTION_LABEL.toLowerCase() || ALT_SOURCE_CODE_OPTION_LABEL): { 
+        case SOURCE_CODE_OPTION_LABEL.toLowerCase():
+        case ALT_SOURCE_CODE_OPTION_LABEL: { 
           return this.SOURCE_CODE_OPTION_VALUE; 
         } 
         // case SOURCE_DISPLAY_OPTION_LABEL.toLowerCase(): { 
         //    return SOURCE_DISPLAY_OPTION_VALUE;
         // } 
-        case (TARGET_CODE_OPTION_LABEL.toLowerCase() || ALT_TARGET_CODE_OPTION_LABEL): { 
+        case TARGET_CODE_OPTION_LABEL.toLowerCase():
+        case ALT_TARGET_CODE_OPTION_LABEL: { 
           return this.TARGET_CODE_OPTION_VALUE;
         } 
-        case (TARGET_DISPLAY_OPTION_LABEL.toLowerCase() || ALT_TARGET_DISPLAY_OPTION_LABEL): {
+        case TARGET_DISPLAY_OPTION_LABEL.toLowerCase():
+        case ALT_TARGET_DISPLAY_OPTION_LABEL: {
           return this.TARGET_DISPLAY_OPTION_VALUE;
         } 
-        case (RELATIONSHIP_TYPE_CODE_OPTION_LABEL.toLowerCase() || ALT_RELATIONSHIP_TYPE_CODE_OPTION_LABEL): { 
+        case RELATIONSHIP_TYPE_CODE_OPTION_LABEL.toLowerCase():
+        case ALT_RELATIONSHIP_TYPE_CODE_OPTION_LABEL: { 
           return this.RELATIONSHIP_TYPE_CODE_OPTION_VALUE;
         } 
         case NO_MAP_FLAG_OPTION_LABEL.toLowerCase(): {
@@ -507,6 +511,7 @@ export class MappingImportComponent implements OnInit, OnDestroy, AfterViewCheck
       this.statusColumnIndexArray.splice(arrayIndex, 1);
     }
 
+    console.log("newValue", newValue);
     switch(newValue) { 
       case this.SOURCE_CODE_OPTION_VALUE: { 
         this.codeColumnIndexArray.push(index);
@@ -525,6 +530,7 @@ export class MappingImportComponent implements OnInit, OnDestroy, AfterViewCheck
         break;
       } 
       case this.RELATIONSHIP_TYPE_CODE_OPTION_VALUE: { 
+        console.log("adding to exists 2");
         this.relationshipColumnIndexArray.push(index);
         break;
       } 
@@ -629,8 +635,9 @@ export class MappingImportComponent implements OnInit, OnDestroy, AfterViewCheck
 
     if (this.data.source.source_file == null) {
       this.translate.get('SOURCE.FILE_REQUIRED').subscribe((msg) => this.error.message = msg);
-    } else if (ServiceUtils.hasDuplicateCodes(this.contents, this.data.source, this.sourceType)) {
-      this.translate.get('ERROR.FILE_CONTENTS_DUPLICATES_SOURCE_AND_TARGET').subscribe((msg) => this.error.message = msg);
+    // retired, api to perform
+    // } else if (ServiceUtils.hasDuplicateCodes(this.contents, this.data.source, this.sourceType)) {
+    //   this.translate.get('ERROR.FILE_CONTENTS_DUPLICATES_SOURCE_AND_TARGET').subscribe((msg) => this.error.message = msg);
     } else {
       this.error = {};
       this.store.dispatch(new SelectMappingFile({source: this.data.source, sourceType: this.sourceType}));

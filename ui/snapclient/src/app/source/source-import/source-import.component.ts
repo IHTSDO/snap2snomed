@@ -189,8 +189,8 @@ export class SourceImportComponent implements OnInit, OnDestroy, AfterViewChecke
   onSubmit(): void {
     if (this.data.source_file == null) {
       this.translate.get('SOURCE.FILE_REQUIRED').subscribe((msg) => this.error.message = msg);
-    } else if (ServiceUtils.hasDuplicateCodes(this.contents, this.data, this.sourceType)) {
-      this.translate.get('ERROR.FILE_CONTENTS_DUPLICATES').subscribe((msg) => this.error.message = msg);
+    // } else if (ServiceUtils.hasDuplicateCodes(this.contents, this.data, this.sourceType)) { // retired, UI to perform
+    //   this.translate.get('ERROR.FILE_CONTENTS_DUPLICATES').subscribe((msg) => this.error.message = msg);
     } else if (this.hasDuplicateNameVersion()) {
       this.translate.get('SOURCE.NAME_DUPLICATE').subscribe((msg) => this.error.message = msg);
     } else if (!this.saved) {

@@ -334,10 +334,10 @@ public class CodeSetImportService {
           // If delimiter is null we only read lines and auto-generate ids
           if (importDetails.getDelimiter() == null) {
             code = DatatypeConverter.printHexBinary(md.digest(csvRecord.get(importDetails.getDisplayColumnIndex()).getBytes()))
-                .toLowerCase();
+                .toLowerCase().trim();
             importDetails.setDisplayColumnIndex(0);
           } else {
-            code = csvRecord.get(importDetails.getCodeColumnIndex());
+            code = csvRecord.get(importDetails.getCodeColumnIndex()).trim();
           }
           final String display = csvRecord.get(importDetails.getDisplayColumnIndex());
           final long recordNumber = csvRecord.getRecordNumber();
@@ -453,7 +453,7 @@ public class CodeSetImportService {
                               String targetDisplay, long recordNumber, Integer noMapFlag, MapStatus status) {
     checkCode(code, recordNumber);
     checkCode(targetCode, recordNumber);
-    checkDuplicateCodes(importedCodes, code + targetCode);
+    checkDuplicateCodes(importedCodes, code, targetCode);
     checkDisplay(targetDisplay, recordNumber);
     checkNoMapFlag(targetCode, noMapFlag);
     checkStatus(targetCode, status);
@@ -462,7 +462,7 @@ public class CodeSetImportService {
   private void validateRecord(Set<String> importedCodes, String code, String display, long recordNumber, List<AdditionalCodeValue> additionalColumnValues,
       ImportDetails importDetails) {
     checkCode(code, recordNumber);
-    checkDuplicateCodes(importedCodes, code);
+    checkDuplicateCodes(importedCodes, code, null);
     checkDisplay(display, recordNumber);
     checkAdditionalColumn(additionalColumnValues, importDetails.getAdditionalColumnIndexes(), recordNumber);
   }
@@ -478,11 +478,24 @@ public class CodeSetImportService {
     }
   }
 
-  private void checkDuplicateCodes(Set<String> importedCodes, String code) {
-    if (importedCodes.contains(code)) {
-      throw new CodeSetImportProblem("duplicate-code", "Code value is duplicated in the import file",
-          "The code value '" + code + "' is duplicated in the import file");
+  /**
+   * targetCode: can be null for code system imports
+   */
+  private void checkDuplicateCodes(Set<String> importedCodes, String sourceCode, String targetCode) {
+
+    if (targetCode == null) {
+      if (importedCodes.contains(sourceCode)) {
+        throw new CodeSetImportProblem("duplicate-code", "Code value is duplicated in the import file",
+            "The source code value:'" + sourceCode + "' is duplicated in the import file");
+      }
     }
+    else {
+      if (importedCodes.contains(sourceCode + targetCode)) {
+        throw new CodeSetImportProblem("duplicate-code", "Code value is duplicated in the import file",
+            "The source code value:'" + sourceCode + "' target code value:'" + targetCode + "' pair is duplicated in the import file");
+      }
+    }
+
   }
 
   private void checkDisplay(String display, long recordNumber) {
@@ -618,8 +631,8 @@ public class CodeSetImportService {
           }
           validateColumnIndexes(importDetails, csvRecord);
           testLineForBinary(csvRecord.toString());
-          final String code = csvRecord.get(importDetails.getCodeColumnIndex());
-          final String targetCode = csvRecord.get(importDetails.getTargetCodeColumnIndex());
+          final String code = csvRecord.get(importDetails.getCodeColumnIndex()).trim();
+          final String targetCode = csvRecord.get(importDetails.getTargetCodeColumnIndex()).trim();
           final String targetDisplay = csvRecord.get(importDetails.getTargetDisplayColumnIndex());
           final String relationship = csvRecord.get(importDetails.getRelationshipColumnIndex());
           // optional
