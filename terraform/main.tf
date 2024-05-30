@@ -6,8 +6,8 @@ terraform {
     }
   }
   backend "remote" {
-    hostname     = "terraform.csiro.cloud"
-    organization = "OD221174-ehealth-research-centreprod-org"
+    organization = "CSIRO"
+
     workspaces {
       prefix = "snap2snomed-"
     }
