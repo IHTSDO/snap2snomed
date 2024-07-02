@@ -425,6 +425,7 @@
     "32506021000036107":  "Australian Edition",
     "332351000009108":    "Veterinary Edition",
     "449081005":      "Spanish Edition",
+    "900000001000122104": "Spanish national Edition", 
     "450829007":      "Latinoamérica Edition",
     "45991000052106": "Swedish Edition",
     "51000202101":    "Norway Edition",
@@ -432,7 +433,7 @@
     "5631000179106":  "Uruguay Edition",
     "731000124108":   "US Edition",
     "83821000000107": "UK Edition",
-    "900000000000207008": "International  Edition",
+    "900000000000207008": "International Edition",
     "999000021000000109": "UK Clinical Edition",
     "999000031000000106": "UK Edition",
     "EXPERIMENTAL":   "Unreleased"
