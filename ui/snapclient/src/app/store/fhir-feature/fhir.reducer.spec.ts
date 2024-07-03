@@ -33,7 +33,8 @@ describe('Fhir Reducer', () => {
       let release : Release[] = [{
         edition: '',
         version: '',
-        uri: ''
+        uri: '',
+        countryCode: ''
       }];
       releases.set('', release)
       const action = new LoadReleasesSuccess(releases);

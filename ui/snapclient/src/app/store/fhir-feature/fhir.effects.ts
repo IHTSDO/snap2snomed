@@ -61,10 +61,12 @@ export class FhirEffects {
             const edition = SnomedUtils.parserVersionUri(ver).edition;
             let label = res.title;
             this.translate.get(`EDITION.${edition}`).subscribe(msg => { label = msg; });
+            const countryCode = edition != null ? SnomedUtils.toCountry(edition) : null;
             return {
               edition: label,
               version: ver?.replace(/.*\//, ''),
               uri: ver,
+              countryCode: countryCode
             } as Release;
           });
       }),

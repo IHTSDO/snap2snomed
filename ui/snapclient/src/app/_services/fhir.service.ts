@@ -34,6 +34,7 @@ export interface Release {
   edition: string; // edition is often a country
   version: string; // version is often a date
   uri: string;
+  countryCode: string;
 }
 
 @Injectable({
