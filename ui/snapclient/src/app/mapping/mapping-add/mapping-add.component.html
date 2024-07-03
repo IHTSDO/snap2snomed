@@ -71,7 +71,8 @@
               <mat-select id="toEdition" formControlName="toEdition"
                           required>
                 <mat-option *ngFor="let elem of editionToVersionsMap | keyvalue" [value]="elem.key">
-                  <span *ngIf="elem.value[0].countryCode" class="flag-icon flag-icon-{{elem.value[0].countryCode}}"></span>{{elem.key}}
+                  <span *ngIf="elem.value[0].countryCode" class="flag-icon flag-icon-{{elem.value[0].countryCode}}"></span>
+                  {{elem.key}}
                 </mat-option>
               </mat-select>
               <mat-error *ngIf="!selectedEdition">{{ 'MAP.TARGET_EDITION_ERROR' | translate }}</mat-error>
