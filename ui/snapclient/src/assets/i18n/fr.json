@@ -6,5 +6,8 @@
   },
   "ERROR": {
     "SERVER": "Erreur du serveur : impossible de charger les détails de l'utilisateur"
+  },
+  "EDITION": {
+    "11000315107": "Édition Française"
   }
 }

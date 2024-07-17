@@ -71,6 +71,11 @@
         <groupId>org.apache.commons</groupId>
         <artifactId>commons-compress</artifactId>
         <version>1.26.0</version> <!-- force version for  CVE-2024-25710 & CVE-2024-26308; remove when org.apache.poi:poi-ooxml updates to this (currently 5.2.3)-->
+      </dependency>      
+      <dependency>
+        <groupId>org.apache.tomcat.embed</groupId>
+        <artifactId>tomcat-embed-core</artifactId>
+        <version>9.0.91</version><!-- force version for CVE-2024-34750; remove when spring-boot-starter-web transitive dependency updates to this (currently 9.0.83)-->
       </dependency>
     </dependencies>
   </dependencyManagement>
