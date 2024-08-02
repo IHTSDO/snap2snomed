@@ -29,7 +29,20 @@ export class FormUtils {
    * @param currentVersion the current version of the mapping or the source
    */
   static calculateNextVersion(currentVersion: string) : string {
-    const newVersion = (+currentVersion) + 1;
-    return isNaN(newVersion) ? (currentVersion + '.1') : newVersion.toString();
+
+    // Check if the version is a valid integer or dot-separated number
+    const isIntegerOrDotNumber = /^\d+(\.\d+)*$/.test(currentVersion);
+    
+    // If not a valid integer or dot-separated number, append ".1" and return
+    if (!isIntegerOrDotNumber) {
+        return currentVersion + ".1";
+    }
+
+    const parts = currentVersion.split('.');
+    const versionNumbers = parts.map(part => parseInt(part, 10));
+    versionNumbers[versionNumbers.length - 1]++;
+    const newVersion = versionNumbers.join('.');
+
+    return newVersion;
   }
 };
