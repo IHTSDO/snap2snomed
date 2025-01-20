@@ -89,6 +89,11 @@
           <artifactId>nimbus-jose-jwt</artifactId>
           <version>9.37.3</version> <!-- force version for CVE-2023-52428; remove when spring-boot spring-boot-starter-oauth2-resource-server updates to this (currently 9.22) -->
       </dependency>
+      <dependency>
+          <groupId>ca.uhn.hapi.fhir</groupId>
+          <artifactId>hapi-fhir-structures-r4</artifactId>
+          <version>6.4.0</version>
+      </dependency> <!-- force version for CVE-2024-51132, CVE-2024-52007, CVE-2024-45294; remove when hapi-fhir-structures-r4 updates this (currently 6.0.1) -->
     </dependencies>
   </dependencyManagement>
 
