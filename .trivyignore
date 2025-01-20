@@ -20,3 +20,9 @@ CVE-2023-6378
 
 # no fix, SQL injection issue which is minimal. Remove when querydsl-jpa addresses this issue
 CVE-2024-49203 
+
+# can't move to the version with the fix as it breaks the app
+CVE-2024-38816
+
+# can't move to the version with the fix as it breaks the app
+CVE-2024-38819
