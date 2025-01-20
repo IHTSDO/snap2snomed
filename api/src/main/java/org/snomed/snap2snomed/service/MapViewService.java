@@ -917,7 +917,7 @@ public class MapViewService {
     .leftJoin(mapRow.lastReviewer)
     .where(getWhereClause(mapId, task, filter, false));
 
-    if ((task.getType().equals(TaskType.RECONCILE) || task.getType().equals(TaskType.AUTHOR)) && sort != null && sort.isUnsorted()) {
+    if ((task != null) && (task.getType().equals(TaskType.RECONCILE) || task.getType().equals(TaskType.AUTHOR)) && sort != null && sort.isUnsorted()) {
       query = query.orderBy(mapRow.sourceCode.index.asc()).orderBy((mapRow.lastAuthor.id.asc()));
     }
 
