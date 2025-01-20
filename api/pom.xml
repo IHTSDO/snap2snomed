@@ -60,7 +60,8 @@
       <dependency>
         <groupId>ch.qos.logback</groupId>
         <artifactId>logback-core</artifactId>
-        <version>1.2.13</version> <!-- force version for CVE-2023-6481 ; remove when spring-boot-starter-actuator updates to have a dependency >= 1.2.13 -->
+        <!--<version>1.2.13</version>--> <!-- force version for CVE-2023-6481 ; remove when spring-boot-starter-actuator updates to have a dependency >= 1.2.13 -->
+        <version>1.5.13</version> <!-- force version for CVE-2024-12798; -->
       </dependency>
       <dependency>
         <groupId>org.springframework</groupId>
@@ -75,7 +76,8 @@
       <dependency>
         <groupId>org.apache.tomcat.embed</groupId>
         <artifactId>tomcat-embed-core</artifactId>
-        <version>9.0.91</version><!-- force version for CVE-2024-34750; remove when spring-boot-starter-web transitive dependency updates to this (currently 9.0.83)-->
+        <!--<version>9.0.91</version>--><!-- force version for CVE-2024-34750; remove when spring-boot-starter-web transitive dependency updates to this (currently 9.0.83)-->
+        <version>9.0.98</version><!-- force version for CVE-2024-50379 and CVE-2024-56337 -->
       </dependency>
       <dependency>
         <groupId>org.springframework.security</groupId>
