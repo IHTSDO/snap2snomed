@@ -99,6 +99,13 @@
           <artifactId>org.hl7.fhir.utilities</artifactId>
           <version>6.4.0</version><!-- force version for CVE-2024-51132, CVE-2024-52007, CVE-2024-45294; remove when hapi-fhir-structures-r4 updates this (currently 6.0.1) -->
       </dependency>
+      <dependency>
+          <groupId>ca.uhn.hapi.fhir</groupId>
+          <artifactId>org.hl7.fhir.r4</artifactId>
+          <version>6.4.0</version><!-- force version for CVE-2024-45294, CVE-2024-51132, CVE-2024-52007; remove when hapi-fhir-structures-r4 updates this (currently 6.0.1) -->
+      </dependency>
+
+
     </dependencies>
   </dependencyManagement>
 
