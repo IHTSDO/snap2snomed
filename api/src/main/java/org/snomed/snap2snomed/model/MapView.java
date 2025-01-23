@@ -26,6 +26,7 @@ import java.util.List;
  
  import org.snomed.snap2snomed.model.enumeration.MapStatus;
  import org.snomed.snap2snomed.model.enumeration.MappingRelationship;
+import org.snomed.snap2snomed.model.enumeration.NoteCategory;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 
@@ -156,6 +157,15 @@ import lombok.AllArgsConstructor;
     this.latestNote = latestNote;
     this.lastAuthor = row.getLastAuthor();
     this.lastReviewer = row.getLastReviewer();
+
+    this.appendedNotes = "";
+    Iterator<Note> i = row.getNotes().iterator();
+    while (i.hasNext()) {
+      Note note = i.next();
+      if (!note.isDeleted() && note.getCategory() == NoteCategory.USER) {
+        this.appendedNotes += note.getCreated() + " " + note.noteBy.getFullName() + " " + note.noteText + ";";
+      }
+    }
 
     this.status = row.getStatus();
 
