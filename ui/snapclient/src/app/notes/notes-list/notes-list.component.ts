@@ -210,13 +210,13 @@ export class NotesListComponent implements OnInit, OnDestroy {
     }
   }
 
-  // Sort by modified desc
+  // Sort by created desc
   sortNotes(a: Note, b: Note): number {
-    if (a.modified && b.modified) {
-      if (a.modified > b.modified) {
+    if (a.created && b.created) {
+      if (a.created > b.created) {
         return -1;
       }
-      if (a.modified < b.modified) {
+      if (a.created < b.created) {
         return 1;
       }
     }

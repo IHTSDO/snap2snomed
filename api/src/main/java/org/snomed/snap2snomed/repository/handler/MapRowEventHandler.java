@@ -18,8 +18,10 @@ package org.snomed.snap2snomed.repository.handler;
 
 import java.time.Instant;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.SortedSet;
+import java.util.TreeSet;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -124,10 +126,28 @@ public class MapRowEventHandler {
             mapRow.setAuthorTask(null);
             mapRow.setBlindMapFlag(Boolean.FALSE);
             SortedSet<Note> siblingNotes = siblingMapRow.getNotes();
-            for (Note note : siblingNotes) {
-              Note newNote = createNote(note.getNoteText(), note.getCreated(), note.getNoteBy(), mapRow, note.getCategory(), note.isDeleted());
-              noteRepository.save(newNote);
+            HashSet<Note> notesCopy = new HashSet<Note>(siblingNotes);  // Create a copy of the original collection to avoid concurrent modification exception
+  
+            // moving notes preserves the created date
+            for (Note note : notesCopy) {
+    
+              siblingMapRow.getNotes().remove(note);
+              //mapRowRepository.save(siblingMapRow);
+  
+              note.setMapRow(mapRow);
+              noteRepository.save(note);
+  
+              // going to replace mapRow to get a copy with notes, so make sure there aren't any unsaved changes.
+              mapRowRepository.save(mapRow);
+  
+              // prevent a lazy loading error wrt MapRow.getNotes()
+              mapRow = this.em.find(MapRow.class, mapRow.getId());
+              mapRow.getNotes().add(note);
             }
+            // for (Note note : siblingNotes) {
+            //   Note newNote = createNote(note.getNoteText(), note.getCreated(), note.getNoteBy(), mapRow, note.getCategory(), note.isDeleted());
+            //   noteRepository.save(newNote);
+            // }
             mapRowRepository.deleteById(siblingMapRow.getId());
             mapRowRepository.save(mapRow);
             siblingMapRow = null;
@@ -163,9 +183,23 @@ public class MapRowEventHandler {
           }
 
           SortedSet<Note> siblingNotes = siblingMapRow.getNotes();
-          for (Note note : siblingNotes) {
-            Note newNote = createNote(note.getNoteText(), note.getCreated(), note.getNoteBy(), mapRow, note.getCategory(), note.isDeleted());
-            noteRepository.save(newNote);
+          HashSet<Note> notesCopy = new HashSet<Note>(siblingNotes);  // Create a copy of the original collection to avoid concurrent modification exception
+
+          // moving notes preserves the created date
+          for (Note note : notesCopy) {
+  
+            siblingMapRow.getNotes().remove(note);
+            mapRowRepository.save(siblingMapRow);
+
+            note.setMapRow(mapRow);
+            noteRepository.save(note);
+
+            // going to replace mapRow to get a copy with notes, so make sure there aren't any unsaved changes.
+            mapRowRepository.save(mapRow);
+
+            // prevent a lazy loading error wrt MapRow.getNotes()
+            mapRow = this.em.find(MapRow.class, mapRow.getId());
+            mapRow.getNotes().add(note);
           }
 
           mapRowRepository.save(mapRow);

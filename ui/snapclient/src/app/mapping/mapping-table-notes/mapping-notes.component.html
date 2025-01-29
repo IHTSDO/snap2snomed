@@ -11,7 +11,7 @@
 
           <ng-container matColumnDef="dateTime">
             <th mat-header-cell *matHeaderCellDef> Date / Time </th>
-            <td mat-cell *matCellDef="let element"> {{element.modified | date }} </td>
+            <td mat-cell *matCellDef="let element"> {{element.created | date }} </td>
           </ng-container>
         
           <ng-container matColumnDef="noteBy">

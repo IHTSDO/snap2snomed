@@ -18,6 +18,8 @@
 
  import java.time.Instant;
  import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
  
@@ -159,9 +161,12 @@ import lombok.AllArgsConstructor;
     this.lastReviewer = row.getLastReviewer();
 
     this.appendedNotes = "";
-    Iterator<Note> i = row.getNotes().iterator();
-    while (i.hasNext()) {
-      Note note = i.next();
+    List<Note> sortedNotes = new ArrayList<>(row.getNotes()); 
+
+    // Sort the List by note.getCreated()
+    Collections.sort(sortedNotes, Comparator.comparing(Note::getCreated).reversed());
+    
+    for (Note note : sortedNotes) {
       if (!note.isDeleted() && note.getCategory() == NoteCategory.USER) {
         this.appendedNotes += note.getCreated() + " " + note.noteBy.getFullName() + " " + note.noteText + ";";
       }
