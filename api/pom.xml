@@ -602,12 +602,10 @@
       <name>IHTSDO Public Nexus Releases</name>
       <url>https://nexus3.ihtsdotools.org/repository/maven-releases/</url>
     </repository>
-    <repositories>
     <repository> <!-- spring-security-crypto: 5.7.14  not yet in standard maven repository-->
         <id>herodevs-nes</id>
         <url>https://www.herodevs.com/repository/nes/</url>
     </repository>
-</repositories>
   </repositories>
 
 </project>
