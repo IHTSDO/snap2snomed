@@ -40,17 +40,17 @@
     <org.springdoc.version>1.7.0</org.springdoc.version>
     <jib.version>3.4.0</jib.version>
     <apt-maven-plugin.version>1.1.3</apt-maven-plugin.version>
-    <problem-spring-web.version>0.27.0</problem-spring-web.version>
+    <problem-spring-web.version>0.29.1</problem-spring-web.version>
     <swagger-request-validator.version>2.38.1</swagger-request-validator.version>
     <apache-poi.version>5.2.5</apache-poi.version>
     <rest-assured.version>4.5.1</rest-assured.version>
-    <jjwt.version>0.11.5</jjwt.version>
+    <jjwt.version>0.12.6</jjwt.version>
     <tc-mysql.version>1.17.2</tc-mysql.version>
     <mockserver.version>5.15.0</mockserver.version>
     <hamcrest-test.version>1.3</hamcrest-test.version>
     <hamcrest-date.version>2.0.8</hamcrest-date.version>
     <hapi.version>6.6.2</hapi.version>
-    <spring-security-core.version>6.2.3</spring-security-core.version>
+    <spring-security-core.version>6.2.8</spring-security-core.version>
     <spring-core.version>5.3.29</spring-core.version>
     <snomed-utilities.version>2.1.0</snomed-utilities.version>
   </properties>
@@ -77,7 +77,7 @@
         <groupId>org.apache.tomcat.embed</groupId>
         <artifactId>tomcat-embed-core</artifactId>
         <!--<version>9.0.91</version>--><!-- force version for CVE-2024-34750; remove when spring-boot-starter-web transitive dependency updates to this (currently 9.0.83)-->
-        <version>9.0.98</version><!-- force version for CVE-2024-50379 and CVE-2024-56337 -->
+        <version>9.0.107</version><!-- force version for CVE-2024-50379 and CVE-2024-56337 --> <!-- force version for CVE-2025-24813 --> <!-- force version for CVE-2025-48988 -->
       </dependency>
       <dependency>
         <groupId>org.springframework.security</groupId>
@@ -104,7 +104,21 @@
           <artifactId>org.hl7.fhir.r4</artifactId>
           <version>6.4.0</version><!-- force version for CVE-2024-45294, CVE-2024-51132, CVE-2024-52007; remove when hapi-fhir-structures-r4 updates this (currently 6.0.1) -->
       </dependency>
-
+      <dependency>
+        <groupId>com.fasterxml.jackson.core</groupId>
+        <artifactId>jackson-core</artifactId>
+        <version>2.19.2</version> <!-- force version for CVE-2025-52999; remove when io.jsonwebtoken:jjwt-jackson:jar updates this -->
+      </dependency>
+      <dependency>
+        <groupId>commons-beanutils</groupId>
+        <artifactId>commons-beanutils</artifactId>
+        <version>1.11.0</version> <!-- force version for CVE-2025-48734; remove when org.ihtsdo.snomed.util:snomed-utilities:jar: updates this -->
+      </dependency>
+      <dependency>
+          <groupId>org.springframework.security</groupId>
+          <artifactId>spring-security-crypto</artifactId>
+          <version>5.7.14</version>
+      </dependency>
 
     </dependencies>
   </dependencyManagement>
