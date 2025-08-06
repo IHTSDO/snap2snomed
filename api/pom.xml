@@ -109,7 +109,11 @@
         <artifactId>jackson-core</artifactId>
         <version>2.19.2</version> <!-- force version for CVE-2025-52999; remove when io.jsonwebtoken:jjwt-jackson:jar updates this -->
       </dependency>
-
+      <dependency>
+        <groupId>commons-beanutils</groupId>
+        <artifactId>commons-beanutils</artifactId>
+        <version>1.11.0</version> <!-- force version for CVE-2025-48734; remove when org.ihtsdo.snomed.util:snomed-utilities:jar: updates this -->
+      </dependency>
 
     </dependencies>
   </dependencyManagement>
