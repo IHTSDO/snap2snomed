@@ -26,3 +26,6 @@ CVE-2024-38816
 
 # can't move to the version with the fix as it breaks the app
 CVE-2024-38819
+
+# Bug should not affect our application. Need to upgrade spring-boot to get a fix
+CVE-2025-22235
