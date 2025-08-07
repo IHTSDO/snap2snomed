@@ -11,12 +11,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * **Removed**    - for now removed features.
 * **Fixed**      - for any bug fixes.
 
-## UNRELEASED
+---
+
+⚠️ **Note**: Changes prior to version Frontend 1.0.2 are incomplete or missing. This changelog was started from version 1.2.0 onward.
+
+---
+
+## [Frontend 1.0.2] - 2025-08-06
+
+#### Fixed
+
+- Added Edition Labels for Jamacian, LOINC Ontology, IPS Terminology Module
+
+
+## [Frontend 1.0.1]
 
 ### Security
 
 - Updated library versions to mitigate CVEs:
- -
 
 #### Changed
 
@@ -31,3 +43,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - SNOMED-470: pre-filled fields in "create map" dialog when they should be empty
 - SNOMED-408: Member list in the edit/create map dialogue is only returning X number of users
 - SNOMED-489: Select all toggle only selects items on page
+
+## [Frontend 1.0.0]

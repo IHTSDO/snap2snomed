@@ -437,6 +437,9 @@
     "999000021000000109": "UK Clinical Edition",
     "999000031000000106": "UK Edition",
     "11000315107": "French Edition",
+    "11000318109": "Jamacian Edition",
+    "11010000107": "LOINC Ontology",
+    "999991001000101": "IPS Terminology Module",
     "EXPERIMENTAL":   "Unreleased"
   },
   "SEARCH": {
