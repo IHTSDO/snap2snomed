@@ -50,7 +50,7 @@
     <hamcrest-test.version>1.3</hamcrest-test.version>
     <hamcrest-date.version>2.0.8</hamcrest-date.version>
     <hapi.version>6.6.2</hapi.version>
-    <spring-security-core.version>6.2.3</spring-security-core.version>
+    <spring-security-core.version>6.5.2</spring-security-core.version>
     <spring-core.version>5.3.29</spring-core.version>
     <snomed-utilities.version>2.1.0</snomed-utilities.version>
   </properties>
@@ -115,9 +115,9 @@
         <version>1.11.0</version> <!-- force version for CVE-2025-48734; remove when org.ihtsdo.snomed.util:snomed-utilities:jar: updates this -->
       </dependency>
       <dependency>
-        <groupId>org.springframework.security</groupId>
+      <groupId>org.springframework.security</groupId>
         <artifactId>spring-security-crypto</artifactId>
-        <version>5.7.16</version> <!-- force version for CVE-2025-22228; -->
+        <version>6.5.2</version> <!-- bring in line with parent dependency spring-security-core.  Maybe out of whack due to use of spring boot 2 as Boot 2.x is tied to Spring Security 5.x?-->
       </dependency>
     </dependencies>
   </dependencyManagement>
@@ -601,10 +601,6 @@
       <id>ihtsdo-releases</id>
       <name>IHTSDO Public Nexus Releases</name>
       <url>https://nexus3.ihtsdotools.org/repository/maven-releases/</url>
-    </repository>
-    <repository> <!-- spring-security-crypto: 5.7.14  not yet in standard maven repository-->
-        <id>herodevs-nes</id>
-        <url>https://www.herodevs.com/repository/nes/</url>
     </repository>
   </repositories>
 
