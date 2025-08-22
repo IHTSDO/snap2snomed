@@ -52,3 +52,33 @@ variable "prodlogin" {
   description  = "Is this deployment production"
   type        = bool
 }
+
+variable "expected_idp_name" {
+  description = "Cognito IdP provider name to link (must match the IdP name in the pool)"
+  type        = string
+  default     = "SNOMEDINTERNATIONAL"
+}
+
+variable "require_verified_email" {
+  description = "Only link when email_verified is true"
+  type        = bool
+  default     = true
+}
+
+variable "snomed_idp_url" {
+  description = "SI Keycloak URL"
+  type        = string
+}
+
+variable "snomed_client_secret" {
+  description = "SI OAuth2 Client Secret"
+  type        = string
+  sensitive   = true
+}
+
+variable "snomed_client_id" {
+  description = "SI OAuth2 Client ID"
+  type        = string
+  sensitive   = true
+}
+

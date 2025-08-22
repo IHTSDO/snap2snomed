@@ -4,6 +4,10 @@ terraform {
       source  = "hashicorp/aws"
       version = "4.58.0"
     }
+    archive = {
+      source = "hashicorp/archive"
+      version = ">= 2.3.0"
+    }
   }
   backend "remote" {
     organization = "CSIRO"
@@ -90,6 +94,9 @@ module "cognito" {
   cognito_image        = var.cognito_image
   dex_client_secret    = var.dex_client_secret
   prodlogin            = var.prodlogin
+  snomed_idp_url       = var.snomed_idp_url
+  snomed_client_secret  = var.snomed_oidc_client_secret
+  snomed_client_id      = var.snomed_oidc_client_id
 }
 
 module "lambda-promtail" {

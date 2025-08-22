@@ -279,3 +279,21 @@ variable "db_log_level" {
   type        = string
   default     = "INFO"
 }
+
+variable "snomed_oidc_client_secret" {
+  description = "SI OAuth2 Client Secret"
+  type        = string
+  sensitive   = true
+}
+
+variable "snomed_oidc_client_id" {
+  description = "SI OAuth2 Client ID"
+  type        = string
+  sensitive   = true
+}
+
+variable "snomed_idp_url" {
+  description = "SI Keycloak URL"
+  type        = string
+  default     = "https://dev-snoauth.ihtsdotools.org/realms/snomed"
+}
