@@ -18,12 +18,31 @@ function hasLinkedProvider(user) {
   }
 }
 
+const expectedLc = EXPECTED_IDP_NAME.toLowerCase();
+
 export const handler = async (event) => {
   console.log("triggerSource:", event.triggerSource);
   if (event.triggerSource !== "PreSignUp_ExternalProvider") {
     console.log("Skip: not external-provider path");
     return event;
   }
+
+  let providerFromEvent = null;
+  try {
+    const raw = event.request?.userAttributes?.identities;
+    if (raw) {
+      const arr = JSON.parse(raw);
+      providerFromEvent = (arr[0]?.providerName || "").toLowerCase();
+    }
+  } catch {}
+  if (!providerFromEvent && typeof event.userName === "string" && event.userName.includes("_")) {
+    providerFromEvent = event.userName.split("_", 1)[0].toLowerCase();
+  }
+  if (providerFromEvent && providerFromEvent !== expectedLc) {
+    console.log(`Skip first provider login: provider ${providerFromEvent} != ${expectedLc}`);
+    return event;
+  }
+
 
   const poolId = event.userPoolId;
   const attrs = event.request?.userAttributes ?? {};
@@ -34,14 +53,14 @@ export const handler = async (event) => {
   let ids = [];
   try {
     ids = attrs.identities ? JSON.parse(attrs.identities) : [];
-    incoming = ids.find(i => (i.providerName || "").toLowerCase() === EXPECTED_IDP_NAME.toLowerCase()) || {};
+    incoming = ids.find(i => (i.providerName || "").toLowerCase() === expectedLc) || {};
   } catch {
     console.log(`Failed to parse incoming identities: ${attrs.identities}`);
   }
 
   if (!incoming.userId && typeof event.userName === "string" && event.userName.includes("_")) {
     const [prov, ...rest] = event.userName.split("_");
-    if ((prov || "").toLowerCase() === EXPECTED_IDP_NAME.toLowerCase()) {
+    if ((prov || "").toLowerCase() === expectedLc) {
       incoming = { providerName: prov, userId: rest.join("_") };
     }
   }
