@@ -20,8 +20,9 @@ resource "aws_lambda_function" "pre_signup" {
 
   environment {
     variables = {
-      EXPECTED_IDP_NAME      = var.expected_idp_name       # e.g. "keycloak"
-      REQUIRE_VERIFIED_EMAIL = var.require_verified_email ? "true" : "false"
+      EXPECTED_IDP_NAME        = var.expected_idp_name
+      EXPECTED_SNOMED_IDP_NAME = var.expected_snomed_idp_name
+      REQUIRE_VERIFIED_EMAIL   = var.require_verified_email ? "true" : "false"
     }
   }
 }

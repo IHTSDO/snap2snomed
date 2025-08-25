@@ -59,6 +59,12 @@ variable "expected_idp_name" {
   default     = "SNOMEDINTERNATIONAL"
 }
 
+variable "expected_snomed_idp_name" {
+  description = "Cognito IdP provider name to link (must match the IdP name in the pool)"
+  type        = string
+  default     = "SNOMED"
+}
+
 variable "require_verified_email" {
   description = "Only link when email_verified is true"
   type        = bool
