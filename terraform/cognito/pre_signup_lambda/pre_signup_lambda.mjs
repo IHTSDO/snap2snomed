@@ -19,11 +19,17 @@ function hasLinkedProvider(user) {
 }
 
 export const handler = async (event) => {
-  if (event.triggerSource !== "PreSignUp_ExternalProvider") return event;
+
+  console.log("triggerSource:", event.triggerSource);
+  if (event.triggerSource !== "PreSignUp_ExternalProvider") {
+    console.log("Skip: not external-provider path");
+    return event;
+  }
 
   const poolId = event.userPoolId;
   const attrs = event.request?.userAttributes ?? {};
   const email = (attrs.email ?? "").trim().toLowerCase();
+  console.log("incoming email:", email, "email_verified:", attrs.email_verified);
 
   // identities from incoming IdP (the *source* we want to link)
   let incoming = {};
@@ -35,7 +41,12 @@ export const handler = async (event) => {
     console.log(`Failed to parse incoming identities: ${attrs.identities}`);
   }
 
-  if (!email || !incoming.userId) return event;              // require email + IdP sub
+  console.log("incoming identities:", ids);
+
+  if (!email || !incoming.userId) {
+    console.error(`Require email and sub in the token!`);
+    return event;
+  }
   if (REQUIRE_VERIFIED_EMAIL && attrs.email_verified !== "true") return event;
 
   // Find *all* Cognito users with this email
