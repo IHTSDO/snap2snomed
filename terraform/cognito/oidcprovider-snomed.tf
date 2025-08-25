@@ -4,7 +4,7 @@ resource "aws_cognito_identity_provider" "SNOMEDINTERNATIONAL" {
   provider_type = "OIDC"
   provider_details = {
     attributes_request_method = "GET"
-    oidc_issuer               = "https://dev-snoauth.ihtsdotools.org/realms/snomed"
+    oidc_issuer               = var.snomed_idp_url
     authorize_scopes          = "profile openid email"
     client_id                 = var.snomed_client_id
     client_secret             = var.snomed_client_secret
