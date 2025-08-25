@@ -51,9 +51,11 @@ resource "aws_cognito_user_pool_client" "appclient" {
   ]
   supported_identity_providers = var.prodlogin != true ? [
         aws_cognito_identity_provider.dex.provider_name,
+        aws_cognito_identity_provider.SNOMEDINTERNATIONAL.provider_name,
         aws_cognito_identity_provider.googleoidc.provider_name,
         aws_cognito_identity_provider.AEHRC.provider_name
       ] : [
+        aws_cognito_identity_provider.SNOMEDINTERNATIONAL.provider_name,
         aws_cognito_identity_provider.dex.provider_name
       ]
 

@@ -12,7 +12,7 @@ resource "aws_lambda_function" "pre_signup" {
   function_name    = local.lambda_name
   role             = aws_iam_role.pre_signup_role.arn
   runtime          = "nodejs18.x"
-  handler          = "index.handler"                               # index.mjs exports `handler`
+  handler          = "pre_signup_lambda.handler"
   filename         = data.archive_file.pre_signup_zip.output_path
   source_code_hash = data.archive_file.pre_signup_zip.output_base64sha256
   timeout          = 10
