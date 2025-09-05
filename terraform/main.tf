@@ -80,6 +80,9 @@ module "ui" {
   host_name    = var.ui_host_name
   host_name_si = var.ui_host_name_si
   production   = var.production
+  maintenance_host_name = var.maintenance_host_name
+  maintenance_redirect_code = var.maintenance_redirect_code
+  maintenance_replace_key_with = var.maintenance_replace_key_with
 }
 
 module "cognito" {
@@ -110,4 +113,3 @@ module "lambda-promtail" {
   write_address = var.loki_url
 
 }
-

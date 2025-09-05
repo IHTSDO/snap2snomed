@@ -28,3 +28,18 @@ variable "production" {
   description = "Production boolean flag for the front end"
   type        = string
 }
+
+variable "maintenance_host_name" {
+  description = "Host name at which the Maintenance page will be accessible"
+  type        = string
+}
+
+variable "maintenance_redirect_code" {
+  description = "Maintenance page redirect code"
+  type        = string
+}
+
+variable "maintenance_replace_key_with" {
+  description = "Maintenance page url path"
+  type        = string
+}

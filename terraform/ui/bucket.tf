@@ -121,3 +121,22 @@ resource "aws_s3_bucket_object" "ui_file_static" {
   cache_control = "public, max-age=31536000"
   content_type  = lookup(local.mime_types, regex("\\.[^\\.]+$", each.value), "binary/octet-stream")
 }
+
+resource "aws_s3_bucket" "maintenance" {
+  bucket = format("%s-maintenance-bucket", replace(var.host_name, "/[.]/", "-"))
+}
+
+resource "aws_s3_bucket_website_configuration" "maintenance" {
+  bucket = aws_s3_bucket.maintenance.id
+  index_document {
+    suffix = "index.html"
+  }
+  routing_rule {
+    redirect {
+      host_name          = var.maintenance_host_name
+      protocol           = "https"
+      http_redirect_code = var.maintenance_redirect_code
+      replace_key_with   = var.maintenance_replace_key_with
+    }
+  }
+}

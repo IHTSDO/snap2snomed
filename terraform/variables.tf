@@ -297,3 +297,21 @@ variable "snomed_idp_url" {
   type        = string
   default     = "https://dev-snoauth.ihtsdotools.org/realms/snomed"
 }
+
+variable "maintenance_host_name" {
+  description = "Host name at which the Maintenance page will be accessible"
+  type        = string
+  default     = "static-web.snomedtools.org"
+}
+
+variable "maintenance_redirect_code" {
+  description = "Maintenance page redirect code"
+  type        = string
+  default     = "302"
+}
+
+variable "maintenance_replace_key_with" {
+  description = "Maintenance page url path"
+  type        = string
+  default     = "html/maint.html"
+}
