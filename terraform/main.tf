@@ -4,6 +4,10 @@ terraform {
       source  = "hashicorp/aws"
       version = "4.58.0"
     }
+    archive = {
+      source = "hashicorp/archive"
+      version = ">= 2.3.0"
+    }
   }
   backend "remote" {
     organization = "CSIRO"
@@ -76,6 +80,9 @@ module "ui" {
   host_name    = var.ui_host_name
   host_name_si = var.ui_host_name_si
   production   = var.production
+  maintenance_host_name = var.maintenance_host_name
+  maintenance_redirect_code = var.maintenance_redirect_code
+  maintenance_replace_key_with = var.maintenance_replace_key_with
 }
 
 module "cognito" {
@@ -90,6 +97,9 @@ module "cognito" {
   cognito_image        = var.cognito_image
   dex_client_secret    = var.dex_client_secret
   prodlogin            = var.prodlogin
+  snomed_idp_url       = var.snomed_idp_url
+  snomed_client_secret  = var.snomed_oidc_client_secret
+  snomed_client_id      = var.snomed_oidc_client_id
 }
 
 module "lambda-promtail" {
@@ -103,4 +113,3 @@ module "lambda-promtail" {
   write_address = var.loki_url
 
 }
-
