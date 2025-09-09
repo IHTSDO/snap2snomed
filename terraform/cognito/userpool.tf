@@ -5,7 +5,7 @@ resource "aws_cognito_user_pool" "userpool" {
   ]
   auto_verified_attributes   = [
       "email",
-  ]      
+  ]
   account_recovery_setting {
       recovery_mechanism {
           name     = "verified_email"
@@ -83,4 +83,9 @@ resource "aws_cognito_user_pool" "userpool" {
   username_configuration {
       case_sensitive = false
   }
+
+  lambda_config {
+    pre_sign_up = aws_lambda_function.pre_signup.arn
+  }
+
 }

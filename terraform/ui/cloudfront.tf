@@ -2,6 +2,10 @@ locals {
   origin_id = format("%s-ui-origin", replace(terraform.workspace == "prod" ? var.host_name_si : var.host_name, "/[.]/", "-"))
 }
 
+locals {
+  maint_origin_id = format("%s-maintenance-origin", replace(terraform.workspace == "prod" ? var.host_name_si : var.host_name, "/[.]/", "-"))
+}
+
 resource "aws_cloudfront_distribution" "ui" {
   enabled             = true
   is_ipv6_enabled     = true
@@ -18,6 +22,16 @@ resource "aws_cloudfront_distribution" "ui" {
     origin_id   = local.origin_id
     s3_origin_config {
       origin_access_identity = aws_cloudfront_origin_access_identity.ui.cloudfront_access_identity_path
+    }
+  }
+  origin {
+    domain_name = aws_s3_bucket_website_configuration.maintenance.website_endpoint
+    origin_id   = local.maint_origin_id
+    custom_origin_config {
+      http_port              = 80
+      https_port             = 443
+      origin_protocol_policy = "http-only"
+      origin_ssl_protocols   = ["TLSv1.2"]
     }
   }
   default_cache_behavior {

@@ -279,3 +279,39 @@ variable "db_log_level" {
   type        = string
   default     = "INFO"
 }
+
+variable "snomed_oidc_client_secret" {
+  description = "SI OAuth2 Client Secret"
+  type        = string
+  sensitive   = true
+}
+
+variable "snomed_oidc_client_id" {
+  description = "SI OAuth2 Client ID"
+  type        = string
+  sensitive   = true
+}
+
+variable "snomed_idp_url" {
+  description = "SI Keycloak URL"
+  type        = string
+  default     = "https://dev-snoauth.ihtsdotools.org/realms/snomed"
+}
+
+variable "maintenance_host_name" {
+  description = "Host name at which the Maintenance page will be accessible"
+  type        = string
+  default     = "static-web.snomedtools.org"
+}
+
+variable "maintenance_redirect_code" {
+  description = "Maintenance page redirect code"
+  type        = string
+  default     = "302"
+}
+
+variable "maintenance_replace_key_with" {
+  description = "Maintenance page url path"
+  type        = string
+  default     = "html/maint.html"
+}

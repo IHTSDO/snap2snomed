@@ -1,6 +1,6 @@
 resource "aws_cognito_identity_provider" "dex" {
   user_pool_id  = aws_cognito_user_pool.userpool.id
-  provider_name = "SNOMED"
+  provider_name = var.expected_snomed_idp_name
   provider_type = "OIDC"
   provider_details = {
     attributes_request_method = "GET"
