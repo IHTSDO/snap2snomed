@@ -6,6 +6,7 @@ The deployment consists of the following parts
  - A Cognito user pool, configured to external identity providers with an app client configuration
  - An RDS database
  - S3 bucket with the Snap2SNOMED front end deployed statically webpacked and hosted via CloudFront
+ - S3 bucket with maintenance page redirect set as origin in CloudFront
  - An ECS Fargate deployment of the Snap2Snomed back end
 
 Terraform stores its state in a remote Terraform server.
