@@ -44,18 +44,18 @@ resource "aws_lb_listener_certificate" "api_si" {
 }
 
 
-resource "aws_lb_listener_rule" "dex" {
-  listener_arn = aws_lb_listener.api.arn
-  condition {
-    path_pattern {
-      values = ["/idp/*"]
-    }
-  }
-  action {
-    type             = "forward"
-    target_group_arn = aws_lb_target_group.dex.arn
-  }
-}
+# resource "aws_lb_listener_rule" "dex" {
+#   listener_arn = aws_lb_listener.api.arn
+#   condition {
+#     path_pattern {
+#       values = ["/idp/*"]
+#     }
+#   }
+#   action {
+#     type             = "forward"
+#     target_group_arn = aws_lb_target_group.dex.arn
+#   }
+# }
 
 resource "aws_security_group" "api_lb" {
   name        = format("%s-AlbSecurityGroup", replace(var.host_name, "/[.]/", "-"))
@@ -79,14 +79,14 @@ resource "aws_security_group" "api_lb" {
   }
 }
 
-resource "aws_lb_target_group" "dex" {
-  port        = 5556
-  protocol    = "HTTP"
-  target_type = "ip"
-  vpc_id      = aws_vpc.api.id
-  health_check {
-    path     = "/idp/dex/.well-known/openid-configuration"
-    port     = 5556
-    protocol = "HTTP"
-  }
-}
+# resource "aws_lb_target_group" "dex" {
+#   port        = 5556
+#   protocol    = "HTTP"
+#   target_type = "ip"
+#   vpc_id      = aws_vpc.api.id
+#   health_check {
+#     path     = "/idp/dex/.well-known/openid-configuration"
+#     port     = 5556
+#     protocol = "HTTP"
+#   }
+# }
