@@ -41,7 +41,7 @@ resource "aws_security_group" "api_db" {
     from_port       = 3306
     protocol        = "tcp"
     to_port         = 3306
-    security_groups = [aws_security_group.api.id,aws_security_group.dex.id]
+    security_groups = [aws_security_group.api.id]
   }
 }
 
