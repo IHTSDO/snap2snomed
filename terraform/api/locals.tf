@@ -105,58 +105,60 @@ locals {
       value = var.identity_provider
     }
   ]
-  dex_ecs_environment = [
-        {
-          name  = "DEX_ISSUER"
-          value = format("https://%s/idp/dex", terraform.workspace == "prod" ? var.host_name_si : var.host_name)
-        },
-        {
-          name  = "DEX_REDIRECT_URIS"
-          value = jsonencode([format("%s/oauth2/idpresponse", var.auth_domain_url)])
-        },
-        {
-          name  = "DEX_CLIENT_SECRET"
-          value = var.dex_client_secret
-        },
-        {
-          name  = "DEX_CROWD_URL"
-          value = var.dex_crowd_url
-        },
-        {
-          name  = "DEX_CROWD_CLIENT_ID"
-          value = var.dex_crowd_client_id
-        },
-        {
-          name  = "DEX_CROWD_CLIENT_SECRET"
-          value = var.dex_crowd_client_secret
-        },
-        {
-          name  = "DEX_DB_NAME"
-          value = "dex_db"
-        },
-        {
-          name  = "DEX_DB_USER"
-          value = var.database_user
-        },
-        {
-          name  = "DEX_DB_PASSWD"
-          value = var.database_password
-        },
-        {
-          name  = "DEX_DB_HOST"
-          value = "${aws_rds_cluster_instance.api.endpoint}"
-        },
-        {
-          name  = "DEX_DB_PORT"
-          value = jsonencode(aws_rds_cluster_instance.api.port)
-        },
-        {
-          name  = "DEX_DB_CREATE"
-          value = "true"
-        },
-        {
-          name  = "DEX_LOG_LEVEL"
-          value = var.dex_loglevel
-        }
-  ]
+
+  # DEX Has been removed
+  # dex_ecs_environment = [
+  #       {
+  #         name  = "DEX_ISSUER"
+  #         value = format("https://%s/idp/dex", terraform.workspace == "prod" ? var.host_name_si : var.host_name)
+  #       },
+  #       {
+  #         name  = "DEX_REDIRECT_URIS"
+  #         value = jsonencode([format("%s/oauth2/idpresponse", var.auth_domain_url)])
+  #       },
+  #       {
+  #         name  = "DEX_CLIENT_SECRET"
+  #         value = var.dex_client_secret
+  #       },
+  #       {
+  #         name  = "DEX_CROWD_URL"
+  #         value = var.dex_crowd_url
+  #       },
+  #       {
+  #         name  = "DEX_CROWD_CLIENT_ID"
+  #         value = var.dex_crowd_client_id
+  #       },
+  #       {
+  #         name  = "DEX_CROWD_CLIENT_SECRET"
+  #         value = var.dex_crowd_client_secret
+  #       },
+  #       {
+  #         name  = "DEX_DB_NAME"
+  #         value = "dex_db"
+  #       },
+  #       {
+  #         name  = "DEX_DB_USER"
+  #         value = var.database_user
+  #       },
+  #       {
+  #         name  = "DEX_DB_PASSWD"
+  #         value = var.database_password
+  #       },
+  #       {
+  #         name  = "DEX_DB_HOST"
+  #         value = "${aws_rds_cluster_instance.api.endpoint}"
+  #       },
+  #       {
+  #         name  = "DEX_DB_PORT"
+  #         value = jsonencode(aws_rds_cluster_instance.api.port)
+  #       },
+  #       {
+  #         name  = "DEX_DB_CREATE"
+  #         value = "true"
+  #       },
+  #       {
+  #         name  = "DEX_LOG_LEVEL"
+  #         value = var.dex_loglevel
+  #       }
+  # ]
 }
