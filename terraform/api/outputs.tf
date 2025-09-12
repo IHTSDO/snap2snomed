@@ -13,6 +13,7 @@ output "api_log_group_name" {
   description = "API Log Group name"
 }
 
+# We will keep old DEX Logs
 output "dex_log_group_name" {
   value       =  aws_cloudwatch_log_group.dex.name
   description = "DEX Log Group name"
