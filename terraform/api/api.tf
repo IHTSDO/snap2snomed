@@ -1,5 +1,9 @@
 resource "aws_ecs_cluster" "api" {
   name               = replace(var.host_name, "/[.]/", "-")
+}
+
+resource "aws_ecs_cluster_capacity_providers" "api" {
+  cluster_name = aws_ecs_cluster.api.name
   capacity_providers = ["FARGATE"]
 }
 
