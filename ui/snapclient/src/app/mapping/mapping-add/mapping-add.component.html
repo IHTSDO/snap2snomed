@@ -114,7 +114,7 @@
                       required></textarea>
             <mat-error
               *ngIf="formGroup.controls.toScope.invalid || formGroup.controls.toScope.hasError('maxlength')">{{ 'MAP.TARGET_SCOPE_ERROR' | translate }}</mat-error>
-            <a href="https://confluence.ihtsdotools.org/x/lT3oBg" target="_blank">{{ 'MAP.ECL_HELP' | translate }}</a>
+            <a href="https://docs.snomed.org/snomed-ct-specifications/snomed-ct-expression-constraint-language/appendices/appendix-d-ecl-quick-reference" target="_blank">{{ 'MAP.ECL_HELP' | translate }}</a>
             <mat-hint align="end">
               {{mappingModel.toScope?.length || 0}}/{{MAX_TARGETSCOPE}}
             </mat-hint>
