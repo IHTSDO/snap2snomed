@@ -23,7 +23,25 @@ resource "aws_ecs_task_definition" "api" {
     },
     environment = [
       for variable in local.api_ecs_environment : variable
-      if variable.value != "" 
+      if variable.value != ""
+    ],
+    secrets = [
+      {
+        name      = "spring.datasource.username"
+        valueFrom = "${aws_secretsmanager_secret.app_secrets.arn}:database_username::"
+      },
+      {
+        name      = "spring.datasource.password"
+        valueFrom = "${aws_secretsmanager_secret.app_secrets.arn}:database_password::"
+      },
+      {
+        name      = "snap2snomed.security.clientId"
+        valueFrom = "${aws_secretsmanager_secret.app_secrets.arn}:client_id::"
+      },
+      {
+        name      = "sentry.dsn"
+        valueFrom = "${aws_secretsmanager_secret.app_secrets.arn}:sentry_dsn::"
+      }
     ]
     logConfiguration = {
       logDriver = "awslogs",
@@ -100,6 +118,7 @@ data "aws_iam_policy_document" "api" {
     ]
     resources = [
       aws_secretsmanager_secret.api.arn,
+      aws_secretsmanager_secret.app_secrets.arn,
       aws_kms_key.api.arn,
       aws_cloudwatch_log_group.api.arn,
       "${aws_cloudwatch_log_group.api.arn}:log-stream:*"
@@ -129,6 +148,22 @@ resource "aws_secretsmanager_secret_version" "api" {
   secret_string = jsonencode({
     username = var.registry_username,
     password = var.registry_password
+  })
+}
+
+resource "aws_secretsmanager_secret" "app_secrets" {
+  name                    = format("%s-AppSecrets", replace(var.host_name, "/[.]/", "-"))
+  kms_key_id              = aws_kms_key.api.id
+  recovery_window_in_days = 0
+}
+
+resource "aws_secretsmanager_secret_version" "app_secrets" {
+  secret_id = aws_secretsmanager_secret.app_secrets.id
+  secret_string = jsonencode({
+    database_username = var.database_user,
+    database_password = var.database_password,
+    client_id         = var.client_id,
+    sentry_dsn        = var.sentry_dsn
   })
 }
 

@@ -83,6 +83,7 @@ variable "application_version" {
 variable "sentry_dsn" {
   description = "DSN to raise errors with Sentry"
   type        = string
+  sensitive   = true
 }
 
 variable "sentry_environment" {
