@@ -28,11 +28,11 @@ resource "aws_ecs_task_definition" "api" {
     secrets = [
       {
         name      = "spring.datasource.username"
-        valueFrom = "${aws_secretsmanager_secret.app_secrets.arn}:database_username::"
+        valueFrom = "${aws_rds_cluster.api.master_user_secret[0].secret_arn}:username::"
       },
       {
         name      = "spring.datasource.password"
-        valueFrom = "${aws_secretsmanager_secret.app_secrets.arn}:database_password::"
+        valueFrom = "${aws_rds_cluster.api.master_user_secret[0].secret_arn}:password::"
       },
       {
         name      = "snap2snomed.security.clientId"
@@ -119,6 +119,7 @@ data "aws_iam_policy_document" "api" {
     resources = [
       aws_secretsmanager_secret.api.arn,
       aws_secretsmanager_secret.app_secrets.arn,
+      aws_rds_cluster.api.master_user_secret[0].secret_arn,
       aws_kms_key.api.arn,
       aws_cloudwatch_log_group.api.arn,
       "${aws_cloudwatch_log_group.api.arn}:log-stream:*"
@@ -160,10 +161,8 @@ resource "aws_secretsmanager_secret" "app_secrets" {
 resource "aws_secretsmanager_secret_version" "app_secrets" {
   secret_id = aws_secretsmanager_secret.app_secrets.id
   secret_string = jsonencode({
-    database_username = var.database_user,
-    database_password = var.database_password,
-    client_id         = var.client_id,
-    sentry_dsn        = var.sentry_dsn
+    client_id  = var.client_id,
+    sentry_dsn = var.sentry_dsn
   })
 }
 

@@ -6,7 +6,8 @@ resource "aws_rds_cluster" "api" {
   backup_retention_period         = var.database_backup_retention_period
   database_name                   = replace(var.host_name, "/[.]/", "")
   master_username                 = var.database_user
-  master_password                 = var.database_password
+  manage_master_user_password     = true
+  master_user_secret_kms_key_id   = aws_kms_key.api.id
   db_subnet_group_name            = aws_db_subnet_group.api.name
   vpc_security_group_ids          = [aws_security_group.api_db.id,aws_security_group.jumpbox_db.id]
   final_snapshot_identifier       = "ci-aurora-cluster-backup-final"
