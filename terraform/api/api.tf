@@ -28,11 +28,11 @@ resource "aws_ecs_task_definition" "api" {
     secrets = [
       {
         name      = "spring.datasource.username"
-        valueFrom = "${aws_rds_cluster.api.master_user_secret[0].secret_arn}:username::"
+        valueFrom = "${try(aws_rds_cluster.api.master_user_secret[0].secret_arn, "")}:username::"
       },
       {
         name      = "spring.datasource.password"
-        valueFrom = "${aws_rds_cluster.api.master_user_secret[0].secret_arn}:password::"
+        valueFrom = "${try(aws_rds_cluster.api.master_user_secret[0].secret_arn, "")}:password::"
       },
       {
         name      = "snap2snomed.security.clientId"
@@ -116,14 +116,14 @@ data "aws_iam_policy_document" "api" {
       "logs:CreateLogStream",
       "logs:PutLogEvents"
     ]
-    resources = [
+    resources = compact([
       aws_secretsmanager_secret.api.arn,
       aws_secretsmanager_secret.app_secrets.arn,
-      aws_rds_cluster.api.master_user_secret[0].secret_arn,
+      try(aws_rds_cluster.api.master_user_secret[0].secret_arn, null),
       aws_kms_key.api.arn,
       aws_cloudwatch_log_group.api.arn,
       "${aws_cloudwatch_log_group.api.arn}:log-stream:*"
-    ]
+    ])
   }
 }
 

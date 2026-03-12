@@ -17,6 +17,7 @@ resource "aws_rds_cluster" "api" {
 }
 
 resource "aws_secretsmanager_secret_rotation" "db" {
+  count              = length(aws_rds_cluster.api.master_user_secret) > 0 ? 1 : 0
   secret_id          = aws_rds_cluster.api.master_user_secret[0].secret_arn
   rotate_immediately = false
 
