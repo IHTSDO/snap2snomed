@@ -5,6 +5,7 @@ resource "aws_acm_certificate" "ui" {
   lifecycle {
     create_before_destroy = true
   }
+  count = terraform.workspace == "prod" ? 0 : 1
 }
 
 resource "aws_acm_certificate" "ui_si" {
