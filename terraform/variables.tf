@@ -40,11 +40,6 @@ variable "api_memory" {
   default     = 8192
 }
 
-variable "api_database_password" {
-  description = "Password for accessing the database"
-  type        = string
-  sensitive   = true
-}
 
 variable "domain" {
   description = "Second-level domain used for the zone"

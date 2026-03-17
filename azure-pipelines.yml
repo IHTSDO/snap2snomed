@@ -13,7 +13,7 @@ pool:
 variables:
   mavenCache: $(Pipeline.Workspace)/.m2/repository
   mavenOptions: '-Dmaven.repo.local=$(mavenCache)'
-  trivyVersion: 0.27.1
+  trivyVersion: 0.69.3
 
 stages:
   - stage: build
