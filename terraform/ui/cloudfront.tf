@@ -13,7 +13,7 @@ resource "aws_cloudfront_distribution" "ui" {
   default_root_object = "index.html"
   aliases             = [terraform.workspace == "prod" ? var.host_name_si : var.host_name]
   viewer_certificate {
-    acm_certificate_arn      = terraform.workspace == "prod" ? aws_acm_certificate.ui_si[0].arn : aws_acm_certificate_validation.ui.certificate_arn
+    acm_certificate_arn      = terraform.workspace == "prod" ? aws_acm_certificate.ui_si[0].arn : aws_acm_certificate_validation.ui[0].certificate_arn
     minimum_protocol_version = "TLSv1.2_2019"
     ssl_support_method       = "sni-only"
   }
