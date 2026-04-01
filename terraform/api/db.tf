@@ -16,7 +16,7 @@ resource "aws_rds_cluster" "api" {
   final_snapshot_identifier       = "ci-aurora-cluster-backup-final"
 
   lifecycle {
-    prevent_destroy = false
+    prevent_destroy = true
     ignore_changes  = [engine_version]
   }
 }
