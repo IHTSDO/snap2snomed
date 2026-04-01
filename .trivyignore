@@ -31,4 +31,4 @@ CVE-2024-38819
 CVE-2025-22235
 
 # Bug should not affect our application. Need to upgrade spring-boot to get a fix
- CVE-2025-41249
+CVE-2025-41249
