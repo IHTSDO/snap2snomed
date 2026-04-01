@@ -5,6 +5,7 @@ resource "aws_acm_certificate" "ui" {
   lifecycle {
     create_before_destroy = true
   }
+  count = terraform.workspace == "prod" ? 0 : 1
 }
 
 resource "aws_acm_certificate" "ui_si" {
@@ -18,13 +19,13 @@ resource "aws_acm_certificate" "ui_si" {
 }
 
 resource "aws_route53_record" "ui_validation" {
-  for_each = {
-    for dvo in aws_acm_certificate.ui.domain_validation_options : dvo.domain_name => {
+  for_each = length(aws_acm_certificate.ui) > 0 ? {
+    for dvo in aws_acm_certificate.ui[0].domain_validation_options : dvo.domain_name => {
       name   = dvo.resource_record_name
       record = dvo.resource_record_value
       type   = dvo.resource_record_type
     }
-  }
+  } : {}
   allow_overwrite = true
   name            = each.value.name
   records         = [each.value.record]
@@ -34,7 +35,8 @@ resource "aws_route53_record" "ui_validation" {
 }
 
 resource "aws_acm_certificate_validation" "ui" {
+  count                   = length(aws_acm_certificate.ui)
   provider                = aws.us-east-1
-  certificate_arn         = aws_acm_certificate.ui.arn
+  certificate_arn         = aws_acm_certificate.ui[0].arn
   validation_record_fqdns = [for record in aws_route53_record.ui_validation : record.fqdn]
 }

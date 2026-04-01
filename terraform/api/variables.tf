@@ -44,11 +44,6 @@ variable "database_user" {
   default     = "snap2snomed"
 }
 
-variable "database_password" {
-  description = "Password for accessing the database"
-  type        = string
-  sensitive   = true
-}
 
 variable "zone_id" {
   description = "Route 53 zone ID"
@@ -83,6 +78,7 @@ variable "application_version" {
 variable "sentry_dsn" {
   description = "DSN to raise errors with Sentry"
   type        = string
+  sensitive   = true
 }
 
 variable "sentry_environment" {
