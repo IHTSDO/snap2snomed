@@ -1,7 +1,7 @@
 resource "aws_rds_cluster" "api" {
   cluster_identifier              = replace(var.host_name, "/[.]/", "-")
   engine                          = "aurora-mysql"
-  engine_version                  = "8.0.mysql_aurora.3.08.2"
+  engine_version                  = "8.0.mysql_aurora.3.10.3"
   db_cluster_parameter_group_name = aws_rds_cluster_parameter_group.snapdbcluster.id
   backup_retention_period         = var.database_backup_retention_period
   database_name                   = replace(var.host_name, "/[.]/", "")
@@ -9,13 +9,17 @@ resource "aws_rds_cluster" "api" {
   manage_master_user_password     = true
   master_user_secret_kms_key_id   = aws_kms_key.api.id
   db_subnet_group_name            = aws_db_subnet_group.api.name
-  vpc_security_group_ids          = [aws_security_group.api_db.id,aws_security_group.jumpbox_db.id]
+  vpc_security_group_ids          = [
+    aws_security_group.api_db.id,
+    aws_security_group.jumpbox_db.id
+  ]
   final_snapshot_identifier       = "ci-aurora-cluster-backup-final"
+
   lifecycle {
     prevent_destroy = false
+    ignore_changes  = [engine_version]
   }
 }
-
 
 resource "aws_rds_cluster_instance" "api" {
   cluster_identifier      = aws_rds_cluster.api.id
