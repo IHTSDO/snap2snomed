@@ -13,8 +13,8 @@
           <button class="relationship-add-button" color="any" mat-icon-button (click)="addFocusTarget(relationship)"
                   [disabled]="disableActions || !selectedSearchItem || addingTarget">
             <span class="relationship-add-button-icon">
-              <mat-progress-spinner *ngIf="addingTarget" diameter="20" mode="indeterminate"></mat-progress-spinner>
-              <mat-icon *ngIf="!addingTarget">add</mat-icon>
+              <mat-progress-spinner *ngIf="addingTarget && addingTargetRelationship === relationship" diameter="20" mode="indeterminate"></mat-progress-spinner>
+              <mat-icon *ngIf="!addingTarget || addingTargetRelationship !== relationship">add</mat-icon>
             </span>
           </button>
           <span>{{'RELATIONSHIP.' + relationship | translate}}</span>
