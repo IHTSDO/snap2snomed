@@ -31,4 +31,22 @@ CVE-2024-38819
 CVE-2025-22235
 
 # Bug should not affect our application. Need to upgrade spring-boot to get a fix
- CVE-2025-41249
+CVE-2025-41249
+
+### This needs to be removed after terraform state update
+# libpng (OS package)
+CVE-2026-33416
+CVE-2026-33636
+
+# HAPI FHIR
+CVE-2026-33180
+CVE-2026-34359
+
+# Tomcat
+CVE-2026-24734
+
+# Spring Boot Actuator
+CVE-2026-22733
+
+# Spring Security
+CVE-2026-22732

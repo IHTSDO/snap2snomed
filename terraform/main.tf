@@ -2,7 +2,7 @@ terraform {
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = "4.58.0"
+      version = "~> 5.0"
     }
     archive = {
       source = "hashicorp/archive"
@@ -36,7 +36,6 @@ module "api" {
   registry_password                = var.api_registry_password
   cpu                              = var.api_cpu
   memory                           = var.api_memory
-  database_password                = var.api_database_password
   zone_id                          = data.aws_route53_zone.app.zone_id
   host_name                        = var.api_host_name
   host_name_si                     = var.api_host_name_si

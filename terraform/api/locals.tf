@@ -17,28 +17,12 @@ locals {
       value = "org.hibernate.dialect.MariaDBDialect"
     },
     {
-      name  = "spring.datasource.username",
-      value = aws_rds_cluster.api.master_username
-    },
-    {
-      name  = "spring.datasource.password",
-      value = var.database_password
-    },
-    {
-      name  = "snap2snomed.security.clientId",
-      value = var.client_id
-    },
-    {
       name  = "spring.security.oauth2.resourceserver.jwt.issuer-uri",
       value = "https://${var.jwt_issuer-uri}"
     },
     {
       name  = "snap2snomed.swagger.applicationVersion",
       value = var.application_version
-    },
-    {
-      name  = "sentry.dsn",
-      value = var.sentry_dsn
     },
     {
       name  = "sentry.environment",
