@@ -59,6 +59,8 @@ export class TargetRelationshipComponent implements OnInit {
   @Output() flagEvent = new EventEmitter<MapView>();
   @Output() noReplacementEvent = new EventEmitter<MapView>();
 
+  addingTarget = false;
+
   writeDisableUtils = WriteDisableUtils;
   toMapRowStatus = toMapRowStatus;
 
@@ -75,7 +77,7 @@ export class TargetRelationshipComponent implements OnInit {
 
   ngOnInit(): void {
     const self = this;
-    self.selectionService.subscribe({
+    self.selectionService.subscribeWithCurrent({
       next: (value: any) => {
         self.selectedSearchItem = value;
       }
@@ -155,6 +157,7 @@ export class TargetRelationshipComponent implements OnInit {
 
   addSelection(code: string, display: string, system: string, relationship: string): void {
     const self = this;
+    self.addingTarget = true;
 
     self.fhirService.getEnglishFsn(code, system, self.task?.mapping?.toVersion || '').subscribe(englishFsn => {
       let displayTerm = display;
@@ -177,6 +180,7 @@ export class TargetRelationshipComponent implements OnInit {
         }
       }
 
+      self.addingTarget = false;
     });
   }
 
