@@ -108,6 +108,7 @@
           </mat-card-header>
           <mat-card-content>
             <app-target-relationship [task]="task" [targetRows]="mapRows" [source]="getSource()" [sourceNavSet]="selectedRowset"
+                                     [savingRelationship]="savingRelationship"
                                      (newTargetEvent)="saveTarget($event)"
                                      [disableActions]="isEditDisabled()"
                                      [disableFlagging]="writeDisableUtils.isFlaggingDisabled(this.task?.type, toMapRowStatus(source.status))"

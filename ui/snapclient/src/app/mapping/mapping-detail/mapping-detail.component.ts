@@ -23,6 +23,7 @@ import {ErrorInfo} from '../../errormessage/errormessage.component';
 import {MapService} from '../../_services/map.service';
 import {
   MapRow,
+  MapRowRelationship,
   MapRowStatus,
   mapRowStatusToIconName,
   MapView,
@@ -91,6 +92,7 @@ export class MappingDetailComponent implements OnInit, OnDestroy {
   writeDisableUtils = WriteDisableUtils;
 
   currentSelection: any;
+  savingRelationship: MapRowRelationship | null = null;
 
   @Input() currentUser: User | null = null;
   @Input() task: Task | undefined;
@@ -338,6 +340,7 @@ export class MappingDetailComponent implements OnInit, OnDestroy {
     $event.rowId = self.rowId ?? '';
     const mapView = $event;
     if (mapView.targetId === '' || mapView.hasChanged()) {
+      self.savingRelationship = (mapView.relationship as MapRowRelationship) ?? null;
       const targetRow = new TargetRow(
         mapView.rowId,
         mapView.targetId, mapView.targetCode, mapView.targetDisplay,
@@ -353,8 +356,10 @@ export class MappingDetailComponent implements OnInit, OnDestroy {
             self.updateStatus(mapView.status as MapRowStatus);
           }
           this.targetChangedService.changeTarget(targetRow);
+          self.savingRelationship = null;
         },
         (err) => this.translate.get('ERROR.TARGETS_NOT_SAVED').subscribe((msg) => {
+          self.savingRelationship = null;
           this.error.message = msg;
         })
       );
