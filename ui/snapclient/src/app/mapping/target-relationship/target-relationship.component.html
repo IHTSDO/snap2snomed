@@ -11,10 +11,10 @@
                 (onDroppableComplete)="onDrop($event, relationship)">
         <mat-card-title>
           <button class="relationship-add-button" color="any" mat-icon-button (click)="addFocusTarget(relationship)"
-                  [disabled]="disableActions || !selectedSearchItem || addingTarget">
+                  [disabled]="disableActions || !selectedSearchItem || addingTargetRelationship !== null || savingRelationship !== null">
             <span class="relationship-add-button-icon">
-              <mat-progress-spinner *ngIf="addingTarget && addingTargetRelationship === relationship" diameter="20" mode="indeterminate"></mat-progress-spinner>
-              <mat-icon *ngIf="!addingTarget || addingTargetRelationship !== relationship">add</mat-icon>
+              <mat-progress-spinner *ngIf="addingTargetRelationship === relationship || savingRelationship === relationship" diameter="20" mode="indeterminate"></mat-progress-spinner>
+              <mat-icon *ngIf="!(addingTargetRelationship === relationship || savingRelationship === relationship)">add</mat-icon>
             </span>
           </button>
           <span>{{'RELATIONSHIP.' + relationship | translate}}</span>
