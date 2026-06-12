@@ -50,3 +50,12 @@ CVE-2026-22733
 
 # Spring Security
 CVE-2026-22732
+
+# Hibernate: Information disclosure and data deletion via second-order SQL injection
+# No fixed version available. Will be resolved as part of Spring Boot 2→3/4 migration planned shortly
+CVE-2026-0603
+
+# Spring Boot: Arbitrary code execution and session hijacking
+# Fix requires Spring Boot 3.5.14 or 4.0.6 — planned shortly
+# also low risk
+CVE-2026-40973
