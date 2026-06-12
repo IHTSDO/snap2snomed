@@ -62,7 +62,7 @@ public class Snap2snomedConfiguration {
   String userGuideUrl = "http://snomed.org/s2sug";
 
   @URL
-  String termsOfServiceUrl = "https://conf.spaces.snomed.org/wiki/spaces/IT/pages/133139436/Terms+of+Service";
+  String termsOfServiceUrl = "https://docs.snomed.org/snomed-ct-user-guides/snap2snomed-user-guide/introduction/terms-of-service";
 
   @URL
   String privacyPolicyUrl = "https://www.iubenda.com/privacy-policy/46600952";
