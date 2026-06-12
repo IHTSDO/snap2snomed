@@ -36,7 +36,6 @@ import org.snomed.snap2snomed.controller.dto.MappedRowDetailsDto;
 import org.snomed.snap2snomed.controller.dto.Snap2SnomedPagedModel;
 import org.snomed.snap2snomed.model.AdditionalCodeColumn;
 import org.snomed.snap2snomed.model.DbMapView;
-import org.snomed.snap2snomed.model.Map;
 import org.snomed.snap2snomed.model.MapRow;
 import org.snomed.snap2snomed.model.MapRowTarget;
 import org.snomed.snap2snomed.model.MapView;
@@ -453,7 +452,7 @@ public class MapViewService {
   }
 
   public String getFileNameForMapExport(Long mapId, String contentType) {
-    final Map map = mapRepository.findById(mapId).orElseThrow(() -> Problem.valueOf(Status.NOT_FOUND, "No Map found with id " + mapId));
+    final org.snomed.snap2snomed.model.Map map = mapRepository.findById(mapId).orElseThrow(() -> Problem.valueOf(Status.NOT_FOUND, "No Map found with id " + mapId));
     String extension;
     switch (contentType) {
       case MapViewRestController.TEXT_TSV:
@@ -522,7 +521,7 @@ public class MapViewService {
   }
 
   public List<MapView> getAllMapViewForMap(Long mapId) {
-    final Map map = mapRepository.findById(mapId).orElseThrow(() -> Problem.valueOf(Status.NOT_FOUND, "No Map found with id " + mapId));
+    final org.snomed.snap2snomed.model.Map map = mapRepository.findById(mapId).orElseThrow(() -> Problem.valueOf(Status.NOT_FOUND, "No Map found with id " + mapId));
     Boolean dualMapMode = map.getProject().getDualMapMode();
     if (dualMapMode) {
       return getDualMapQueryForMap(mapId, null, null, null).fetch();
@@ -538,7 +537,7 @@ public class MapViewService {
     final List<AdditionalCodeColumn> additionalColumns = mapRepository.findSourceByMapId(mapId).get()
         .getAdditionalColumnsMetadata();
 
-    final Map map = mapRepository.findById(mapId)
+    final org.snomed.snap2snomed.model.Map map = mapRepository.findById(mapId)
         .orElseThrow(() -> Problem.valueOf(Status.NOT_FOUND, "No Map found with id " + mapId));
     Boolean dualMapMode = map.getProject().getDualMapMode();
 
