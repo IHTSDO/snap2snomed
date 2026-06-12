@@ -51,7 +51,7 @@
     <hamcrest-date.version>2.0.8</hamcrest-date.version>
     <hapi.version>6.6.2</hapi.version>
     <spring-security-core.version>6.5.4</spring-security-core.version>
-    <spring-core.version>5.3.29</spring-core.version>
+    <spring-core.version>5.3.34</spring-core.version>
     <snomed-utilities.version>2.1.0</snomed-utilities.version>
   </properties>
 
@@ -76,8 +76,7 @@
       <dependency>
         <groupId>org.apache.tomcat.embed</groupId>
         <artifactId>tomcat-embed-core</artifactId>
-        <!--<version>9.0.91</version>--><!-- force version for CVE-2024-34750; remove when spring-boot-starter-web transitive dependency updates to this (currently 9.0.83)-->
-        <version>9.0.117</version><!-- force version for CVE-2024-50379 and CVE-2024-56337 --> <!-- force version for CVE-2025-24813 --> <!-- force version for CVE-2025-48988 -->
+        <version>9.0.118</version><!-- force version for CVE-2024-34750; remove when spring-boot-starter-web transitive dependency updates to this (currently 9.0.83)-->
       </dependency>
       <dependency>
         <groupId>org.springframework.security</groupId>
@@ -92,17 +91,17 @@
       <dependency>
           <groupId>ca.uhn.hapi.fhir</groupId>
           <artifactId>hapi-fhir-structures-r4</artifactId>
-          <version>6.4.0</version> <!-- force version for CVE-2024-51132, CVE-2024-52007, CVE-2024-45294; remove when hapi-fhir-structures-r4 updates this (currently 6.0.1) -->
+          <version>${hapi.version}</version>
       </dependency>
       <dependency>
           <groupId>ca.uhn.hapi.fhir</groupId>
           <artifactId>org.hl7.fhir.utilities</artifactId>
-          <version>6.4.0</version><!-- force version for CVE-2024-51132, CVE-2024-52007, CVE-2024-45294; remove when hapi-fhir-structures-r4 updates this (currently 6.0.1) -->
+          <version>${hapi.version}</version>
       </dependency>
       <dependency>
           <groupId>ca.uhn.hapi.fhir</groupId>
           <artifactId>org.hl7.fhir.r4</artifactId>
-          <version>6.4.0</version><!-- force version for CVE-2024-45294, CVE-2024-51132, CVE-2024-52007; remove when hapi-fhir-structures-r4 updates this (currently 6.0.1) -->
+          <version>${hapi.version}</version>
       </dependency>
       <dependency>
         <groupId>com.fasterxml.jackson.core</groupId>
