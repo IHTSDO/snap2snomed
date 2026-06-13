@@ -20,9 +20,7 @@ import java.time.Instant;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -36,6 +34,7 @@ import org.snomed.snap2snomed.controller.dto.MappedRowDetailsDto;
 import org.snomed.snap2snomed.controller.dto.Snap2SnomedPagedModel;
 import org.snomed.snap2snomed.model.AdditionalCodeColumn;
 import org.snomed.snap2snomed.model.DbMapView;
+import org.snomed.snap2snomed.model.Map;
 import org.snomed.snap2snomed.model.MapRow;
 import org.snomed.snap2snomed.model.MapRowTarget;
 import org.snomed.snap2snomed.model.MapView;
@@ -243,53 +242,27 @@ public class MapViewService {
       return "IN (" + "'" + String.join("', '", stringList) + "'" + ") ";
     }
 
-    public String getNativeExpression(boolean useDualView, Map<String, Object> params) {
+    public String getNativeExpression(boolean useDualView) {
 
       String expression = null;
-
-      if (!CollectionUtils.isEmpty(sourceCodes)) {
-        String innerExpression = null;
-        for (int i = 0; i < sourceCodes.size(); i++) {
-          String paramName = "sourceCode_" + i;
-          params.put(paramName, sourceCodes.get(i) + "%");
-          innerExpression = collectNativeQueryOrStatement(innerExpression, " importedco14_.code LIKE :" + paramName + " ");
-        }
-        expression = collectNativeQueryAndStatement(expression, innerExpression);
-      }
-
-      if (!CollectionUtils.isEmpty(sourceDisplays)) {
-        String innerExpression = null;
-        for (int i = 0; i < sourceDisplays.size(); i++) {
-          String paramName = "sourceDisplay_" + i;
-          params.put(paramName, "%" + sourceDisplays.get(i) + "%");
-          innerExpression = collectNativeQueryOrStatement(innerExpression, " importedco14_.display LIKE :" + paramName + " ");
-        }
-        expression = collectNativeQueryAndStatement(expression, innerExpression);
-      }
+        
+      expression = stringCollectionToNativeQueryOrStatements(expression, sourceCodes,
+          s -> " importedco14_.code LIKE '" + s + "%' ",
+          (a, b) -> collectNativeQueryOrStatement(a, b));
+      expression = stringCollectionToNativeQueryOrStatements(expression, sourceDisplays,
+          s -> " importedco14_.display LIKE '%" + s + "%' ",
+          (a, b) -> collectNativeQueryAndStatement(a, b));
 
       if (noMap != null) {
         expression = collectNativeQueryAndStatement(expression, " maprow15_.no_map = " + noMap);
       }
 
-      if (!CollectionUtils.isEmpty(targetCodes)) {
-        String innerExpression = null;
-        for (int i = 0; i < targetCodes.size(); i++) {
-          String paramName = "targetCode_" + i;
-          params.put(paramName, targetCodes.get(i) + "%");
-          innerExpression = collectNativeQueryOrStatement(innerExpression, " maprowtarg1_.target_code LIKE :" + paramName + " ");
-        }
-        expression = collectNativeQueryAndStatement(expression, innerExpression);
-      }
-
-      if (!CollectionUtils.isEmpty(targetDisplays)) {
-        String innerExpression = null;
-        for (int i = 0; i < targetDisplays.size(); i++) {
-          String paramName = "targetDisplay_" + i;
-          params.put(paramName, "%" + targetDisplays.get(i) + "%");
-          innerExpression = collectNativeQueryOrStatement(innerExpression, " maprowtarg1_.target_display LIKE :" + paramName + " ");
-        }
-        expression = collectNativeQueryAndStatement(expression, innerExpression);
-      }
+      expression = stringCollectionToNativeQueryOrStatements(expression, targetCodes,
+          s -> " maprowtarg1_.target_code LIKE '" + s + "%' ",
+          (a, b) -> collectNativeQueryOrStatement(a, b));
+      expression = stringCollectionToNativeQueryOrStatements(expression, targetDisplays,
+          s -> " maprowtarg1_.target_display LIKE '%" + s + "%' ",
+          (a, b) -> collectNativeQueryAndStatement(a, b));
 
       if (!CollectionUtils.isEmpty(relationshipTypes)) {
         List<String> stringRelationshipTypes = relationshipTypes.stream()
@@ -306,13 +279,11 @@ public class MapViewService {
       }
 
       if (!CollectionUtils.isEmpty(lastAuthor)) {
-        params.put("lastAuthor", lastAuthor);
-        expression = collectNativeQueryAndStatement(expression, " maprow15_.`last_author_id` IN (:lastAuthor) ");
+        expression = collectNativeQueryAndStatement(expression, " maprow15_.`last_author_id` " + getInListExpression(lastAuthor));
       }
 
       if (!CollectionUtils.isEmpty(lastReviewer)) {
-        params.put("lastReviewer", lastReviewer);
-        expression = collectNativeQueryAndStatement(expression, " maprow15_.`last_reviewer_id` IN (:lastReviewer) ");
+        expression = collectNativeQueryAndStatement(expression, " maprow15_.`last_reviewer_id` " +  getInListExpression(lastReviewer));
       }
 
       if (!CollectionUtils.isEmpty(lastAuthorReviewer)) {
@@ -320,11 +291,10 @@ public class MapViewService {
         if (lastAuthorReviewer.contains("none")) {
           noneMatch = " maprow15_.`last_author_id` IS NULL AND maprow15_.`last_reviewer_id` IS NULL ";
         }
-        params.put("lastAuthorReviewerA", lastAuthorReviewer);
-        params.put("lastAuthorReviewerB", lastAuthorReviewer);
+
         expression = collectNativeQueryAndStatement(expression,
-            collectNativeQueryOrStatement(" maprow15_.`last_author_id` IN (:lastAuthorReviewerA)" +
-            " OR maprow15_.`last_reviewer_id` IN (:lastAuthorReviewerB) ",
+            collectNativeQueryOrStatement(" maprow15_.`last_author_id` " +  getInListExpression(lastAuthorReviewer) +
+            " OR maprow15_.`last_reviewer_id` " + getInListExpression(lastAuthorReviewer),
                 noneMatch));
       }
 
@@ -333,10 +303,10 @@ public class MapViewService {
         if (assignedAuthor.contains("none")) {
           noneMatch = " assigned_author_user.id IS NULL ";
         }
-        params.put("assignedAuthor", assignedAuthor);
+
         //TODO assigned author not picking up second author .. existing issue not caused by this code
-        expression = collectNativeQueryAndStatement(expression,
-            collectNativeQueryOrStatement(" assigned_author_user.id IN (:assignedAuthor) ",
+        expression = collectNativeQueryAndStatement(expression, 
+            collectNativeQueryOrStatement(" assigned_author_user.id " + getInListExpression(assignedAuthor), 
             noneMatch));
       }
 
@@ -345,9 +315,9 @@ public class MapViewService {
         if (assignedReviewer.contains("none")) {
           noneMatch = " assigned_reviewer_user.id IS NULL ";
         }
-        params.put("assignedReviewer", assignedReviewer);
-        expression = collectNativeQueryAndStatement(expression,
-            collectNativeQueryOrStatement(" assigned_reviewer_user.id IN (:assignedReviewer) ",
+
+        expression = collectNativeQueryAndStatement(expression, 
+            collectNativeQueryOrStatement(" assigned_reviewer_user.id " + getInListExpression(assignedReviewer),
             noneMatch));
       }
 
@@ -356,15 +326,15 @@ public class MapViewService {
         if (assignedReconciler.contains("none")) {
           noneMatch = " assigned_reconciler_user.id IS NULL";
         }
-        params.put("assignedReconciler", assignedReconciler);
-        expression = collectNativeQueryAndStatement(expression,
-            collectNativeQueryOrStatement(" assigned_reconciler_user.id IN (:assignedReconciler) ",
+
+        expression = collectNativeQueryAndStatement(expression, 
+            collectNativeQueryOrStatement(" assigned_reconciler_user.id " + getInListExpression(assignedReconciler),
             noneMatch));
       }
 
       if (targetOutOfScope != null) {
         if (targetOutOfScope) {
-          expression = collectNativeQueryAndStatement(expression,
+          expression = collectNativeQueryAndStatement(expression, 
             " ('target-out-of-scope' IN (select tags7_.tags from map_row_target_tags tags7_ where maprowtarg1_.id=tags7_.map_row_target_id)) ");
         }
         else {
@@ -372,24 +342,37 @@ public class MapViewService {
         }
       }
 
+
       if (flagged != null) {
         String flagMatch = null;
         if (flagged == false) {
           flagMatch = " maprowtarg1_.flagged IS NULL ";
         }
-        expression = collectNativeQueryAndStatement(expression,
-            collectNativeQueryOrStatement(" maprowtarg1_.flagged = " + flagged + " ", flagMatch));
+
+        expression = collectNativeQueryAndStatement(expression, 
+            collectNativeQueryOrStatement(" maprowtarg1_.flagged = " + flagged + " ", flagMatch)); 
       }
 
       if (!CollectionUtils.isEmpty(additionalColumns)) {
         for (int i = 0; i < additionalColumns.size(); i++) {
           final String string = additionalColumns.get(i);
           if (!string.isEmpty()) {
-            String paramName = "additionalColumn_" + i;
-            params.put(paramName, "%" + string + "%");
-            expression = collectNativeQueryAndStatement(expression, " additionalColumn" + (i+1) + ".value LIKE :" + paramName + " ");
+            expression = collectNativeQueryAndStatement(expression, " additionalColumn" + (i+1)  + ".value LIKE '%" + string + "%' ");
           }
         }
+      }
+
+      return expression;
+    }
+
+    private String stringCollectionToNativeQueryOrStatements(String expression, List<String> stringCollection,
+        Function<String, String> function, BiFunction<String, String, String> collector) {
+      if (!CollectionUtils.isEmpty(stringCollection)) {
+        String innerExpression = null;
+        for (final String string : stringCollection) {
+          innerExpression = collector.apply(innerExpression, function.apply(string));
+        }
+        return collectNativeQueryAndStatement(expression, innerExpression);
       }
 
       return expression;
@@ -452,7 +435,7 @@ public class MapViewService {
   }
 
   public String getFileNameForMapExport(Long mapId, String contentType) {
-    final org.snomed.snap2snomed.model.Map map = mapRepository.findById(mapId).orElseThrow(() -> Problem.valueOf(Status.NOT_FOUND, "No Map found with id " + mapId));
+    final Map map = mapRepository.findById(mapId).orElseThrow(() -> Problem.valueOf(Status.NOT_FOUND, "No Map found with id " + mapId));
     String extension;
     switch (contentType) {
       case MapViewRestController.TEXT_TSV:
@@ -521,7 +504,7 @@ public class MapViewService {
   }
 
   public List<MapView> getAllMapViewForMap(Long mapId) {
-    final org.snomed.snap2snomed.model.Map map = mapRepository.findById(mapId).orElseThrow(() -> Problem.valueOf(Status.NOT_FOUND, "No Map found with id " + mapId));
+    final Map map = mapRepository.findById(mapId).orElseThrow(() -> Problem.valueOf(Status.NOT_FOUND, "No Map found with id " + mapId));
     Boolean dualMapMode = map.getProject().getDualMapMode();
     if (dualMapMode) {
       return getDualMapQueryForMap(mapId, null, null, null).fetch();
@@ -537,7 +520,7 @@ public class MapViewService {
     final List<AdditionalCodeColumn> additionalColumns = mapRepository.findSourceByMapId(mapId).get()
         .getAdditionalColumnsMetadata();
 
-    final org.snomed.snap2snomed.model.Map map = mapRepository.findById(mapId)
+    final Map map = mapRepository.findById(mapId)
         .orElseThrow(() -> Problem.valueOf(Status.NOT_FOUND, "No Map found with id " + mapId));
     Boolean dualMapMode = map.getProject().getDualMapMode();
 
@@ -610,9 +593,8 @@ public class MapViewService {
         }     
       }
 
-      Map<String, Object> filterParams = new LinkedHashMap<>();
       if (filter != null) {
-        final String filterExpression = filter.getNativeExpression(true, filterParams);
+        final String filterExpression = filter.getNativeExpression(true);
         if (filterExpression != null) {
           queryStrBuilder.append(" WHERE ").append(filterExpression);
         }
@@ -621,7 +603,6 @@ public class MapViewService {
       // TODO can this count query be simplified to potentially speed it up .. just the union itself will give the correct count
       Query totalRowCountQuery = entityManager.createNativeQuery("SELECT COUNT(*) FROM ( " + queryStrBuilder.toString() + " ) AS COUNT_ROWS");
       totalRowCountQuery.setParameter("mapId", map.getId());
-      filterParams.forEach((k, v) -> totalRowCountQuery.setParameter(k, v));
       totalRowCountQuery.toString();
       int totalRowCount = ((Number) totalRowCountQuery.getSingleResult()).intValue();
 
@@ -635,7 +616,6 @@ public class MapViewService {
 
       Query q = entityManager.createNativeQuery(queryStrBuilder.toString(), "DualMapViewResult");
       q.setParameter("mapId", map.getId());
-      filterParams.forEach((k, v) -> q.setParameter(k, v));
       q.setFirstResult((int) pageable.getOffset());
       q.setMaxResults((int) pageable.getPageSize());
 
