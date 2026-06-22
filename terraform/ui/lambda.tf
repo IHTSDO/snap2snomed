@@ -6,7 +6,7 @@ resource "aws_lambda_function" "ui" {
   filename         = "${path.module}/main.js.zip"
   handler          = "main.handler"
   source_code_hash = data.archive_file.ui.output_base64sha256
-  runtime          = "nodejs16.x"
+  runtime          = "nodejs20.x"
   publish          = true
   lifecycle {
     ignore_changes = [source_code_hash]
