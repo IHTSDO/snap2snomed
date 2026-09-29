@@ -106,6 +106,8 @@ stages:
               targetPath: '$(System.DefaultWorkingDirectory)/ui/target/site'
               artifact: 'snap2snomed-ui'
               publishLocation: 'pipeline'
+          - script: ./terraform/lambda-promtail/fetch-lambda-promtail.sh
+            displayName: Fetch lambda-promtail release
           - task: PublishPipelineArtifact@1
             inputs:
               targetPath: '$(System.DefaultWorkingDirectory)/terraform'

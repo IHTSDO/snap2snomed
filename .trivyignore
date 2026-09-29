@@ -59,3 +59,40 @@ CVE-2026-0603
 # Fix requires Spring Boot 3.5.14 or 4.0.6 — planned shortly
 # also low risk
 CVE-2026-40973
+
+### Temporary, expires 2026-12-31 (Trivy reports these again after that date).
+# HIGH/CRITICAL findings from build snap2snomed-20260928.1, accepted so the
+# lambda-promtail Terraform change can deploy. Prod already runs these library
+# versions (build of 2026-06-15). Remove when the API moves to Spring Boot 3.5
+# and the pinned libraries below are upgraded.
+# Tomcat 9.0.118, fixed in 9.0.121
+CVE-2026-65182 exp:2026-12-31
+CVE-2026-65905 exp:2026-12-31
+CVE-2026-68525 exp:2026-12-31
+# HL7 FHIR core 6.9.7, fixed in 6.9.10
+CVE-2026-55471 exp:2026-12-31
+CVE-2026-49485 exp:2026-12-31
+# Jackson core 2.21.1 and databind 2.13.5, fixed in 2.21.4 / 2.18.8
+GHSA-r7wm-3cxj-wff9 exp:2026-12-31
+CVE-2026-54512 exp:2026-12-31
+CVE-2026-54513 exp:2026-12-31
+# HttpCore5 5.1.5, fixed in 5.4.3
+CVE-2026-54399 exp:2026-12-31
+CVE-2026-54428 exp:2026-12-31
+# Spring Boot 2.7 line; fixes only in Spring Boot 3.5 or later
+# micrometer-core 1.9.17
+CVE-2026-40984 exp:2026-12-31
+# spring-data-commons 2.7.18
+CVE-2026-41716 exp:2026-12-31
+# spring-data-rest-core 3.7.18
+CVE-2026-41728 exp:2026-12-31
+CVE-2026-41729 exp:2026-12-31
+# spring-hateoas 1.5.6
+CVE-2026-41006 exp:2026-12-31
+CVE-2026-41007 exp:2026-12-31
+# spring-expression 5.3.31
+CVE-2026-41849 exp:2026-12-31
+CVE-2026-41850 exp:2026-12-31
+# spring-webmvc 5.3.31
+CVE-2026-41842 exp:2026-12-31
+CVE-2026-41845 exp:2026-12-31
