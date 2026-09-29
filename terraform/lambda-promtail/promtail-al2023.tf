@@ -1,9 +1,8 @@
 # lambda-promtail on the supported provided.al2023 runtime.
 #
-# AWS blocks updates to go1.x functions from 3 March 2027, so this function
-# replaces lambda_promtail (promtail.tf). Both run side by side until this one
-# is verified; a follow-up change then removes lambda_promtail. Loki drops the
-# exact duplicate lines while both forward the same log groups.
+# It replaced the go1.x function lambda_promtail, which AWS stops accepting
+# updates for on 3 March 2027. The IAM role and policies in promtail.tf are
+# shared with it.
 #
 # dist/lambda-promtail-v1.0.1.zip is the unmodified release asset from
 # https://github.com/grafana/lambda-promtail/releases/tag/v1.0.1. It is not in
@@ -66,8 +65,6 @@ resource "aws_lambda_permission" "lambda_promtail_al2023_allow_cloudwatch" {
   principal     = "logs.${var.aws_region}.amazonaws.com"
 }
 
-# A log group allows two subscription filters, so this one runs beside
-# lambdafunction_logfilter.
 resource "aws_cloudwatch_log_subscription_filter" "lambda_promtail_al2023" {
   for_each        = toset(var.log_groups)
   name            = "lambda_promtail_al2023_${each.value}"

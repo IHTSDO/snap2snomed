@@ -108,7 +108,7 @@ module "lambda-promtail" {
   aws_region    = var.aws_region
   username      = var.loki_username
   password      = var.loki_password
-  log_groups    = [module.api.dex_log_group_name, module.api.api_log_group_name]
+  log_groups    = [module.api.api_log_group_name]
   write_address = var.loki_url
 
 }
