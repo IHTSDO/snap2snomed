@@ -126,7 +126,12 @@
 #   }
 # }
 
-# We want to keep old dex logs
+# We want to keep old dex logs. prevent_destroy makes Terraform refuse any
+# plan that would delete this log group, including pipeline runs.
 resource "aws_cloudwatch_log_group" "dex" {
   name = format("%s-dex", replace(var.host_name, "/[.]/", "-"))
+
+  lifecycle {
+    prevent_destroy = true
+  }
 }
