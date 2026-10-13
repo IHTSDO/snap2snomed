@@ -96,3 +96,20 @@ CVE-2026-41850 exp:2026-12-31
 # spring-webmvc 5.3.31
 CVE-2026-41842 exp:2026-12-31
 CVE-2026-41845 exp:2026-12-31
+
+### Temporary, expires 2026-12-31 (Trivy reports these again after that date).
+# HIGH/CRITICAL findings from build 24323 (2026-10-02) and a local scan of
+# snap2snomed-20261002.1_main on 2026-10-13, accepted so the AL2023 jumpbox
+# and go1.x removal Terraform change can deploy. Prod already runs these
+# library versions. Remove when the API moves to Spring Boot 3.5.
+# Jackson core 2.21.1, fixed in 2.21.7. The async-parser DoS needs Jackson's
+# non-blocking parser, which the API does not use (no WebFlux).
+CVE-2026-68494 exp:2026-12-31
+CVE-2026-89407 exp:2026-12-31
+CVE-2026-89425 exp:2026-12-31
+# Jackson databind 2.13.5, fixed in 2.18.11 / 2.21.7
+CVE-2026-91776 exp:2026-12-31
+CVE-2026-91777 exp:2026-12-31
+# spring-webmvc 5.3.31 (CRITICAL), fixed only in 7.0.9. Needs XsltView; the
+# API has no XsltView, view resolver or template engine.
+CVE-2026-47884 exp:2026-12-31
