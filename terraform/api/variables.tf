@@ -159,8 +159,9 @@ variable "database_backup_retention_period" {
 }
 
 variable "jumpbox_ami_id" {
-  description = "This is the jumpbox ami ID"
+  description = "Jumpbox AMI ID. Leave null to use the latest Amazon Linux 2023 AMI in the region"
   type        = string
+  default     = null
 }
 
 variable "user_registration_url" {
