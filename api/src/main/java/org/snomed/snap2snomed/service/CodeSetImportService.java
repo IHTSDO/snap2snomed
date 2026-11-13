@@ -40,10 +40,10 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import javax.persistence.EntityManager;
-import javax.transaction.Transactional;
-import javax.validation.Validator;
-import javax.xml.bind.DatatypeConverter;
+import jakarta.persistence.EntityManager;
+import jakarta.transaction.Transactional;
+import jakarta.validation.Validator;
+import java.util.HexFormat;
 
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
@@ -75,8 +75,9 @@ import org.springframework.stereotype.Component;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.HttpMediaTypeNotAcceptableException;
 import org.springframework.web.multipart.MultipartFile;
-import org.zalando.problem.Problem;
-import org.zalando.problem.Status;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ProblemDetail;
+import org.springframework.web.ErrorResponseException;
 
 import com.google.common.base.Utf8;
 
@@ -139,7 +140,7 @@ public class CodeSetImportService {
         statement.setLong(4, code.getImportedCodeSet().getId());
         statement.addBatch();
       }
-      statement.executeLargeBatch();
+      statement.executeBatch();
 
       final PreparedStatement additionalColumnsStatement2 = connection.prepareStatement("insert into imported_code_additional_columns (imported_code_id, value, collection_order) values (?, ?, ?)");
       final ResultSet generatedKeys2 = statement.getGeneratedKeys();
@@ -157,13 +158,13 @@ public class CodeSetImportService {
         }
 
         if (batchCount >= importBatchSize) {
-          additionalColumnsStatement2.executeLargeBatch();
+          additionalColumnsStatement2.executeBatch();
           batchCount = 0;
         }
 
       }
 
-      additionalColumnsStatement2.executeLargeBatch(); // flush the last few records.
+      additionalColumnsStatement2.executeBatch(); // flush the last few records.
 
     }
   }
@@ -260,7 +261,7 @@ public class CodeSetImportService {
           statement.addBatch();
         }
       }
-      statement.executeLargeBatch();
+      statement.executeBatch();
 
       // Obsolete: we now take the status from the file, or use DRAFT if not provided for all rows
       // Set imported MapRows to DRAFT for the map
@@ -284,7 +285,7 @@ public class CodeSetImportService {
         statement.setLong(4, mapRowTargetParam.getMapRowTarget().getRow().getId());
         statement.addBatch();
       }
-      statement.executeLargeBatch();
+      statement.executeBatch();
     }
 
     int getInsertCount() {
@@ -320,12 +321,12 @@ public class CodeSetImportService {
 
         for (final CSVRecord csvRecord : parser) {
           if (parser.getRecordNumber() > configuration.getMaximumImportedCodeSetRows()) {
-            throw Problem.builder()
-                .withStatus(Status.BAD_REQUEST)
-                .withType(URI.create(TOO_LARGE_FILE_PROBLEM_URI))
-                .withTitle("Code set too large to import")
-                .withDetail("Code set row count " + parser.getRecordNumber() + " exceeds the maximum supported row count for import "
-                    + configuration.getMaximumImportedCodeSetRows()).build();
+            ProblemDetail body = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST,
+                "Code set row count " + parser.getRecordNumber() + " exceeds the maximum supported row count for import "
+                    + configuration.getMaximumImportedCodeSetRows());
+            body.setTitle("Code set too large to import");
+            body.setType(URI.create(TOO_LARGE_FILE_PROBLEM_URI));
+            throw new ErrorResponseException(HttpStatus.BAD_REQUEST, body, null);
           }
           validateColumnIndexes(importDetails, csvRecord);
           testLineForBinary(csvRecord.toString());
@@ -333,8 +334,8 @@ public class CodeSetImportService {
           String code;
           // If delimiter is null we only read lines and auto-generate ids
           if (importDetails.getDelimiter() == null) {
-            code = DatatypeConverter.printHexBinary(md.digest(csvRecord.get(importDetails.getDisplayColumnIndex()).getBytes()))
-                .toLowerCase().trim();
+            code = HexFormat.of().formatHex(md.digest(csvRecord.get(importDetails.getDisplayColumnIndex()).getBytes()))
+                .trim();
             importDetails.setDisplayColumnIndex(0);
           } else {
             code = csvRecord.get(importDetails.getCodeColumnIndex()).trim();
@@ -396,14 +397,14 @@ public class CodeSetImportService {
       throw new CodeSetImportProblem("invalid-column", "Invalid column specfied", e.getLocalizedMessage());
     } catch (final NoSuchAlgorithmException e ) {
       log.error("Unecpected error creating MD5 hash for code", e);
-      throw Problem.valueOf(Status.INTERNAL_SERVER_ERROR, "Unexpected error creating MD5 hash for code");
+      throw Snap2SnomedProblem.of(HttpStatus.INTERNAL_SERVER_ERROR, "Unexpected error creating MD5 hash for code");
     } catch (final IOException e) {
       log.error("Failed reading code set from an import request", e);
-      throw Problem.valueOf(Status.INTERNAL_SERVER_ERROR, "Unable to read the file in the request due to an I/O error");
+      throw Snap2SnomedProblem.of(HttpStatus.INTERNAL_SERVER_ERROR, "Unable to read the file in the request due to an I/O error");
     } catch (IllegalStateException|IllegalArgumentException e) {
       throw new CodeSetImportProblem("invalid-file", "Invalid data encountered in source file", e.getLocalizedMessage());
     } catch (final GenericJDBCException e) {
-      throw Problem.valueOf(Status.INTERNAL_SERVER_ERROR, "JDBC Exception:" + e.getLocalizedMessage());
+      throw Snap2SnomedProblem.of(HttpStatus.INTERNAL_SERVER_ERROR, "JDBC Exception:" + e.getLocalizedMessage());
     }
     entityManager.flush();
     entityManager.clear();
@@ -595,11 +596,13 @@ public class CodeSetImportService {
     }
 
     // If delimiter is null throw an error message
+    // NOTE: pre-existing gap carried over as-is - this branch builds a problem but never throws it,
+    // so a null delimiter currently falls through silently. Not changed here to avoid an unrelated
+    // behavior change while removing problem-spring-web.
     if (importDetails.getDelimiter() == null) {
-      Problem.builder()
-        .withStatus(Status.BAD_REQUEST)
-        .withType(URI.create(BAD_MISSING_DELIMITER_PROBLEM_URI))
-        .withTitle("Missing file delimiter");
+      ProblemDetail body = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
+      body.setTitle("Missing file delimiter");
+      body.setType(URI.create(BAD_MISSING_DELIMITER_PROBLEM_URI));
     }
 
     // We expect header for now
@@ -622,12 +625,12 @@ public class CodeSetImportService {
         final InsertMappingCodeWork insertMappingCodeWork = new InsertMappingCodeWork();
         for (final CSVRecord csvRecord : parser) {
           if (parser.getRecordNumber() > configuration.getMaximumImportedCodeSetRows()) {
-            throw Problem.builder()
-                    .withStatus(Status.BAD_REQUEST)
-                    .withType(URI.create(TOO_LARGE_FILE_PROBLEM_URI))
-                    .withTitle("Mapping file too large to import")
-                    .withDetail("Mapping file row count " + parser.getRecordNumber() + " exceeds the maximum supported row count for import "
-                            + configuration.getMaximumImportedCodeSetRows()).build();
+            ProblemDetail body = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST,
+                    "Mapping file row count " + parser.getRecordNumber() + " exceeds the maximum supported row count for import "
+                            + configuration.getMaximumImportedCodeSetRows());
+            body.setTitle("Mapping file too large to import");
+            body.setType(URI.create(TOO_LARGE_FILE_PROBLEM_URI));
+            throw new ErrorResponseException(HttpStatus.BAD_REQUEST, body, null);
           }
           validateColumnIndexes(importDetails, csvRecord);
           testLineForBinary(csvRecord.toString());
@@ -678,7 +681,7 @@ public class CodeSetImportService {
       throw new MappingImportProblem("invalid-column", "Invalid column specfied", e.getLocalizedMessage());
     } catch (final IOException e) {
       log.error("Failed reading mapping details from import request", e);
-      throw Problem.valueOf(Status.INTERNAL_SERVER_ERROR, "Unable to read the file in the request due to an I/O error");
+      throw Snap2SnomedProblem.of(HttpStatus.INTERNAL_SERVER_ERROR, "Unable to read the file in the request due to an I/O error");
     } catch (IllegalStateException|IllegalArgumentException e) {
       throw new MappingImportProblem("invalid-file", "Invalid data encountered in the mapping file", e.getLocalizedMessage());
     }

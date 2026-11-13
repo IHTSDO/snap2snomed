@@ -1,6 +1,6 @@
 <ng-container matColumnDef="id">
   <th class="table-selector-cell" mat-header-cell *matHeaderCellDef>
-    <mat-checkbox [matBadge]="getSelectedRowsCount()"
+    <mat-checkbox class="accent-checkbox select-all-badge" [matBadge]="getSelectedRowsCount()"
                   matBadgeSize="small"
                   [matBadgeHidden]="selectedRows && selectedRows.length == 0"
                   matTooltip="{{ isAllSelected ? ('SELECTION.CLEAR' | translate) : ('SELECTION.SELECT_ALL' | translate) }}"
@@ -8,7 +8,7 @@
                   [checked]="isAllSelected"
                   [indeterminate]="isIndeterminateSelectAll()">
     </mat-checkbox>
-    <mat-checkbox class="select-all-on-page" color="primary"
+    <mat-checkbox class="select-all-on-page"
                   matTooltip="{{ isPageSelected ? ('SELECTION.CLEAR_PAGE_SELECTION' | translate) : ('SELECTION.SELECT_ALL_ON_PAGE' | translate) }}"
                   (change)="$event ? selectPageToggle($event) : null"
                   [checked]="isAllSelected || isPageSelected"
@@ -17,7 +17,7 @@
     </mat-checkbox>
   </th>
   <td class="table-selector-cell" mat-cell *matCellDef="let row; let idx = index">
-    <mat-checkbox [ngClass]="{'highlight-check': !isAllSelected && isSelectionFocus(idx)}"
+    <mat-checkbox class="accent-checkbox" [ngClass]="{'highlight-check': !isAllSelected && isSelectionFocus(idx)}"
                   (click)="$event.stopPropagation(); shiftKeySelect($event, row);"
                   (change)="$event ? toggleSelection($event, row, idx) : null"
                   [checked]="isAllSelected || checkSelected(row)"

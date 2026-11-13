@@ -26,14 +26,13 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import javax.persistence.EntityManager;
-import javax.persistence.Query;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.Query;
 
 import org.snomed.snap2snomed.controller.MapViewRestController;
 import org.snomed.snap2snomed.controller.dto.MappedRowDetailsDto;
 import org.snomed.snap2snomed.controller.dto.Snap2SnomedPagedModel;
 import org.snomed.snap2snomed.model.AdditionalCodeColumn;
-import org.snomed.snap2snomed.model.DbMapView;
 import org.snomed.snap2snomed.model.Map;
 import org.snomed.snap2snomed.model.MapRow;
 import org.snomed.snap2snomed.model.MapRowTarget;
@@ -50,6 +49,7 @@ import org.snomed.snap2snomed.model.enumeration.MapStatus;
 import org.snomed.snap2snomed.model.enumeration.MappingRelationship;
 import org.snomed.snap2snomed.model.enumeration.NoteCategory;
 import org.snomed.snap2snomed.model.enumeration.TaskType;
+import org.snomed.snap2snomed.problem.Snap2SnomedProblem;
 import org.snomed.snap2snomed.problem.auth.NotAuthorisedProblem;
 import org.snomed.snap2snomed.repository.DbMapViewRepository;
 import org.snomed.snap2snomed.repository.MapRepository;
@@ -68,8 +68,7 @@ import org.springframework.hateoas.PagedModel;
 import org.springframework.hateoas.RepresentationModel;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
-import org.zalando.problem.Problem;
-import org.zalando.problem.Status;
+import org.springframework.http.HttpStatus;
 
 import com.querydsl.core.QueryResults;
 import com.querydsl.core.types.ExpressionUtils;
@@ -278,12 +277,20 @@ public class MapViewService {
         expression = collectNativeQueryAndStatement(expression, " maprow15_.status " + getInListExpression(stringStatuses));
       }
 
+      // Rows still blind (sibling not yet independently resolved) have their lastAuthor/
+      // lastReviewer nulled out for display in this exact query's results (see MapView's "dual
+      // map mode - view screen" constructor) - matching on the underlying value here without
+      // that same blind_map_flag guard would let a still-blind row appear in the filtered list
+      // with an identity the display then correctly refuses to reveal. A filter for a specific
+      // (or "none") last author/reviewer should only ever match rows where that's actually shown.
       if (!CollectionUtils.isEmpty(lastAuthor)) {
-        expression = collectNativeQueryAndStatement(expression, " maprow15_.`last_author_id` " + getInListExpression(lastAuthor));
+        expression = collectNativeQueryAndStatement(expression,
+            " map_view.blind_map_flag = false AND maprow15_.`last_author_id` " + getInListExpression(lastAuthor));
       }
 
       if (!CollectionUtils.isEmpty(lastReviewer)) {
-        expression = collectNativeQueryAndStatement(expression, " maprow15_.`last_reviewer_id` " +  getInListExpression(lastReviewer));
+        expression = collectNativeQueryAndStatement(expression,
+            " map_view.blind_map_flag = false AND maprow15_.`last_reviewer_id` " +  getInListExpression(lastReviewer));
       }
 
       if (!CollectionUtils.isEmpty(lastAuthorReviewer)) {
@@ -293,20 +300,24 @@ public class MapViewService {
         }
 
         expression = collectNativeQueryAndStatement(expression,
+            " map_view.blind_map_flag = false AND (" +
             collectNativeQueryOrStatement(" maprow15_.`last_author_id` " +  getInListExpression(lastAuthorReviewer) +
             " OR maprow15_.`last_reviewer_id` " + getInListExpression(lastAuthorReviewer),
-                noneMatch));
+                noneMatch) + ")");
       }
 
       if (!CollectionUtils.isEmpty(assignedAuthor)) {
         String noneMatch = null;
         if (assignedAuthor.contains("none")) {
-          noneMatch = " assigned_author_user.id IS NULL ";
+          noneMatch = " assigned_author_user.id IS NULL AND sibling_assigned_author_user.id IS NULL ";
         }
 
-        //TODO assigned author not picking up second author .. existing issue not caused by this code
-        expression = collectNativeQueryAndStatement(expression, 
-            collectNativeQueryOrStatement(" assigned_author_user.id " + getInListExpression(assignedAuthor), 
+        // A blind dual-map row's second author only ever appears via sibling_assigned_author_user
+        // (see the join added above) - assigned_author_user alone is just the collapsed row's own
+        // author, so a filter checking only that column could never match the second author.
+        expression = collectNativeQueryAndStatement(expression,
+            collectNativeQueryOrStatement(" assigned_author_user.id " + getInListExpression(assignedAuthor)
+            + " OR sibling_assigned_author_user.id " + getInListExpression(assignedAuthor),
             noneMatch));
       }
 
@@ -419,7 +430,7 @@ public class MapViewService {
   public Snap2SnomedPagedModel<EntityModel<MapView>> getMapResults(Long mapId, Pageable pageable, PagedResourcesAssembler<MapView> assembler,
       MapViewFilter filter) {
     if (!mapRepository.existsById(mapId)) {
-      throw Problem.valueOf(Status.NOT_FOUND, "No Map found with id " + mapId);
+      throw Snap2SnomedProblem.of(HttpStatus.NOT_FOUND, "No Map found with id " + mapId);
     }
 
     return getMapResults(mapId, null, pageable, assembler, filter);
@@ -427,7 +438,7 @@ public class MapViewService {
 
   public Snap2SnomedPagedModel<EntityModel<MapView>> getMapResultsByTask(Long taskId, Pageable pageable, PagedResourcesAssembler<MapView> assembler,
       MapViewFilter filter) {
-    final Task task = taskRepository.findById(taskId).orElseThrow(() -> Problem.valueOf(Status.NOT_FOUND, "No Task found with id " + taskId));
+    final Task task = taskRepository.findById(taskId).orElseThrow(() -> Snap2SnomedProblem.of(HttpStatus.NOT_FOUND, "No Task found with id " + taskId));
     if (!webSecurity.isAdminUser() && !webSecurity.hasAnyProjectRoleForMapId(task.getMap().getId())) {
       throw new NotAuthorisedProblem("Not authorised to view map if the user is not admin or member of an associated project!");
     }
@@ -435,7 +446,7 @@ public class MapViewService {
   }
 
   public String getFileNameForMapExport(Long mapId, String contentType) {
-    final Map map = mapRepository.findById(mapId).orElseThrow(() -> Problem.valueOf(Status.NOT_FOUND, "No Map found with id " + mapId));
+    final Map map = mapRepository.findById(mapId).orElseThrow(() -> Snap2SnomedProblem.of(HttpStatus.NOT_FOUND, "No Map found with id " + mapId));
     String extension;
     switch (contentType) {
       case MapViewRestController.TEXT_TSV:
@@ -455,7 +466,7 @@ public class MapViewService {
         break;
 
       default:
-        throw Problem.valueOf(Status.UNSUPPORTED_MEDIA_TYPE, "Content type " + contentType + " is not supported for map export");
+        throw Snap2SnomedProblem.of(HttpStatus.UNSUPPORTED_MEDIA_TYPE, "Content type " + contentType + " is not supported for map export");
     }
 
     return "map-" + map.getProject().getTitle() + "_" + map.getMapVersion() + extension;
@@ -504,7 +515,7 @@ public class MapViewService {
   }
 
   public List<MapView> getAllMapViewForMap(Long mapId) {
-    final Map map = mapRepository.findById(mapId).orElseThrow(() -> Problem.valueOf(Status.NOT_FOUND, "No Map found with id " + mapId));
+    final Map map = mapRepository.findById(mapId).orElseThrow(() -> Snap2SnomedProblem.of(HttpStatus.NOT_FOUND, "No Map found with id " + mapId));
     Boolean dualMapMode = map.getProject().getDualMapMode();
     if (dualMapMode) {
       return getDualMapQueryForMap(mapId, null, null, null).fetch();
@@ -521,7 +532,7 @@ public class MapViewService {
         .getAdditionalColumnsMetadata();
 
     final Map map = mapRepository.findById(mapId)
-        .orElseThrow(() -> Problem.valueOf(Status.NOT_FOUND, "No Map found with id " + mapId));
+        .orElseThrow(() -> Snap2SnomedProblem.of(HttpStatus.NOT_FOUND, "No Map found with id " + mapId));
     Boolean dualMapMode = map.getProject().getDualMapMode();
 
     if (dualMapMode && task == null) {
@@ -583,6 +594,11 @@ public class MapViewService {
       queryStrBuilder.append("left outer join map_row maprow15_ on map_view.map_row_id=maprow15_.id  ");
       queryStrBuilder.append("left outer join `user` user16_ on maprow15_.`last_author_id`=user16_.id  ");
       queryStrBuilder.append("left outer join `user` assigned_author_user on  task3_.assignee_id=assigned_author_user.id  ");
+      // task12_ (already joined above via map_view.sibling_row_author_task_id) is the second
+      // author's task for a blind dual-map pair - assigned_author_user alone only ever resolves
+      // to the primary/collapsed row's own author (task3_), so filtering by the second author
+      // never matched any row. See the "assignedAuthor" filter condition below.
+      queryStrBuilder.append("left outer join `user` sibling_assigned_author_user on task12_.assignee_id=sibling_assigned_author_user.id  ");
       queryStrBuilder.append("left outer join `user` assigned_reviewer_user on task5_.assignee_id=assigned_reviewer_user.id ");
       queryStrBuilder.append("left outer join `user` assigned_reconciler_user on task7_.assignee_id=assigned_reconciler_user.id ");
       
@@ -1053,7 +1069,12 @@ public class MapViewService {
     if (betweenStatement == null) {
       return expression;
     }
-    return expression + " OR " + betweenStatement;
+    // Wrapping both sides in parentheses (rather than plain string concatenation) is required
+    // because either side may itself be an OR-combined expression (eg lastAuthorReviewer's
+    // "last_author_id IN (...) OR last_reviewer_id IN (...)") - without it, splicing this whole
+    // clause into a larger WHERE via collectNativeQueryAndStatement's bare " AND " causes SQL's
+    // AND-before-OR precedence to detach the second half from the rest of the filter entirely.
+    return "(" + expression + ") OR (" + betweenStatement + ")";
   }
 
   private BooleanExpression collectAndStatement(BooleanExpression expression, BooleanExpression betweenStatement) {
@@ -1070,13 +1091,16 @@ public class MapViewService {
     if (betweenStatement == null) {
       return expression;
     }
-    return expression + " AND " + betweenStatement;
+    // See collectNativeQueryOrStatement above - wrapping both sides is required so an
+    // OR-combined betweenStatement can't have its second half detached from the rest of the
+    // WHERE clause by SQL's AND-before-OR precedence.
+    return "(" + expression + ") AND (" + betweenStatement + ")";
   }
 
   public MapView getDualMapSiblingRow(Long mapId, Long sourceCodeId, Long mapRowId) {
 
     if (!mapRepository.existsById(mapId)) {
-      throw Problem.valueOf(Status.NOT_FOUND, "No Map found with id " + mapId);
+      throw Snap2SnomedProblem.of(HttpStatus.NOT_FOUND, "No Map found with id " + mapId);
     }
 
     JPAQuery<MapView> query = new JPAQuery<MapView>(entityManager)

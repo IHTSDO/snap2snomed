@@ -33,9 +33,10 @@ import {LoadTasksForMap} from 'src/app/store/task-feature/task.actions';
 
 
 @Component({
-  selector: 'app-assigned-work',
-  templateUrl: './assigned-work.component.html',
-  styleUrls: ['./assigned-work.component.css']
+    selector: 'app-assigned-work',
+    templateUrl: './assigned-work.component.html',
+    styleUrls: ['./assigned-work.component.css'],
+    standalone: false
 })
 export class AssignedWorkComponent implements OnInit, AfterViewInit, OnDestroy {
   private subscription = new Subscription();

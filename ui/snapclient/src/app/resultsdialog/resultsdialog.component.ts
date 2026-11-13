@@ -18,9 +18,10 @@ import { Component, Inject, OnInit } from '@angular/core';
 import {MatBottomSheetRef, MAT_BOTTOM_SHEET_DATA} from '@angular/material/bottom-sheet';
 
 @Component({
-  selector: 'app-resultsdialog',
-  templateUrl: './resultsdialog.component.html',
-  styleUrls: ['./resultsdialog.component.css']
+    selector: 'app-resultsdialog',
+    templateUrl: './resultsdialog.component.html',
+    styleUrls: ['./resultsdialog.component.css'],
+    standalone: false
 })
 export class ResultsdialogComponent implements OnInit {
 

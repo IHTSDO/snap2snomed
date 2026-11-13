@@ -20,6 +20,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Optional;
 import java.util.Properties;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 /**
@@ -29,6 +31,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class Snap2snomedVersion {
 
+  private static final Logger log = LoggerFactory.getLogger(Snap2snomedVersion.class);
   private static final String GIT_PROPERTIES_FILE_NAME = "git.properties";
   private static final String GIT_COMMIT_SHORT = "git.commit.id.abbrev";
 
@@ -45,11 +48,10 @@ public class Snap2snomedVersion {
       try {
         gitProperties.load(gitPropertiesStream);
       } catch (final IOException e) {
-        throw new RuntimeException("Unable to read property file: " + GIT_PROPERTIES_FILE_NAME);
+        log.warn("Unable to read property file: {}", GIT_PROPERTIES_FILE_NAME);
       }
     } else {
-      throw new RuntimeException(
-          "Required property file not found in classpath: " + GIT_PROPERTIES_FILE_NAME);
+      log.warn("Property file not found in classpath: {}", GIT_PROPERTIES_FILE_NAME);
     }
   }
 

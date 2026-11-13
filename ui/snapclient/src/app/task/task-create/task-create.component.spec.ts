@@ -1,5 +1,5 @@
 /*
- * Copyright © 2022 SNOMED International
+ * Copyright © 2026 SNOMED International
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,24 +14,29 @@
  * limitations under the License.
  */
 
-import {ComponentFixture, TestBed} from '@angular/core/testing';
+import { ComponentFixture, fakeAsync, tick, TestBed } from '@angular/core/testing';
 
-import {TaskCreateComponent} from './task-create.component';
-import {By} from '@angular/platform-browser';
-import {Task, TaskType} from '../../_models/task';
-import {User} from '../../_models/user';
-import {Mapping} from '../../_models/mapping';
-import {TranslateLoader, TranslateModule, TranslateService} from '@ngx-translate/core';
-import {ScannedActionsSubject} from '@ngrx/store';
-import {APP_CONFIG} from '../../app.config';
-import {provideMockStore} from '@ngrx/store/testing';
-import {initialAppState} from '../../store/app.state';
-import {HttpClientTestingModule} from '@angular/common/http/testing';
-import {HttpLoaderFactory} from '../../app.module';
-import {MatSnackBarModule} from '@angular/material/snack-bar';
-import {MatSlideToggleModule} from '@angular/material/slide-toggle';
-import {MatRadioModule} from '@angular/material/radio';
-import {MAT_DIALOG_DATA, MatDialogModule, MatDialogRef} from '@angular/material/dialog';
+import { TaskCreateComponent } from './task-create.component';
+import { By } from '@angular/platform-browser';
+import { Task, TaskType } from '../../_models/task';
+import { User } from '../../_models/user';
+import { Mapping } from '../../_models/mapping';
+import { TranslateLoader, TranslateModule, TranslateService } from '@ngx-translate/core';
+import { ScannedActionsSubject } from '@ngrx/store';
+import { APP_CONFIG } from '../../app.config';
+import { provideMockStore } from '@ngrx/store/testing';
+import { initialAppState } from '../../store/app.state';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { HttpLoaderFactory } from '../../app.module';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import { MatRadioModule } from '@angular/material/radio';
+import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
+import { MatCardModule } from '@angular/material/card';
+import { MatChipsModule } from '@angular/material/chips';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { FormsModule } from '@angular/forms';
+import { HttpClient, provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 
 describe('TaskCreateComponent', () => {
   let component: TaskCreateComponent;
@@ -42,52 +47,54 @@ describe('TaskCreateComponent', () => {
   user.familyName = 'Smith';
 
   const mapping = new Mapping();
-  mapping.project.title = 'Test Map';
+  mapping.project = {
+    title: 'Test Map'
+  } as any;
   const task = new Task('1', TaskType.AUTHOR, '',
     mapping, user, '1-10', 10, '', '', true, true);
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [
-        HttpClientTestingModule,
-        MatSnackBarModule,
+      declarations: [TaskCreateComponent],
+      imports: [MatSnackBarModule,
         MatSlideToggleModule,
         MatRadioModule,
         MatDialogModule,
+        MatCardModule,
+        MatChipsModule,
+        MatTooltipModule,
+        FormsModule,
         TranslateModule.forRoot({
           loader: {
             provide: TranslateLoader,
             useFactory: HttpLoaderFactory,
-            deps: [HttpClientTestingModule]
+            deps: [HttpClient]
           }
-        })
-      ],
+        })],
       providers: [TranslateService, ScannedActionsSubject,
-        {provide: MatDialogRef, useValue: {}},
-        {provide: MAT_DIALOG_DATA, useValue: {}},
-        {provide: APP_CONFIG, useValue: {}},
+        { provide: MatDialogRef, useValue: {} },
+        { provide: MAT_DIALOG_DATA, useValue: {} },
+        { provide: APP_CONFIG, useValue: {} },
         provideMockStore({
           initialState: initialAppState
-        })
-      ],
-      declarations: [TaskCreateComponent]
+        }), provideHttpClient(withInterceptorsFromDi()), provideHttpClientTesting()]
     })
-    .compileComponents();
+      .compileComponents();
   });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(TaskCreateComponent);
     component = fixture.componentInstance;
-    component.data.task = task;
-    component.data.isOwner = true;
-    component.data.errorMessage =
-      {
-        "indexesWithExistingTask": {"specification": "1-5", "count": 5},
-        "indexesWithRoleConflict": {"specification": "1-5,8-10", "count": 8},
-        "originalIndexSpecification": {"specification": "*", "count": 13},
-        "indexSpecificationWithRoleConflictsRemoved": {"specification": "6-7,11-13", "count": 4},
-        "indexSpecificationWithExistingTaskConflictsRemoved": {"specification": "6-13", "count": 7},
-        "indexSpecificationWithAllConflictsRemoved": {"specification": "6-7,11-13", "count": 4},
+    component.data = {
+      task,
+      isOwner: true,
+      errorMessage: {
+        "indexesWithExistingTask": { "specification": "1-5", "count": 5 },
+        "indexesWithRoleConflict": { "specification": "1-5,8-10", "count": 8 },
+        "originalIndexSpecification": { "specification": "*", "count": 13 },
+        "indexSpecificationWithRoleConflictsRemoved": { "specification": "6-7,11-13", "count": 4 },
+        "indexSpecificationWithExistingTaskConflictsRemoved": { "specification": "6-13", "count": 7 },
+        "indexSpecificationWithAllConflictsRemoved": { "specification": "6-7,11-13", "count": 4 },
         "indexCountWithRoleConflict": 8,
         "indexCountWithExistingTaskConflict": 5,
         "indexCountWithRoleAndExistingTaskConflict": 5,
@@ -95,24 +102,30 @@ describe('TaskCreateComponent', () => {
         "title": "Task row specification contains rows which cannot be assigned to a task by this user",
         "status": 400
       }
-    fixture.detectChanges();
+    } as any;
+    // detectChanges intentionally not called here - each test calls it after setting its own inputs
+    // to avoid NG0100 from @if embedded views with [(ngModel)] being created mid-lifecycle
   });
 
   it('should create', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should show sliders if its owner', () => {
+  it('should show sliders if its owner', fakeAsync(() => {
+    fixture.detectChanges();
+    tick();
     fixture.detectChanges();
     const el = fixture.debugElement.query(By.css('.assign-select')).nativeElement;
     expect(el).toBeTruthy();
-  });
+  }));
 
-  it('should not show sliders if its member', () => {
+  it('should not show sliders if its member', fakeAsync(() => {
     component.data.task = task;
     component.data.isOwner = false;
     fixture.detectChanges();
+    tick();
+    fixture.detectChanges();
     const el = fixture.debugElement.query(By.css('.assign-select'));
     expect(el).toBeFalsy();
-  });
+  }));
 });

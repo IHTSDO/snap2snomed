@@ -20,7 +20,8 @@ import { By } from '@angular/platform-browser';
 import { DroppableDirective } from './droppable.directive';
 
 @Component({
-  template: `<div [appDroppable]="{zone: 'testZone'}">red green blue</div>`
+    template: `<div [appDroppable]="{zone: 'testZone'}">red green blue</div>`,
+    imports: [ DroppableDirective ]
 })
 class TestDroppableComponent {
 }
@@ -33,7 +34,7 @@ describe('DroppableDirective', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ DroppableDirective ]
+      imports: [ TestDroppableComponent ]
     })
     .compileComponents();
 
@@ -43,8 +44,8 @@ describe('DroppableDirective', () => {
   });
 
   it('should create an instance', () => {
+    expect(component).toBeTruthy();
     inputEl.triggerEventHandler('dragenter', {target: inputEl.nativeElement});
-    fixture.detectChanges()
-    // expect(inputEl.nativeElement.style.backgroundColor).toBe('blue');  // FIXME
+    fixture.detectChanges();
   });
 });

@@ -33,24 +33,23 @@ describe('GravatarComponent', () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(GravatarComponent);
     component = fixture.componentInstance;
-    fixture.detectChanges();
   });
 
   it('should create', () => {
+    fixture.detectChanges();
     expect(component).toBeTruthy();
   });
 
   it('should display alt text', () => {
-    component.alt='ML';
-    component.updateGravatar();
+    component.alt = 'ML';
     fixture.detectChanges();
     const el = fixture.debugElement.query(By.css('div'));
     expect(el.nativeElement).toBeTruthy();
   })
 
   it('should display img', () => {
-    component.alt='ML';
-    component.updateGravatar('michael@lawley.id.au');
+    component.alt = 'ML';
+    component.email = 'michael@lawley.id.au';
     fixture.detectChanges();
     const el = fixture.debugElement.query(By.css('img'));
     expect(el.nativeElement).toBeTruthy();

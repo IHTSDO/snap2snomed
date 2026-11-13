@@ -30,98 +30,94 @@
   <description>API Backend for the Snap2Snomed mapping tool</description>
 
   <properties>
-    <java.version>17</java.version>
+    <java.version>21</java.version>
     <docker.repository>aehrc/snap2snomed</docker.repository>
     <docker.registry.host>quay.io</docker.registry.host>
-    <sentry.version>7.3.0</sentry.version>
+    <sentry.version>8.51.0</sentry.version>
     <jacoco.version>0.8.12</jacoco.version>
     <commons-csv.version>1.10.0</commons-csv.version>
-    <aws-mysql-jdbc.version>1.1.13</aws-mysql-jdbc.version>
-    <org.springdoc.version>1.7.0</org.springdoc.version>
+    <aws-advanced-jdbc-wrapper.version>2.6.5</aws-advanced-jdbc-wrapper.version>
+    <org.springdoc.version>3.1.0</org.springdoc.version>
     <jib.version>3.4.0</jib.version>
-    <apt-maven-plugin.version>1.1.3</apt-maven-plugin.version>
-    <problem-spring-web.version>0.27.0</problem-spring-web.version>
-    <swagger-request-validator.version>2.38.1</swagger-request-validator.version>
-    <apache-poi.version>5.2.5</apache-poi.version>
+    <openfeign-querydsl.version>7.5</openfeign-querydsl.version> <!-- io.github.openfeign.querydsl fork; com.querydsl is unmaintained since 2021 -->
+    <swagger-request-validator.version>2.46.0</swagger-request-validator.version>
+    <apache-poi.version>5.5.1</apache-poi.version>
     <rest-assured.version>4.5.1</rest-assured.version>
-    <jjwt.version>0.11.5</jjwt.version>
+    <jjwt.version>0.13.0</jjwt.version>
     <tc-mysql.version>1.17.2</tc-mysql.version>
     <mockserver.version>5.15.0</mockserver.version>
     <hamcrest-test.version>1.3</hamcrest-test.version>
     <hamcrest-date.version>2.0.8</hamcrest-date.version>
-    <hapi.version>6.6.2</hapi.version>
-    <spring-security-core.version>6.5.4</spring-security-core.version>
-    <spring-core.version>5.3.34</spring-core.version>
+    <hapi.version>8.10.1</hapi.version>
     <snomed-utilities.version>2.1.0</snomed-utilities.version>
+    <!-- Overrides of spring-boot-starter-parent 4.1.0 managed versions for CVEs; remove once Boot's managed versions catch up -->
+    <spring-framework.version>7.0.9</spring-framework.version> <!-- CVE-2026-47884, CVE-2026-47890 (Boot 4.1.0 manages 7.0.8) -->
+    <jackson-2-bom.version>2.21.7</jackson-2-bom.version> <!-- CVE-2026-89407, CVE-2026-89425, CVE-2026-68497, CVE-2026-91776, CVE-2026-91777 (Boot 4.1.0 manages 2.21.4) -->
+    <jackson-bom.version>3.1.7</jackson-bom.version> <!-- CVE-2026-89407, CVE-2026-89425 (Boot 4.1.0 manages 3.1.4) -->
   </properties>
 
   <dependencyManagement>
     <dependencies>
-      <dependency>
-        <groupId>ch.qos.logback</groupId>
-        <artifactId>logback-core</artifactId>
-        <version>1.2.13</version><!-- force version for CVE-2023-6481 ; remove when spring-boot-starter-actuator updates to have a dependency >= 1.2.13 -->
-        <!--<version>1.3.15</version>--> <!-- force version for CVE-2024-12798;  Exception java.lang.NoClassDefFoundError: ch/qos/logback/core/joran/action/AbstractEventEvaluatorAction if this is enabled -->
-      </dependency>
-      <dependency>
-        <groupId>org.springframework</groupId>
-        <artifactId>spring-web</artifactId>
-        <version>5.3.34</version> <!-- force version for CVE-2024-22243; remove when spring-boot-starter-web updates to this (currently 2.7.18) -->
-      </dependency>
-      <dependency>
-        <groupId>org.apache.commons</groupId>
-        <artifactId>commons-compress</artifactId>
-        <version>1.26.0</version> <!-- force version for  CVE-2024-25710 & CVE-2024-26308; remove when org.apache.poi:poi-ooxml updates to this (currently 5.2.3)-->
-      </dependency>      
-      <dependency>
-        <groupId>org.apache.tomcat.embed</groupId>
-        <artifactId>tomcat-embed-core</artifactId>
-        <version>9.0.118</version><!-- force version for CVE-2024-34750; remove when spring-boot-starter-web transitive dependency updates to this (currently 9.0.83)-->
-      </dependency>
-      <dependency>
-        <groupId>org.springframework.security</groupId>
-        <artifactId>spring-security-web</artifactId>
-        <version>5.7.14</version><!-- force version for  CVE-2024-38821  remove when spring-boot-starter-security updates to this -->
-      </dependency>
-      <dependency>
-          <groupId>com.nimbusds</groupId>
-          <artifactId>nimbus-jose-jwt</artifactId>
-          <version>9.37.4</version> <!-- force version for CVE-2023-52428; remove when spring-boot spring-boot-starter-oauth2-resource-server updates to this (currently 9.22) -->
-      </dependency>
-      <dependency>
-          <groupId>ca.uhn.hapi.fhir</groupId>
-          <artifactId>hapi-fhir-structures-r4</artifactId>
-          <version>${hapi.version}</version>
-      </dependency>
-      <dependency>
-          <groupId>ca.uhn.hapi.fhir</groupId>
-          <artifactId>org.hl7.fhir.utilities</artifactId>
-          <version>6.9.7</version><!-- force version for CVE-2026-45367 (ReDoS); from org.hl7.fhir.core project, versioned separately from hapi-fhir -->
-      </dependency>
-      <dependency>
-          <groupId>ca.uhn.hapi.fhir</groupId>
-          <artifactId>org.hl7.fhir.r4</artifactId>
-          <version>6.9.7</version><!-- force version for CVE-2026-45367 (ReDoS); from org.hl7.fhir.core project, versioned separately from hapi-fhir -->
-      </dependency>
-      <dependency>
-        <groupId>com.fasterxml.jackson.core</groupId>
-        <artifactId>jackson-core</artifactId>
-        <version>2.21.1</version> <!-- force version for CVE-2025-52999; remove when io.jsonwebtoken:jjwt-jackson:jar updates this -->
-      </dependency>
       <dependency>
         <groupId>commons-beanutils</groupId>
         <artifactId>commons-beanutils</artifactId>
         <version>1.11.0</version> <!-- force version for CVE-2025-48734; remove when org.ihtsdo.snomed.util:snomed-utilities:jar: updates this -->
       </dependency>
       <dependency>
-      <groupId>org.springframework.security</groupId>
-        <artifactId>spring-security-crypto</artifactId>
-        <version>6.5.2</version> <!-- bring in line with parent dependency spring-security-core.  Maybe out of whack due to use of spring boot 2 as Boot 2.x is tied to Spring Security 5.x?-->
+        <groupId>io.swagger.core.v3</groupId>
+        <artifactId>swagger-core</artifactId>
+        <version>2.2.52</version> <!-- align with swagger-core-jakarta from springdoc 3.1.0; both artifacts define io.swagger.v3.core.util.PrimitiveType, a version mismatch between them breaks reflection-based field access in springdoc's ObjectMapperProvider -->
+      </dependency>
+      <dependency>
+        <groupId>com.nimbusds</groupId>
+        <artifactId>nimbus-jose-jwt</artifactId>
+        <version>9.37.4</version> <!-- force version for CVE-2023-52428 and CVE-2025-53864; remove when org.mock-server:mockserver-core updates this test-scope transitive dependency -->
+      </dependency>
+      <dependency>
+        <groupId>org.apache.logging.log4j</groupId>
+        <artifactId>log4j-api</artifactId>
+        <version>2.25.5</version> <!-- force version for CVE-2026-49844; remove when org.apache.poi:poi-ooxml updates this transitive dependency -->
+      </dependency>
+      <dependency>
+        <groupId>org.mozilla</groupId>
+        <artifactId>rhino</artifactId>
+        <version>1.7.14.1</version> <!-- force version for CVE-2025-66453; remove when com.github.java-json-tools:json-schema-core (via swagger-request-validator) updates this transitive dependency -->
+      </dependency>
+      <!-- force version for CVE-2026-65182, CVE-2026-65905, CVE-2026-68525; remove once
+           spring-boot-starter-parent's managed tomcat.version reaches 11.0.25+.
+           All three embed artifacts are pinned together since Tomcat releases them in lockstep. -->
+      <dependency>
+        <groupId>org.apache.tomcat.embed</groupId>
+        <artifactId>tomcat-embed-core</artifactId>
+        <version>11.0.25</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.tomcat.embed</groupId>
+        <artifactId>tomcat-embed-el</artifactId>
+        <version>11.0.25</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.tomcat.embed</groupId>
+        <artifactId>tomcat-embed-websocket</artifactId>
+        <version>11.0.25</version>
       </dependency>
     </dependencies>
   </dependencyManagement>
 
   <dependencies>
+    <dependency>
+      <groupId>com.fasterxml.jackson.datatype</groupId>
+      <artifactId>jackson-datatype-hibernate7</artifactId>
+    </dependency>
+    <!-- Boot 4's starters no longer pull this in by default now that Jackson 3 is the default
+         mapper (Jackson 3's creator detection is built into its core, no separate module needed).
+         Our Jackson 2 ObjectMapper (JacksonConfiguration) still needs it to construct Lombok
+         @Builder-only DTOs (e.g. MappingDto, MappingDetails) via their generated all-args
+         constructor - findModulesViaServiceLoader(true) is a no-op without this on the classpath. -->
+    <dependency>
+      <groupId>com.fasterxml.jackson.module</groupId>
+      <artifactId>jackson-module-parameter-names</artifactId>
+    </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-actuator</artifactId>
@@ -151,17 +147,25 @@
       <artifactId>spring-boot-starter-oauth2-resource-server</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.flywaydb</groupId>
-      <artifactId>flyway-core</artifactId>
-    </dependency>      
+      <!-- Boot 4's modularized autoconfigure split Flyway's autoconfiguration out of the implicit
+           spring-boot-starter-data-jpa graph; this starter (not just flyway-core) is what actually
+           triggers migrations running automatically on startup. -->
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-flyway</artifactId>
+    </dependency>
     <dependency>
       <groupId>org.flywaydb</groupId>
       <artifactId>flyway-mysql</artifactId>
     </dependency>
     <dependency>
-      <groupId>software.aws.rds</groupId>
-      <artifactId>aws-mysql-jdbc</artifactId>
-      <version>${aws-mysql-jdbc.version}</version>
+      <groupId>software.amazon.jdbc</groupId>
+      <artifactId>aws-advanced-jdbc-wrapper</artifactId>
+      <version>${aws-advanced-jdbc-wrapper.version}</version>
+      <scope>runtime</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.mysql</groupId>
+      <artifactId>mysql-connector-j</artifactId>
       <scope>runtime</scope>
     </dependency>
     <dependency>
@@ -169,34 +173,13 @@
       <artifactId>spring-security-data</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.springframework.security</groupId>
-      <artifactId>spring-security-core</artifactId>
-      <version>${spring-security-core.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.springframework</groupId>
-      <artifactId>spring-core</artifactId>
-      <version>${spring-core.version}</version>
-    </dependency>
-    <dependency>
       <groupId>org.springframework.data</groupId>
       <artifactId>spring-data-envers</artifactId>
     </dependency>
     <dependency>
-      <groupId>com.querydsl</groupId>
-      <artifactId>querydsl-apt</artifactId>
-      <scope>provided</scope>
-    </dependency>
-
-    <dependency>
-      <groupId>com.querydsl</groupId>
+      <groupId>io.github.openfeign.querydsl</groupId>
       <artifactId>querydsl-jpa</artifactId>
-    </dependency>
-
-    <dependency>
-      <groupId>org.zalando</groupId>
-      <artifactId>problem-spring-web-starter</artifactId>
-      <version>${problem-spring-web.version}</version>
+      <version>${openfeign-querydsl.version}</version>
     </dependency>
 
     <dependency>
@@ -233,7 +216,7 @@
     <dependency>
       <groupId>org.mariadb.jdbc</groupId>
       <artifactId>mariadb-java-client</artifactId>
-      <version>3.2.0</version>
+      <version>3.5.11</version> <!-- force version for CVE-2026-55856, CVE-2026-55857, CVE-2026-55858, CVE-2026-119279, CVE-2026-119280, CVE-2026-119281 -->
     </dependency>
     <dependency>
       <groupId>org.apache.commons</groupId>
@@ -243,7 +226,7 @@
 
     <dependency>
       <groupId>io.sentry</groupId>
-      <artifactId>sentry-spring-boot-starter</artifactId>
+      <artifactId>sentry-spring-boot-4-starter</artifactId>
       <version>${sentry.version}</version>
     </dependency>
     <dependency>
@@ -254,13 +237,7 @@
 
     <dependency>
       <groupId>org.springdoc</groupId>
-      <artifactId>springdoc-openapi-ui</artifactId>
-      <version>${org.springdoc.version}</version>
-    </dependency>
-
-    <dependency>
-      <groupId>org.springdoc</groupId>
-      <artifactId>springdoc-openapi-data-rest</artifactId>
+      <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
       <version>${org.springdoc.version}</version>
     </dependency>
 
@@ -318,7 +295,7 @@
     <dependency>
         <groupId>com.google.guava</groupId>
         <artifactId>guava</artifactId>
-        <version>33.1.0-jre</version>
+        <version>33.7.2-jre</version> <!-- CVE-2026-102554 -->
     </dependency>
 
     <dependency>
@@ -397,7 +374,7 @@
         <artifactId>jib-maven-plugin</artifactId>
         <version>${jib.version}</version>
         <configuration>
-          <from><image>aehrc/jre:openjdk-17-fontconfig</image></from>
+          <from><image>aehrc/jre:openjdk-21-fontconfig</image></from>
           <container>
             <ports>
               <port>8080</port>
@@ -418,27 +395,28 @@
       </plugin>
 
       <plugin>
-        <groupId>com.mysema.maven</groupId>
-        <artifactId>apt-maven-plugin</artifactId>
-        <version>${apt-maven-plugin.version}</version>
-        <executions>
-          <execution>
-            <goals>
-              <goal>process</goal>
-            </goals>
-            <configuration>
-              <outputDirectory>target/generated-sources/java</outputDirectory>
-              <processor>com.querydsl.apt.jpa.JPAAnnotationProcessor,lombok.launch.AnnotationProcessorHider$AnnotationProcessor</processor>
-            </configuration>
-          </execution>
-        </executions>
-        <dependencies>
-          <dependency>
-            <groupId>com.querydsl</groupId>
-            <artifactId>querydsl-apt</artifactId>
-            <version>${querydsl.version}</version>
-          </dependency>
-        </dependencies>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <configuration>
+          <generatedSourcesDirectory>${project.build.directory}/generated-sources/java</generatedSourcesDirectory>
+          <annotationProcessorPaths>
+            <path>
+              <groupId>io.github.openfeign.querydsl</groupId>
+              <artifactId>querydsl-apt</artifactId>
+              <version>${openfeign-querydsl.version}</version>
+              <classifier>jpa</classifier>
+            </path>
+            <path>
+              <groupId>org.projectlombok</groupId>
+              <artifactId>lombok</artifactId>
+              <version>${lombok.version}</version>
+            </path>
+          </annotationProcessorPaths>
+          <annotationProcessors>
+            <annotationProcessor>com.querydsl.apt.jpa.JPAAnnotationProcessor</annotationProcessor>
+            <annotationProcessor>lombok.launch.AnnotationProcessorHider$AnnotationProcessor</annotationProcessor>
+          </annotationProcessors>
+        </configuration>
       </plugin>
 
       <!-- Code coverage -->
@@ -489,11 +467,10 @@
         </executions>
       </plugin>
       <plugin>
-        <groupId>pl.project13.maven</groupId>
-        <artifactId>git-commit-id-plugin</artifactId>
+        <groupId>io.github.git-commit-id</groupId>
+        <artifactId>git-commit-id-maven-plugin</artifactId>
         <configuration>
           <prefix>git</prefix>
-          <dotGitDirectory>${project.basedir}/.git</dotGitDirectory>
           <generateGitPropertiesFile>true</generateGitPropertiesFile>
           <generateGitPropertiesFilename>${project.build.outputDirectory}/git.properties</generateGitPropertiesFilename>
           <offline>true</offline>

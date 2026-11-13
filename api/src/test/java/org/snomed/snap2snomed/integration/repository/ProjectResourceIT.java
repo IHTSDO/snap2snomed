@@ -425,9 +425,9 @@ public class ProjectResourceIT extends IntegrationTestBase {
 
     restClient.givenUser(DEFAULT_TEST_ADMIN_USER_SUBJECT)
               .queryParam("projection", "targetView")
-              .queryParam("row.sourceCode.index", "1")
+              .queryParam("sourceCodeIndex", "1")
               .queryParam("mapId", mapId)
-              .get("/mapRowTargets")
+              .get("/mapRowTargets/search/findByMapIdAndSourceCodeIndex")
               .then().statusCode(200)
               .body("page.totalElements", equalTo(1));
 
@@ -445,9 +445,9 @@ public class ProjectResourceIT extends IntegrationTestBase {
 
     restClient.givenUser(DEFAULT_TEST_ADMIN_USER_SUBJECT)
               .queryParam("projection", "targetView")
-              .queryParam("row.sourceCode.index", "1")
+              .queryParam("sourceCodeIndex", "1")
               .queryParam("mapId", mapId)
-              .get("/mapRowTargets")
+              .get("/mapRowTargets/search/findByMapIdAndSourceCodeIndex")
               .then().statusCode(200)
               .body("page.totalElements", equalTo(0));
 

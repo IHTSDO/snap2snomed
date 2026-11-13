@@ -39,9 +39,10 @@ export interface Coding { //import from reducer?
 }
 
 @Component({
-  selector: 'app-target-relationship',
-  templateUrl: './target-relationship.component.html',
-  styleUrls: ['./target-relationship.component.css']
+    selector: 'app-target-relationship',
+    templateUrl: './target-relationship.component.html',
+    styleUrls: ['./target-relationship.component.css'],
+    standalone: false
 })
 export class TargetRelationshipComponent implements OnInit, OnChanges {
   relationships: MapRowRelationship[] = [];
@@ -60,6 +61,7 @@ export class TargetRelationshipComponent implements OnInit, OnChanges {
   @Output() flagEvent = new EventEmitter<MapView>();
   @Output() noReplacementEvent = new EventEmitter<MapView>();
 
+  readonly draggableZones = ['relationshipZone'];
   addingTargetRelationship: string | null = null;
 
   writeDisableUtils = WriteDisableUtils;

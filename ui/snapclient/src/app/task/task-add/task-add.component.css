@@ -7,10 +7,14 @@ h3 {
   color: #555555;
 }
 
-.mat-card-actions {
+.mat-mdc-card-actions {
   display: flex;
   flex-direction: row;
   justify-content: space-between;
+}
+
+.mat-mdc-card-actions .mat-mdc-raised-button {
+  --mat-button-protected-label-text-color: black;
 }
 
 .field-full-width {

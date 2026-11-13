@@ -18,9 +18,10 @@ import { Component, OnInit } from '@angular/core';
 import {MatDialogRef} from "@angular/material/dialog";
 
 @Component({
-  selector: 'app-feedback-widget',
-  templateUrl: './feedback-widget.component.html',
-  styleUrls: ['./feedback-widget.component.css']
+    selector: 'app-feedback-widget',
+    templateUrl: './feedback-widget.component.html',
+    styleUrls: ['./feedback-widget.component.css'],
+    standalone: false
 })
 export class FeedbackWidgetComponent implements OnInit {
 

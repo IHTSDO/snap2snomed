@@ -17,11 +17,12 @@
 import {TestBed} from '@angular/core/testing';
 
 import {SourceNavigationService} from './source-navigation.service';
-import {HttpClientTestingModule} from '@angular/common/http/testing';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import {APP_CONFIG} from '../app.config';
 import {provideMockStore} from '@ngrx/store/testing';
 import {SourceService} from './source.service';
 import {initialAppState} from '../store/app.state';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 
 describe('SourceNavigationService', () => {
   let service: SourceNavigationService;
@@ -29,13 +30,14 @@ describe('SourceNavigationService', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      imports: [
-        HttpClientTestingModule
-      ],
-      providers: [
+    imports: [],
+    providers: [
         { provide: APP_CONFIG, useValue: {} },
-        provideMockStore({initialState}), SourceService],
-    });
+        provideMockStore({ initialState }), SourceService,
+        provideHttpClient(withInterceptorsFromDi()),
+        provideHttpClientTesting()
+    ]
+});
     service = TestBed.inject(SourceNavigationService);
   });
 

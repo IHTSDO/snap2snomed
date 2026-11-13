@@ -29,7 +29,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
-import javax.persistence.EntityManager;
+import jakarta.persistence.EntityManager;
 import org.snomed.snap2snomed.model.ImportedCode;
 import org.snomed.snap2snomed.model.Map;
 import org.snomed.snap2snomed.model.Project;
@@ -38,6 +38,7 @@ import org.snomed.snap2snomed.model.QMapRowTarget;
 import org.snomed.snap2snomed.model.Task;
 import org.snomed.snap2snomed.model.User;
 import org.snomed.snap2snomed.model.enumeration.TaskType;
+import org.snomed.snap2snomed.problem.Snap2SnomedProblem;
 import org.snomed.snap2snomed.problem.task.NoSuchAssigneeProblem;
 import org.snomed.snap2snomed.problem.task.TaskAssigneeWithNoProjectRoleProblem;
 import org.snomed.snap2snomed.problem.task.TaskDeletProblem;
@@ -59,8 +60,9 @@ import org.springframework.data.rest.core.annotation.HandleBeforeDelete;
 import org.springframework.data.rest.core.annotation.HandleBeforeLinkSave;
 import org.springframework.data.rest.core.annotation.HandleBeforeSave;
 import org.springframework.data.rest.core.annotation.RepositoryEventHandler;
-import org.zalando.problem.Problem;
-import org.zalando.problem.Status;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ProblemDetail;
+import org.springframework.web.ErrorResponseException;
 
 @RepositoryEventHandler
 public class TaskEventHandler {
@@ -129,14 +131,14 @@ public class TaskEventHandler {
     String principalSubject = authenticationFacade.getPrincipalSubject();
     Instant modified = Instant.now();
     if (principalSubject == null || principalSubject.isBlank()) {
-      throw Problem.valueOf(Status.UNAUTHORIZED, "No valid user is not logged in");
+      throw Snap2SnomedProblem.of(HttpStatus.UNAUTHORIZED, "No valid user is not logged in");
     }
 
     boolean isOwner = task.getMap().getProject().getOwners().stream().anyMatch(u -> u.getId().equals(principalSubject));
     boolean isAdmin = authenticationFacade.isAdminUser();
 
     if (!isOwner && !isAdmin) {
-      throw new TaskDeletProblem("only-owners-can-delete", "Only owners are allowed to delete tasks", Status.FORBIDDEN);
+      throw new TaskDeletProblem("only-owners-can-delete", "Only owners are allowed to delete tasks", HttpStatus.FORBIDDEN);
     }
 
     if (task.getType().equals(TaskType.AUTHOR)) {
@@ -169,13 +171,13 @@ public class TaskEventHandler {
     User assignee = task.getAssignee();
     Map map = task.getMap();
     if (map == null) {
-      throw Problem.valueOf(Status.BAD_REQUEST,
+      throw Snap2SnomedProblem.of(HttpStatus.BAD_REQUEST,
           "Map associated with this task does not exist or the current user is not authorised for this project");
     }
 
     Project project = map.getProject();
     if (project == null) {
-      throw Problem.valueOf(Status.BAD_REQUEST,
+      throw Snap2SnomedProblem.of(HttpStatus.BAD_REQUEST,
           "Project associated with this task does not exist or the current user is not authorised for this project");
     }
 
@@ -393,8 +395,9 @@ public class TaskEventHandler {
       addCollection = (ids) ->
         mapRowRepository.setReconcileTaskBySourceCode(task, ids, modified, user);
     } else {
-      throw Problem.builder().withTitle("Unknown task type " + task.getType()).withStatus(
-          Status.INTERNAL_SERVER_ERROR).build();
+      ProblemDetail body = ProblemDetail.forStatus(HttpStatus.INTERNAL_SERVER_ERROR);
+      body.setTitle("Unknown task type " + task.getType());
+      throw new ErrorResponseException(HttpStatus.INTERNAL_SERVER_ERROR, body, null);
     }
 
     processRange(rangeSet, addRange, addCollection);

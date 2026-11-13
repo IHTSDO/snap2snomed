@@ -1,13 +1,14 @@
-.mat-card {
+.mat-mdc-card {
   margin-bottom: 10px;
 }
 
-.mat-card-content {
+.mat-mdc-card-content {
   display: inline-block;
   width: 95%;
+  box-sizing: border-box;
 }
 
-.mat-card-actions {
+.mat-mdc-card-actions {
   display: inline-block;
 }
 

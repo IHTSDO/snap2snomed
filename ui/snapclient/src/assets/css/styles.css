@@ -106,11 +106,12 @@ header {
   float: right;
 }
 
-.mat-toolbar {
+.mat-mdc-toolbar {
+  --mat-toolbar-container-background-color: white;
   background-color: white;
 }
 
-.mat-card-actions {
+.mat-mdc-card-actions {
   margin-top: 12px !important;
   margin-left: 16px !important;
   margin-bottom: 0px !important;
@@ -210,21 +211,14 @@ footer {
   clear: both;
   height: 30px;
   width: 100%;
-  position: sticky;
   margin-top: 20px;
   display: flex;
   flex-direction: row;
   align-content: flex-start;
   justify-content: space-evenly;
   flex-wrap: nowrap;
-  z-index: 100;
 }
 
-.footer-link {
-  padding: 0 20px 0 20px;
-  color: darkgray;
-  font-size: 0.8em;
-}
 
 @media only screen and (max-width: 1640px) {
   footer {
@@ -333,13 +327,13 @@ footer {
   border-color: #f5c6cb;
 }
 
-.backenderror-snackbar .mat-simple-snackbar-action span:before {
+.backenderror-snackbar .mat-mdc-snack-bar-action span:before {
     content: "\e5c9";
     font-family: "Material Icons";
     font-size: 1.5em;
 }
 
-.mat-snack-bar-container {
+.mat-mdc-snack-bar-container {
   background-color: #ffffff !important;
 }
 
@@ -347,16 +341,174 @@ flag {
   vertical-align: middle;
 }
 
-.selected-row {
+.selected-row .mat-mdc-cell {
   background-color: aliceblue;
 }
 
-.mat-tooltip {
+.mat-mdc-tooltip {
   font-size: 0.8em;
 }
 
 /** reduce font-size in tables **/
-.mat-cell td {
+.mat-mdc-cell td {
   font-size: smaller;
+}
+
+/** M3 raises secondary text colour; restore M2 grey for paginator and table headers.
+    :root (specificity 0-1-0) beats the theme's html (0-0-1) selectors unconditionally. */
+:root {
+  --mat-paginator-container-text-color: rgba(0, 0, 0, 0.54);
+  --mat-table-header-headline-color: rgba(0, 0, 0, 0.54);
+}
+
+/** Restore M2 appearance for paginator page-size select (M3 filled variant has grey bg + larger text) */
+.mat-mdc-paginator {
+  --mdc-filled-text-field-container-color: white;
+  --mat-paginator-select-trigger-text-size: 12px;
+}
+
+/* Accent colour (#ff4081) — add class="btn-accent" to elements needing pink */
+.mat-mdc-raised-button.btn-accent,
+.mat-mdc-unelevated-button.btn-accent {
+  --mat-button-protected-container-color: #ff4081;
+  --mat-button-protected-label-text-color: white;
+  --mat-button-filled-container-color: #ff4081;
+  --mat-button-filled-label-text-color: white;
+}
+
+.mat-mdc-fab.btn-accent {
+  --mdc-fab-container-color: #ff4081;
+  --mdc-fab-icon-color: white;
+}
+
+.mat-mdc-mini-fab.btn-accent {
+  --mdc-fab-small-container-color: #ff4081;
+  --mdc-fab-small-icon-color: white;
+  --mat-fab-small-container-shape: 50%;
+}
+
+.mat-mdc-icon-button.btn-accent {
+  --mat-icon-button-icon-color: #ff4081;
+}
+
+.mat-mdc-button.btn-accent {
+  --mdc-text-button-label-text-color: #ff4081;
+}
+
+/* Primary icon buttons and small FABs — add class="btn-primary" where needed */
+.mat-mdc-icon-button.btn-primary {
+  --mat-icon-button-icon-color: var(--mat-button-filled-container-color);
+}
+
+.mat-mdc-mini-fab.btn-primary {
+  --mat-fab-small-container-color: var(--mat-button-filled-container-color);
+  --mat-fab-small-foreground-color: var(--mat-button-filled-label-text-color, white);
+}
+
+/* Warn colour (#d32f2f) — add class="btn-warn" to elements needing red */
+.mat-mdc-icon-button.btn-warn {
+  --mat-icon-button-icon-color: #d32f2f;
+}
+
+/* Accent icons — replaces mat-icon color="accent" */
+.mat-icon.accent-icon {
+  color: #ff4081;
+}
+
+/* Accent checkboxes — replaces mat-checkbox color="accent" */
+.mat-mdc-checkbox.accent-checkbox {
+  --mdc-checkbox-selected-checkmark-color: white;
+  --mdc-checkbox-selected-icon-color: #ff4081;
+  --mdc-checkbox-selected-hover-icon-color: #ff4081;
+  --mdc-checkbox-selected-focus-icon-color: #ff4081;
+  --mdc-checkbox-selected-pressed-icon-color: #ff4081;
+  --mat-checkbox-selected-checkmark-color: white;
+  --mat-checkbox-selected-focus-state-layer-color: #ff4081;
+  --mat-checkbox-selected-hover-state-layer-color: #ff4081;
+  --mat-checkbox-selected-pressed-state-layer-color: #ff4081;
+}
+
+/* Accent chips — replaces mat-chip-option color="accent" */
+.mat-mdc-chip-option.accent-chip {
+  --mat-chip-elevated-selected-container-color: #ff4081;
+  --mat-chip-selected-label-text-color: white;
+  --mat-chip-with-icon-selected-icon-color: white;
+  --mat-chip-selected-trailing-icon-color: white;
+  width: 32px;
+  height: 32px;
+  min-height: 32px;
+  border-radius: 50% !important;
+  padding: 0 !important;
+}
+
+.mat-mdc-chip-option.accent-chip .mdc-evolution-chip__action--primary {
+  padding-left: 0;
+  padding-right: 0;
+  width: 100%;
+  justify-content: center;
+}
+
+.mat-mdc-chip-option.accent-chip .mat-mdc-chip-action-label {
+  padding: 0;
+  overflow: visible;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.mat-mdc-chip-option.accent-chip .mat-mdc-chip-graphic {
+  display: none;
+}
+
+/* Accent display chip — use mat-chip (not mat-chip-option) for non-selectable accent chips */
+.mat-mdc-chip.accent-chip {
+  --mat-chip-elevated-container-color: #ff4081;
+  --mat-chip-label-text-color: white;
+  --mat-chip-with-icon-icon-color: white;
+  --mat-chip-outline-color: transparent;
+}
+
+/* Badge styling — primary colour, rounded square, not squished */
+.mat-badge-content {
+  background-color: #3F51B5 !important;
+  color: white !important;
+  border-radius: 4px !important;
+  width: auto !important;
+  min-width: 14px !important;
+  height: 18px !important;
+  line-height: 18px !important;
+  padding: 0 4px !important;
+}
+
+/* Select panel that sizes to its content rather than the trigger width */
+.fit-content-panel {
+  min-width: fit-content !important;
+}
+
+/* Accent radio buttons — replaces mat-radio-button color="accent" */
+.accent-radio .mat-mdc-radio-button {
+  --mat-radio-selected-icon-color: #ff4081;
+  --mat-radio-selected-hover-icon-color: #ff4081;
+  --mat-radio-selected-focus-icon-color: #ff4081;
+  --mat-radio-selected-pressed-icon-color: #ff4081;
+  --mat-radio-checked-ripple-color: #ff4081;
+}
+
+/* Accent checkboxes — replaces mat-checkbox color="accent" */
+.mat-mdc-checkbox.accent-checkbox {
+  --mat-checkbox-selected-icon-color: #ff4081;
+  --mat-checkbox-selected-hover-icon-color: #ff4081;
+  --mat-checkbox-selected-focus-icon-color: #ff4081;
+  --mat-checkbox-selected-pressed-icon-color: #ff4081;
+  --mat-checkbox-selected-checkmark-color: white;
+}
+
+/* lib-shrimp-hierarchy (@csiro/shrimp-hierarchy-view) draws a fixed "initialising..." SVG
+   banner on construction that its Angular wrapper has no way to update or clear, so it never
+   reflects the actual (correctly loaded) hierarchy data. Hide it until the library exposes a
+   way to update/remove it. */
+.hierarchy-view .banner {
+  display: none;
 }
 

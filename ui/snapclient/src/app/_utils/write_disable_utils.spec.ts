@@ -40,7 +40,7 @@ describe('WriteDisableUtils', () => {
     let testLoop = 1;
     [test1].forEach(
       (test) => {
-        expect(WriteDisableUtils.isStatusSelectionDisabled(test[0], test[1])).toBe(test[2], `Test:${testLoop}`);
+        expect(WriteDisableUtils.isStatusSelectionDisabled(test[0], test[1]), `Test:${testLoop}`).toBe(test[2]);
         testLoop += 1;
       });
   });
@@ -61,7 +61,7 @@ describe('WriteDisableUtils', () => {
     let testLoop = 1;
     [test1].forEach(
       (test) => {
-        expect(WriteDisableUtils.isEditDisabled(test[0], test[1])).toBe(test[2], `Test:${testLoop}`);
+        expect(WriteDisableUtils.isEditDisabled(test[0], test[1]), `Test:${testLoop}`).toBe(test[2]);
         testLoop += 1;
       });
   });
@@ -82,7 +82,7 @@ describe('WriteDisableUtils', () => {
     let testLoop = 1;
     [test1].forEach(
       (test) => {
-        expect(WriteDisableUtils.isFlaggingDisabled(test[0], test[1])).toBe(test[2], `Test:${testLoop}`);
+        expect(WriteDisableUtils.isFlaggingDisabled(test[0], test[1]), `Test:${testLoop}`).toBe(test[2]);
         testLoop += 1;
       });
   });

@@ -16,7 +16,10 @@
 
 import {Pipe, PipeTransform} from '@angular/core';
 
-@Pipe({name: 'initials'})
+@Pipe({
+    name: 'initials',
+    standalone: false
+})
 export class InitialsPipe implements PipeTransform {
   transform(namefield: string): string {
     if (!namefield) {

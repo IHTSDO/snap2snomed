@@ -18,14 +18,9 @@ package org.snomed.snap2snomed.controller;
 
 import org.snomed.snap2snomed.controller.dto.ImportMappingFileDetails;
 import org.snomed.snap2snomed.controller.dto.MappingImportResponse;
-import org.snomed.snap2snomed.problem.auth.NoSuchUserProblem;
-import org.snomed.snap2snomed.problem.auth.NotAuthorisedProblem;
-import org.snomed.snap2snomed.security.AuthenticationFacade;
-import org.snomed.snap2snomed.security.WebSecurity;
 import org.snomed.snap2snomed.service.CodeSetImportService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.HttpMediaTypeNotAcceptableException;
 import org.springframework.web.bind.annotation.PostMapping;

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {HttpParams} from '@angular/common/http';
+import { HttpParams } from '@angular/common/http';
 import {Action} from '@ngrx/store';
 import {MappedRowDetailsDto} from 'src/app/_models/map_row';
 import {CreateMappingParams, MapViewResults} from 'src/app/_services/map.service';

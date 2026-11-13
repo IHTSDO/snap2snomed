@@ -19,9 +19,10 @@ import {SourceCode} from '../../_models/source_code';
 import {TranslateService} from '@ngx-translate/core';
 
 @Component({
-  selector: 'app-source-detail',
-  templateUrl: './source-detail.component.html',
-  styleUrls: ['./source-detail.component.css']
+    selector: 'app-source-detail',
+    templateUrl: './source-detail.component.html',
+    styleUrls: ['./source-detail.component.css'],
+    standalone: false
 })
 export class SourceDetailComponent implements OnInit {
 

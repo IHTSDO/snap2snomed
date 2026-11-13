@@ -14,6 +14,13 @@
 
 mat-icon {
   margin-right: 5px;
+  flex-shrink: 0;
+  overflow: visible;
+}
+
+.black-text {
+  --mat-button-protected-label-text-color: black;
+  --mat-button-filled-label-text-color: black;
 }
 
 .table-container {
@@ -21,8 +28,12 @@ mat-icon {
   overflow: auto;
 }
 
-.mat-form-field {
+.mat-mdc-form-field {
   margin-right: 10px;
+}
+
+.mat-mdc-card-actions {
+  gap: 8px;
 }
 
 .row {

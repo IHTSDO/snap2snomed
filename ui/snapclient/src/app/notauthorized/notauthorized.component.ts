@@ -17,9 +17,10 @@
 import { Component, OnInit } from '@angular/core';
 
 @Component({
-  selector: 'app-notauthorized',
-  templateUrl: './notauthorized.component.html',
-  styleUrls: ['./notauthorized.component.css']
+    selector: 'app-notauthorized',
+    templateUrl: './notauthorized.component.html',
+    styleUrls: ['./notauthorized.component.css'],
+    standalone: false
 })
 export class NotauthorizedComponent implements OnInit {
 

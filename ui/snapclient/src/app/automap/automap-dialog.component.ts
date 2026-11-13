@@ -25,9 +25,10 @@ export interface ProgressDialogData extends DialogData {
 }
 
 @Component({
-  selector: 'app-automap-dialog',
-  templateUrl: './automap-dialog.component.html',
-  styleUrls: ['./automap-dialog.component.css'],
+    selector: 'app-automap-dialog',
+    templateUrl: './automap-dialog.component.html',
+    styleUrls: ['./automap-dialog.component.css'],
+    standalone: false
 })
 export class AutomapDialogComponent {
   processing: boolean;

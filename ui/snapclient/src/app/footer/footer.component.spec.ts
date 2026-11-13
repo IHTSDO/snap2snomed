@@ -1,5 +1,5 @@
 /*
- * Copyright © 2022 SNOMED International
+ * Copyright © 2026 SNOMED International
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,10 +20,11 @@ import {FooterComponent} from './footer.component';
 import {DebugElement} from '@angular/core';
 import {By} from '@angular/platform-browser';
 import {APP_CONFIG} from "../app.config";
-import {MAT_DIALOG_DATA, MatDialogModule} from "@angular/material/dialog";
+import { MatDialogModule } from "@angular/material/dialog";
 import {TranslateLoader, TranslateModule, TranslateService} from '@ngx-translate/core';
-import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { HttpLoaderFactory } from '../app.module';
+import { HttpClient, provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 
 describe('FooterComponent', () => {
   let component: FooterComponent;
@@ -31,22 +32,21 @@ describe('FooterComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [
-        MatDialogModule,
-        HttpClientTestingModule,
+    declarations: [FooterComponent],
+    imports: [MatDialogModule,
         TranslateModule.forRoot({
-          loader: {
-            provide: TranslateLoader,
-            useFactory: HttpLoaderFactory,
-            deps: [HttpClientTestingModule]
-          }
-        })
-      ],
-      providers: [
-        TranslateService, { provide: APP_CONFIG, useValue: {} }
-      ],
-      declarations: [FooterComponent]
-    })
+            loader: {
+                provide: TranslateLoader,
+                useFactory: HttpLoaderFactory,
+                deps: [HttpClient]
+            }
+        })],
+    providers: [
+        TranslateService, { provide: APP_CONFIG, useValue: {} },
+        provideHttpClient(withInterceptorsFromDi()),
+        provideHttpClientTesting()
+    ]
+})
       .compileComponents();
   });
 

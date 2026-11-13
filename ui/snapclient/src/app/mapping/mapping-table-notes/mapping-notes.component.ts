@@ -23,9 +23,10 @@ import { MatTable, MatTableDataSource } from '@angular/material/table';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 
 @Component({
-  selector: 'app-mapping-notes',
-  templateUrl: './mapping-notes.component.html',
-  styleUrls: ['./mapping-notes.component.css']
+    selector: 'app-mapping-notes',
+    templateUrl: './mapping-notes.component.html',
+    styleUrls: ['./mapping-notes.component.css'],
+    standalone: false
 })
 export class MappingNotesComponent implements OnInit, OnDestroy {
 

@@ -18,9 +18,9 @@ package org.snomed.snap2snomed.repository.handler;
 
 import java.util.Set;
 
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-import javax.validation.constraints.NotNull;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.validation.constraints.NotNull;
 
 import org.snomed.snap2snomed.model.Map;
 import org.snomed.snap2snomed.model.MapRow;

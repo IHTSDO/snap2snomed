@@ -16,7 +16,10 @@
 
 import {Pipe, PipeTransform} from '@angular/core';
 
-@Pipe({name: 'trim'})
+@Pipe({
+    name: 'trim',
+    standalone: false
+})
 export class TrimPipe implements PipeTransform {
   transform(namefield: string | undefined): string | undefined {
     const maxwidth = (window.innerWidth <= 1000) ? 20 : (window.innerWidth <= 2000) ? 40 : 60;

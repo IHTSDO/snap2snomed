@@ -1,5 +1,5 @@
 /*
- * Copyright © 2022 SNOMED International
+ * Copyright © 2026 SNOMED International
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +19,7 @@ import {NestedTreeControl} from '@angular/cdk/tree';
 import {FhirService} from '../_services/fhir.service';
 import {Subscription} from 'rxjs';
 import {SelectionService} from '../_services/selection.service';
-import {ConceptNode} from '@csiro/shrimp-hierarchy-view';
-import {Coding} from '../store/fhir-feature/fhir.reducer';
+import {Coding, ConceptNode} from '../store/fhir-feature/fhir.reducer';
 import {MatTreeNestedDataSource} from '@angular/material/tree';
 import {Task} from "../_models/task";
 
@@ -31,9 +30,10 @@ export class Node {
 }
 
 @Component({
-  selector: 'app-tree-view',
-  templateUrl: './tree-view.component.html',
-  styleUrls: ['./tree-view.component.css']
+    selector: 'app-tree-view',
+    templateUrl: './tree-view.component.html',
+    styleUrls: ['./tree-view.component.css'],
+    standalone: false
 })
 export class TreeViewComponent implements OnInit, OnDestroy {
 

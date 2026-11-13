@@ -16,7 +16,7 @@
 
 package org.snomed.snap2snomed.problem;
 
-import org.zalando.problem.Status;
+import org.springframework.http.HttpStatus;
 
 public class CodeSetImportProblem extends Snap2SnomedProblem {
 
@@ -25,7 +25,7 @@ public class CodeSetImportProblem extends Snap2SnomedProblem {
   private static final String BASE_TYPE = "codeset-import/";
 
   public CodeSetImportProblem(String subtype, String title, String detail) {
-    super(BASE_TYPE + subtype, title, Status.BAD_REQUEST, detail);
+    super(BASE_TYPE + subtype, title, HttpStatus.BAD_REQUEST, detail);
   }
 
   public CodeSetImportProblem(String subtype, String title) {

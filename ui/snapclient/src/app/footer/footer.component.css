@@ -1,0 +1,11 @@
+.container-fluid {
+  width: 100%;
+  text-align: center;
+}
+
+a.footer-link {
+  display: inline-block;
+  padding: 0 20px;
+  color: darkgray;
+  font-size: 0.8em;
+}

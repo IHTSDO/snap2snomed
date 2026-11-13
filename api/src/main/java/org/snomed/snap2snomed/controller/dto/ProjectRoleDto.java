@@ -17,8 +17,8 @@
 package org.snomed.snap2snomed.controller.dto;
 
 import java.util.Set;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.Data;
 import org.snomed.snap2snomed.model.User;
 

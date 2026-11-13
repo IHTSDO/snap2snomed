@@ -1,5 +1,5 @@
 /*
- * Copyright © 2022 SNOMED International
+ * Copyright © 2026 SNOMED International
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,14 +14,20 @@
  * limitations under the License.
  */
 
-import {HttpClientTestingModule} from '@angular/common/http/testing';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import {NO_ERRORS_SCHEMA} from '@angular/core';
 import {TranslateLoader, TranslateModule, TranslateService} from '@ngx-translate/core';
 import {APP_CONFIG} from '../app.config';
 import {HttpLoaderFactory} from '../app.module';
 import {SelectionService} from '../_services/selection.service';
 
 import { TreeViewComponent } from './tree-view.component';
+import { HttpClient, provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { MatTreeModule } from '@angular/material/tree';
+import { MatCardModule } from '@angular/material/card';
+import { MatIconModule } from '@angular/material/icon';
+import { MatButtonModule } from '@angular/material/button';
 
 describe('TreeViewComponent', () => {
   let component: TreeViewComponent;
@@ -29,21 +35,23 @@ describe('TreeViewComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [
-        HttpClientTestingModule,
-        TranslateModule.forRoot({
-          loader: {
-            provide: TranslateLoader,
-            useFactory: HttpLoaderFactory,
-            deps: [HttpClientTestingModule]
-          }
-        })
-      ],
-      providers: [TranslateService, SelectionService,
-        {provide: APP_CONFIG, useValue: {}},
-      ],
-      declarations: [ TreeViewComponent ]
-    })
+    declarations: [TreeViewComponent],
+    schemas: [NO_ERRORS_SCHEMA],
+    imports: [
+      MatTreeModule,
+      MatCardModule,
+      MatIconModule,
+      MatButtonModule,
+      TranslateModule.forRoot({
+            loader: {
+                provide: TranslateLoader,
+                useFactory: HttpLoaderFactory,
+                deps: [HttpClient]
+            }
+        })],
+    providers: [TranslateService, SelectionService,
+        { provide: APP_CONFIG, useValue: {} }, provideHttpClient(withInterceptorsFromDi()), provideHttpClientTesting(),]
+})
     .compileComponents();
   });
 

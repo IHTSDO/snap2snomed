@@ -26,9 +26,10 @@ export interface ErrorInfo {
 }
 
 @Component({
-  selector: 'app-errormessage',
-  templateUrl: './errormessage.component.html',
-  styleUrls: ['./errormessage.component.css']
+    selector: 'app-errormessage',
+    templateUrl: './errormessage.component.html',
+    styleUrls: ['./errormessage.component.css'],
+    standalone: false
 })
 export class ErrormessageComponent implements AfterViewChecked {
   @Input() error: ErrorInfo = {};

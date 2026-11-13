@@ -1,5 +1,5 @@
 /*
- * Copyright © 2022 SNOMED International
+ * Copyright © 2026 SNOMED International
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,10 +26,12 @@ import {TranslateService} from '@ngx-translate/core';
 import {APP_CONFIG, AppConfig} from './app.config';
 import {ErrorInfo} from './errormessage/errormessage.component';
 
+
 @Component({
-  selector: 'app-root',
-  templateUrl: './app.component.html',
-  styleUrls: ['./app.component.css']
+    selector: 'app-root',
+    templateUrl: './app.component.html',
+    styleUrls: ['./app.component.css'],
+    standalone: false
 })
 export class AppComponent implements OnInit {
   static translator: TranslateService;
@@ -70,6 +72,9 @@ export class AppComponent implements OnInit {
       if (code && code.length > 1) {
         this.isLoading = true;
         this.store.dispatch(new LogIn(code));
+      } else if (params.error) {
+        this.hasError = true;
+        this.errorMsg = params.error_description ?? params.error;
       }
     });
   }
@@ -79,7 +84,7 @@ export class AppComponent implements OnInit {
     AppComponent.translator = this.translate;
     this.translate.setDefaultLang(this.config.defaultLang);
     const supportedLangs = ['en', 'fr', 'nl', 'hu', 'sv'];
-    const userLang = this.translate.getBrowserLang(); // TODO - Get from user profile when ready
+    const userLang = this.translate.getBrowserLang() ?? this.config.defaultLang; // TODO - Get from user profile when ready
     const lang = supportedLangs.indexOf(userLang) >= 0 ? userLang : this.config.defaultLang;
     this.translate.addLangs(supportedLangs);
     this.translate.use(lang);

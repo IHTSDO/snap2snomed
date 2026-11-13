@@ -16,7 +16,7 @@
 
 package org.snomed.snap2snomed.config;
 
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotNull;
 import org.hibernate.validator.constraints.URL;
 import lombok.Getter;
 import lombok.Setter;

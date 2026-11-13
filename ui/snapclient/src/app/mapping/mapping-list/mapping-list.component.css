@@ -1,6 +1,9 @@
 .container {
   height: calc(100vh - 249px);
   margin: 10px;
+  background-color: #fafafa;
+  display: flex;
+  flex-direction: column;
 }
 
 .container.has-error {
@@ -8,46 +11,58 @@
 }
 
 .container-scroll-list {
-  height: calc(100vh - 306px);
+  flex: 1;
   overflow-y: auto;
   width: 100%;
 }
 
 .container-scroll-list.has-error {
-  height: calc(100vh - 385px);
+  flex: 1;
 }
 
 .filter {
   width: 300px;
+  --mat-form-field-filled-container-color: white;
+  margin-left: 0;
 }
 
 .header {
-  display: block;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  flex-wrap: nowrap;
   position: sticky;
   width: 100%;
   top: 0;
   z-index: 2;
+  background-color: #fafafa;
 }
 
 .mapping-add {
-  background-color: #e6e6e6;
+  background-color: white;
+  width: 840px;
 }
 
-.mat-cell, .mat-header-cell {
+mat-toolbar {
+  justify-content: flex-end;
+}
+
+.mat-mdc-cell, .mat-mdc-header-cell {
   padding: 10px;
 }
 
-.mat-cell > button {
+.mat-mdc-cell > button {
   margin: 2px 3px;
 }
 
-.mat-cell > .mat-icon-button {
+.mat-mdc-cell > .mat-mdc-icon-button {
   border-radius: 4px;
   width: 62px;
 }
 
 .mat-column-actions {
-  width: 8%;
+  width: 200px;
+  white-space: nowrap;
 }
 
 .mat-column-description {
@@ -74,27 +89,32 @@
   width: 10%;
 }
 
-.mat-form-field {
+.mat-mdc-form-field {
   font-size: 12px;
+  --mat-form-field-container-text-size: 12px;
+  --mat-form-field-filled-label-text-size: 12px;
+  --mat-select-trigger-text-size: 12px;
   margin-left: 10px;
-  margin-top: 6px;
-  float: left;
-  z-index: 3;
 }
 
-.mat-row {
+
+mat-paginator {
+  flex: 1;
+}
+
+.mat-mdc-row {
   height: 61px;
   cursor: pointer;
 }
 
 button.cancel {
   background: none;
-  z-index: 4;
-  float: right;
-  position: absolute;
   border: 0;
-  right: -4px;
-  top: -10px;
+}
+
+button[mat-stroked-button] {
+  --mat-button-outlined-icon-spacing: 0px;
+  --mat-button-outlined-icon-offset: 0px;
 }
 
 table {
@@ -116,13 +136,18 @@ table {
   }
 }
 
-@media only screen and (max-height: 920px) {
-  .container-scroll-list {
-    height: calc(99vh - 249px);
-  }
+
+.mat-mdc-row:hover .mat-mdc-cell {
+  background-color: #dcf1fc;
 }
 
-.mat-row:hover .mat-cell {
-  background-color: #dcf1fc;
+.no-maps-message {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 16px 10px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+  background-color: white;
+  font-size: 1.2em;
 }
 

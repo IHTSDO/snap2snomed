@@ -38,7 +38,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import org.zalando.problem.Status;
 
 @Validated
 @RestController
@@ -89,7 +88,7 @@ public class ProjectRestController {
 
     if (!webSecurity.isAdminUser() && !webSecurity.isProjectOwnerForId(projectId)) {
       throw new DeleteProblem("project", "Only a project owner can delete a project",
-          Status.METHOD_NOT_ALLOWED);
+          HttpStatus.METHOD_NOT_ALLOWED);
     }
 
     projectService.deleteProject(project);

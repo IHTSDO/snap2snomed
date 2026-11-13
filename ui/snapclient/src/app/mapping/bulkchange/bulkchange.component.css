@@ -2,6 +2,13 @@
   width: 800px;
   height: 100%;
   overflow: unset;
+  box-sizing: border-box;
+  padding: 0 24px 24px;
+}
+
+.setwidth h2[mat-dialog-title] {
+  margin-left: -24px;
+  margin-right: -24px;
 }
 
 .row {
@@ -21,6 +28,10 @@
   align-items: center;
 }
 
+mat-card > .box {
+  padding: 16px;
+}
+
 .spaced {
   justify-content: space-between;
 }
@@ -30,15 +41,11 @@
   margin-bottom: 15px;
 }
 
-.mat-checkbox {
+.mat-mdc-checkbox {
   margin-right: 5px;
 }
 
-.auto-margin-top {
-  margin-top: auto;
-}
-
-.mat-card {
+.mat-mdc-card {
   margin-bottom: 15px;
 }
 

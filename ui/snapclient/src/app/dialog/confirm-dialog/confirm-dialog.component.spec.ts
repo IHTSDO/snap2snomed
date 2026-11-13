@@ -14,16 +14,20 @@
  * limitations under the License.
  */
 
-import {ComponentFixture, TestBed} from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import {MAT_DIALOG_DATA, MatDialogModule, MatDialogRef} from '@angular/material/dialog';
-import {ConfirmDialogComponent} from './confirm-dialog.component';
+import {
+  MAT_DIALOG_DATA,
+  MatDialogModule,
+  MatDialogRef,
+} from '@angular/material/dialog';
+import { ConfirmDialogComponent } from './confirm-dialog.component';
 
 describe('ConfirmDialogComponent', () => {
   let component: ConfirmDialogComponent;
   let fixture: ComponentFixture<ConfirmDialogComponent>;
   const mockDialogRef = {
-    close: jasmine.createSpy('close')
+    close: vi.fn(),
   };
 
   const test_title = 'test title';
@@ -37,19 +41,19 @@ describe('ConfirmDialogComponent', () => {
       declarations: [ConfirmDialogComponent],
       imports: [MatDialogModule],
       providers: [
-        {provide: MatDialogRef, useValue: mockDialogRef},
+        { provide: MatDialogRef, useValue: mockDialogRef },
         {
-          provide: MAT_DIALOG_DATA, useValue: {
+          provide: MAT_DIALOG_DATA,
+          useValue: {
             title: test_title,
             message: test_message,
             button: test_button,
             cancel: test_cancel,
-            type: test_type
-          }
+            type: test_type,
+          },
         },
-      ]
-    })
-      .compileComponents();
+      ],
+    }).compileComponents();
   });
 
   beforeEach(() => {

@@ -15,7 +15,7 @@
  */
 
 import {Inject, Injectable} from '@angular/core';
-import {HttpClient, HttpParams} from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import {Observable} from 'rxjs';
 import {Mapping} from '../_models/mapping';
 import {Project} from '../_models/project';
@@ -415,8 +415,9 @@ export class MapService {
   }
   
   getTagCount(mapId: string, tag: string): Observable<MapRowTargetResults> {
-    const url = `${this.config.apiBaseUrl}/mapRowTargets?tags=${tag}&mapId=${mapId}`;
+    const url = `${this.config.apiBaseUrl}/mapRowTargets/search/findByMapIdAndTag`;
     const header = ServiceUtils.getHTTPHeaders();
+    header.params = new HttpParams().set('mapId', mapId).set('tag', tag);
     return this.http.get<MapRowTargetResults>(url, header);
   }
 
@@ -449,28 +450,31 @@ export class MapService {
    * Get Targets for Source Code
    */
   findTargetsBySourceIndex(map_id: string, source_idx: string, task: Task | undefined): Observable<MapRowTargetResults> {
-    const url = `${this.config.apiBaseUrl}/mapRowTargets`;
     const header = ServiceUtils.getHTTPHeaders();
+    let url: string;
 
     if (task?.type === TaskType.AUTHOR) {
+      url = `${this.config.apiBaseUrl}/mapRowTargets/search/findByMapIdAndSourceCodeIndexAndAuthorTaskId`;
       header.params = new HttpParams()
       .set('projection', 'targetView')
       .set('mapId', map_id)
-      .set('row.sourceCode.index', source_idx)
-      .set('row.authorTask.id', task.id);
+      .set('sourceCodeIndex', source_idx)
+      .set('taskId', task.id);
     }
     else if (task?.type === TaskType.RECONCILE) {
+      url = `${this.config.apiBaseUrl}/mapRowTargets/search/findByMapIdAndSourceCodeIndexAndReconcileTaskId`;
       header.params = new HttpParams()
       .set('projection', 'targetView')
       .set('mapId', map_id)
-      .set('row.sourceCode.index', source_idx)
-      .set('row.reconcileTask.id', task.id);
+      .set('sourceCodeIndex', source_idx)
+      .set('taskId', task.id);
     }
     else {
+      url = `${this.config.apiBaseUrl}/mapRowTargets/search/findByMapIdAndSourceCodeIndex`;
       header.params = new HttpParams()
       .set('projection', 'targetView')
       .set('mapId', map_id)
-      .set('row.sourceCode.index', source_idx);
+      .set('sourceCodeIndex', source_idx);
     }
     return this.http.get<MapRowTargetResults>(url, header);
   }

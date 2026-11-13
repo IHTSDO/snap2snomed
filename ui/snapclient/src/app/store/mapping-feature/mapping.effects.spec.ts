@@ -1,5 +1,5 @@
 /*
- * Copyright © 2022 SNOMED International
+ * Copyright © 2026 SNOMED International
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,34 +16,34 @@
 
 import {TestBed} from '@angular/core/testing';
 import {provideMockActions} from '@ngrx/effects/testing';
-import {Observable} from 'rxjs';
+import {EMPTY, Observable} from 'rxjs';
 
 import {MappingEffects} from './mapping.effects';
-import {HttpClientTestingModule} from '@angular/common/http/testing';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import {provideMockStore} from '@ngrx/store/testing';
 import {initialAppState} from '../app.state';
 import { APP_CONFIG } from '../../app.config';
 import {RouterTestingModule} from '@angular/router/testing';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 
 describe('MappingEffects', () => {
-  let actions$: Observable<any>;
+  let actions$: Observable<any> = EMPTY;
   let effects: MappingEffects;
 
   const initialState = initialAppState;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      imports: [
-        RouterTestingModule,
-        HttpClientTestingModule
-      ],
-      providers: [
+    imports: [RouterTestingModule],
+    providers: [
         { provide: APP_CONFIG, useValue: {} },
         MappingEffects,
         provideMockActions(() => actions$),
-        provideMockStore({initialState})
-      ]
-    });
+        provideMockStore({ initialState }),
+        provideHttpClient(withInterceptorsFromDi()),
+        provideHttpClientTesting()
+    ]
+});
 
     effects = TestBed.inject(MappingEffects);
   });

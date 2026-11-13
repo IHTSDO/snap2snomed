@@ -1,5 +1,5 @@
 /*
- * Copyright © 2022 SNOMED International
+ * Copyright © 2062 SNOMED International
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 
 import {ComponentFixture, TestBed} from '@angular/core/testing';
 import {RouterTestingModule} from '@angular/router/testing';
-import {HttpClientTestingModule} from '@angular/common/http/testing';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import {MatButtonModule} from '@angular/material/button';
 import {MatIconModule} from '@angular/material/icon';
 import {MatCardModule} from '@angular/material/card';
@@ -43,6 +43,7 @@ import {LastupdatedPipe} from '../../_utils/lastupdated_pipe';
 import {InitialsPipe} from '../../_utils/initialize_pipe';
 import {GravatarComponent} from '../../user/gravatar/gravatar.component';
 import {NotesItemComponent} from './notes-item.component';
+import { HttpClient, provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 
 describe('NotesItemComponent', () => {
   let component: NotesItemComponent;
@@ -51,9 +52,8 @@ describe('NotesItemComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [
-        RouterTestingModule,
-        HttpClientTestingModule,
+    declarations: [NotesItemComponent, UserChipComponent, LastupdatedPipe, InitialsPipe, GravatarComponent],
+    imports: [RouterTestingModule,
         MatButtonModule,
         MatIconModule,
         MatCardModule,
@@ -64,21 +64,21 @@ describe('NotesItemComponent', () => {
         NoopAnimationsModule,
         FormsModule,
         TranslateModule.forRoot({
-          loader: {
-            provide: TranslateLoader,
-            useFactory: HttpLoaderFactory,
-            deps: [HttpClientTestingModule]
-          }
-        })
-      ],
-      providers: [
-        {provide: APP_CONFIG, useValue: {}},
+            loader: {
+                provide: TranslateLoader,
+                useFactory: HttpLoaderFactory,
+                deps: [HttpClient]
+            }
+        })],
+    providers: [
+        { provide: APP_CONFIG, useValue: {} },
         provideMockStore({
-          initialState: initialAppState,
+            initialState: initialAppState,
         }), TranslateService,
-      ],
-      declarations: [NotesItemComponent, UserChipComponent, LastupdatedPipe, InitialsPipe, GravatarComponent]
-    })
+        provideHttpClient(withInterceptorsFromDi()),
+        provideHttpClientTesting(),
+    ]
+})
       .compileComponents();
   });
 
@@ -98,12 +98,12 @@ describe('NotesItemComponent', () => {
   });
 
   it('should contain notes card', () => {
-    el = fixture.debugElement.query(By.css('.mat-card'));
+    el = fixture.debugElement.query(By.css('.mat-mdc-card'));
     expect(el).toBeTruthy();
   });
 
   it('should contain notes text', () => {
-    el = fixture.debugElement.query(By.css('.mat-card p'));
+    el = fixture.debugElement.query(By.css('.mat-mdc-card p'));
     expect(el).toBeTruthy();
     expect(el.nativeElement.textContent).toBe('Test notes');
   });

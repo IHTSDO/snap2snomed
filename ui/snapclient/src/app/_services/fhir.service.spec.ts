@@ -17,10 +17,11 @@
 import {TestBed} from '@angular/core/testing';
 
 import {FhirService} from './fhir.service';
-import {HttpClientTestingModule} from '@angular/common/http/testing';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import {provideMockStore} from '@ngrx/store/testing';
 import {initialAppState} from '../store/app.state';
 import { APP_CONFIG } from '../app.config';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 
 describe('FhirService', () => {
   let service: FhirService;
@@ -29,14 +30,15 @@ describe('FhirService', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      imports: [
-        HttpClientTestingModule
-      ],
-      providers: [
-        provideMockStore({initialState}),
+    imports: [],
+    providers: [
+        provideMockStore({ initialState }),
         FhirService,
-        { provide: APP_CONFIG, useValue: {} }],
-    });
+        { provide: APP_CONFIG, useValue: {} },
+        provideHttpClient(withInterceptorsFromDi()),
+        provideHttpClientTesting()
+    ]
+});
     service = TestBed.inject(FhirService);
   });
 

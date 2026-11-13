@@ -100,9 +100,9 @@ public class MapRowTargetResourceIT extends IntegrationTestBase {
     System.err.flush();
     restClient.givenDefaultUser()
         .queryParam("projection", "targetView")
-        .queryParam("row.sourceCode.index", "1")
+        .queryParam("sourceCodeIndex", "1")
         .queryParam("mapId", mapId).log().all()
-        .get("/mapRowTargets")
+        .get("/mapRowTargets/search/findByMapIdAndSourceCodeIndex")
         .then().log().body().statusCode(200)
         .body("content", hasSize(1))
         .body("content[0].source.code", is("map row code 1."))
@@ -118,9 +118,9 @@ public class MapRowTargetResourceIT extends IntegrationTestBase {
 
     restClient.givenDefaultUser()
         .queryParam("projection", "targetView")
-        .queryParam("row.sourceCode.index", "10")
+        .queryParam("sourceCodeIndex", "10")
         .queryParam("mapId", mapId).log().all()
-        .get("/mapRowTargets")
+        .get("/mapRowTargets/search/findByMapIdAndSourceCodeIndex")
         .then().log().body().statusCode(200)
         .body("content", hasSize(1))
         .body("content[0]", not(hasKey("id")));

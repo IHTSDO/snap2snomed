@@ -1,5 +1,5 @@
 /*
- * Copyright © 2022 SNOMED International
+ * Copyright © 2026 SNOMED International
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ import {User} from '../../_models/user';
 import {Mapping} from '../../_models/mapping';
 import {Task, TaskType} from '../../_models/task';
 import {RouterTestingModule} from '@angular/router/testing';
-import {HttpClientTestingModule} from '@angular/common/http/testing';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {HttpLoaderFactory} from '../../app.module';
 import {APP_CONFIG} from '../../app.config';
@@ -35,6 +35,17 @@ import {By} from '@angular/platform-browser';
 import {MatDialogModule} from '@angular/material/dialog';
 import {MapRowStatus} from '../../_models/map_row';
 import {MatTooltipModule} from '@angular/material/tooltip';
+import {MatCheckboxModule} from '@angular/material/checkbox';
+import {MatTreeModule} from '@angular/material/tree';
+import {MatCardModule} from '@angular/material/card';
+import {MatIconModule} from '@angular/material/icon';
+import {MatButtonToggleModule} from '@angular/material/button-toggle';
+import {MatChipsModule} from '@angular/material/chips';
+import {FormsModule} from '@angular/forms';
+import {ClipboardModule} from '@angular/cdk/clipboard';
+import {NO_ERRORS_SCHEMA} from '@angular/core';
+import {TreeViewComponent} from '../../tree-view/tree-view.component';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 
 describe('MappingDetailComponent', () => {
   let component: MappingDetailComponent;
@@ -66,30 +77,38 @@ describe('MappingDetailComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [
-        RouterTestingModule,
-        HttpClientTestingModule,
+    declarations: [MappingDetailComponent, TreeViewComponent],
+    schemas: [NO_ERRORS_SCHEMA],
+    imports: [RouterTestingModule,
         BrowserAnimationsModule,
         MatDialogModule,
         MatTooltipModule,
+        MatCheckboxModule,
+        MatTreeModule,
+        MatCardModule,
+        MatIconModule,
+        MatButtonToggleModule,
+        MatChipsModule,
+        FormsModule,
+        ClipboardModule,
         TranslateModule.forRoot({
-          loader: {
-            provide: TranslateLoader,
-            useFactory: HttpLoaderFactory,
-            deps: [HttpClientTestingModule]
-          }
-        })
-      ],
-      providers: [
-        {provide: APP_CONFIG, useValue: {}},
+            loader: {
+                provide: TranslateLoader,
+                useFactory: HttpLoaderFactory
+            }
+        })],
+    providers: [
+        { provide: APP_CONFIG, useValue: {} },
         provideMockStore({
-          initialState: initialAppState,
-          selectors: [
-            {selector: selectCurrentUser, value: user},
-          ],
-        }), TranslateService],
-      declarations: [MappingDetailComponent]
-    })
+            initialState: initialAppState,
+            selectors: [
+                { selector: selectCurrentUser, value: user },
+            ],
+        }), TranslateService,
+        provideHttpClient(withInterceptorsFromDi()),
+        provideHttpClientTesting()
+    ]
+})
       .compileComponents();
     store = TestBed.inject(MockStore);
     translateService = TestBed.inject(TranslateService);

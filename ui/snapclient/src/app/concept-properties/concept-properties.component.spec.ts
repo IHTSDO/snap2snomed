@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideMockStore } from '@ngrx/store/testing';
 import { TranslateLoader, TranslateModule, TranslateService } from '@ngx-translate/core';
@@ -23,6 +23,10 @@ import { HttpLoaderFactory } from '../app.module';
 import { initialAppState } from '../store/app.state';
 
 import { ConceptPropertiesComponent } from './concept-properties.component';
+import { HttpClient, provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { MatCardModule } from '@angular/material/card';
+import { MatTabsModule } from '@angular/material/tabs';
+import { MatTableModule } from '@angular/material/table';
 
 describe('ConceptPropertiesComponent', () => {
   let component: ConceptPropertiesComponent;
@@ -30,20 +34,21 @@ describe('ConceptPropertiesComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [
-        HttpClientTestingModule,
+    declarations: [ConceptPropertiesComponent],
+    imports: [
+        MatCardModule,
+        MatTabsModule,
+        MatTableModule,
         TranslateModule.forRoot({
-          loader: {
-            provide: TranslateLoader,
-            useFactory: HttpLoaderFactory,
-            deps: [HttpClientTestingModule]
-          }
-        })
-      ],
-      providers: [TranslateService, { provide: APP_CONFIG, useValue: {} },
-      provideMockStore({ initialState: initialAppState })],
-      declarations: [ConceptPropertiesComponent]
-    })
+            loader: {
+                provide: TranslateLoader,
+                useFactory: HttpLoaderFactory,
+                deps: [HttpClient]
+            }
+        })],
+    providers: [TranslateService, { provide: APP_CONFIG, useValue: {} },
+        provideMockStore({ initialState: initialAppState }), provideHttpClient(withInterceptorsFromDi()), provideHttpClientTesting()]
+})
       .compileComponents();
   });
 

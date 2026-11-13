@@ -364,6 +364,32 @@ public class TaskResourceIT extends IntegrationTestBase {
   }
 
   @Test
+  public void shouldOnlyDeleteTaskWhenNoRoleReferencesItsMapRowsRemain() throws Exception {
+    // map_row.author_task_id and map_row.review_task_id are independent columns, so an AUTHOR
+    // and a REVIEW task can both reference the same rows at once without conflicting.
+    long authorTask = restClient.createTask(DEFAULT_TEST_USER_SUBJECT, TaskType.AUTHOR, mapId, DEFAULT_TEST_USER_SUBJECT,
+        "1-5", false, false, null);
+    long reviewTask = restClient.createTask(DEFAULT_TEST_USER_SUBJECT, TaskType.REVIEW, mapId, DEFAULT_TEST_USER_SUBJECT,
+        "1-5", true, false, null);
+
+    // Reassigning the AUTHOR role's rows to a new author task leaves the original author task
+    // with no author_task_id references - but its rows are still referenced via review_task_id,
+    // so deleteTasksWithNoMapRows() must not delete it just because one of its three role
+    // associations (author/review/reconcile) is now empty; only when all three are.
+    long newAuthorTask = restClient.createTask(DEFAULT_TEST_USER_SUBJECT, TaskType.AUTHOR, mapId, DEFAULT_TEST_USER_SUBJECT,
+        "1-5", true, true, null);
+
+    // Original author task has no remaining role reference at all, so it should be gone.
+    restClient.givenDefaultUser().get("/tasks/" + authorTask).then().statusCode(403);
+
+    // The review task's rows were untouched - it must survive.
+    restClient.givenDefaultUser().get("/tasks/" + reviewTask).then().statusCode(200);
+
+    restClient.deleteTask(newAuthorTask);
+    restClient.deleteTask(reviewTask);
+  }
+
+  @Test
   public void failCreateEntityOverlappingSourceRowSpecification() throws Exception {
     long authorTask = restClient.createTask(TaskType.AUTHOR, mapId, DEFAULT_TEST_USER_SUBJECT, "1-5,3,7,15,10-20");
 
@@ -726,7 +752,7 @@ public class TaskResourceIT extends IntegrationTestBase {
             config.getSecurity().getAdminGroup());
     adminUser.get("/tasks/" + task)
             .then().statusCode(200);
-    adminUser.delete("/tasks/" + task).then().statusCode(204);
+    adminUser.delete("/tasks/" + task).then().statusCode(200);
 
   }
 }

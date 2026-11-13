@@ -14,18 +14,29 @@
  * limitations under the License.
  */
 
-import {TestBed} from '@angular/core/testing';
+import { TestBed } from '@angular/core/testing';
 
-import {TokenInterceptor} from './token-interceptor.service';
-import {HttpClientTestingModule, HttpTestingController} from '@angular/common/http/testing';
-import {provideMockStore} from '@ngrx/store/testing';
-import {initialAppState} from '../store/app.state';
-import {HTTP_INTERCEPTORS, HttpClient, HttpErrorResponse, HttpRequest, HttpResponse} from '@angular/common/http';
-import {APP_CONFIG} from '../app.config';
-import {take} from 'rxjs/operators';
-import {of} from 'rxjs';
-import {RouterTestingModule} from '@angular/router/testing';
-import {testRoutes} from '../auth.guard.spec';
+import { TokenInterceptor } from './token-interceptor.service';
+import {
+  HttpTestingController,
+  provideHttpClientTesting,
+} from '@angular/common/http/testing';
+import { provideMockStore } from '@ngrx/store/testing';
+import { initialAppState } from '../store/app.state';
+import {
+  HTTP_INTERCEPTORS,
+  HttpClient,
+  HttpErrorResponse,
+  HttpRequest,
+  HttpResponse,
+  provideHttpClient,
+  withInterceptorsFromDi,
+} from '@angular/common/http';
+import { APP_CONFIG } from '../app.config';
+import { take } from 'rxjs/operators';
+import { of } from 'rxjs';
+import { RouterTestingModule } from '@angular/router/testing';
+import { testRoutes } from '../test-routes';
 
 describe('TokenInterceptorService', () => {
   let service: TokenInterceptor;
@@ -37,12 +48,19 @@ describe('TokenInterceptorService', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      imports: [
-        RouterTestingModule.withRoutes(routes),
-        HttpClientTestingModule
+      imports: [RouterTestingModule.withRoutes(routes)],
+      providers: [
+        provideMockStore({ initialState }),
+        {
+          provide: APP_CONFIG,
+          useValue: {},
+          HTTP_INTERCEPTORS,
+          useClass: TokenInterceptor,
+          multi: true,
+        },
+        provideHttpClient(withInterceptorsFromDi()),
+        provideHttpClientTesting(),
       ],
-      providers: [provideMockStore({initialState}),
-        {provide: APP_CONFIG, useValue: {}, HTTP_INTERCEPTORS, useClass: TokenInterceptor, multi: true}],
     });
     httpClient = TestBed.inject(HttpClient);
     httpMock = TestBed.inject(HttpTestingController);
@@ -55,46 +73,57 @@ describe('TokenInterceptorService', () => {
 
   it('should not intercept 201 errors', () => {
     const testData = 'test';
-    httpClient
-      .get<string>(url)
-      .subscribe(
-        (data) => expect(data).toBeTruthy(),
-        (error: HttpErrorResponse) => expect(error).toBeFalsy()
-      );
+    httpClient.get<string>(url).subscribe(
+      (data) => expect(data).toBeTruthy(),
+      (error: HttpErrorResponse) => expect(error).toBeFalsy()
+    );
     const req = httpMock.expectOne(url);
-    const expectedResponse = new HttpResponse({status: 201, statusText: 'Created', body: {}});
+    const expectedResponse = new HttpResponse({
+      status: 201,
+      statusText: 'Created',
+      body: {},
+    });
     req.flush(testData, expectedResponse);
   });
 
   it('should intercept 401 errors', () => {
-    const expectedResponse = new HttpResponse({status: 401, statusText: 'Unauth', body: {}});
-    httpClient
-      .get<string>(url)
-      .subscribe(
-        (data) => fail('error'),
-        (error: HttpErrorResponse) => expect(error).toBeTruthy()
-      );
+    const expectedResponse = new HttpResponse({
+      status: 401,
+      statusText: 'Unauth',
+      body: {},
+    });
+    httpClient.get<string>(url).subscribe(
+      (data) => { throw new Error('error'); },
+      (error: HttpErrorResponse) => expect(error).toBeTruthy()
+    );
     const req = httpMock.expectOne(url);
     const next: any = {
-      handle: jasmine.createSpy('handle').and.callFake(() => of(expectedResponse))
+      handle: vi.fn().mockImplementation(() => of(expectedResponse)),
     };
-    service.intercept(expectedResponse as unknown as HttpRequest<any>, next).pipe(take(1)).subscribe();
+    service
+      .intercept(expectedResponse as unknown as HttpRequest<any>, next)
+      .pipe(take(1))
+      .subscribe();
     req.error(new ErrorEvent('401 error'), expectedResponse);
   });
 
   it('should throw 400 errors', () => {
-    const expectedResponse = new HttpErrorResponse({status: 400, statusText: 'Unauth'});
-    httpClient
-      .get<string>(url)
-      .subscribe(
-        (data) => fail('error'),
-        (error: HttpErrorResponse) => expect(error).toBeTruthy()
-      );
+    const expectedResponse = new HttpErrorResponse({
+      status: 400,
+      statusText: 'Unauth',
+    });
+    httpClient.get<string>(url).subscribe(
+      (data) => { throw new Error('error'); },
+      (error: HttpErrorResponse) => expect(error).toBeTruthy()
+    );
     const req = httpMock.expectOne(url);
     const next: any = {
-      handle: jasmine.createSpy('handle').and.callFake(() => of(expectedResponse))
+      handle: vi.fn().mockImplementation(() => of(expectedResponse)),
     };
-    service.intercept(expectedResponse as unknown as HttpRequest<any>, next).pipe(take(1)).subscribe();
+    service
+      .intercept(expectedResponse as unknown as HttpRequest<any>, next)
+      .pipe(take(1))
+      .subscribe();
     req.error(new ErrorEvent('400 error'), expectedResponse);
   });
 });

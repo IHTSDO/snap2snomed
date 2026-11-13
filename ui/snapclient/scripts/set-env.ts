@@ -1,5 +1,5 @@
 /*
- * Copyright © 2022 SNOMED International
+ * Copyright © 2026 SNOMED International
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,11 +15,11 @@
  */
 
 const { writeFile } = require('fs');
-const { argv } = require('yargs');
 // read environment variables from .env file
 require('dotenv').config();
-// read the command line arguments passed with yargs
-const environment = argv.environment;
+// read the --environment=<value> command line argument
+const environmentArg = process.argv.slice(2).find((arg) => arg.startsWith('--environment='));
+const environment = environmentArg ? environmentArg.split('=')[1] : undefined;
 // Configure Angular `environment.ts` file path
 const baseEnvFile = './src/assets/config.json';
 // Load node modules

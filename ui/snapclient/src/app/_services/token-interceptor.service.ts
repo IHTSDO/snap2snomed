@@ -15,14 +15,7 @@
  */
 
 import {Inject, Injectable} from '@angular/core';
-import {
-  HttpErrorResponse,
-  HttpEvent,
-  HttpHandler,
-  HttpInterceptor,
-  HttpParams,
-  HttpRequest
-} from '@angular/common/http';
+import { HttpErrorResponse, HttpEvent, HttpHandler, HttpInterceptor, HttpParams, HttpRequest } from '@angular/common/http';
 import {BehaviorSubject, Observable, Subject, throwError} from 'rxjs';
 import {catchError, filter, finalize, map, switchMap, take} from 'rxjs/operators';
 import {Store} from '@ngrx/store';

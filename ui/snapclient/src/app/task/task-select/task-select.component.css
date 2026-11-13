@@ -1,15 +1,7 @@
-#task-select .mat-select {
-  vertical-align: top;
-  margin-bottom: -20px;
-  margin-top: -8px;
-}
-
-#task-select .mat-form-field {
+#task-select .mat-mdc-form-field {
   width: 100%;
-  height: 28px;
-  vertical-align: super;
 }
 
-#task-select .mat-select-arrow-wrapper {
-  vertical-align: bottom !important;
+::ng-deep .task-select-panel .mdc-list-item__primary-text {
+  width: 100%;
 }

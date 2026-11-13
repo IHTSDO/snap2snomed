@@ -95,7 +95,7 @@
     "CANCEL_OR_COMPLETE_TASK": "Unable to cancel/complete task",
     "UNABLE_TO_GET_INCOMPLETE_ROW_COUNT_FOR_TASK": "Unable to get the number of incomplete rows for task {{task}}",
     "NOT_AUTHORIZED": "Not authorized",
-    "NOT_AUTHORIZED_EXPLANATION": "You are not authorized to access this page",
+    "NOT_AUTHORIZED_EXPLANATION": "You are unable to access this page. This could be because the task or map no longer exists, or you do not have permission to access it.",
     "NOT_AUTHORIZED_RETURN": "Return to Home",
     "EXPORT_FAILED": "Export Failed",
     "EXISTING_VERSION": "A map with the same version already exists",

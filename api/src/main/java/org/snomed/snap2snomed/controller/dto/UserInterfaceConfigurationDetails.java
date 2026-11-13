@@ -16,8 +16,8 @@
 
 package org.snomed.snap2snomed.controller.dto;
 
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
 import org.hibernate.validator.constraints.URL;
 
@@ -85,7 +85,6 @@ public class UserInterfaceConfigurationDetails {
 
   String registrationText;
 
-  @NotBlank
   String mainPageText;
 
   @NotBlank

@@ -55,9 +55,10 @@ const ALT_RELATIONSHIP_TYPE_CODE_OPTION_LABEL = 'relationship';
 const NUM_SAMPLE_LINES = 3;
 
 @Component({
-  selector: 'app-mapping-import',
-  templateUrl: './mapping-import.component.html',
-  styleUrls: ['./mapping-import.component.css', '../../source/source-import/source-import.component.css'],
+    selector: 'app-mapping-import',
+    templateUrl: './mapping-import.component.html',
+    styleUrls: ['./mapping-import.component.css', '../../source/source-import/source-import.component.css'],
+    standalone: false
 })
 export class MappingImportComponent implements OnInit, OnDestroy, AfterViewChecked {
 
@@ -649,16 +650,19 @@ export class MappingImportComponent implements OnInit, OnDestroy, AfterViewCheck
     this.dialogRef.close();
   }
 
-  // TODO:  resultSelector function for MergeMap is deprecated.
+  // resultSelector function for MergeMap is deprecated and has been replaced with nested map operators
   // https://rxjs.dev/deprecations/resultSelector
-  // Find another way to do this
   getInstructions(): void {
     if (this.translate) {
       const i1$ = this.translate.get('SOURCE.IMPORT_TYPES');
       const i2$ = this.translate.get('SOURCE.MAX_FILE_SIZE').pipe(
         map((t) => `${t}: ${ServiceUtils.bytesToMB(this.MAXFILESIZE)}`));
 
-      i1$.pipe(mergeMap(value => i2$, (outerValue, innerValue) => `${outerValue}. ${innerValue}`)).subscribe(
+      i1$.pipe(
+        mergeMap((outerValue) => i2$.pipe(
+          map((innerValue) => `${outerValue}. ${innerValue}`)
+        ))
+      ).subscribe(
         (t) => this.fileUploadInstructions = `${t}`);
     }
   }

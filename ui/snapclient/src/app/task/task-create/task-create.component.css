@@ -1,5 +1,23 @@
+.task-create-container {
+  padding: 0 24px;
+}
+
 .conflictmessage {
   margin-bottom: 15px;
+}
+
+.assign-select {
+  margin-top: 10px;
+}
+
+::ng-deep .task-create-container mat-chip-option.mat-mdc-chip-disabled .mdc-evolution-chip__action {
+  background-color: #e0e0e0 !important;
+  opacity: 1 !important;
+  border-radius: var(--mat-chip-container-shape-radius, 8px) !important;
+}
+
+mat-card.mat-mdc-card-outlined {
+  padding: 16px !important;
 }
 
 .matcardactions {
@@ -9,17 +27,18 @@
 }
 
 .matcardactions-left {
-  align-items: flex-start;
+  align-items: stretch;
   display: flex;
+  flex: 1;
   flex-direction: column;
   justify-content: space-between;
-  width: 50%;
 }
 
 .matcardactions-right {
   align-items: flex-end;
   display: flex;
+  flex: 0 0 auto;
+  margin-left: 15px;
   flex-direction: column;
   justify-content: space-between;
-  width: 50%;
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright © 2022 SNOMED International
+ * Copyright © 2026 SNOMED International
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,8 +18,7 @@ import {Action} from '@ngrx/store';
 import {R4} from '@ahryman40k/ts-fhir-types';
 import {Release} from '../../_services/fhir.service';
 import { Properties } from './fhir.effects';
-import {Coding, Match} from './fhir.reducer';
-import {ConceptNode} from '@csiro/shrimp-hierarchy-view';
+import {Coding, ConceptNode, Match} from './fhir.reducer';
 
 
 export enum FhirActionTypes {
@@ -41,6 +40,7 @@ export enum FhirActionTypes {
   CONCEPT_HIERARCHY = "[Fhir] Concept Hierarchy",
   CONCEPT_HIERARCHY_SUCCESS = "Concept Hierarchy Succeeded",
   CONCEPT_HIERARCHY_FAILED = "Concept Hierarchy Failed",
+  CONCEPT_HIERARCHY_CLEAR = "[Fhir] Concept Hierarchy Clear",
 }
 
 export class LoadReleases implements Action {
@@ -166,6 +166,10 @@ export class ConceptHierarchyFailure implements Action {
   }
 }
 
+export class ConceptHierarchyClear implements Action {
+  readonly type = FhirActionTypes.CONCEPT_HIERARCHY_CLEAR;
+}
+
 export type FhirActions = LoadReleases
   | LoadReleasesSuccess
   | LoadReleasesFailure
@@ -184,4 +188,5 @@ export type FhirActions = LoadReleases
   | ConceptHierarchy
   | ConceptHierarchySuccess
   | ConceptHierarchyFailure
+  | ConceptHierarchyClear
 ;

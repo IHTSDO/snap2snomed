@@ -24,10 +24,12 @@
 import { OnInit, Renderer2, Input, ElementRef, Component, ViewEncapsulation } from "@angular/core";
 
 @Component({
-  selector: "[resizeColumn]",
-  template: '<div mat-sort-header>{{title}}</div>',
-  styleUrls: ['./resize-column.component.css'],
-  encapsulation: ViewEncapsulation.None // Tell Angular to not scope your styles
+    selector: "[resizeColumn]",
+    template: '<div mat-sort-header>{{title}}</div>',
+    styleUrls: ['./resize-column.component.css'],
+    encapsulation: ViewEncapsulation.None // Tell Angular to not scope your styles
+    ,
+    standalone: false
 })
 export class ResizeColumnComponent implements OnInit {
   

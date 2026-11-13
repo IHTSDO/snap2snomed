@@ -16,7 +16,7 @@
 
 package org.snomed.snap2snomed.problem;
 
-import org.zalando.problem.Status;
+import org.springframework.http.HttpStatus;
 
 public class BadRequestDataProblem extends Snap2SnomedProblem {
 
@@ -25,6 +25,6 @@ public class BadRequestDataProblem extends Snap2SnomedProblem {
   private static final String BASE_TYPE = "bad-request-data/";
 
   public BadRequestDataProblem(String detail) {
-    super(BASE_TYPE, "Bad request data", Status.BAD_REQUEST, detail);
+    super(BASE_TYPE, "Bad request data", HttpStatus.BAD_REQUEST, detail);
   }
 }

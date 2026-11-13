@@ -1,5 +1,5 @@
 /*
- * Copyright © 2022 SNOMED International
+ * Copyright © 2026 SNOMED International
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {HttpClientTestingModule} from '@angular/common/http/testing';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import {ComponentFixture, TestBed} from '@angular/core/testing';
 import {provideMockStore} from '@ngrx/store/testing';
 import {TranslateLoader, TranslateModule, TranslateService} from '@ngx-translate/core';
@@ -23,6 +23,9 @@ import {HttpLoaderFactory} from 'src/app/app.module';
 import {initialAppState} from 'src/app/store/app.state';
 
 import {ConceptAutosuggestComponent} from './concept-autosuggest.component';
+import {ConceptListComponent} from '../concept-list/concept-list.component';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import {MatTableModule} from '@angular/material/table';
 
 describe('ConceptAutosuggestComponent', () => {
   let component: ConceptAutosuggestComponent;
@@ -30,20 +33,17 @@ describe('ConceptAutosuggestComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [
-        HttpClientTestingModule,
+    declarations: [ConceptAutosuggestComponent, ConceptListComponent],
+    imports: [MatTableModule,
         TranslateModule.forRoot({
-          loader: {
-            provide: TranslateLoader,
-            useFactory: HttpLoaderFactory,
-            deps: [HttpClientTestingModule]
-          }
-        })
-      ],
-      providers: [TranslateService, {provide: APP_CONFIG, useValue: {}},
-        provideMockStore({initialState: initialAppState})],
-      declarations: [ ConceptAutosuggestComponent ]
-    })
+            loader: {
+                provide: TranslateLoader,
+                useFactory: HttpLoaderFactory
+            }
+        })],
+    providers: [TranslateService, { provide: APP_CONFIG, useValue: {} },
+        provideMockStore({ initialState: initialAppState }), provideHttpClient(withInterceptorsFromDi()), provideHttpClientTesting()]
+})
     .compileComponents();
   });
 

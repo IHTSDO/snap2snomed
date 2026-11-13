@@ -1,61 +1,73 @@
 <div id="notes">
-  <mat-card id="input">
+  <mat-card appearance="outlined" id="input">
     <mat-card-header>
       <mat-card-title>{{'DETAILS.ADD_NOTE' | translate}}</mat-card-title>
     </mat-card-header>
     <mat-card-content>
-      <mat-form-field id="new-note-input" *ngIf="newNote"
-                      hintLabel="{{'FORM.MAX_CHARS' | translate}} {{MAX_NOTE}}"
-                      [appDroppable]="{zone: 'noteZone'}"
-                      (onDroppableComplete)="onDrop($event)">
-        <mat-label>{{ 'DETAILS.NOTE_TEXT' | translate }}</mat-label>
-        <textarea matInput [(ngModel)]="newNote.noteText"
-                  id="text" name="text" #text="ngModel"
-                  [maxLength]="MAX_NOTE" [pattern]="VALID_STRING_PATTERN"
-        ></textarea>
-        <mat-hint align="end">{{text.value?.length || 0}}/{{MAX_NOTE}}</mat-hint>
-        <mat-error *ngIf="text.invalid">{{ 'DETAILS.NOTE_TEXT_ERROR' | translate }}</mat-error>
-      </mat-form-field>
-      <button class="add" color="primary" mat-raised-button type="button"
-              (click)="addNewNote()" [disabled]="!isValid()">
+      @if (newNote) {
+        <mat-form-field id="new-note-input"
+          hintLabel="{{'FORM.MAX_CHARS' | translate}} {{MAX_NOTE}}"
+          [appDroppable]="{zone: 'noteZone'}"
+          (onDroppableComplete)="onDrop($event)">
+          <mat-label>{{ 'DETAILS.NOTE_TEXT' | translate }}</mat-label>
+          <textarea matInput [(ngModel)]="newNote.noteText"
+            id="text" name="text" #text="ngModel"
+            [maxLength]="MAX_NOTE" [pattern]="VALID_STRING_PATTERN"
+          ></textarea>
+          <mat-hint align="end">{{text.value?.length || 0}}/{{MAX_NOTE}}</mat-hint>
+          @if (text.invalid) {
+            <mat-error>{{ 'DETAILS.NOTE_TEXT_ERROR' | translate }}</mat-error>
+          }
+        </mat-form-field>
+      }
+      <button class="add" mat-flat-button type="button"
+        (click)="addNewNote()" [disabled]="!isValid()">
         <mat-icon class="add">save</mat-icon>
         {{'DETAILS.NOTE_SAVE' | translate}}
       </button>
     </mat-card-content>
   </mat-card>
-  <mat-card id="list">
+  <mat-card appearance="outlined" id="list">
     <mat-card-header>
       <mat-card-title>{{'DETAILS.NOTES' | translate}}
         &nbsp;
-        <mat-chip color="accent" *ngIf="notes.length > 0" selected>{{notes.length}}</mat-chip>
+        @if (notes.length > 0) {
+          <span class="notes-count-badge">{{notes.length}}</span>
+        }
       </mat-card-title>
     </mat-card-header>
     <mat-card-content>
       <div id="notes-list">
-        <div *ngFor="let note of notes">
-          <app-notes-item [note]="note">
-            <button mat-icon-button color="accent" title="{{'PROJECT.DELETE_NOTE_TOOLTIP' | translate}}"
-                    [disabled]="!canDelete(note)"
-                    (click)="deleteNote(note)"><mat-icon>delete</mat-icon></button>
-          </app-notes-item>
+        @for (note of notes; track note) {
+          <div>
+            <app-notes-item [note]="note">
+              <button mat-icon-button class="btn-accent" title="{{'PROJECT.DELETE_NOTE_TOOLTIP' | translate}}"
+                [disabled]="!canDelete(note)"
+                (click)="deleteNote(note)"><mat-icon>delete</mat-icon></button>
+              </app-notes-item>
+            </div>
+          }
         </div>
-      </div>
-    </mat-card-content>
-  </mat-card>
-  <mat-card id="list">
-    <mat-card-header>
-      <mat-card-title>{{'DETAILS.SYSTEM_NOTES' | translate}}
-        &nbsp;
-        <mat-chip color="accent" *ngIf="systemNotes.length > 0" selected>{{systemNotes.length}}</mat-chip>
-      </mat-card-title>
-    </mat-card-header>
-    <mat-card-content>
-      <div id="system-notes-list">
-        <div *ngFor="let note of systemNotes">
-          <app-notes-item [note]="note">
-          </app-notes-item>
+      </mat-card-content>
+    </mat-card>
+    <mat-card appearance="outlined" id="list">
+      <mat-card-header>
+        <mat-card-title>{{'DETAILS.SYSTEM_NOTES' | translate}}
+          &nbsp;
+          @if (systemNotes.length > 0) {
+            <mat-chip-option class="accent-chip" selected>{{systemNotes.length}}</mat-chip-option>
+          }
+        </mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div id="system-notes-list">
+          @for (note of systemNotes; track note) {
+            <div>
+              <app-notes-item [note]="note">
+              </app-notes-item>
+            </div>
+          }
         </div>
-      </div>
-    </mat-card-content>
-  </mat-card>
-</div>
+      </mat-card-content>
+    </mat-card>
+  </div>

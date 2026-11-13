@@ -37,10 +37,22 @@ import org.springframework.data.rest.core.mapping.ExposureConfiguration;
 import org.springframework.data.rest.webmvc.config.RepositoryRestConfigurer;
 import org.springframework.http.HttpMethod;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
+import tools.jackson.databind.DeserializationFeature;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.cfg.MapperBuilder;
 
 @Configuration
 @EnableJpaAuditing(auditorAwareRef = "auditorProvider")
 public class RepositoryConfiguration implements RepositoryRestConfigurer {
+
+  // Spring Data REST's DomainObjectReader runs its own separate Jackson 3 mapper regardless of
+  // the app's own Jackson 2 ObjectMapper bean (see JacksonConfiguration), so FAIL_ON_NULL_FOR_PRIMITIVES
+  // has to be disabled here too - needed for Note.deleted / MapRowTarget.flagged primitive fields
+  // that can be omitted from a partial JSON merge.
+  @Override
+  public void configureJacksonObjectMapper(MapperBuilder<? extends ObjectMapper, ?> objectMapperBuilder) {
+    objectMapperBuilder.disable(DeserializationFeature.FAIL_ON_NULL_FOR_PRIMITIVES);
+  }
 
   @Override
   public void configureRepositoryRestConfiguration(RepositoryRestConfiguration config, CorsRegistry cors) {

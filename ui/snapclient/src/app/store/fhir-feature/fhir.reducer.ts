@@ -1,5 +1,5 @@
 /*
- * Copyright © 2022 SNOMED International
+ * Copyright © 2026 SNOMED International
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ import {Release} from '../../_services/fhir.service';
 import {R4} from '@ahryman40k/ts-fhir-types';
 import {Properties} from './fhir.effects';
 import {ConceptNode} from '@csiro/shrimp-hierarchy-view';
+export {ConceptNode} from '@csiro/shrimp-hierarchy-view';
 
 export interface Coding {
   code: string;
@@ -145,6 +146,12 @@ export function fhirReducer(state = initialFhirState, action: FhirActions): IFhi
         ...state,
         nodes: [],
         errorMessage: action.payload.error
+      };
+
+    case FhirActionTypes.CONCEPT_HIERARCHY_CLEAR:
+      return {
+        ...state,
+        nodes: []
       };
 
     default:

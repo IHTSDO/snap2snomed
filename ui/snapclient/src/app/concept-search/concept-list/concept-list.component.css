@@ -11,22 +11,26 @@
   text-decoration: line-through;
 }
     
-.mat-table {
+.mat-mdc-table {
   margin-top: 0;
   display: table;
 }
   
-.mat-row {
+.mat-mdc-row {
   height: auto;
 }
-.mat-row:hover:not(.highlight) {
+.mat-mdc-row:hover:not(.highlight) {
   background-color: #dcf1fc !important;
 }
-.mat-row:nth-child(even){
+.mat-mdc-row:nth-child(even){
   background-color: #00000010;
 }
+
+.mat-mdc-row, .mat-mdc-cell {
+  border-bottom: none !important;
+}
   
-.item-list .mat-cell {
+.item-list .mat-mdc-cell {
   padding: 3px 6px;
 }
   

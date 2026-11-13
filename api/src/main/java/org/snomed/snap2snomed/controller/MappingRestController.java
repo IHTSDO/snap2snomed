@@ -20,7 +20,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import java.io.IOException;
-import javax.validation.Valid;
+import jakarta.validation.Valid;
 import org.snomed.snap2snomed.controller.dto.MapCloneDto;
 import org.snomed.snap2snomed.controller.dto.MappingDto;
 import org.snomed.snap2snomed.controller.dto.MappingResponse;

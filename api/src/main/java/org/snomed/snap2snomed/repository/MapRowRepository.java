@@ -30,6 +30,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.history.RevisionRepository;
 import org.springframework.data.rest.core.annotation.RepositoryRestResource;
@@ -37,7 +38,7 @@ import org.springframework.data.rest.core.annotation.RestResource;
 
 @RepositoryRestResource
 public interface MapRowRepository
-    extends RevisionRepository<MapRow, Long, Integer>, PagingAndSortingRepository<MapRow, Long> {
+    extends RevisionRepository<MapRow, Long, Integer>, PagingAndSortingRepository<MapRow, Long>, CrudRepository<MapRow, Long> {
 
   // ---------------------------------
   // Exported in REST interface

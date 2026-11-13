@@ -9,10 +9,12 @@
         <h4>{{title}}</h4>
         <div class="space-fill">&nbsp;</div>
         <p class="profile-menu">
-          <span class="text-danger" *ngIf="isAdmin">{{ 'HOME.ADMIN' | translate }} </span>
+          @if (isAdmin) {
+            <span class="text-danger">{{ 'HOME.ADMIN' | translate }} </span>
+          }
           <span>{{ 'HOME.WELCOME' | translate }}, {{currentUser?.givenName}}
             <app-gravatar [email]="currentUser?.email" [alt]="''"></app-gravatar>
-        </span>
+          </span>
           <button class="user-menu-button" mat-icon-button [matMenuTriggerFor]="menu" aria-label="User menu">
             <mat-icon>more_vert</mat-icon>
           </button>
@@ -36,9 +38,11 @@
     <div class="main__content">
       <app-errormessage [error]="error"></app-errormessage>
       <!-- Main Content Here -->
-      <div *ngIf="currentUser">
-        <router-outlet (activate)='onActivate($event)'></router-outlet>
-      </div>
+      @if (currentUser) {
+        <div>
+          <router-outlet (activate)='onActivate($event)'></router-outlet>
+        </div>
+      }
     </div>
   </section>
 </div>

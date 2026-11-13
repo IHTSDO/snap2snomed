@@ -1,4 +1,4 @@
-.mat-form-field {
+.mat-mdc-form-field {
   width: 100%;
 }
 
@@ -13,10 +13,12 @@ button.add {
 
 #input {
   flex: 1;
+  min-width: 0;
 }
 
 #list {
   flex: 2;
+  min-width: 0;
 }
 
 #notes {
@@ -27,4 +29,20 @@ button.add {
 #notes-list, #system-notes-list {
   max-height: 305px;
   overflow-y: auto;
+}
+
+.notes-count-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 30px;
+  width: 30px;
+  border-radius: 50%;
+  background-color: #ff4081;
+  color: white;
+  font-size: 0.75em;
+}
+
+mat-card-header {
+  padding-bottom: 8px;
 }

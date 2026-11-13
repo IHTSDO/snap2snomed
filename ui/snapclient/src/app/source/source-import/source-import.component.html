@@ -3,9 +3,11 @@
 </mat-card-header>
 <mat-dialog-content>
   <div class="modal-content">
-    <div *ngIf="uploading">
-      <app-loading-spinner></app-loading-spinner>
-    </div>
+    @if (uploading) {
+      <div>
+        <app-loading-spinner></app-loading-spinner>
+      </div>
+    }
     <form>
       <div class="modal-body">
         <mat-card-content>
@@ -13,167 +15,181 @@
           <mat-form-field class="field-full-width" hintLabel="{{'FORM.MAX_CHARS' | translate}} {{MAX_NAME}}">
             <mat-label>{{ 'SOURCE.NAME' | translate }}</mat-label>
             <input id="source-name" name="source-name" matInput placeholder="{{'SOURCE.NAME_PLACEHOLDER' | translate}}"
-                   [(ngModel)]="data.name" #name="ngModel"
-                   [maxLength]="MAX_NAME"
-                   [ngModelOptions]="ngModelOptions"
-                   required>
-            <mat-hint align="end">{{name.value?.length || 0}}/{{MAX_NAME}}</mat-hint>
-            <mat-error *ngIf="name.invalid">{{ 'SOURCE.NAME_ERROR' | translate }}</mat-error>
-          </mat-form-field>
-          <mat-form-field class="field-full-width" hintLabel="{{'FORM.MAX_CHARS' | translate}} {{MAX_VERSION}}">
-            <mat-label>{{ 'SOURCE.VERSION' | translate }}</mat-label>
-            <input id="source-version" name="source-version"
-                   matInput placeholder="{{'SOURCE.VERSION_PLACEHOLDER' | translate}}"
-                   [(ngModel)]="data.version" #version="ngModel"
-                   [maxLength]="MAX_VERSION"
-                   [ngModelOptions]="ngModelOptions"
-                   required>
-            <mat-hint align="end">{{version.value?.length || 0}}/{{MAX_VERSION}}</mat-hint>
-            <mat-error *ngIf="version.invalid">{{ 'SOURCE.VERSION_ERROR' | translate }}</mat-error>
-          </mat-form-field>
-            <mat-expansion-panel>
-              <mat-expansion-panel-header>
-                <mat-panel-title>
-                  {{ 'FORM.FHIR_METADATA' | translate }}
-                </mat-panel-title>
-              </mat-expansion-panel-header>
-              <mat-form-field class="field-full-width" hintLabel="{{'FORM.MAX_CHARS' | translate}} {{MAX_CODESYSTEM}}">
-                <mat-label>{{ 'SOURCE.CODESYSTEM' | translate }}</mat-label>
-                <input id="source-codesystem" name="source-codesystem"
-                       matInput placeholder="{{'SOURCE.CODESYSTEM_PLACEHOLDER' | translate}}"
-                       [(ngModel)]="data.codesystemUri" #codesystem="ngModel"
-                       [maxLength]="MAX_CODESYSTEM"
-                       [ngModelOptions]="ngModelOptions">
-                <mat-hint align="end">{{codesystem.value?.length || 0}}/{{MAX_CODESYSTEM}}</mat-hint>
+              [(ngModel)]="data.name" #name="ngModel"
+              [maxLength]="MAX_NAME"
+              [ngModelOptions]="ngModelOptions"
+              required>
+              <mat-hint align="end">{{name.value?.length || 0}}/{{MAX_NAME}}</mat-hint>
+              @if (name.invalid) {
+                <mat-error>{{ 'SOURCE.NAME_ERROR' | translate }}</mat-error>
+              }
+            </mat-form-field>
+            <mat-form-field class="field-full-width" hintLabel="{{'FORM.MAX_CHARS' | translate}} {{MAX_VERSION}}">
+              <mat-label>{{ 'SOURCE.VERSION' | translate }}</mat-label>
+              <input id="source-version" name="source-version"
+                matInput placeholder="{{'SOURCE.VERSION_PLACEHOLDER' | translate}}"
+                [(ngModel)]="data.version" #version="ngModel"
+                [maxLength]="MAX_VERSION"
+                [ngModelOptions]="ngModelOptions"
+                required>
+                <mat-hint align="end">{{version.value?.length || 0}}/{{MAX_VERSION}}</mat-hint>
+                @if (version.invalid) {
+                  <mat-error>{{ 'SOURCE.VERSION_ERROR' | translate }}</mat-error>
+                }
               </mat-form-field>
-              <mat-form-field class="field-full-width" hintLabel="{{'FORM.MAX_CHARS' | translate}} {{MAX_VALUESET}}">
-                <mat-label>{{ 'SOURCE.VALUESET' | translate }}</mat-label>
-                <input id="source-valueset" name="source-valueset"
-                       matInput placeholder="{{'SOURCE.VALUESET_PLACEHOLDER' | translate}}"
-                       [(ngModel)]="data.valuesetUri" #valueset="ngModel"
-                       [maxLength]="MAX_VALUESET"
-                       [ngModelOptions]="ngModelOptions">
-                <mat-hint align="end">{{valueset.value?.length || 0}}/{{MAX_VALUESET}}</mat-hint>
-              </mat-form-field>
-            </mat-expansion-panel>
-          <div class="field-full-width source-file mat-elevation-z2">
-            <div class="file">
-              <label>{{ 'SOURCE.FILE' | translate }}</label>
-              <button id="fileUploadButton" mat-button mat-raised-button type="button"
+              <mat-expansion-panel>
+                <mat-expansion-panel-header>
+                  <mat-panel-title>
+                    {{ 'FORM.FHIR_METADATA' | translate }}
+                  </mat-panel-title>
+                </mat-expansion-panel-header>
+                <mat-form-field class="field-full-width" hintLabel="{{'FORM.MAX_CHARS' | translate}} {{MAX_CODESYSTEM}}">
+                  <mat-label>{{ 'SOURCE.CODESYSTEM' | translate }}</mat-label>
+                  <input id="source-codesystem" name="source-codesystem"
+                    matInput placeholder="{{'SOURCE.CODESYSTEM_PLACEHOLDER' | translate}}"
+                    [(ngModel)]="data.codesystemUri" #codesystem="ngModel"
+                    [maxLength]="MAX_CODESYSTEM"
+                    [ngModelOptions]="ngModelOptions">
+                    <mat-hint align="end">{{codesystem.value?.length || 0}}/{{MAX_CODESYSTEM}}</mat-hint>
+                  </mat-form-field>
+                  <mat-form-field class="field-full-width" hintLabel="{{'FORM.MAX_CHARS' | translate}} {{MAX_VALUESET}}">
+                    <mat-label>{{ 'SOURCE.VALUESET' | translate }}</mat-label>
+                    <input id="source-valueset" name="source-valueset"
+                      matInput placeholder="{{'SOURCE.VALUESET_PLACEHOLDER' | translate}}"
+                      [(ngModel)]="data.valuesetUri" #valueset="ngModel"
+                      [maxLength]="MAX_VALUESET"
+                      [ngModelOptions]="ngModelOptions">
+                      <mat-hint align="end">{{valueset.value?.length || 0}}/{{MAX_VALUESET}}</mat-hint>
+                    </mat-form-field>
+                  </mat-expansion-panel>
+                  <div class="field-full-width source-file">
+                    <div class="file">
+                      <label>{{ 'SOURCE.FILE' | translate }}</label>
+                      <button id="fileUploadButton" mat-button mat-raised-button type="button"
                       (click)="fileUpload.click()">{{ 'FORM.FILE' | translate }}</button>
-              <input matInput id="fileUploadName" type="text" readonly [(ngModel)]="file_name"
-                     [ngModelOptions]="ngModelOptions" required/>
-              <input hidden type="file" class="file-upload" id="fileUpload" name="fileUpload"
-                     accept="{{fileaccept}}" #fileUpload
-                     (change)="onFileSelected($event)"/>
-              <p><small>{{fileUploadInstructions}}</small></p>
-            </div>
-            <div class="delimiter-group">
-              <mat-form-field class="field-one-character">
-                <mat-label>{{ 'SOURCE.DELIMITERTEXT' | translate }}</mat-label>
-                <input id="delimiter" name="delimiter" matInput
-                       [ngModel]="data.delimiter" #delimiterinput="ngModel"
-                       [ngModelOptions]="ngModelOptions"
-                       [maxLength]="1"
-                       (input)="changeDelimiter($event)">
-                <button mat-icon-button matSuffix #tooltip="matTooltip" color="any"
-                        matTooltip="{{ 'SOURCE.NO_DELIMITER' | translate }}" (click)="setNullDelimiter()">
-                  <mat-icon>cancel</mat-icon>
-                </button>
-              </mat-form-field>
-              <button mat-button *ngIf="data.delimiter != '\t'" (click)="setTabDelimiter()" class="tab-button">Use TAB</button>
-            </div>
-          </div>
+                      <input matInput id="fileUploadName" type="text" readonly [(ngModel)]="file_name"
+                        [ngModelOptions]="ngModelOptions" required/>
+                        <input hidden type="file" class="file-upload" id="fileUpload" name="fileUpload"
+                          accept="{{fileaccept}}" #fileUpload
+                          (change)="onFileSelected($event)"/>
+                          <p><small>{{fileUploadInstructions}}</small></p>
+                        </div>
+                        <div class="delimiter-group">
+                          <mat-form-field class="field-one-character">
+                            <mat-label>{{ 'SOURCE.DELIMITERTEXT' | translate }}</mat-label>
+                            <input id="delimiter" name="delimiter" matInput
+                              [ngModel]="data.delimiter" #delimiterinput="ngModel"
+                              [ngModelOptions]="ngModelOptions"
+                              [maxLength]="1"
+                              (input)="changeDelimiter($event)">
+                              <button mat-icon-button matSuffix #tooltip="matTooltip"
+                                matTooltip="{{ 'SOURCE.NO_DELIMITER' | translate }}" (click)="setNullDelimiter()">
+                                <mat-icon>cancel</mat-icon>
+                              </button>
+                            </mat-form-field>
+                            @if (data.delimiter != '\t') {
+                              <button mat-button (click)="setTabDelimiter()" class="tab-button">Use TAB</button>
+                            }
+                          </div>
+                        </div>
 
-          <div id="lines" *ngIf="lines">
-            <div *ngIf="isCorrectDelimiter(); then csvheaders; else incorrectdelimiter"></div>
-            <ng-template #csvheaders>
-              <button class="alert alert-warning">
-                <mat-icon>warning</mat-icon>
-                {{'SOURCE.SELECT_COLUMNS' | translate}}</button>
-              <div class="field-full-width pull-right">
-                <mat-checkbox [(ngModel)]="data.hasHeader"
-                              [ngModelOptions]="ngModelOptions">{{'SOURCE.HAS_HEADER' | translate}}</mat-checkbox>
-              </div>
-              <div *ngIf="data.delimiter; then selectdisplaycol; else autogenerated;">
-              </div>
-              <ng-template #selectdisplaycol>
-                <mat-form-field class="field-full-width">
-                  <mat-label>{{ 'SOURCE.CODE_COL_HEADER' | translate }}</mat-label>
-                  <mat-select [(ngModel)]="data.codeColumnIndex"
-                              [ngModelOptions]="ngModelOptions">
-                    <mat-option *ngFor="let col of csvHeaders; let idx = index" [value]="idx">
-                      {{col}}
-                    </mat-option>
-                  </mat-select>
-                </mat-form-field>
-              </ng-template>
-              <ng-template #autogenerated>
-                <div class="autogen">
-                  <span class="autogen-label"><small>{{ 'SOURCE.CODE_COL' | translate }}</small></span>
-                  <div>{{ 'SOURCE.AUTOGENERATED' | translate }}</div>
+                        @if (lines) {
+                          <div id="lines">
+                            @if (isCorrectDelimiter()) {
+                              <button class="alert alert-warning">
+                                <mat-icon>warning</mat-icon>
+                              {{'SOURCE.SELECT_COLUMNS' | translate}}</button>
+                              <div class="field-full-width pull-right">
+                                <mat-checkbox [(ngModel)]="data.hasHeader"
+                                [ngModelOptions]="ngModelOptions">{{'SOURCE.HAS_HEADER' | translate}}</mat-checkbox>
+                              </div>
+                              @if (data.delimiter) {
+                                <mat-form-field class="field-full-width">
+                                  <mat-label>{{ 'SOURCE.CODE_COL_HEADER' | translate }}</mat-label>
+                                  <mat-select [(ngModel)]="data.codeColumnIndex"
+                                    [ngModelOptions]="ngModelOptions">
+                                    @for (col of csvHeaders; track col; let idx = $index) {
+                                      <mat-option [value]="idx">
+                                        {{col}}
+                                      </mat-option>
+                                    }
+                                  </mat-select>
+                                </mat-form-field>
+                              } @else {
+                                <div class="autogen">
+                                  <span class="autogen-label"><small>{{ 'SOURCE.CODE_COL' | translate }}</small></span>
+                                  <div>{{ 'SOURCE.AUTOGENERATED' | translate }}</div>
+                                </div>
+                              }
+                              <mat-form-field class="field-full-width">
+                                <mat-label>{{ 'SOURCE.DISPLAY_COL' | translate }}</mat-label>
+                                <mat-select [(ngModel)]="data.displayColumnIndex"
+                                  [ngModelOptions]="ngModelOptions">
+                                  @for (col of csvHeaders; track col; let idx = $index) {
+                                    <mat-option [value]="idx">
+                                      {{col}}
+                                    </mat-option>
+                                  }
+                                </mat-select>
+                              </mat-form-field>
+                              @for (additionalCol of data.additionalColumnIndexes.values(); track trackByIdx(i, additionalCol); let i = $index) {
+                                <div fxLayout="row" class="additional-column-section">
+                                  <mat-form-field class="two-form-fields trailing-space">
+                                    <mat-label>{{ 'SOURCE.ADDITIONAL_INFORMATION_COLUMN' | translate : {count: i+1} }}</mat-label>
+                                    <mat-select [(ngModel)]="data.additionalColumnIndexes[i]"
+                                      [ngModelOptions]="ngModelOptions" #additionalColumn{{i}}="ngModel" [disabled]="!data.hasHeader" required>
+                                      @for (col of csvHeaders; track col; let idx = $index) {
+                                        <mat-option [value]="idx">
+                                          {{col}}
+                                        </mat-option>
+                                      }
+                                    </mat-select>
+                                    <mat-error>{{ 'SOURCE.ADDITIONAL_INFORMATION_COLUMN_ERROR' | translate }}</mat-error>
+                                  </mat-form-field>
+                                  <mat-form-field class="two-form-fields trailing-space">
+                                    <mat-label>{{ 'SOURCE.ADDITIONAL_INFORMATION_COLUMN_TYPE' | translate : {count: i+1} }}</mat-label>
+                                    <mat-select [(ngModel)]="data.additionalColumnTypes[i]"
+                                      [ngModelOptions]="ngModelOptions" #additionalColumnType{{i}}="ngModel" [disabled]="!data.hasHeader" required>
+                                      <mat-option value="TEXT">{{ 'SOURCE.ADDITIONAL_INFORMATION_COLUMN_TYPE_TEXT' | translate }}</mat-option>
+                                      <mat-option value="NUMBER">{{ 'SOURCE.ADDITIONAL_INFORMATION_COLUMN_TYPE_NUMBER' | translate }}</mat-option>
+                                    </mat-select>
+                                    <mat-error>{{ 'SOURCE.ADDITIONAL_INFORMATION_COLUMN_TYPE_ERROR' | translate }}</mat-error>
+                                  </mat-form-field>
+                                  <button mat-mini-fab class="btn-accent" type="button" title="{{ 'SOURCE.REMOVE_ADDITIONAL_SOURCE_COLUMN_BUTTON' | translate }}"
+                                    (click)="onRemoveAdditionalColumn(i)">
+                                    <mat-icon>remove</mat-icon>
+                                  </button>
+                                </div>
+                              }
+                              <button mat-raised-button [disabled]="!data.hasHeader || data.additionalColumnIndexes.length >= 10"
+                                (click)="onAddAdditionalColumn()"
+                                matTooltip="{{ 'SOURCE.IMPORT_ADDITIONAL_SOURCE_COLUMN_TOOLTIP' | translate }}">
+                                <mat-icon>add</mat-icon>{{ 'SOURCE.IMPORT_ADDITIONAL_SOURCE_COLUMN_BUTTON' | translate }}
+                              </button>
+                            } @else {
+                              <button class="alert alert-danger">
+                                <mat-icon>warning</mat-icon>
+                              {{'SOURCE.INCORRECT_DELIMITER' | translate}}</button>
+                            }
+                          </div>
+                        }
+                      </mat-card-content>
+                      @if (!csvHeaders || error.message !== undefined) {
+                        <div class="column-fill">
+                          <app-errormessage [error]="error"></app-errormessage>
+                        </div>
+                      }
+                      <mat-divider></mat-divider>
+                      <mat-card-actions>
+                        @if (saved) {
+                          <p class="alert alert-success">{{ 'SOURCE.SUCCESS' | translate }}</p>
+                        }
+                        <button mat-flat-button type="submit" [disabled]="disableSubmit()"
+                        (click)="onSubmit()">{{ 'FORM.SAVE' | translate }}</button>
+                        <button mat-raised-button class="black-text" type="cancel"
+                        (click)="onClose(false)">{{ 'FORM.CLOSE' | translate }}</button>
+                      </mat-card-actions>
+                    </div>
+                  </form>
                 </div>
-              </ng-template>
-              <mat-form-field class="field-full-width">
-                <mat-label>{{ 'SOURCE.DISPLAY_COL' | translate }}</mat-label>
-                <mat-select [(ngModel)]="data.displayColumnIndex"
-                            [ngModelOptions]="ngModelOptions">
-                  <mat-option *ngFor="let col of csvHeaders; let idx = index" [value]="idx">
-                    {{col}}
-                  </mat-option>
-                </mat-select>
-              </mat-form-field>
-              <div fxLayout="row" class="additional-column-section" *ngFor="let additionalCol of data.additionalColumnIndexes.values(); index as i; trackBy:trackByIdx">
-                <mat-form-field class="two-form-fields trailing-space">
-                  <mat-label>{{ 'SOURCE.ADDITIONAL_INFORMATION_COLUMN' | translate : {count: i+1} }}</mat-label>
-                  <mat-select [(ngModel)]="data.additionalColumnIndexes[i]"
-                    [ngModelOptions]="ngModelOptions" #additionalColumn{{i}}="ngModel" [disabled]="!data.hasHeader" required>
-                    <mat-option *ngFor="let col of csvHeaders; let idx = index" [value]="idx">
-                      {{col}}
-                    </mat-option>
-                  </mat-select>
-                  <mat-error>{{ 'SOURCE.ADDITIONAL_INFORMATION_COLUMN_ERROR' | translate }}</mat-error>
-                </mat-form-field>
-                <mat-form-field class="two-form-fields trailing-space">
-                  <mat-label>{{ 'SOURCE.ADDITIONAL_INFORMATION_COLUMN_TYPE' | translate : {count: i+1} }}</mat-label>
-                  <mat-select [(ngModel)]="data.additionalColumnTypes[i]" 
-                    [ngModelOptions]="ngModelOptions" #additionalColumnType{{i}}="ngModel" [disabled]="!data.hasHeader" required>
-                    <mat-option value="TEXT">{{ 'SOURCE.ADDITIONAL_INFORMATION_COLUMN_TYPE_TEXT' | translate }}</mat-option>
-                    <mat-option value="NUMBER">{{ 'SOURCE.ADDITIONAL_INFORMATION_COLUMN_TYPE_NUMBER' | translate }}</mat-option>
-                  </mat-select>
-                  <mat-error>{{ 'SOURCE.ADDITIONAL_INFORMATION_COLUMN_TYPE_ERROR' | translate }}</mat-error>
-                </mat-form-field>
-                <button mat-mini-fab color="accent" type="button" title="{{ 'SOURCE.REMOVE_ADDITIONAL_SOURCE_COLUMN_BUTTON' | translate }}"
-                        (click)="onRemoveAdditionalColumn(i)">
-                  <mat-icon>remove</mat-icon>
-                </button>
-              </div>
-    
-              <button mat-raised-button [disabled]="!data.hasHeader || data.additionalColumnIndexes.length >= 10"
-                (click)="onAddAdditionalColumn()"
-                matTooltip="{{ 'SOURCE.IMPORT_ADDITIONAL_SOURCE_COLUMN_TOOLTIP' | translate }}">
-                  <mat-icon>add</mat-icon>{{ 'SOURCE.IMPORT_ADDITIONAL_SOURCE_COLUMN_BUTTON' | translate }}
-              </button>
-            </ng-template>
-            <ng-template #incorrectdelimiter>
-              <button class="alert alert-danger">
-                <mat-icon>warning</mat-icon>
-                {{'SOURCE.INCORRECT_DELIMITER' | translate}}</button>
-            </ng-template>
-          </div>
-        </mat-card-content>
-        <div *ngIf="!csvHeaders || error.message !== undefined" class="column-fill">
-          <app-errormessage [error]="error"></app-errormessage>
-        </div>
-        <mat-divider></mat-divider>
-        <mat-card-actions>
-          <p *ngIf="saved" class="alert alert-success">{{ 'SOURCE.SUCCESS' | translate }}</p>
-          <button mat-raised-button color="primary" type="submit" [disabled]="disableSubmit()"
-                  (click)="onSubmit()">{{ 'FORM.SAVE' | translate }}</button>
-          <button mat-raised-button color="default" type="cancel"
-                  (click)="onClose(false)">{{ 'FORM.CLOSE' | translate }}</button>
-        </mat-card-actions>
-      </div>
-    </form>
-  </div>
-</mat-dialog-content>
+              </mat-dialog-content>

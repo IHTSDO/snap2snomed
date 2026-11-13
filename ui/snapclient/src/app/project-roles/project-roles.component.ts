@@ -17,7 +17,7 @@
 import {Component, EventEmitter, Input, OnInit, Output, ViewChild} from '@angular/core';
 import {MatTableDataSource} from '@angular/material/table';
 import {ProjectRole, projectRoles, ProjectUserFilter, User} from '../_models/user';
-import {FormControl, NgForm} from '@angular/forms';
+import {UntypedFormControl, NgForm} from '@angular/forms';
 import {TranslateService} from '@ngx-translate/core';
 import {UserService} from '../_services/user.service';
 import {Project} from '../_models/project';
@@ -28,9 +28,10 @@ import {Observable, Subscription} from 'rxjs';
 import {catchError, debounceTime, distinctUntilChanged, map} from 'rxjs/operators';
 
 @Component({
-  selector: 'app-project-roles',
-  templateUrl: './project-roles.component.html',
-  styleUrls: ['./project-roles.component.css']
+    selector: 'app-project-roles',
+    templateUrl: './project-roles.component.html',
+    styleUrls: ['./project-roles.component.css'],
+    standalone: false
 })
 export class ProjectRolesComponent implements OnInit {
 
@@ -46,8 +47,8 @@ export class ProjectRolesComponent implements OnInit {
   displayedColumns = ['username', 'project_role'];
   displayedFilterColumns = ['filter_name', 'filter_role'];
 
-  usernameFilterControl = new FormControl('');
-  emailFilterControl = new FormControl('');
+  usernameFilterControl = new UntypedFormControl('');
+  emailFilterControl = new UntypedFormControl('');
 
   private subscription = new Subscription();
   private debounce = 200;
@@ -149,7 +150,12 @@ export class ProjectRolesComponent implements OnInit {
     [this.usernameFilterControl, this.emailFilterControl].forEach((control) => {
       this.subscription.add(control.valueChanges
         .pipe(debounceTime(this.debounce), distinctUntilChanged())
-        .subscribe(() => {
+        .subscribe((value) => {
+          if (control === this.usernameFilterControl) {
+            this.filterValues.username = value ?? '';
+          } else if (control === this.emailFilterControl) {
+            this.filterValues.email = value ?? '';
+          }
           this.applyFilter();
         }));
     });

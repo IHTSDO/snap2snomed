@@ -1,5 +1,5 @@
 /*
- * Copyright © 2022 SNOMED International
+ * Copyright © 2026 SNOMED International
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,48 +14,58 @@
  * limitations under the License.
  */
 
-import {ComponentFixture, fakeAsync, TestBed, tick} from '@angular/core/testing';
-
-import {MappingViewComponent} from './mapping-view.component';
-import {TranslateLoader, TranslateModule, TranslateService} from '@ngx-translate/core';
-import {MockStore, provideMockStore} from '@ngrx/store/testing';
-import {IAppState, initialAppState} from '../../store/app.state';
-import {ChangeDetectorRef, DebugElement} from '@angular/core';
-import {User} from '../../_models/user';
-import {RouterTestingModule} from '@angular/router/testing';
-import {HttpClientTestingModule} from '@angular/common/http/testing';
-import {MatButtonModule} from '@angular/material/button';
-import {MatDividerModule} from '@angular/material/divider';
-import {MatIconModule} from '@angular/material/icon';
-import {MatMenuModule} from '@angular/material/menu';
-import {MatToolbarModule} from '@angular/material/toolbar';
-import {MatCardModule} from '@angular/material/card';
-import {HttpLoaderFactory} from '../../app.module';
-import {selectCurrentMapping, selectMappingError, selectSelectedRows} from '../../store/mapping-feature/mapping.selectors';
-import {Mapping} from '../../_models/mapping';
-import {selectCurrentUser} from '../../store/auth-feature/auth.selectors';
-import {InitialsPipe} from '../../_utils/initialize_pipe';
-import {LastupdatedPipe} from '../../_utils/lastupdated_pipe';
-import {ErrormessageComponent} from '../../errormessage/errormessage.component';
-import {By} from '@angular/platform-browser';
-import {MatChipsModule} from '@angular/material/chips';
-import {MatSort} from '@angular/material/sort';
-import {MatPaginator} from '@angular/material/paginator';
-import {APP_CONFIG} from '../../app.config';
-import {NoopAnimationsModule} from '@angular/platform-browser/animations';
-import {MatSnackBarModule} from '@angular/material/snack-bar';
-import {MatDialogModule} from '@angular/material/dialog';
-import { BulkchangeComponent } from '../bulkchange/bulkchange.component';
+import { ComponentFixture, TestBed, fakeAsync, flushMicrotasks, tick, waitForAsync } from '@angular/core/testing';
+import { MappingViewComponent } from './mapping-view.component';
+import { TranslateLoader, TranslateModule, TranslateService, TranslateFakeLoader } from '@ngx-translate/core';
+import { provideMockStore } from '@ngrx/store/testing';
+import { initialAppState } from '../../store/app.state';
+import { DebugElement, NO_ERRORS_SCHEMA } from '@angular/core';
+import { User } from '../../_models/user';
+import { MapService } from '../../_services/map.service';
+import { MatButtonModule } from '@angular/material/button';
+import { MatDividerModule } from '@angular/material/divider';
+import { MatIconModule } from '@angular/material/icon';
+import { MatMenuModule } from '@angular/material/menu';
+import { MatToolbarModule } from '@angular/material/toolbar';
+import { MatCardModule } from '@angular/material/card';
+import { MatChipsModule } from '@angular/material/chips';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatDialogModule } from '@angular/material/dialog';
 import { MatBottomSheetModule } from '@angular/material/bottom-sheet';
+import { MatTableModule } from '@angular/material/table';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
+import { MatSidenavModule } from '@angular/material/sidenav';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { FormsModule } from '@angular/forms';
+import { NoopAnimationsModule } from '@angular/platform-browser/animations';
+import { By } from '@angular/platform-browser';
+import { ActivatedRoute, provideRouter } from '@angular/router';
+import { of } from 'rxjs';
+
+import { selectCurrentMapping, selectCurrentView, selectMappingError, selectMappingLoading, selectSelectedRows } from '../../store/mapping-feature/mapping.selectors';
+import { selectCurrentUser } from '../../store/auth-feature/auth.selectors';
+import { selectMappingFile, selectMappingFileError, selectMappingFileLoading, selectMappingFileSuccess } from '../../store/source-feature/source.selectors';
+import { selectTaskList } from '../../store/task-feature/task.selectors';
+import { Mapping } from '../../_models/mapping';
+import { Page } from '../../_models/map_row';
+
+import { InitialsPipe } from '../../_utils/initialize_pipe';
+import { LastupdatedPipe } from '../../_utils/lastupdated_pipe';
+import { ErrormessageComponent } from '../../errormessage/errormessage.component';
+import { BulkchangeComponent } from '../bulkchange/bulkchange.component';
 import { MappingTableSelectorComponent } from '../mapping-table-selector/mapping-table-selector.component';
-import {MappingDetailsCardComponent} from '../mapping-details-card/mapping-details-card.component';
-import {ActivatedRoute} from '@angular/router';
-import {Observable, of} from 'rxjs';
+import { MappingDetailsCardComponent } from '../mapping-details-card/mapping-details-card.component';
+import { APP_CONFIG } from '../../app.config';
+import { MatSortModule } from '@angular/material/sort';
+import { MatPaginatorModule } from '@angular/material/paginator';
 
 describe('MappingViewComponent', () => {
   let component: MappingViewComponent;
   let fixture: ComponentFixture<MappingViewComponent>;
-  let store: MockStore<IAppState>;
   let el: DebugElement;
 
   const user = new User();
@@ -65,11 +75,24 @@ describe('MappingViewComponent', () => {
   mapping.id = '1';
   mapping.project.title = 'Test Map';
 
-  beforeEach(async (done) => {
-     await TestBed.configureTestingModule({
+  const mockMapService = {
+    getTagCount: () => of({ page: { totalElements: 0 } })
+  };
+
+  beforeEach(waitForAsync(() => {
+    TestBed.configureTestingModule({
+      declarations: [
+        MappingViewComponent,
+        InitialsPipe,
+        LastupdatedPipe,
+        ErrormessageComponent,
+        BulkchangeComponent,
+        MappingDetailsCardComponent,
+        MappingTableSelectorComponent
+      ],
       imports: [
-        RouterTestingModule,
-        HttpClientTestingModule,
+        MatSortModule,
+        MatPaginatorModule,
         MatButtonModule,
         MatDividerModule,
         MatIconModule,
@@ -77,6 +100,15 @@ describe('MappingViewComponent', () => {
         MatToolbarModule,
         MatCardModule,
         MatChipsModule,
+        MatTableModule,
+        MatFormFieldModule,
+        MatInputModule,
+        MatSelectModule,
+        MatSidenavModule,
+        MatCheckboxModule,
+        MatSlideToggleModule,
+        MatTooltipModule,
+        FormsModule,
         NoopAnimationsModule,
         MatSnackBarModule,
         MatDialogModule,
@@ -84,57 +116,74 @@ describe('MappingViewComponent', () => {
         TranslateModule.forRoot({
           loader: {
             provide: TranslateLoader,
-            useFactory: HttpLoaderFactory,
-            deps: [HttpClientTestingModule]
+            useClass: TranslateFakeLoader
           }
         })
       ],
       providers: [
-        {provide: APP_CONFIG, useValue: {}},
-        {provide: ActivatedRoute,
+        provideRouter([{ path: 'map-view/:id', component: MappingViewComponent }]),
+        { provide: APP_CONFIG, useValue: {} },
+        {
+          provide: ActivatedRoute,
           useValue: {
-            params: of({
-              mappingid: mapping.id,
-            }),
-            queryParams: of({
-            })
+            params: of({ mappingid: mapping.id }),
+            queryParams: of({})
           }
         },
+        { provide: MapService, useValue: mockMapService },
         provideMockStore({
           initialState: initialAppState,
           selectors: [
-            {selector: selectMappingError, value: 'MockError'},
-            {selector: selectCurrentMapping, value: mapping},
-            {selector: selectCurrentUser, value: user},
-            {selector: selectSelectedRows, value: null},
-          ],
-        }), TranslateService],
-      declarations: [
-        MappingViewComponent,
-        InitialsPipe,
-        LastupdatedPipe,
-        MatSort,
-        MatPaginator,
-        ErrormessageComponent,
-        BulkchangeComponent,
-        MappingDetailsCardComponent,
-        MappingTableSelectorComponent
-      ]
+            { selector: selectMappingError, value: 'MockError' },
+            { selector: selectCurrentMapping, value: mapping },
+            { selector: selectCurrentView, value: new Page() },
+            { selector: selectTaskList, value: [] },
+            { selector: selectCurrentUser, value: user },
+            { selector: selectSelectedRows, value: [] },
+            { selector: selectMappingFile, value: null },
+            { selector: selectMappingFileSuccess, value: null },
+            { selector: selectMappingFileError, value: null },
+            { selector: selectMappingLoading, value: false },
+            { selector: selectMappingFileLoading, value: false }
+          ]
+        }),
+        TranslateService
+      ],
+      schemas: [NO_ERRORS_SCHEMA]
     }).compileComponents();
-    store = TestBed.inject(MockStore);
+  }));
+
+  beforeEach(fakeAsync(() => {
+    // Defensive reset: clear owners in case a previous test leaked state
+    mapping.project.owners = [];
+
     fixture = TestBed.createComponent(MappingViewComponent);
     component = fixture.componentInstance;
-    const changeDetectorRef = fixture.debugElement.injector.get(ChangeDetectorRef);
-    component.mappingTableSelector = new MappingTableSelectorComponent(component.table, changeDetectorRef, store);
+
     component.allSourceDetails = [];
-    component.ngOnInit();
-    await setTimeout(function() {
-      done();
-      fixture.detectChanges();
-    }, 200);
-  });
+    component.currentUser = user;
+    // Pre-set mapping so @if(mapping) embedded view is created in the first detectChanges
+    // rather than mid-cycle during a later one — avoids NG0100 from in-flight creation
+    component.mapping = mapping;
+
+    fixture.detectChanges(); // ngOnInit, @if(mapping) view created (mapping already truthy)
+    tick(201);               // fire debounceTime(200): selectCurrentMapping subscription fires
+    fixture.detectChanges(); // update cycle with stable embedded view
+    tick();                  // drain microtasks (ngModel, router navigation)
+    fixture.detectChanges(); // settle final state
+  }));
 
   afterEach(() => {
+    selectCurrentView.clearResult();
+    selectCurrentMapping.clearResult();
+    selectTaskList.clearResult();
+    selectMappingFile.clearResult();
+    selectMappingFileSuccess.clearResult();
+    selectMappingFileLoading.clearResult();
+    selectMappingFileError.clearResult();
+    selectMappingLoading.clearResult();
+    selectMappingError.clearResult();
+    selectSelectedRows.clearResult();
     fixture.destroy();
   });
 
@@ -143,73 +192,79 @@ describe('MappingViewComponent', () => {
   });
 
   it('should show EDIT MAP button', () => {
-    fixture.detectChanges();
     el = fixture.debugElement.query(By.css('a'));
     expect(el.nativeElement.textContent).toBe(' MAP.MAP_VIEW_BUTTON ');
     expect(el).toBeTruthy();
   });
 
-  it('should show BULK EDIT button', () => {
-    const currentUser = component.currentUser;
-    try {
+  // Owner-only tests: recreate the component with isOwner()=true from the start so
+  // @if(isOwner()) views are stable on the first detectChanges and never cause NG0100.
+  describe('as owner', () => {
+    beforeEach(async () => {
+      fixture.destroy();
+      
+      // Set owners BEFORE creating fixture so @if(isOwner()) is true on initial render
       mapping.project.owners = [user];
+
+      fixture = TestBed.createComponent(MappingViewComponent);
+      component = fixture.componentInstance;
+
+      component.allSourceDetails = [];
+      component.mapping = mapping;
       component.currentUser = user;
+
       fixture.detectChanges();
+      await fixture.whenStable();      // Allow translate pipe and Material to settle
+      fixture.detectChanges();
+      await fixture.whenStable();      // Final settle for tooltip bindings
+    });
+
+    afterEach(() => {
+      mapping.project.owners = [];
+    });
+
+    it('should show BULK EDIT button', () => {
       el = fixture.debugElement.query(By.css('#bulk-change'));
       expect(el.nativeElement.textContent).toBe(' TABLE.BULK_CHANGE ');
       expect(el).toBeTruthy();
-    } finally {
-      component.currentUser = currentUser;
-      mapping.project.owners = [];
-    }
-  });
+    });
 
-  it('should show VALIDATE button', () => {
-    const currentUser = component.currentUser;
-    try {
-      mapping.project.owners = [user];
-      component.currentUser = user;
-      fixture.detectChanges();
+    it('should show VALIDATE button', () => {
       el = fixture.debugElement.query(By.css('#validate-targets'));
       expect(el.nativeElement.textContent).toBe(' MAP.VALIDATE_TARGETS ');
       expect(el).toBeTruthy();
-    } finally {
-      component.currentUser = currentUser;
-      mapping.project.owners = [];
-    }
+    });
   });
 
-  /**
-   * Test for <h2>{{mapping.project.title}}</h2>
-   */
   it('should show Map title', () => {
-    fixture.detectChanges();
     el = fixture.debugElement.query(By.css('h2'));
     expect(el.nativeElement.textContent).toBe('Test Map - (MAP.SINGLE_MAP)');
     expect(el).toBeTruthy();
   });
 
   it('should show Map table', () => {
-    fixture.detectChanges();
     el = fixture.debugElement.query(By.css('table'));
     expect(el).toBeTruthy();
   });
 
   it('should show Paginator', () => {
-    fixture.detectChanges();
     el = fixture.debugElement.query(By.css('mat-paginator'));
     expect(el).toBeTruthy();
   });
 
   it('should show Export Menu button and menu', () => {
-    fixture.detectChanges();
-    el = fixture.debugElement.query(By.css('.mat-menu-trigger'));
+    el = fixture.debugElement.query(By.css('.mat-mdc-menu-trigger'));
     expect(el).toBeTruthy();
-    expect(el.nativeElement.textContent).toBe('MAP.EXPORT');
-    el.triggerEventHandler('click', null);
-    const menu = fixture.debugElement.query(By.css('.mat-menu-panel'));
-    expect(menu).toBeTruthy();
-    expect(menu.nativeElement.textContent).toBe('MAP.EXPORT_CSVMAP.EXPORT_TSVMAP.EXPORT_XLSXMAP.EXPORT_FHIR_JSONMAP.EXPORT_XLSX_EXTENDED');
-  });
 
+    expect(el.nativeElement.textContent).toBe('MAP.EXPORT');
+
+    el.triggerEventHandler('click', null);
+
+    const menu = fixture.debugElement.query(By.css('.mat-mdc-menu-panel'));
+    expect(menu).toBeTruthy();
+
+    expect(menu.nativeElement.textContent).toBe(
+      'MAP.EXPORT_CSVMAP.EXPORT_TSVMAP.EXPORT_XLSXMAP.EXPORT_FHIR_JSONMAP.EXPORT_XLSX_EXTENDED'
+    );
+  });
 });

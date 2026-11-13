@@ -27,9 +27,10 @@ import {Task, TaskType} from '../../_models/task';
 import {StatusUtils} from '../../_utils/status_utils';
 
 @Component({
-  selector: 'app-target-rows',
-  templateUrl: './target-rows.component.html',
-  styleUrls: ['./target-rows.component.css']
+    selector: 'app-target-rows',
+    templateUrl: './target-rows.component.html',
+    styleUrls: ['./target-rows.component.css'],
+    standalone: false
 })
 export class TargetRowsComponent implements OnInit {
   displayedColumns: string[] = [

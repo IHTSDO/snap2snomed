@@ -18,7 +18,6 @@ package org.snomed.snap2snomed.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import org.snomed.snap2snomed.config.Snap2snomedConfiguration;
-import org.snomed.snap2snomed.model.Project;
 import org.snomed.snap2snomed.model.User;
 import org.snomed.snap2snomed.problem.auth.InvalidIdentitiyTokenProblem;
 import org.snomed.snap2snomed.problem.auth.NoSuchUserProblem;
@@ -27,8 +26,6 @@ import org.snomed.snap2snomed.security.AuthenticationFacade;
 import org.snomed.snap2snomed.security.WebSecurity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.data.rest.webmvc.RepositoryRestController;
-import org.springframework.hateoas.server.ExposesResourceFor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
@@ -39,9 +36,7 @@ import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import javax.validation.constraints.Size;
-import org.zalando.problem.Problem;
-import org.zalando.problem.Status;
+import jakarta.validation.constraints.Size;
 
 // this requires an authenticated user to ensure they have a valid access token, but doesn't
 // require a "valid" user in the database - this is how users get into the database

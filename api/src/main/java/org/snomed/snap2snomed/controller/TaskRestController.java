@@ -17,14 +17,12 @@
 package org.snomed.snap2snomed.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
-import java.net.URI;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import org.snomed.snap2snomed.controller.dto.AutomapRowDto;
 import org.snomed.snap2snomed.controller.dto.IndexSpecification;
-import org.snomed.snap2snomed.model.Project;
 import org.snomed.snap2snomed.model.Task;
 import org.snomed.snap2snomed.model.enumeration.MapStatus;
 import org.snomed.snap2snomed.model.enumeration.TaskType;
@@ -39,16 +37,17 @@ import org.snomed.snap2snomed.security.AuthenticationFacade;
 import org.snomed.snap2snomed.security.WebSecurity;
 import org.snomed.snap2snomed.util.EntityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.ErrorResponseException;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
-import org.zalando.problem.Problem;
-import org.zalando.problem.Status;
 
 @RestController
 public class TaskRestController {
@@ -91,13 +90,13 @@ public class TaskRestController {
     boolean isAssignee = EntityUtils.isTaskAssignee(authenticationFacade.getAuthenticatedUser(), task);
 
     if (!isAdmin && !isAssignee) {
-      throw new TaskDeletProblem("only-owners-and-assignees", "Only owners and assignees may delete tasks", Status.FORBIDDEN);
+      throw new TaskDeletProblem("only-owners-and-assignees", "Only owners and assignees may delete tasks", HttpStatus.FORBIDDEN);
     } else {
       IndexSpecification incompleteRows = getIncompleteRows(task);
       if (!isAdmin && incompleteRows.getCount() != 0) {
         throw new TaskDeletProblem("incomplete-rows-for-task",
           "The task cannot be completed because there are " + incompleteRows.getCount() + " rows still not in a complete state which are "
-              + incompleteRows.getSpecification(), Status.BAD_REQUEST);
+              + incompleteRows.getSpecification(), HttpStatus.BAD_REQUEST);
       }
     }
 
@@ -122,11 +121,13 @@ public class TaskRestController {
       throw new NotAuthorisedProblem("Not authorised to view map if the user is not admin or member of an associated project for the task!");
     }
     if (taskRepository.existsById(taskId)) {
-      Task task = taskRepository.findById(taskId).orElseThrow(() -> Problem.valueOf(Status.BAD_REQUEST, "Cannot find task with id " + taskId));
+      Task task = taskRepository.findById(taskId).orElseThrow(() -> Snap2SnomedProblem.of(HttpStatus.BAD_REQUEST, "Cannot find task with id " + taskId));
       return getIncompleteRows(task);
     } else {
-      throw Problem.builder().withStatus(Status.NOT_FOUND).withDetail("Task " + taskId + " could not be found.").withTitle("Task not found").withType(
-          URI.create(Snap2SnomedProblem.BASE_PROBLEM_TYPE_URI + "task/not-found")).build();
+      ProblemDetail body = ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, "Task " + taskId + " could not be found.");
+      body.setTitle("Task not found");
+      body.setType(Snap2SnomedProblem.toTypeUri("task/not-found"));
+      throw new ErrorResponseException(HttpStatus.NOT_FOUND, body, null);
     }
   }
 

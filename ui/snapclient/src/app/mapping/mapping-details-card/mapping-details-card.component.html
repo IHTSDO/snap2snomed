@@ -1,39 +1,45 @@
-<mat-card class="details-card">
+<mat-card appearance="outlined" class="details-card">
   <mat-card-content>
     <div class="row">
       <div class="col-project">
         <h2 id="map-title" class="one-line-ellipse">{{mapping.project.title}} <span class="dual-map-text">- ({{(mapping.project.dualMapMode ? 'MAP.DUAL_MAP' : 'MAP.SINGLE_MAP') | translate}})</span></h2>
         <ul class="sources-list">
           <li class="one-line-ellipse"><b>{{'SOURCE.SOURCE' | translate}}:</b>&nbsp;{{mapping.source.name}},
-            <i>{{'MAP.VERSION' | translate}}</i> {{mapping.source.version}}
-          </li>
-          <li class="one-line-ellipse"><b>{{'MAP.TARGET' | translate}}:</b>&nbsp;
-            <app-source-version [version]="mapping.toVersion"></app-source-version>
-          </li>
-          <li class="one-line-ellipse"><b>{{'MAP.SCOPE' | translate}}:</b>&nbsp;
-            {{mapping.toScope}}
-          </li>
-        </ul>
-      </div>
-      <div *ngIf="outOfScopeTargetCount > 0" class="col-middle">
-        <span class="out-of-scope-text">{{'MAP.NUM_TARGETS_OUT_OF_SCOPE' | translate}}: {{outOfScopeTargetCount}}</span>
-      </div>
-      <div class="col-action">
-        <mat-form-field>
-          <mat-label>{{'MAP.MAP_VERSION' | translate}}</mat-label>
-          <mat-select id="map-version-select" (selectionChange)="versionSelectionChange($event)" [(value)]="mapping.id">
-            <mat-option [value]="map.id" *ngFor="let map of mapping.project.maps">
-              {{ map.mapVersion }}
-            </mat-option>
-          </mat-select>
-        </mat-form-field>
-        <small><i>{{'MAP.LAST_UPDATED' | translate}}: {{mapping.modified | lastupdated}}</i></small>
-        <p *ngIf="hasHandler()">
-          <a class="mat-primary" mat-stroked-button (click)="clickHandler()">
-            {{(editable ? 'MAP.MAP_EDIT_BUTTON' : 'MAP.MAP_VIEW_BUTTON') | translate}}
-          </a>
-        </p>
-      </div>
-    </div>
-  </mat-card-content>
+          <i>{{'MAP.VERSION' | translate}}</i> {{mapping.source.version}}
+        </li>
+        <li class="one-line-ellipse"><b>{{'MAP.TARGET' | translate}}:</b>&nbsp;
+        <app-source-version [version]="mapping.toVersion"></app-source-version>
+      </li>
+      <li class="one-line-ellipse"><b>{{'MAP.SCOPE' | translate}}:</b>&nbsp;
+      {{mapping.toScope}}
+    </li>
+  </ul>
+</div>
+@if (outOfScopeTargetCount > 0) {
+  <div class="col-middle">
+    <span class="out-of-scope-text">{{'MAP.NUM_TARGETS_OUT_OF_SCOPE' | translate}}: {{outOfScopeTargetCount}}</span>
+  </div>
+}
+<div class="col-action">
+  <mat-form-field>
+    <mat-label>{{'MAP.MAP_VERSION' | translate}}</mat-label>
+    <mat-select id="map-version-select" (selectionChange)="versionSelectionChange($event)" [(value)]="mapping.id">
+      @for (map of mapping.project.maps; track map) {
+        <mat-option [value]="map.id">
+          {{ map.mapVersion }}
+        </mat-option>
+      }
+    </mat-select>
+  </mat-form-field>
+  <small><i>{{'MAP.LAST_UPDATED' | translate}}: {{mapping.modified | lastupdated}}</i></small>
+  @if (hasHandler()) {
+    <p>
+      <a class="mat-primary" mat-stroked-button (click)="clickHandler()">
+        {{(editable ? 'MAP.MAP_EDIT_BUTTON' : 'MAP.MAP_VIEW_BUTTON') | translate}}
+      </a>
+    </p>
+  }
+</div>
+</div>
+</mat-card-content>
 </mat-card>

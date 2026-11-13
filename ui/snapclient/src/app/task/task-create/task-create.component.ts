@@ -46,9 +46,10 @@ interface ErrorMessage {
 }
 
 @Component({
-  selector: 'app-task-create',
-  templateUrl: './task-create.component.html',
-  styleUrls: ['./task-create.component.css']
+    selector: 'app-task-create',
+    templateUrl: './task-create.component.html',
+    styleUrls: ['./task-create.component.css'],
+    standalone: false
 })
 export class TaskCreateComponent implements OnInit {
 
@@ -206,8 +207,7 @@ export class TaskCreateComponent implements OnInit {
           rtn = this.data.errorMessage.indexesWithRoleConflict ? this.data.errorMessage.indexesWithRoleConflict.count : 0;
           break;
         case TaskConflictType.EXISTING_AND_ROLE:
-          rtn = this.data.errorMessage.indexCountWithRoleAndExistingTaskConflict ?
-            this.data.errorMessage.indexCountWithRoleAndExistingTaskConflict.count : 0;
+          rtn = this.data.errorMessage.indexCountWithRoleAndExistingTaskConflict ?? 0;
           break;
       }
     }
