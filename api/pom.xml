@@ -50,6 +50,10 @@
     <hamcrest-date.version>2.0.8</hamcrest-date.version>
     <hapi.version>8.10.1</hapi.version>
     <snomed-utilities.version>2.1.0</snomed-utilities.version>
+    <!-- Overrides of spring-boot-starter-parent 4.1.0 managed versions for CVEs; remove once Boot's managed versions catch up -->
+    <spring-framework.version>7.0.9</spring-framework.version> <!-- CVE-2026-47884, CVE-2026-47890 (Boot 4.1.0 manages 7.0.8) -->
+    <jackson-2-bom.version>2.21.7</jackson-2-bom.version> <!-- CVE-2026-89407, CVE-2026-89425, CVE-2026-68497, CVE-2026-91776, CVE-2026-91777 (Boot 4.1.0 manages 2.21.4) -->
+    <jackson-bom.version>3.1.7</jackson-bom.version> <!-- CVE-2026-89407, CVE-2026-89425 (Boot 4.1.0 manages 3.1.4) -->
   </properties>
 
   <dependencyManagement>
@@ -68,16 +72,6 @@
         <groupId>com.nimbusds</groupId>
         <artifactId>nimbus-jose-jwt</artifactId>
         <version>9.37.4</version> <!-- force version for CVE-2023-52428 and CVE-2025-53864; remove when org.mock-server:mockserver-core updates this test-scope transitive dependency -->
-      </dependency>
-      <dependency>
-        <groupId>com.fasterxml.jackson.core</groupId>
-        <artifactId>jackson-databind</artifactId>
-        <version>2.21.5</version> <!-- force version for CVE-2026-54515, CVE-2026-59889, GHSA-mhm7-754m-9p8w; remove once spring-boot-starter-parent's managed Jackson 2 databind version catches up -->
-      </dependency>
-      <dependency>
-        <groupId>tools.jackson.core</groupId>
-        <artifactId>jackson-databind</artifactId>
-        <version>3.1.5</version> <!-- force version for CVE-2026-59889; remove when org.flywaydb:flyway-core updates its Jackson 3 databind dependency -->
       </dependency>
       <dependency>
         <groupId>org.apache.logging.log4j</groupId>
@@ -222,7 +216,7 @@
     <dependency>
       <groupId>org.mariadb.jdbc</groupId>
       <artifactId>mariadb-java-client</artifactId>
-      <version>3.5.9</version> <!-- force version for CVE-2026-55856, CVE-2026-55857, CVE-2026-55858 -->
+      <version>3.5.11</version> <!-- force version for CVE-2026-55856, CVE-2026-55857, CVE-2026-55858, CVE-2026-119279, CVE-2026-119280, CVE-2026-119281 -->
     </dependency>
     <dependency>
       <groupId>org.apache.commons</groupId>
@@ -301,7 +295,7 @@
     <dependency>
         <groupId>com.google.guava</groupId>
         <artifactId>guava</artifactId>
-        <version>33.6.0-jre</version>
+        <version>33.7.2-jre</version> <!-- CVE-2026-102554 -->
     </dependency>
 
     <dependency>
