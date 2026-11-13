@@ -1,5 +1,5 @@
 /*
- * Copyright © 2022-23 SNOMED International
+ * Copyright © 2026 SNOMED International
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,24 +23,21 @@ export class StatusUtils {
    *  Under Authoring
    */
   static inAuthoredState(status: MapRowStatus): boolean {
-    return authorStatuses.filter((s) => s !== MapRowStatus.UNMAPPED)
-      .includes(status);
+    return authorStatuses.includes(status) && status !== MapRowStatus.UNMAPPED;
   }
 
   /**
    * Under Reconciliation (Dual Mapping)
    */
   static inReconcileState(status: MapRowStatus): boolean {
-    return reconcileStatuses.filter((s) => s !== MapRowStatus.MAPPED)
-    .includes(status);
+    return reconcileStatuses.includes(status) && status !== MapRowStatus.MAPPED;
   }
 
   /**
    * Under Review or Completed Review
    */
   static inReviewedState(status: MapRowStatus): boolean {
-    return reviewStatuses.filter((s) => s !== MapRowStatus.REJECTED)
-    .includes(status);
+    return reviewStatuses.includes(status) && status !== MapRowStatus.REJECTED;
   }
 
   /**

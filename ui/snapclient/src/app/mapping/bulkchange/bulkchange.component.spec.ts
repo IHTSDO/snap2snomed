@@ -1,5 +1,5 @@
 /*
- * Copyright © 2022 SNOMED International
+ * Copyright © 2026 SNOMED International
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
@@ -25,16 +25,16 @@ import { MatDividerModule } from '@angular/material/divider';
 import { MatFormFieldModule, MatLabel } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatRadioModule } from '@angular/material/radio';
+import { MatIconModule } from '@angular/material/icon';
 import { MatSelectModule } from '@angular/material/select';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { By } from '@angular/platform-browser';
-import { BrowserAnimationsModule, NoopAnimationsModule } from '@angular/platform-browser/animations';
-import { TranslateLoader, TranslateModule, TranslateService } from '@ngx-translate/core';
-import { APP_CONFIG } from 'src/app/app.config';
-import { HttpLoaderFactory } from 'src/app/app.module';
-import { ErrormessageComponent } from 'src/app/errormessage/errormessage.component';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
+import { APP_CONFIG } from 'src/app/app.config';
+import { ErrormessageComponent } from 'src/app/errormessage/errormessage.component';
 import { BulkchangeComponent } from './bulkchange.component';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 
 describe('BulkchangeComponent', () => {
   let component: BulkchangeComponent;
@@ -42,11 +42,10 @@ describe('BulkchangeComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
+      declarations: [BulkchangeComponent, ErrormessageComponent],
       imports: [
         MatDialogModule,
-        HttpClientTestingModule,
-        BrowserAnimationsModule,
-        MatDialogModule,
+        MatLabel,
         MatButtonModule,
         MatDividerModule,
         MatRadioModule,
@@ -57,100 +56,110 @@ describe('BulkchangeComponent', () => {
         ReactiveFormsModule,
         MatInputModule,
         MatSelectModule,
-        NoopAnimationsModule,
-        TranslateModule.forRoot({
-          loader: {
-            provide: TranslateLoader,
-            useFactory: HttpLoaderFactory,
-            deps: [HttpClientTestingModule]
-          }
-        })
+        MatIconModule,
+        TranslateModule.forRoot() 
       ],
       providers: [
-        {provide: MatDialogRef, useValue: {}},
-        {provide: MAT_DIALOG_DATA, useValue: {selectedRows: ['a']}},
-        {provide: APP_CONFIG, useValue: {}},
+        { provide: MatDialogRef, useValue: {} },
+        { provide: MAT_DIALOG_DATA, useValue: { selectedRows: ['a'], isMapView: true } },
+        { provide: APP_CONFIG, useValue: {} },
         MatSnackBar,
-        TranslateService],
-      declarations: [ BulkchangeComponent,
-                      ErrormessageComponent,
-                      MatLabel ]
-    })
-    .compileComponents();
+        TranslateService,
+        provideHttpClient(withInterceptorsFromDi()),
+        provideHttpClientTesting()
+      ]
+    }).compileComponents();
   });
 
-  beforeEach(() => {
+  beforeEach(async () => {
     fixture = TestBed.createComponent(BulkchangeComponent);
     component = fixture.componentInstance;
+
     fixture.detectChanges();
+    await fixture.whenStable(); // allow Angular/Material to settle
   });
 
   it('should create', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should show warning if mapview is set', () => {
+  it('should show warning if mapview is set', async () => {
     component.isMapView = true;
+
     fixture.detectChanges();
+
     const el = fixture.debugElement.query(By.css('.alert-warning'));
     expect(el).toBeTruthy();
   });
 
-  it('should show header for selections', () => {
+  it('should show header for selections', async () => {
     fixture.detectChanges();
-    const el = fixture.debugElement.query(By.css('.mat-dialog-title'));
+
+    const el = fixture.debugElement.query(By.css('.mat-mdc-dialog-title'));
     expect(el.nativeElement.textContent).toContain('BULKCHANGEDIALOG.SELECTED');
   });
 
-  it('should hide relationship and status selection - on clear no map', () => {
+  it('should hide relationship and status selection - on clear no map', async () => {
     component.setClearNoMap(true);
+
     fixture.detectChanges();
+
     let el = fixture.debugElement.query(By.css('.alert-warning'));
     expect(el).toBeTruthy();
-    el = fixture.debugElement.query(By.css('.mat-form-field'));
+
+    el = fixture.debugElement.query(By.css('.mat-mdc-form-field'));
     expect(el).toBeFalsy();
-    el = fixture.debugElement.query(By.css('button.mat-primary'));
-    expect(el.attributes['ng-reflect-disabled']).toEqual('false');
+
+    const button = fixture.debugElement.query(By.css('button[mat-flat-button]'));
+    expect(button.nativeElement.disabled).toBe(false);
   });
 
-  it('should hide relationship selection and status - on no map', () => {
+  it('should hide relationship selection and status - on no map', async () => {
     component.setNoMap(true);
+
     fixture.detectChanges();
+
     const el = fixture.debugElement.query(By.css('.alert-warning'));
     expect(el).toBeTruthy();
-    const el1 = fixture.debugElement.query(By.css('#relationships'));
-    expect(el1).toBeFalsy();
-    const el2 = fixture.debugElement.query(By.css('#statuses'));
-    expect(el2).toBeFalsy();
-    const el3 = fixture.debugElement.query(By.css('button.mat-primary'));
-    console.log(el3.attributes['ng-reflect-disabled']);
-    expect(el3.attributes['ng-reflect-disabled']).toEqual('false');
+
+    expect(fixture.debugElement.query(By.css('#relationships'))).toBeFalsy();
+    expect(fixture.debugElement.query(By.css('#statuses'))).toBeFalsy();
+
+    const button = fixture.debugElement.query(By.css('button[mat-flat-button]'));
+    expect(button.nativeElement.disabled).toBe(false);
   });
 
-  it('should hide relationship and status selection - on clear targets', () => {
+  it('should hide relationship and status selection - on clear targets', async () => {
     component.clearTarget = true;
     component.clearTargetClicked(true);
+
     fixture.detectChanges();
+
     let el = fixture.debugElement.query(By.css('.alert-warning'));
     expect(el).toBeTruthy();
-    el = fixture.debugElement.query(By.css('.mat-form-field'));
+
+    el = fixture.debugElement.query(By.css('.mat-mdc-form-field'));
     expect(el).toBeFalsy();
-    el = fixture.debugElement.query(By.css('button.mat-primary'));
-    expect(el.attributes['ng-reflect-disabled']).toEqual('false');
+
+    const button = fixture.debugElement.query(By.css('button[mat-flat-button]'));
+    expect(button.nativeElement.disabled).toBe(false);
   });
 
-  it('should enable ok when selecting relationship', () => {
-    component.changedRelationship='EQUIVALENT';
+  it('should enable ok when selecting relationship', async () => {
+    component.changedRelationship = 'EQUIVALENT';
+
     fixture.detectChanges();
-    let el = fixture.debugElement.query(By.css('button.mat-primary'));
-    expect(el.attributes['ng-reflect-disabled']).toEqual('false');
+
+    const button = fixture.debugElement.query(By.css('button[mat-flat-button]'));
+    expect(button.nativeElement.disabled).toBe(false);
   });
 
-  it('should enable ok when selecting status', () => {
-    component.changedStatus='MAPPED';
+  it('should enable ok when selecting status', async () => {
+    component.changedStatus = 'MAPPED';
+
     fixture.detectChanges();
-    let el = fixture.debugElement.query(By.css('button.mat-primary'));
-    expect(el.attributes['ng-reflect-disabled']).toEqual('false');
-  });
 
+    const button = fixture.debugElement.query(By.css('button[mat-flat-button]'));
+    expect(button.nativeElement.disabled).toBe(false);
+  });
 });

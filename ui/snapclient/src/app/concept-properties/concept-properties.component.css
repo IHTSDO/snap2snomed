@@ -3,28 +3,32 @@
   max-height: 200px;
 }
 
-.mat-card {
+.mat-mdc-card {
   max-height: 340px;
 }
 
-.mat-table {
+.mat-mdc-table {
   margin-top: 0;
   display: table;
 }
 
-.mat-row {
+.mat-mdc-row {
   height: auto;
 }
 
-.mat-row:nth-child(even){
+.mat-mdc-row:nth-child(even){
   background-color: #00000010;
+}
+
+.mat-mdc-row, .mat-mdc-cell {
+  border-bottom: none !important;
 }
 
 .row-line-above {
   border-top: 2px solid black;
 }
 
-.properties .mat-cell {
+.properties .mat-mdc-cell {
   padding: 3px 6px;
 }
 
@@ -39,12 +43,33 @@
   min-width: 7em;
 }
 
-.mat-chip {
+.mat-mdc-chip {
   min-height: 20px;
   text-align: center;
   padding: 0 4px;
   border-radius: 6px;
   display: inherit;
+}
+
+.property-value-chip {
+  --mat-chip-outline-width: 0;
+  --mat-chip-elevated-container-color: #e0e0e0;
+  height: 16px !important;
+  min-height: 16px !important;
+  padding: 0 !important;
+  font-size: 0.7em;
+}
+
+/* mdc-evolution-chip__action--primary and __text-label are internal markup rendered by
+   MatChipOption's own template, so they need ::ng-deep to be reachable from this stylesheet. */
+.property-value-chip ::ng-deep .mdc-evolution-chip__action--primary {
+  padding: 0 2px !important;
+  height: 16px !important;
+}
+
+.property-value-chip ::ng-deep .mdc-evolution-chip__text-label {
+  padding: 0 !important;
+  line-height: 16px !important;
 }
 
 .grip {

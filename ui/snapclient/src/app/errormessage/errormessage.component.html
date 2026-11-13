@@ -1,35 +1,47 @@
-<div #errorMessage *ngIf="error.message || error.messages" class="alert alert-danger" role="alert">
-  <button type="button" class="close-alert" (click)="closeAlert()">×</button>
-  <div *ngIf="error.messages; else elseBlock">
-    <div *ngFor="let msg of error.messages; let i=index">
-      <p>{{ msg }}.</p>
-      <hr *ngIf="i < error.messages.length - 1 && error.messages.length > 1"/>
-    </div>
+@if (error.message || error.messages) {
+  <div #errorMessage class="alert alert-danger" role="alert">
+    <button type="button" class="close-alert" (click)="closeAlert()">×</button>
+    @if (error.messages) {
+      <div>
+        @for (msg of error.messages; track msg; let i = $index) {
+          <div>
+            <p>{{ msg }}.</p>
+            @if (i < error.messages.length - 1 && error.messages.length > 1) {
+              <hr/>
+            }
+          </div>
+        }
+      </div>
+    } @else {
+      <p>{{ error.message }}.</p>
+    }
+    @if (error.detail) {
+      <div>
+        <hr/>
+        <h3 id="titleMessage">{{ error.detail.title | translate }}</h3>
+        @if (error.detail.detail) {
+          <p id="detailMessage">{{ error.detail.detail | translate }}</p>
+        }
+        @if (error.detail.violations) {
+          <div class="container-table">
+            <table id="violations" mat-table class="full-width-table mat-elevation-z0" [dataSource]="error.detail.violations"
+              matSort>
+              <!-- Field Column -->
+              <ng-container matColumnDef="field">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header>{{ 'ERROR.VIOLATION_FIELD' | translate }}</th>
+                <td mat-cell *matCellDef="let maprow">{{maprow.field}}</td>
+              </ng-container>
+              <!-- Message Column -->
+              <ng-container matColumnDef="message">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header>{{ 'ERROR.VIOLATION_ISSUE' | translate }}</th>
+                <td mat-cell *matCellDef="let maprow">{{maprow.message}}</td>
+              </ng-container>
+              <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+              <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+            </table>
+          </div>
+        }
+      </div>
+    }
   </div>
-  <ng-template #elseBlock>
-    <p>{{ error.message }}.</p>
-  </ng-template>
-  <div *ngIf="error.detail">
-    <hr/>
-    <h3 id="titleMessage">{{ error.detail.title | translate }}</h3>
-    <p *ngIf="error.detail.detail" id="detailMessage">{{ error.detail.detail | translate }}</p>
-    <div *ngIf="error.detail.violations" class="container-table">
-      <table id="violations" mat-table class="full-width-table mat-elevation-z0" [dataSource]="error.detail.violations"
-             matSort>
-        <!-- Field Column -->
-        <ng-container matColumnDef="field">
-          <th mat-header-cell *matHeaderCellDef mat-sort-header>{{ 'ERROR.VIOLATION_FIELD' | translate }}</th>
-          <td mat-cell *matCellDef="let maprow">{{maprow.field}}</td>
-        </ng-container>
-        <!-- Message Column -->
-        <ng-container matColumnDef="message">
-          <th mat-header-cell *matHeaderCellDef mat-sort-header>{{ 'ERROR.VIOLATION_ISSUE' | translate }}</th>
-          <td mat-cell *matCellDef="let maprow">{{maprow.message}}</td>
-        </ng-container>
-
-        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-      </table>
-    </div>
-  </div>
-</div>
+}

@@ -1,6 +1,6 @@
 .container {
   margin: 10px;
-  width: 90vw;
+  width: calc(90vw - 20px);
 }
 
 /* Header source details panel */
@@ -30,6 +30,11 @@
 .col-status {
   flex: 4;
   margin-top: 1.2em;
+}
+
+#previous-code-button,
+#next-code-button {
+  color: black;
 }
 
 .status-group {
@@ -104,7 +109,7 @@ h2 {
   flex: 1;
 }
 
-.mat-card-header {
+.mat-mdc-card-header {
   justify-content: space-between;
 }
 
@@ -113,18 +118,19 @@ h2 {
   justify-content: space-between;
 }
 
-.mat-card-actions {
+.mat-mdc-card-actions {
   height: 50px;
   margin: 0 10px;
 }
 
-.mat-card-actions .mat-icon {
+.mat-mdc-card-actions .mat-icon {
   vertical-align: middle;
 }
 
-.mat-card-footer {
+.mat-mdc-card-footer {
   margin: 0;
   width: 100%;
+  padding-bottom: 10px;
 }
 
 .button-actions {
@@ -138,7 +144,7 @@ h2 {
   vertical-align: middle;
 }
 
-.button-actions .mat-form-field {
+.button-actions .mat-mdc-form-field {
   font-size: 0.8em;
   line-height: 1;
 }
@@ -162,7 +168,7 @@ h2 {
 }
 
 
-.mat-button-toggle-group-appearance-standard {
+.mat-button-toggle-group {
   border-radius: 30px;
   border: none;
 }
@@ -173,11 +179,15 @@ h2 {
 }
 
 .mat-button-toggle-checked {
-  background-color: #ff4081;
-  color: #ffffff;
+  --mat-button-toggle-legacy-selected-state-background-color: #ff4081;
+  --mat-button-toggle-legacy-selected-state-text-color: #ffffff;
+  --mat-button-toggle-selected-state-background-color: #ff4081;
+  --mat-button-toggle-selected-state-text-color: #ffffff;
+  background-color: #ff4081 !important;
+  color: #ffffff !important;
 }
 
-.mat-flat-button.mat-button-disabled.mat-button-disabled {
+.mat-mdc-unelevated-button.mat-button-disabled.mat-button-disabled {
   background-color: #ffffff;
 }
 

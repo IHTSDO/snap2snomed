@@ -24,9 +24,10 @@ import { selectCurrentView, selectSelectedRows } from '../../../app/store/mappin
 import { MappedRowDetailsDto, MapView, Page } from '../../../app/_models/map_row';
 
 @Component({
-  selector: 'app-mapping-table-selector',
-  templateUrl: './mapping-table-selector.component.html',
-  styleUrls: ['./mapping-table-selector.component.css']
+    selector: 'app-mapping-table-selector',
+    templateUrl: './mapping-table-selector.component.html',
+    styleUrls: ['./mapping-table-selector.component.css'],
+    standalone: false
 })
 export class MappingTableSelectorComponent implements OnInit, OnDestroy, AfterViewInit {
 
@@ -219,7 +220,7 @@ export class MappingTableSelectorComponent implements OnInit, OnDestroy, AfterVi
   }
 
   checkSelected(row: MapView): boolean {
-    return this.selectedRows.filter(selectedRow => {
+    return (this.selectedRows ?? []).filter(selectedRow => {
       return selectedRow.sourceIndex === parseInt(row.sourceIndex)
       && (row.targetId ? selectedRow.mapRowTargetId === parseInt(row.targetId) : true)}).length > 0;
   }

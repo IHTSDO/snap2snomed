@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {HttpClient, HttpParams} from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import {Inject, Injectable} from '@angular/core';
 import {APP_CONFIG, AppConfig} from '../app.config';
 import {Observable} from 'rxjs';

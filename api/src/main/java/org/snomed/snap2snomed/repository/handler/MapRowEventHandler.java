@@ -21,14 +21,14 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.SortedSet;
-import java.util.TreeSet;
 
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import lombok.extern.slf4j.Slf4j;
 import org.snomed.snap2snomed.model.*;
 import org.snomed.snap2snomed.model.enumeration.MapStatus;
 import org.snomed.snap2snomed.model.enumeration.NoteCategory;
+import org.snomed.snap2snomed.problem.Snap2SnomedProblem;
 import org.snomed.snap2snomed.problem.auth.NotAuthorisedProblem;
 import org.snomed.snap2snomed.problem.mapping.InvalidMappingProblem;
 import org.snomed.snap2snomed.problem.mapping.UnauthorisedMappingProblem;
@@ -44,8 +44,7 @@ import org.springframework.data.rest.core.annotation.HandleBeforeLinkDelete;
 import org.springframework.data.rest.core.annotation.HandleBeforeLinkSave;
 import org.springframework.data.rest.core.annotation.HandleBeforeSave;
 import org.springframework.data.rest.core.annotation.RepositoryEventHandler;
-import org.zalando.problem.Problem;
-import org.zalando.problem.Status;
+import org.springframework.http.HttpStatus;
 
 @RepositoryEventHandler
 @Slf4j
@@ -68,7 +67,7 @@ public class MapRowEventHandler {
 
   @HandleBeforeCreate
   public void handleMapRowBeforeCreate(MapRow mapRow) {
-    throw Problem.valueOf(Status.FORBIDDEN, "Map rows are system created on creation of a map");
+    throw Snap2SnomedProblem.of(HttpStatus.FORBIDDEN, "Map rows are system created on creation of a map");
   }
 
   @HandleBeforeSave

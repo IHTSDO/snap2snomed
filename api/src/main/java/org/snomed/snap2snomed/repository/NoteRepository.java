@@ -18,19 +18,19 @@ package org.snomed.snap2snomed.repository;
 
 import java.util.Optional;
 import org.snomed.snap2snomed.model.Note;
-import org.snomed.snap2snomed.model.Task;
 import org.snomed.snap2snomed.model.enumeration.NoteCategory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.history.RevisionRepository;
 import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 import org.springframework.data.rest.core.annotation.RestResource;
 
 @RepositoryRestResource
-public interface NoteRepository extends RevisionRepository<Note, Long, Integer>, PagingAndSortingRepository<Note, Long> {
+public interface NoteRepository extends RevisionRepository<Note, Long, Integer>, PagingAndSortingRepository<Note, Long>, CrudRepository<Note, Long> {
 
     // ---------------------------------
     // Exported in REST interface

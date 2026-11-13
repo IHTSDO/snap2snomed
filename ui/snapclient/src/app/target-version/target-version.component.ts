@@ -19,9 +19,10 @@ import {TranslateService} from '@ngx-translate/core';
 import {SnomedUtils} from '../_utils/snomed_utils';
 
 @Component({
-  selector: 'app-source-version',
-  templateUrl: './target-version.component.html',
-  styleUrls: ['./target-version.component.css']
+    selector: 'app-source-version',
+    templateUrl: './target-version.component.html',
+    styleUrls: ['./target-version.component.css'],
+    standalone: false
 })
 export class TargetVersionComponent {
   @Input() system = 'http://snomed.info/sct';

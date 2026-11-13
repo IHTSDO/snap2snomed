@@ -29,8 +29,9 @@
   margin-right: 5px;
 }
 
-.mat-card {
+.mat-mdc-card {
   padding: 25px;
+  box-shadow: none !important;
 }
 
 .source-field {
@@ -71,7 +72,7 @@ table.details-table td {
   margin-top: 1em;
 }
 
-.mat-icon {
+:not(button) > .mat-icon {
   position: relative;
   top: -2px;
   margin-left: 0px
@@ -117,20 +118,23 @@ table.details-table td {
 }
 
 button#delete {
-  float: right;
+  margin-left: auto;
 }
 
-/* Blue button form authoring mode, but only when enabled, grey to signify disabled */
+button#cancel {
+  --mat-button-protected-label-text-color: black;
+  --mat-button-protected-container-color: white;
+  margin-left: 8px;
+}
+
+/* Blue button for authoring mode when enabled, grey when disabled */
 .mat-button-toggle-checked:not(.mat-button-toggle-disabled) {
   background-color: #3F51B5;
   color: #ffffff !important;
-} 
+}
 
-/* 
-  Hack to deal with hover highlight issue which may be fixed in newer versions
-  https://github.com/angular/components/issues/14721
-*/
-::ng-deep .mat-button-toggle-appearance-standard:not(.mat-button-toggle-disabled):hover .mat-button-toggle-focus-overlay {
+/* Suppress hover highlight on standard-appearance toggles */
+::ng-deep .mat-button-toggle:not(.mat-button-toggle-disabled):hover .mat-button-toggle-focus-overlay {
   opacity: 0 !important;
 }
 

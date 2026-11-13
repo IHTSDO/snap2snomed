@@ -1,5 +1,5 @@
 /*
- * Copyright © 2022 SNOMED International
+ * Copyright © 2026 SNOMED International
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,12 +17,13 @@
 import {ComponentFixture, TestBed} from '@angular/core/testing';
 
 import {ProjectBadgesComponent} from './project-badges.component';
-import {HttpClientTestingModule} from "@angular/common/http/testing";
+import { provideHttpClientTesting } from "@angular/common/http/testing";
 import {TranslateLoader, TranslateModule, TranslateService} from "@ngx-translate/core";
 import {HttpLoaderFactory} from "../app.module";
 import {APP_CONFIG} from "../app.config";
 import {provideMockStore} from "@ngrx/store/testing";
 import {initialAppState} from "../store/app.state";
+import { HttpClient, provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 
 describe('ProjectBadgesComponent', () => {
   let component: ProjectBadgesComponent;
@@ -30,20 +31,17 @@ describe('ProjectBadgesComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [
-        HttpClientTestingModule,
-        TranslateModule.forRoot({
-          loader: {
-            provide: TranslateLoader,
-            useFactory: HttpLoaderFactory,
-            deps: [HttpClientTestingModule]
-          }
-        })
-      ],
-      providers: [TranslateService, {provide: APP_CONFIG, useValue: {}},
-        provideMockStore({initialState: initialAppState})],
-      declarations: [ProjectBadgesComponent]
-    })
+    declarations: [ProjectBadgesComponent],
+    imports: [TranslateModule.forRoot({
+            loader: {
+                provide: TranslateLoader,
+                useFactory: HttpLoaderFactory,
+                deps: [HttpClient]
+            }
+        })],
+    providers: [TranslateService, { provide: APP_CONFIG, useValue: {} },
+        provideMockStore({ initialState: initialAppState }), provideHttpClient(withInterceptorsFromDi()), provideHttpClientTesting()]
+})
     .compileComponents();
   });
 

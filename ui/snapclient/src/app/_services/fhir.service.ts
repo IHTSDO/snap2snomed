@@ -1,5 +1,5 @@
 /*
- * Copyright © 2022 SNOMED International
+ * Copyright © 2026 SNOMED International
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
  */
 
 import {Inject, Injectable} from '@angular/core';
-import {HttpClient} from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import {Observable, forkJoin, of} from 'rxjs';
 import {ServiceUtils} from '../_utils/service_utils';
 import {APP_CONFIG, AppConfig} from '../app.config';
@@ -23,8 +23,7 @@ import {R4} from '@ahryman40k/ts-fhir-types';
 import {catchError, concatMap, map, mergeMap, tap} from 'rxjs/operators';
 import {ErrorDetail} from '../_models/error_detail';
 import {BundleTypeKind, Bundle_RequestMethodKind} from '@ahryman40k/ts-fhir-types/lib/R4';
-import {Coding, Match} from '../store/fhir-feature/fhir.reducer';
-import {ConceptNode} from '@csiro/shrimp-hierarchy-view';
+import {Coding, ConceptNode, Match} from '../store/fhir-feature/fhir.reducer';
 
 export const SEQUENCE = 'http://ontoserver.csiro.au/fhir/ConceptMap/automapstrategy-seq;automapstrategy-default;automapstrategy-MML'
 export const DEFAULT = 'http://ontoserver.csiro.au/fhir/ConceptMap/automapstrategy-default';

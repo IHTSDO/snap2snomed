@@ -1,19 +1,23 @@
 .mapping-edit {
-  background-color: #e6e6e6;
+  background-color: white;
+  width: 840px;
 }
 
-.mat-card {
+.view-notes-button {
+  --mat-icon-button-icon-color: black;
+}
+
+.mat-mdc-card {
   margin: 10px;
   flex-grow: 1;
 }
 
-.mat-cell {
+.mat-mdc-cell {
   padding-right: 10px;
 }
 
-.mat-icon-button {
-  width:30px !important;
-  height:30px !important;
+.mat-mdc-icon-button {
+  --mat-icon-button-state-layer-size: 30px;
   line-height: 30px !important;
 }
 
@@ -42,7 +46,7 @@ ul.sources-list li {
   min-width: 40%;
 }
 
-.actions-card .mat-card-content {
+.actions-card .mat-mdc-card-content {
   height: 100%;
 }
 
@@ -62,17 +66,73 @@ ul.sources-list li {
 
 .compact-table {
   width: 100% !important;
+
+  --mat-table-row-item-container-height: 30px;
+  --mat-table-header-container-height: 30px;
 }
 
-.compact-table .mat-row {
+.compact-table .mat-mdc-row {
   height: 30px;
 }
 
-.mat-header-cell {
+.mat-mdc-header-cell {
   padding: 0 5px 0 0;
 }
 
-.mat-slide-toggle {
+.filter-header-row {
+  height: 38px;
+  --mat-table-header-container-height: 38px;
+}
+
+.filter-header-row .mat-mdc-header-cell {
+  padding: 6px 8px;
+}
+
+.filter-header-row .mat-mdc-form-field {
+  --mat-form-field-outlined-outline-color: #d0d0d0;
+  --mat-form-field-outlined-hover-outline-color: #bdbdbd;
+  --mat-form-field-container-height: 26px;
+  --mat-form-field-container-vertical-padding: 2px;
+  --mat-form-field-container-text-size: var(--mat-table-row-item-label-text-size);
+}
+
+.filter-header-row .mat-mdc-form-field .mat-mdc-icon-button {
+  --mat-icon-button-state-layer-size: 22px;
+  --mat-icon-button-icon-size: 18px;
+  line-height: 22px !important;
+  --mat-icon-button-icon-color: #9e9e9e;
+  --mdc-icon-button-state-layer-size: 22px;
+}
+
+.filter-header-row .mat-mdc-form-field .mat-mdc-icon-button .mat-icon {
+  width: 18px;
+  height: 18px;
+  font-size: 18px;
+}
+
+::ng-deep .filter-header-row .mat-mdc-form-field .mat-mdc-form-field-infix {
+  padding-left: 0;
+}
+
+::ng-deep .filter-header-row .mat-mdc-form-field .mat-mdc-text-field-wrapper,
+::ng-deep .filter-header-row .mat-mdc-form-field .mat-mdc-form-field-flex {
+  padding-left: 0 !important;
+}
+
+.filter-header-row .mat-mdc-form-field input.mat-mdc-input-element {
+  padding-left: 4px !important;
+}
+
+.filter-header-row .mat-mdc-select {
+  --mat-select-trigger-text-size: var(--mat-table-row-item-label-text-size);
+  --mat-select-trigger-text-line-height: var(--mat-table-row-item-label-text-line-height);
+}
+
+::ng-deep .filter-select-panel {
+  --mat-option-label-text-size: var(--mat-table-row-item-label-text-size);
+}
+
+.mat-mdc-slide-toggle {
   margin-top: 1px;
   margin-right: 10px;
 }
@@ -80,7 +140,7 @@ ul.sources-list li {
 /** columns **/
 .mat-column-filter-id,
 .mat-column-id {
-  width: 35px;
+  width: 50px;
   text-align: center;
 }
 
@@ -97,6 +157,44 @@ ul.sources-list li {
   text-align: center;
 }
 
+.mat-column-targetOutOfScope,
+.mat-column-flagged {
+  vertical-align: middle;
+}
+
+.mat-column-latestNote {
+  position: relative;
+}
+
+.mat-column-latestNote .view-notes-button {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.mat-column-targetOutOfScope {
+  position: relative;
+}
+
+.mat-column-targetOutOfScope mat-icon {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.mat-column-flagged {
+  position: relative;
+}
+
+.mat-column-flagged mat-icon {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
 .mat-column-filter-assignedAuthor,
 .mat-column-assignedAuthor,
 .mat-column-filter-assignedReconciler,
@@ -109,13 +207,19 @@ ul.sources-list li {
   text-align: center;
 }
 
+.mat-column-assignedAuthor,
+.mat-column-assignedReconciler,
+.mat-column-assignedReviewer {
+  vertical-align: middle;
+}
+
 .mat-column-filter-lastAuthorReviewer,
 .mat-column-lastAuthorReviewer {
   text-align: left;
 }
 
 .mat-column-filter-sourceCode, .mat-column-filter-targetCode,
-.mat-column-filter-sourceCode .mat-form-field, .mat-column-filter-targetCode .mat-form-field,
+.mat-column-filter-sourceCode .mat-mdc-form-field, .mat-column-filter-targetCode .mat-mdc-form-field,
 .mat-column-sourceCode, .mat-column-targetCode {
   width: 100px;
   max-width: 150px; /* wide enough for an 18 digit SNOMED code */
@@ -127,80 +231,91 @@ ul.sources-list li {
   min-width: 100px;
 }
 
-.mat-column-filter-sourceDisplay .mat-form-field-type-mat-input {
+.mat-column-filter-sourceDisplay .mat-mdc-form-field {
   width: 95% !important;
 }
 
-.mat-column-filter-targetDisplay .mat-form-field-type-mat-input {
+.mat-column-filter-targetDisplay .mat-mdc-form-field {
   width: 95% !important;
 }
 
 .mat-column-noMap {
   width: 100px;
   text-align: center;
+  position: relative;
 }
 
-::ng-deep .mat-column-filter-notes .mat-form-field,
-::ng-deep .mat-column-filter-noMap .mat-form-field {
+.mat-column-noMap mat-icon {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+::ng-deep .mat-column-filter-notes .mat-mdc-form-field,
+::ng-deep .mat-column-filter-noMap .mat-mdc-form-field {
   width: 100px;
 }
 
 
-::ng-deep .mat-column-filter-targetOutOfScope .mat-form-field{
+::ng-deep .mat-column-filter-targetOutOfScope .mat-mdc-form-field{
   width: 60px;
 }
 
 
-::ng-deep .mat-column-filter-flagged .mat-form-field{
+::ng-deep .mat-column-filter-flagged .mat-mdc-form-field{
   width: 60px;
 }
 
-::ng-deep .mat-column-filter-notes .mat-form-field{
+::ng-deep .mat-column-filter-notes .mat-mdc-form-field{
   width: 60px;
 }
 
-::ng-deep .mat-column-filter-assignedAuthor .mat-form-field {
-  width: 60px;
-  text-align: center;
-}
-
-::ng-deep .mat-column-filter-assignedReconciler .mat-form-field {
+::ng-deep .mat-column-filter-assignedAuthor .mat-mdc-form-field {
   width: 60px;
   text-align: center;
 }
 
-::ng-deep .mat-column-filter-assignedReviewer .mat-form-field {
+::ng-deep .mat-column-filter-assignedReconciler .mat-mdc-form-field {
   width: 60px;
   text-align: center;
 }
 
-::ng-deep .mat-column-filter-lastAuthorReviewer .mat-form-field {
+::ng-deep .mat-column-filter-assignedReviewer .mat-mdc-form-field {
+  width: 60px;
+  text-align: center;
+}
+
+::ng-deep .mat-column-filter-lastAuthorReviewer .mat-mdc-form-field {
   width: 60px;
   text-align: center;
 }
 
 .mat-column-relationship, .mat-column-status {
   width: 100px;
-  font-size: 0.8em;
 }
 
-::ng-deep .mat-column-filter-relationship .mat-form-field,
-::ng-deep .mat-column-filter-status .mat-form-field {
+::ng-deep .mat-column-filter-relationship .mat-mdc-form-field,
+::ng-deep .mat-column-filter-status .mat-mdc-form-field {
   width: 100px;
 }
 
-.mat-standard-chip {
+.mat-mdc-standard-chip {
   height: auto;
 }
 
-#table-mapping ::ng-deep .mat-form-field-wrapper {
-  padding-bottom: 0!important;
+#table-mapping {
+  background-color: white;
 }
 
-td.mat-cell {
+#table-mapping ::ng-deep .mat-mdc-form-field-subscript-wrapper {
+  display: none;
+}
+
+td.mat-mdc-cell {
   padding: 0 5px;
 }
-::ng-deep .highlight-check .mat-checkbox-inner-container .mat-checkbox-persistent-ripple {
+::ng-deep .highlight-check .mdc-checkbox .mdc-checkbox__ripple {
   opacity: .1;
   background-color: blueviolet !important;
 }
@@ -240,6 +355,7 @@ td.mat-cell {
 .top-row {
   display: flex;
   justify-content: space-between;
+  background-color: #e6e6e6;
 }
 
 .table-actions {
@@ -259,11 +375,22 @@ td.mat-cell {
 .mapping-details {
   flex: 1;
   max-width: 50%;
+  display: flex;
+  flex-direction: column;
+}
+
+app-mapping-details-card {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
 }
 
 .actions-card {
   flex: 1;
   max-width: 50%;
+  height: 100%;
+  box-sizing: border-box;
+  background-color: white;
 }
 
 
@@ -296,7 +423,23 @@ td.mat-cell {
   }
 }
 
-.mat-chip {
+#validate-targets:not(:disabled) {
+  color: black;
+}
+
+#bulk-change:not(:disabled) {
+  color: black;
+}
+
+#show-hide-button:not(:disabled) {
+  color: black;
+}
+
+#clear-filter-button:not(:disabled) {
+  color: black;
+}
+
+.mat-mdc-chip {
   transition: box-shadow 280ms cubic-bezier(0.4, 0, 0.2, 1);
   border-radius: 20px;
   height: 40px;

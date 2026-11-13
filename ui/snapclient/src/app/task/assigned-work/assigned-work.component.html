@@ -1,27 +1,31 @@
-<mat-card class="assigned-work-card">
+<mat-card appearance="outlined" class="assigned-work-card">
   <app-errormessage [error]="error"></app-errormessage>
   <mat-card-content>
-    <div *ngIf="loading">
-      <app-loading-spinner></app-loading-spinner>
-    </div>
+    @if (loading) {
+      <div>
+        <app-loading-spinner></app-loading-spinner>
+      </div>
+    }
     <mat-tab-group class="task-list" [selectedIndex]="activeTab" (selectedTabChange)="setActiveTab($event)">
-      <mat-tab
-        *ngIf="mapping && (isAdmin || isUserInGroup(currentUser, mapping.project.owners) || isUserInGroup(currentUser, mapping.project.members))">
-        <ng-template mat-tab-label>
-          <mat-icon class="tab-icon">add_task</mat-icon>
-          <span>{{'TASK.ADD_TASK' | translate}}</span>
-        </ng-template>
-        <app-task-add [mappingTableSelector]="mappingTableSelector"
-                      [mapping]="mapping" [currentUser]="currentUser"
-                      (cancelNewTaskEvent)="taskCreateCancelled()"
-                      (newTaskEvent)="selectTaskTab($event)"></app-task-add>
-      </mat-tab>
+      @if (mapping && (isAdmin || isUserInGroup(currentUser, mapping.project.owners) || isUserInGroup(currentUser, mapping.project.members))) {
+        <mat-tab
+          >
+          <ng-template mat-tab-label>
+            <mat-icon class="tab-icon">add_task</mat-icon>
+            <span>{{'TASK.ADD_TASK' | translate}}</span>
+          </ng-template>
+          <app-task-add [mappingTableSelector]="mappingTableSelector"
+            [mapping]="mapping" [currentUser]="currentUser"
+            (cancelNewTaskEvent)="taskCreateCancelled()"
+          (newTaskEvent)="selectTaskTab($event)"></app-task-add>
+        </mat-tab>
+      }
 
       <mat-tab>
         <ng-template mat-tab-label>
           <mat-icon class="tab-icon">edit</mat-icon>
           <span matBadge="{{authTotalElements}}" matBadgeSize="small"
-                matBadgeOverlap="false">{{'TASK.TAB_AUTHOR' | translate}}</span>
+          class="tab-count-badge" matBadgeOverlap="false">{{'TASK.TAB_AUTHOR' | translate}}</span>
         </ng-template>
         <mat-paginator #authpaginator
           [length]="authTotalElements || 0"
@@ -31,39 +35,45 @@
           (page)="authPageChanged($event)"
           [showFirstLastButtons]="true">
         </mat-paginator>
-        <div *ngFor="let task of authorTasks">
-          <app-task-card [task]="task" [isClickable]="isAssigned(task)"
-                         [currentUser]="currentUser" [isOwner]="isOwner()"
-                         (updateTaskEvent)="selectTaskTab($event)"></app-task-card>
-        </div>
+        @for (task of authorTasks; track task) {
+          <div>
+            <app-task-card [task]="task" [isClickable]="isAssigned(task)"
+              [currentUser]="currentUser" [isOwner]="isOwner()"
+            (updateTaskEvent)="selectTaskTab($event)"></app-task-card>
+          </div>
+        }
       </mat-tab>
 
-      <mat-tab *ngIf="mapping?.project?.dualMapMode">
-        <ng-template mat-tab-label>
-          <mat-icon class="tab-icon">compare_arrows</mat-icon>
-          <span matBadge="{{reconcileTotalElements}}" matBadgeSize="small"
-                matBadgeOverlap="false">{{'TASK.TAB_RECONCILE' | translate }}</span>
-        </ng-template>
-        <mat-paginator #reconcilepaginator
-          [length]="reconcileTotalElements || 0"
-          [pageIndex]="reconcileCurrentPage"
-          [pageSize]="reconcilePageSize"
-          [pageSizeOptions]="pageSizeOptions"
-          (page)="reconcilePageChanged($event)"
-          [showFirstLastButtons]="true">
-        </mat-paginator>
-        <div *ngFor="let task of reconcileTasks">
-          <app-task-card [task]="task" [isClickable]="isAssigned(task)"
-                         [currentUser]="currentUser" [isOwner]="isOwner()"
-                         (updateTaskEvent)="selectTaskTab($event)"></app-task-card>
-        </div>
-      </mat-tab>
+      @if (mapping?.project?.dualMapMode) {
+        <mat-tab>
+          <ng-template mat-tab-label>
+            <mat-icon class="tab-icon">compare_arrows</mat-icon>
+            <span matBadge="{{reconcileTotalElements}}" matBadgeSize="small"
+            class="tab-count-badge" matBadgeOverlap="false">{{'TASK.TAB_RECONCILE' | translate }}</span>
+          </ng-template>
+          <mat-paginator #reconcilepaginator
+            [length]="reconcileTotalElements || 0"
+            [pageIndex]="reconcileCurrentPage"
+            [pageSize]="reconcilePageSize"
+            [pageSizeOptions]="pageSizeOptions"
+            (page)="reconcilePageChanged($event)"
+            [showFirstLastButtons]="true">
+          </mat-paginator>
+          @for (task of reconcileTasks; track task) {
+            <div>
+              <app-task-card [task]="task" [isClickable]="isAssigned(task)"
+                [currentUser]="currentUser" [isOwner]="isOwner()"
+              (updateTaskEvent)="selectTaskTab($event)"></app-task-card>
+            </div>
+          }
+        </mat-tab>
+      }
 
       <mat-tab>
         <ng-template mat-tab-label>
           <mat-icon class="tab-icon">checklist</mat-icon>
           <span matBadge="{{reviewTotalElements}}" matBadgeSize="small"
-                matBadgeOverlap="false">{{'TASK.TAB_REVIEW' | translate}}</span>
+          class="tab-count-badge" matBadgeOverlap="false">{{'TASK.TAB_REVIEW' | translate}}</span>
         </ng-template>
         <mat-paginator #reviewpaginator
           [length]="reviewTotalElements || 0"
@@ -73,11 +83,13 @@
           (page)="reviewPageChanged($event)"
           [showFirstLastButtons]="true">
         </mat-paginator>
-        <div *ngFor="let task of reviewTasks">
-          <app-task-card [task]="task" [isClickable]="isAssigned(task)"
-                         [currentUser]="currentUser" [isOwner]="isOwner()"
-                         (updateTaskEvent)="selectTaskTab($event)"></app-task-card>
-        </div>
+        @for (task of reviewTasks; track task) {
+          <div>
+            <app-task-card [task]="task" [isClickable]="isAssigned(task)"
+              [currentUser]="currentUser" [isOwner]="isOwner()"
+            (updateTaskEvent)="selectTaskTab($event)"></app-task-card>
+          </div>
+        }
       </mat-tab>
     </mat-tab-group>
   </mat-card-content>

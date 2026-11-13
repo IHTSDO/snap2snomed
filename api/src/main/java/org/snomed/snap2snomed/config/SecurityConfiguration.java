@@ -16,7 +16,7 @@
 
 package org.snomed.snap2snomed.config;
 
-import javax.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotBlank;
 
 import org.snomed.snap2snomed.validation.AtLeastOneNotNull;
 
@@ -51,7 +51,7 @@ public class SecurityConfiguration {
   String authLoginResponseType = "code";
 
   @NotBlank
-  String authLoginScope = "email+openid+profile";
+  String authLoginScope = "email openid profile";
 
   @NotBlank
   String adminGroup = "AdminGroup";

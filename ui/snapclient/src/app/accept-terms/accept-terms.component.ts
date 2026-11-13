@@ -18,9 +18,10 @@ import {Component} from '@angular/core';
 import {MatDialogRef} from "@angular/material/dialog";
 
 @Component({
-  selector: 'app-accept-terms',
-  templateUrl: './accept-terms.component.html',
-  styleUrls: ['./accept-terms.component.css']
+    selector: 'app-accept-terms',
+    templateUrl: './accept-terms.component.html',
+    styleUrls: ['./accept-terms.component.css'],
+    standalone: false
 })
 export class AcceptTermsComponent {
 

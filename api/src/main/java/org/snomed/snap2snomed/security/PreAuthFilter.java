@@ -23,12 +23,12 @@ import java.util.List;
 import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.ServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.snomed.snap2snomed.problem.BadRequestDataProblem;
 import org.snomed.snap2snomed.problem.Snap2SnomedProblem;
@@ -66,6 +66,10 @@ public class PreAuthFilter extends GenericFilterBean {
             new FilterRule(HttpMethod.GET, "/mapRows/([^\\/]+).*", groupValues -> webSecurity.isAdminUser() || webSecurity.hasAnyProjectRoleForMapRowId(asLong(groupValues[0]))),
 
             new FilterRule(HttpMethod.GET, "/mapRowTargets/search/findByMapId", groupValues -> webSecurity.isValidUser()), // result filtered by query
+            new FilterRule(HttpMethod.GET, "/mapRowTargets/search/findByMapIdAndSourceCodeIndex", groupValues -> webSecurity.isValidUser()), // result filtered by query
+            new FilterRule(HttpMethod.GET, "/mapRowTargets/search/findByMapIdAndSourceCodeIndexAndAuthorTaskId", groupValues -> webSecurity.isValidUser()), // result filtered by query
+            new FilterRule(HttpMethod.GET, "/mapRowTargets/search/findByMapIdAndSourceCodeIndexAndReconcileTaskId", groupValues -> webSecurity.isValidUser()), // result filtered by query
+            new FilterRule(HttpMethod.GET, "/mapRowTargets/search/findByMapIdAndTag", groupValues -> webSecurity.isValidUser()), // result filtered by query
             new FilterRule(HttpMethod.GET, "/mapRowTargets", groupValues -> webSecurity.isValidUser()), //TODO filter
 
             new FilterRule(HttpMethod.GET, "/tasks/search/findByMapIdAndType", groupValues -> webSecurity.isValidUser()),
@@ -124,7 +128,7 @@ public class PreAuthFilter extends GenericFilterBean {
             FilterChain chain) throws IOException, ServletException {
 
         HttpServletRequest currentRequest = (HttpServletRequest) request;
-        HttpMethod method = HttpMethod.resolve(currentRequest.getMethod());
+        HttpMethod method = HttpMethod.valueOf(currentRequest.getMethod());
         String path = currentRequest.getServletPath();
 
         boolean isAuthorised = false;

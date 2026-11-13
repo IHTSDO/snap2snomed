@@ -16,6 +16,7 @@
 
 import {TestBed} from '@angular/core/testing';
 import {ServiceUtils} from './service_utils';
+import {MapViewFilter} from '../_models/map_row';
 
 describe('ServiceUtils', () => {
   let serviceUtils: ServiceUtils;
@@ -93,6 +94,91 @@ describe('ServiceUtils', () => {
     [string1, string2, string3, string4, string5, string6, string7, string8].forEach((list) => {
       expect(ServiceUtils.setFilterChipList(list[0] as string)).toEqual(list[1]);
     });
+  });
+
+  it('should convert every MapViewFilter field to HttpParams via filtersToParam', () => {
+    const filter = new MapViewFilter();
+    filter.sourceCode = 'ABC';
+    filter.sourceDisplay = 'display';
+    filter.targetCode = 'XYZ';
+    filter.targetDisplay = 'targetdisplay';
+    filter.relationship = ['TARGET_EQUIVALENT'];
+    filter.noMap = true;
+    filter.status = ['MAPPED'];
+    filter.targetOutOfScope = false;
+    filter.flagged = true;
+    filter.notes = false;
+    filter.lastAuthorReviewer = 'author1';
+    filter.assignedAuthor = 'author2';
+    filter.assignedReviewer = 'reviewer1';
+    filter.assignedReconciler = 'reconciler1';
+    filter.additionalColumns = ['col1', 'col2'];
+
+    const params = ServiceUtils.filtersToParam(filter);
+
+    expect(params.get('sourceCode')).toBe('ABC');
+    expect(params.get('sourceDisplay')).toBe('display');
+    expect(params.get('targetCode')).toBe('XYZ');
+    expect(params.get('targetDisplay')).toBe('targetdisplay');
+    expect(params.get('relationship')).toBe('TARGET_EQUIVALENT');
+    expect(params.get('noMap')).toBe('true');
+    expect(params.get('status')).toBe('MAPPED');
+    expect(params.get('targetOutOfScope')).toBe('false');
+    expect(params.get('flagged')).toBe('true');
+    expect(params.get('notes')).toBe('false');
+    expect(params.get('lastAuthorReviewer')).toBe('author1');
+    expect(params.get('assignedAuthor')).toBe('author2');
+    expect(params.get('assignedReviewer')).toBe('reviewer1');
+    expect(params.get('assignedReconciler')).toBe('reconciler1');
+    expect(params.get('additionalColumns')).toBe('col1,col2');
+  });
+
+  it('should not include unset boolean filter fields in filtersToParam', () => {
+    const filter = new MapViewFilter();
+    const params = ServiceUtils.filtersToParam(filter);
+
+    expect(params.has('noMap')).toBe(false);
+    expect(params.has('targetOutOfScope')).toBe(false);
+    expect(params.has('flagged')).toBe(false);
+    expect(params.has('notes')).toBe(false);
+  });
+
+  it('should convert params back to a MapViewFilter via paramsToFilterEntity', () => {
+    const params = {
+      sourceCode: 'ABC',
+      sourceDisplay: 'a display',
+      targetCode: 'XYZ',
+      targetDisplay: 'a target display',
+      relationship: 'TARGET_EQUIVALENT',
+      noMap: 'true',
+      status: 'MAPPED',
+      targetOutOfScope: 'false',
+      flagged: 'true',
+      notes: 'true',
+      lastAuthorReviewer: 'author1',
+      assignedAuthor: 'author2',
+      assignedReviewer: 'reviewer1',
+      assignedReconciler: 'reconciler1',
+      additionalColumns: 'col1,col2',
+    };
+
+    const filter = ServiceUtils.paramsToFilterEntity(params);
+
+    expect(filter.sourceCode).toBe('ABC');
+    expect(filter.sourceDisplay).toBe('a display');
+    expect(filter.targetCode).toBe('XYZ');
+    expect(filter.targetDisplay).toBe('a target display');
+    expect(filter.relationship).toBe('TARGET_EQUIVALENT');
+    expect(filter.noMap).toBe(true);
+    expect(filter.status).toBe('MAPPED');
+    expect(filter.targetOutOfScope).toBe(false);
+    expect(filter.flagged).toBe(true);
+    expect(filter.notes).toBe(true);
+    expect(filter.lastAuthorReviewer).toBe('author1');
+    expect(filter.assignedAuthor).toBe('author2');
+    expect(filter.assignedReviewer).toBe('reviewer1');
+    expect(filter.assignedReconciler).toBe('reconciler1');
+    expect(filter.additionalColumns).toEqual(['col1', 'col2']);
   });
 
 });

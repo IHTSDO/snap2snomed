@@ -39,9 +39,10 @@ import {MappingTableSelectorComponent} from 'src/app/mapping/mapping-table-selec
 import {AuthService} from '../../_services/auth.service';
 
 @Component({
-  selector: 'app-task-add',
-  templateUrl: './task-add.component.html',
-  styleUrls: ['./task-add.component.css']
+    selector: 'app-task-add',
+    templateUrl: './task-add.component.html',
+    styleUrls: ['./task-add.component.css'],
+    standalone: false
 })
 export class TaskAddComponent implements OnInit, AfterViewInit, OnDestroy {
 
@@ -97,8 +98,8 @@ export class TaskAddComponent implements OnInit, AfterViewInit, OnDestroy {
     self.subscription.add(self.store.select(selectTaskSaveError).subscribe(
       (error) => {
         if (error) {
-          if ([400, 403].indexOf(error.error.status) >= 0 &&
-              error.error?.error?.type.search('problem\/.*([task])+') > 0) {
+          if ([400, 403].indexOf(error.error?.status) >= 0 &&
+              error.error?.error?.type?.search('problem\/.*([task])+') > 0) {
             self.handleTaskError(error.error.error);
           } else {
             throw error;

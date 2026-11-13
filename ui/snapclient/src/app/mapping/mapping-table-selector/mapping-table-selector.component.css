@@ -1,17 +1,26 @@
 .table-selector-cell {
-  width: 30px;
-  max-width: 30px;
-  min-width: 30px;
+  width: 50px;
+  max-width: 50px;
+  min-width: 50px;
   text-align: center;
   align-items: center;
-  padding-left: 10px;
+  vertical-align: middle;
+  padding-left: 5px;
 }
 
-::ng-deep .mat-badge-content {
+th.table-selector-cell {
+  flex-direction: column;
+  justify-content: flex-start;
+  padding-top: 12px;
+  box-sizing: border-box;
+}
+
+.select-all-badge ::ng-deep .mat-badge-content {
   width: auto !important;
   padding-left: 4px;
   padding-right: 4px;
-  top: -8px !important;
+  bottom: auto !important;
+  left: auto !important;
   text-overflow: unset;
   border-radius: 3px !important;
   right: -6px !important;
@@ -21,18 +30,36 @@
 }
 
 
-.mat-checkbox .mat-checkbox-frame {
-  transform: scale(2);
+.mat-mdc-checkbox .mdc-checkbox__background {
+  transform: scale(1.1);
 }
 
-.mat-checkbox-checked .mat-checkbox-background {
-  transform: scale(2);
+.table-selector-cell .mat-mdc-checkbox {
+  --mdc-checkbox-state-layer-size: 20px;
+  width: 24px;
+  height: 24px;
+}
+
+td.table-selector-cell .mat-mdc-checkbox {
+  margin-top: 6px;
+}
+
+::ng-deep .table-selector-cell .mat-mdc-checkbox .mdc-form-field,
+::ng-deep .table-selector-cell .mat-mdc-checkbox .mdc-checkbox {
+  width: 24px;
+  height: 24px;
+}
+
+::ng-deep .table-selector-cell .mat-mdc-checkbox .mat-mdc-checkbox-ripple {
+  width: 24px;
+  height: 24px;
+  top: calc(50% - 12px);
+  left: calc(50% - 12px);
 }
 
 mat-checkbox.select-all-on-page {
-  margin: 2px 0;
-}
-
-.select-all-on-page {
-  display: block;
+  display: block !important;
+  margin-top: -2px;
+  margin-left: auto;
+  margin-right: auto;
 }

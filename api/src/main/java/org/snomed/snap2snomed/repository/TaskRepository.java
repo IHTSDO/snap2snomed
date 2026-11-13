@@ -24,6 +24,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.history.RevisionRepository;
 import org.springframework.data.rest.core.annotation.RepositoryRestResource;
@@ -31,7 +32,7 @@ import org.springframework.data.rest.core.annotation.RestResource;
 
 @RepositoryRestResource
 public interface TaskRepository
-    extends RevisionRepository<Task, Long, Integer>, PagingAndSortingRepository<Task, Long> {
+    extends RevisionRepository<Task, Long, Integer>, PagingAndSortingRepository<Task, Long>, CrudRepository<Task, Long> {
 
   // ---------------------------------
   // Exported in REST interface
@@ -87,9 +88,19 @@ public interface TaskRepository
   @Override
   boolean existsById(Long id);
 
+  // Hibernate 7 mistranslates the equivalent HQL ("delete from Task t where not exists
+  // (select 1 from MapRow mr where mr.authorTask = t) and ...") into SQL that wraps each
+  // correlated NOT EXISTS subquery in an extra derived-table layer (select * from (select 1
+  // from map_row mr1_0 where mr1_0.author_task_id=t1_0.id) _sub_), which puts the outer
+  // table's alias out of scope for MySQL ("Unknown column 't1_0.id' in 'where clause'").
+  // Native SQL avoids Hibernate's translator entirely for this one query.
   @RestResource(exported = false)
   @Modifying
-  @Query("delete from Task t where not exists (select 1 from MapRow mr where mr.authorTask = t) and not exists (select 1 from MapRow mr where mr.reviewTask = t) and not exists (select 1 from MapRow mr where mr.reconcileTask = t)")
+  @Query(value = "delete t1 from task t1 "
+      + "where not exists (select 1 from map_row mr where mr.author_task_id = t1.id) "
+      + "and not exists (select 1 from map_row mr where mr.review_task_id = t1.id) "
+      + "and not exists (select 1 from map_row mr where mr.reconcile_task_id = t1.id)",
+      nativeQuery = true)
   void deleteTasksWithNoMapRows();
 
   @RestResource(exported = false)

@@ -18,6 +18,7 @@ import {ComponentFixture, TestBed} from '@angular/core/testing';
 
 import {FeedbackWidgetComponent} from './feedback-widget.component';
 import {MAT_DIALOG_DATA, MatDialogRef} from "@angular/material/dialog";
+import {MatIconModule} from '@angular/material/icon';
 
 describe('FeedbackWidgetComponent', () => {
   let component: FeedbackWidgetComponent;
@@ -26,6 +27,7 @@ describe('FeedbackWidgetComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       declarations: [FeedbackWidgetComponent],
+      imports: [MatIconModule],
       providers: [{provide: MAT_DIALOG_DATA, useValue: {}},
         {provide: MatDialogRef, useValue: {}}]
     })

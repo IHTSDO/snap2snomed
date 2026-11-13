@@ -24,24 +24,8 @@
   <parent>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
-    <version>2.7.18</version>
+    <version>4.1.0</version>
   </parent>
-
-  <dependencyManagement>
-    <dependencies>
-      <dependency>
-        <groupId>org.flywaydb</groupId>
-        <artifactId>flyway-core</artifactId>
-        <version>7.15.0</version>
-       <!-- Version 8 of Flyway community no longer supports MySQL 5.7 but the latest Aurora MySQL LTS version is 5.7 -->
-      </dependency>
-      <dependency>
-        <groupId>org.yaml</groupId>
-        <artifactId>snakeyaml</artifactId>
-        <version>2.2</version>
-      </dependency>
-    </dependencies>
-  </dependencyManagement>
 
   <groupId>org.snomed.snap2snomed</groupId>
   <artifactId>snap2snomed</artifactId>

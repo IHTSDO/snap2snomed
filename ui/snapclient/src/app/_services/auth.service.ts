@@ -15,7 +15,7 @@
  */
 
 import {Inject, Injectable} from '@angular/core';
-import {HttpClient, HttpHeaders, HttpParams} from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import {Observable, throwError} from 'rxjs';
 import {TokenMsg, UserInfo} from '../_models/user';
 import {Task} from '../_models/task';
@@ -27,7 +27,7 @@ import {LogOut} from '../store/auth-feature/auth.actions';
 import {selectAssignedTasks, selectAuthorizedProjects} from '../store/app.selectors';
 import {ActivatedRouteSnapshot} from '@angular/router';
 import {ServiceUtils} from '../_utils/service_utils';
-import jwt_decode from 'jwt-decode';
+import { jwtDecode } from 'jwt-decode';
 import {selectMappingLoading} from '../store/mapping-feature/mapping.selectors';
 import {map} from "rxjs/operators";
 import {MapService} from "./map.service";
@@ -66,26 +66,29 @@ export class AuthService {
     // clear SessionStorage first
     this.clearSessionStorage();
     if (this.baseUrl.length > 5) {
-      let href = `${this.baseUrl}`;
-      let params = new HttpParams()
-        .set('client_id', this.authClientID)
-        .set('response_type', this.authLoginResponseType)
-        .set('scope', this.authLoginScope)
-        .set('redirect_uri', this.authLoginRedirectUrl);
+      const endpoint = this.identityProvider
+        ? `${this.baseUrl}/authorize`
+        : `${this.baseUrl}/login`;
+
+      // Normalize scope: split on '+' or whitespace then rejoin with '%20'.
+      // The config value may use '+' as separator (legacy form-encoding style) or spaces.
+      // encodeURIComponent('+') = '%2B', which Cognito treats as a literal '+' — invalid_scope.
+      const normalizedScope = this.authLoginScope.split(/[\s+]+/).map(encodeURIComponent).join('%20');
+      const queryParts = [
+        `client_id=${encodeURIComponent(this.authClientID)}`,
+        `response_type=${encodeURIComponent(this.authLoginResponseType)}`,
+        `scope=${normalizedScope}`,
+        `redirect_uri=${encodeURIComponent(this.authLoginRedirectUrl)}`,
+      ];
 
       if (this.identityProvider) {
-        params = params.set('identity_provider', this.identityProvider);
-        href += `/authorize`;
-      }
-      else {
-        href += `/login`;
+        queryParts.push(`identity_provider=${encodeURIComponent(this.identityProvider)}`);
       }
 
-      href += `?${params.toString()}`;
       // Redirect to AWS Cognito hosted UI
-      window.location.href = href;
+      window.location.href = `${endpoint}?${queryParts.join('&')}`;
     } else {
-      throwError({error: `Login unsuccessful - missing URL ${this.baseUrl}`});
+      throwError(() => ({error: `Login unsuccessful - missing URL ${this.baseUrl}`}));
     }
   }
 
@@ -181,12 +184,14 @@ export class AuthService {
     let admin = false;
     this.store.select(selectToken).subscribe((state) => {
       if (state && state.id_token) {
-        const decoded = jwt_decode(state.id_token);
-        // @ts-ignore
-        const groups = decoded['cognito:groups'] ?? null;
-        if (groups) {
-          admin = groups.indexOf(this.config.adminGroup) >= 0;
-        }
+        try {
+          const decoded = jwtDecode(state.id_token);
+          // @ts-ignore
+          const groups = decoded['cognito:groups'] ?? null;
+          if (groups) {
+            admin = groups.indexOf(this.config.adminGroup) >= 0;
+          }
+        } catch { }
       }
     }).unsubscribe();
     return admin;
@@ -196,12 +201,14 @@ export class AuthService {
     let expired = true;
     this.store.select(selectToken).subscribe((state) => {
       if (state && state.id_token) {
-        const decoded = jwt_decode(state.id_token);
-        // @ts-ignore
-        const expireTime = decoded['exp'] ?? null;
-        if (expireTime) {
-          expired = (expireTime*1000) < Date.now();
-        }
+        try {
+          const decoded = jwtDecode(state.id_token);
+          // @ts-ignore
+          const expireTime = decoded['exp'] ?? null;
+          if (expireTime) {
+            expired = (expireTime*1000) < Date.now();
+          }
+        } catch { }
       }
     }).unsubscribe();
     return expired;
@@ -211,12 +218,14 @@ export class AuthService {
     let expired = true;
     this.store.select(selectToken).subscribe((state) => {
       if (state && state.access_token) {
-        const decoded = jwt_decode(state.access_token);
-        // @ts-ignore
-        const expireTime = decoded['exp'] ?? null;
-        if (expireTime) {
-          expired = (expireTime*1000) < Date.now();
-        }
+        try {
+          const decoded = jwtDecode(state.access_token);
+          // @ts-ignore
+          const expireTime = decoded['exp'] ?? null;
+          if (expireTime) {
+            expired = (expireTime*1000) < Date.now();
+          }
+        } catch { }
       }
     }).unsubscribe();
     return expired;
@@ -246,7 +255,7 @@ export class AuthService {
         }
       });
     } else {
-      throwError({error: 'Token is missing'});
+      throwError(() => ({error: 'Token is missing'}));
     }
     const url = `${this.baseUrl}/oauth2/token`;
     return this.http.post<TokenMsg>(url, body.toString(), {headers});

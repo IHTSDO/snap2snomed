@@ -24,7 +24,8 @@ export interface DraggableOptions {
 }
 
 @Directive({
-  selector: '[appDraggable]'
+    selector: '[appDraggable]',
+    standalone: false
 })
 export class DraggableDirective implements OnInit, OnDestroy {
 

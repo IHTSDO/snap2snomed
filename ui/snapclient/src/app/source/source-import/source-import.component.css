@@ -2,6 +2,13 @@
   border: none;
 }
 
+#fileUploadButton,
+.black-text {
+  --mat-button-protected-label-text-color: black;
+  --mat-button-filled-label-text-color: black;
+}
+
+
 #csv-headers .alert {
   margin-top: 0;
 }
@@ -11,8 +18,8 @@
 }
 
 .source-file {
-  background-color: rgba(0, 0, 0, 0.04);
-  border-radius: 5px;
+  background-color: var(--mat-form-field-filled-container-color, rgba(0, 0, 0, 0.04));
+  border-radius: 4px;
   display: flex;
 }
 
@@ -20,12 +27,19 @@
   margin: 10px 0;
   overflow: hidden;
   text-overflow: ellipsis;
+  border: none;
+  outline: none;
+  background: transparent;
+}
+
+.file {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
 }
 
 .source-file label {
-  margin: 10px;
-  width: 100%;
-  float: left;
+  margin: 10px 10px 5px 10px;
 }
 
 .column-fill {
@@ -34,7 +48,6 @@
 
 .field-one-character {
   width: 140px;
-  height: 50px;
 }
 
 .file {

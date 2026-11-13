@@ -18,9 +18,10 @@ import {Component, Input, OnChanges, OnInit} from '@angular/core';
 import {Task} from 'src/app/_models/task';
 
 @Component({
-  selector: 'app-task-item',
-  templateUrl: './task-item.component.html',
-  styleUrls: ['./task-item.component.css']
+    selector: 'app-task-item',
+    templateUrl: './task-item.component.html',
+    styleUrls: ['./task-item.component.css'],
+    standalone: false
 })
 export class TaskItemComponent implements OnInit {
   @Input() task: Task | undefined;

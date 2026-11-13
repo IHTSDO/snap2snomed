@@ -21,9 +21,10 @@ import {ErrorInfo} from 'src/app/errormessage/errormessage.component';
 import {Router} from '@angular/router';
 
 @Component({
-  selector: 'app-task-select',
-  templateUrl: './task-select.component.html',
-  styleUrls: ['./task-select.component.css']
+    selector: 'app-task-select',
+    templateUrl: './task-select.component.html',
+    styleUrls: ['./task-select.component.css'],
+    standalone: false
 })
 export class TaskSelectComponent implements OnInit {
   @Input() selectedTask: Task | null = null;

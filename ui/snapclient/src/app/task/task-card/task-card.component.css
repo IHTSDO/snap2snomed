@@ -2,13 +2,13 @@
   width: 80%;
 }
 
-.summary-task-card .mat-card {
+.summary-task-card .mat-mdc-card {
   height: 35px;
   background-color: #4b6b85;
   color: white;
 }
 
-.summary-task-card .mat-card-content {
+.summary-task-card .mat-mdc-card-content {
   display: flex;
   flex-direction: row;
   align-items: center;
@@ -25,7 +25,7 @@
   margin: 0;
 }
 
-.summary-task-card .mat-card-content small {
+.summary-task-card .mat-mdc-card-content small {
   margin-left: 0;
 }
 
@@ -33,19 +33,19 @@
   padding: 8px 6px 8px 6px;
 }
 
-.task-card .mat-card {
+.task-card .mat-mdc-card {
   box-shadow: rgba(0, 0, 0, 0.25) 0 0.0625em 0.0625em, rgba(0, 0, 0, 0.25) 0 0.125em 0.5em, rgba(255, 255, 255, 0.1) 0 0 0 1px inset;
   color: #555555;
 
 }
 
-.task-card .mat-card-title {
+.task-card .mat-mdc-card-title {
   font-size: 16px;
   display: flex;
   align-items: center;
 }
 
-.task-card .mat-card-content {
+.task-card .mat-mdc-card-content {
   display: flex;
   align-items: center;
   color: #888888;
@@ -56,20 +56,20 @@
   margin-left: 5px;
 }
 
-::ng-deep .mat-card-header-text {
+::ng-deep .mat-mdc-card-header-text {
   margin: 0;
   width: 100%;
 }
 
-.mat-card .mat-card {
+.mat-mdc-card {
   padding: 8px;
 }
 
-.mat-checkbox {
+.mat-mdc-checkbox {
   margin-right: 4px;
 }
 
-.mat-chip {
+.mat-mdc-chip {
   min-width: 45px;
   margin-right: 5px;
 }
@@ -85,7 +85,7 @@
   box-shadow: none;
 }
 
-.not-available .mat-card-title, .not-available .mat-card-content {
+.not-available .mat-mdc-card-title, .not-available .mat-mdc-card-content {
   color: #b0b0b0;
 }
 
@@ -109,14 +109,33 @@ small {
   margin-left: 5px
 }
 
-.mat-progress-bar {
-  height: 20px;
+.mat-mdc-progress-bar {
+  --mat-progress-bar-active-indicator-height: 20px;
+  --mat-progress-bar-track-height: 20px;
+  --mat-progress-bar-track-shape: 10px;
   border-radius: 10px;
+  margin-bottom: 12px;
+}
+
+::ng-deep .mat-mdc-card-title {
+  overflow: visible !important;
+}
+
+::ng-deep .mat-mdc-card-header {
+  overflow: visible !important;
+}
+
+.progress-container {
+  position: relative;
+  width: 100%;
 }
 
 .mat-progress-text {
   position: absolute;
-  padding: 5px;
+  top: 0;
+  left: 5px;
+  height: 20px;
+  line-height: 20px;
   color: white;
   font-size: 0.8em;
 }

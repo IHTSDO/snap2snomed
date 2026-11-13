@@ -13,7 +13,7 @@ pool:
 variables:
   mavenCache: $(Pipeline.Workspace)/.m2/repository
   mavenOptions: '-Dmaven.repo.local=$(mavenCache)'
-  trivyVersion: 0.69.3
+  trivyVersion: 0.70.0
 
 stages:
   - stage: build
@@ -39,7 +39,7 @@ stages:
           - task: npmAuthenticate@0
             inputs:
               workingFile: ui/snapclient/.npmrc
-          - task: Maven@3
+          - task: Maven@4
             displayName: Build
             inputs:
               mavenPomFile: 'pom.xml'
@@ -47,12 +47,12 @@ stages:
               mavenFeedAuthenticate: true
               mavenOptions: ' $(mavenOptions)'
               javaHomeOption: 'JDKVersion'
-              jdkVersionOption: '1.17'
+              jdkVersionOption: '1.21'
               jdkArchitectureOption: 'x64'
               publishJUnitResults: true
               testResultsFiles: '**/*/TEST*-*.xml'
               goals: 'clean verify -Pazure-devops -DskipUITests=$(skipUITests)'
-          - task: PublishCodeCoverageResults@1
+          - task: PublishCodeCoverageResults@2
             displayName: Publish Code Coverage
             inputs:
               enabled: $(enableCodeCoverage)
@@ -70,13 +70,13 @@ stages:
             displayName: "Run trivy scan on snap2snomed"
             inputs:
               script: |
-                trivy image --exit-code 0 --severity LOW,MEDIUM --security-checks vuln --timeout 15m $(dockerRegistry)/$(registryPath):$(Build.BuildNumber)
-                trivy image --exit-code 1 --severity HIGH,CRITICAL --security-checks vuln --timeout 15m $(dockerRegistry)/$(registryPath):$(Build.BuildNumber)
+                trivy image --exit-code 0 --severity LOW,MEDIUM --scanners vuln --timeout 15m $(dockerRegistry)/$(registryPath):$(Build.BuildNumber)
+                trivy image --exit-code 1 --severity HIGH,CRITICAL --scanners vuln --timeout 15m $(dockerRegistry)/$(registryPath):$(Build.BuildNumber)
           - script: |
-              export VERSION=`git rev-parse --short=7 HEAD` && \
-              yarn exec sentry-cli releases new $VERSION && \
-              yarn exec sentry-cli releases set-commits $VERSION -- --auto --ignore-missing && \
-              yarn exec sentry-cli releases files $VERSION upload-sourcemaps ../target/site
+              export SENTRY_RELEASE=$(git rev-parse --short=7 HEAD) && \
+              yarn exec sentry-cli releases new $SENTRY_RELEASE && \
+              yarn exec sentry-cli releases set-commits $SENTRY_RELEASE -- --auto --ignore-missing && \
+              yarn exec sentry-cli sourcemaps upload ../target/site
             displayName: Notify Sentry of release
             workingDirectory: $(System.DefaultWorkingDirectory)/ui/snapclient
             env:

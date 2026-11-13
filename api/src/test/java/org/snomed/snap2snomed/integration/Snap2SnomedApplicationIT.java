@@ -17,8 +17,6 @@
 package org.snomed.snap2snomed.integration;
 
 import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.not;
-import static org.hamcrest.Matchers.nullValue;
 import static io.restassured.RestAssured.given;
 
 import org.junit.jupiter.api.Test;

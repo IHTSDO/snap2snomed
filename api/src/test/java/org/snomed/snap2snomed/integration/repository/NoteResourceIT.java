@@ -68,7 +68,7 @@ public class NoteResourceIT extends IntegrationTestBase {
   @Test
   public void shouldCreateEntity() throws Exception {
     restClient.givenDefaultUser().body(restClient.createNoteJson(mapRowId, DEFAULT_TEST_USER_SUBJECT, "This is a test note"))
-        .post("/notes/").then().statusCode(201);
+        .post("/notes").then().statusCode(201);
   }
 
   @Test
@@ -82,7 +82,7 @@ public class NoteResourceIT extends IntegrationTestBase {
   @Test
   public void shouldListNotes() throws Exception {
     restClient.givenDefaultUser().body(restClient.createNoteJson(mapRowId, DEFAULT_TEST_USER_SUBJECT, "This is a test note"))
-        .post("/notes/").then().statusCode(201);
+        .post("/notes").then().statusCode(201);
     restClient.givenDefaultUser().get("/notes")
         .then().log().ifValidationFails(LogDetail.BODY).statusCode(200)
         .body("content", hasSize(greaterThan(0)));
@@ -115,16 +115,16 @@ public class NoteResourceIT extends IntegrationTestBase {
     Long mapRowId3 = restClient.getMapRowId(mapId, "map1 row code 3.");
 
     String note1Modified = restClient.givenDefaultUser().body(restClient.createNoteJson(mapRowId2, DEFAULT_TEST_USER_SUBJECT, "Maprow 2 - This is a test note 1"))
-        .post("/notes/").then().statusCode(201).extract().body().jsonPath().getString("modified");
+        .post("/notes").then().statusCode(201).extract().body().jsonPath().getString("modified");
 
     String note2Modified = restClient.givenDefaultUser().body(restClient.createNoteJson(mapRowId2, DEFAULT_TEST_USER_SUBJECT, "Maprow 2 - This is a test note 2"))
-        .post("/notes/").then().statusCode(201).extract().body().jsonPath().getString("modified");
+        .post("/notes").then().statusCode(201).extract().body().jsonPath().getString("modified");
 
     String note3Modified = restClient.givenDefaultUser().body(restClient.createNoteJson(mapRowId2, DEFAULT_TEST_USER_SUBJECT, "Maprow 2 - This is a test note 3"))
-        .post("/notes/").then().statusCode(201).extract().body().jsonPath().getString("modified");
+        .post("/notes").then().statusCode(201).extract().body().jsonPath().getString("modified");
 
     String note4Modified = restClient.givenDefaultUser().body(restClient.createNoteJson(mapRowId3, DEFAULT_TEST_USER_SUBJECT, "Maprow 3 - This is a test note 4"))
-        .post("/notes/").then().statusCode(201).extract().body().jsonPath().getString("modified");
+        .post("/notes").then().statusCode(201).extract().body().jsonPath().getString("modified");
 
     assertThat(parseTime(note1Modified))
         .isBefore(parseTime(note2Modified))

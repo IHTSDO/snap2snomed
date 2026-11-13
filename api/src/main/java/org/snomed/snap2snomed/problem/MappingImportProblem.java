@@ -16,7 +16,7 @@
 
 package org.snomed.snap2snomed.problem;
 
-import org.zalando.problem.Status;
+import org.springframework.http.HttpStatus;
 
 public class MappingImportProblem extends Snap2SnomedProblem {
 
@@ -25,7 +25,7 @@ public class MappingImportProblem extends Snap2SnomedProblem {
   private static final String BASE_TYPE = "mapping-import/";
 
   public MappingImportProblem(String subtype, String title, String detail) {
-    super(BASE_TYPE + subtype, title, Status.BAD_REQUEST, detail);
+    super(BASE_TYPE + subtype, title, HttpStatus.BAD_REQUEST, detail);
   }
 
   public MappingImportProblem(String subtype, String title) {

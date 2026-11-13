@@ -1,5 +1,5 @@
 /*
- * Copyright © 2022 SNOMED International
+ * Copyright © 2026 SNOMED International
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,18 +16,19 @@
 
 import {TestBed} from '@angular/core/testing';
 import {provideMockActions} from '@ngrx/effects/testing';
-import {Observable} from 'rxjs';
+import {EMPTY, Observable} from 'rxjs';
 import {RouterTestingModule} from '@angular/router/testing';
-import {HttpClientTestingModule} from '@angular/common/http/testing';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import {provideMockStore} from '@ngrx/store/testing';
 import {initialAppState} from '../app.state';
 import {TaskEffects} from './task.effects';
 import {APP_CONFIG} from '../../app.config';
-import {testRoutes} from '../../auth.guard.spec';
+import {testRoutes} from '../../test-routes';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 
 
 describe('TaskEffects', () => {
-  let actions$: Observable<any>;
+  let actions$: Observable<any> = EMPTY;
   let effects: TaskEffects;
 
   const initialState = initialAppState;
@@ -35,17 +36,16 @@ describe('TaskEffects', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      imports: [
-        RouterTestingModule.withRoutes(routes),
-        HttpClientTestingModule
-      ],
-      providers: [
+    imports: [RouterTestingModule.withRoutes(routes)],
+    providers: [
         { provide: APP_CONFIG, useValue: {} },
         TaskEffects,
         provideMockActions(() => actions$),
-        provideMockStore({initialState})
-      ]
-    });
+        provideMockStore({ initialState }),
+        provideHttpClient(withInterceptorsFromDi()),
+        provideHttpClientTesting()
+    ]
+});
 
     effects = TestBed.inject(TaskEffects);
   });

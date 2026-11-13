@@ -1,5 +1,5 @@
 /*
- * Copyright © 2022 SNOMED International
+ * Copyright © 2026 SNOMED International
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,7 +38,7 @@ import {selectCurrentView} from '../../store/mapping-feature/mapping.selectors';
 import {Mapping} from '../../_models/mapping';
 import {DroppableEventObject} from 'src/app/_directives/droppable.directive';
 import {MatSnackBar} from '@angular/material/snack-bar';
-import {MatTableFilter} from 'mat-table-filter';
+// import {MatTableFilter} from 'mat-table-filter'; TODO: investigate replacement post angular upgrade
 import {ErrorInfo} from 'src/app/errormessage/errormessage.component';
 import {Params} from '@angular/router';
 import {ServiceUtils} from '../../_utils/service_utils';
@@ -67,9 +67,10 @@ export interface TableColumn {
 }
 
 @Component({
-  selector: 'app-mapping-table',
-  templateUrl: './mapping-table.component.html',
-  styleUrls: ['./mapping-table.component.css']
+    selector: 'app-mapping-table',
+    templateUrl: './mapping-table.component.html',
+    styleUrls: ['./mapping-table.component.css'],
+    standalone: false
 })
 export class MappingTableComponent implements OnInit, AfterViewInit, OnDestroy {
   @Input() paging!: TableParams;
@@ -113,7 +114,6 @@ export class MappingTableComponent implements OnInit, AfterViewInit, OnDestroy {
     'filter-flagged',
     'filter-notes',
     'filter-lastAuthorReviewer',
-    'filter-actions',
   ];
   additionalFilteredColumns: string[] = [];
 
@@ -166,7 +166,7 @@ export class MappingTableComponent implements OnInit, AfterViewInit, OnDestroy {
 
   private mapping: Mapping | null | undefined;
 
-  filterType: MatTableFilter;
+  // filterType: MatTableFilter; TODO: investigate replace post angular upgrade
   statuses: MapRowStatus[];
   relationships: MapRowRelationship[];
   yesNoOptions: [string, boolean][];
@@ -188,7 +188,7 @@ export class MappingTableComponent implements OnInit, AfterViewInit, OnDestroy {
 
     this.paging = {};
     this.filterEntity = new MapViewFilter();
-    this.filterType = MatTableFilter.ANYWHERE;
+    // this.filterType = MatTableFilter.ANYWHERE; TODO: investigate replacement post angular upgrade
     this.relationships = mapRowRelationships;
     this.statuses = mapRowStatuses;
     this.yesNoOptions = [

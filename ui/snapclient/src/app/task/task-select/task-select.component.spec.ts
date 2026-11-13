@@ -1,5 +1,5 @@
 /*
- * Copyright © 2022 SNOMED International
+ * Copyright © 2026 SNOMED International
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
 import {ComponentFixture, TestBed} from '@angular/core/testing';
 
 import {TaskSelectComponent} from './task-select.component';
-import {HttpClientTestingModule} from '@angular/common/http/testing';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import {NoopAnimationsModule} from '@angular/platform-browser/animations';
 import {MatTabsModule} from '@angular/material/tabs';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
@@ -44,6 +44,8 @@ import {MatTooltipModule} from '@angular/material/tooltip';
 import {TrimPipe} from '../../_utils/trim_pipe';
 import {MatIconModule} from '@angular/material/icon';
 import {RouterTestingModule} from '@angular/router/testing';
+import { HttpClient, provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import {ErrormessageComponent} from '../../errormessage/errormessage.component';
 
 describe('TaskSelectComponent', () => {
   let component: TaskSelectComponent;
@@ -63,9 +65,8 @@ describe('TaskSelectComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [
-        RouterTestingModule,
-        HttpClientTestingModule,
+    declarations: [TaskSelectComponent, TaskItemComponent, TrimPipe, ErrormessageComponent],
+    imports: [RouterTestingModule,
         NoopAnimationsModule,
         MatTabsModule,
         FormsModule,
@@ -78,25 +79,22 @@ describe('TaskSelectComponent', () => {
         MatTooltipModule,
         MatIconModule,
         TranslateModule.forRoot({
-          loader: {
-            provide: TranslateLoader,
-            useFactory: HttpLoaderFactory,
-            deps: [HttpClientTestingModule]
-          }
-        })
-      ],
-      providers: [TranslateService,
-        {provide: APP_CONFIG, useValue: {}},
+            loader: {
+                provide: TranslateLoader,
+                useFactory: HttpLoaderFactory,
+                deps: [HttpClient]
+            }
+        })],
+    providers: [TranslateService,
+        { provide: APP_CONFIG, useValue: {} },
         provideMockStore({
-          initialState: initialAppState,
-          selectors: [
-            {selector: selectCurrentUser, value: user},
-            {selector: selectTaskList, value: [task]},
-          ]
-        })
-      ],
-      declarations: [TaskSelectComponent, TaskItemComponent, TrimPipe]
-    })
+            initialState: initialAppState,
+            selectors: [
+                { selector: selectCurrentUser, value: user },
+                { selector: selectTaskList, value: [task] },
+            ]
+        }), provideHttpClient(withInterceptorsFromDi()), provideHttpClientTesting()]
+})
       .compileComponents();
     store = TestBed.inject(MockStore);
     translateService = TestBed.inject(TranslateService);

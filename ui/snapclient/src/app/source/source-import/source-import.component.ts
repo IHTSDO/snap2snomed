@@ -31,9 +31,10 @@ import {ErrorInfo} from '../../errormessage/errormessage.component';
 
 
 @Component({
-  selector: 'app-source-import',
-  templateUrl: './source-import.component.html',
-  styleUrls: ['./source-import.component.css']
+    selector: 'app-source-import',
+    templateUrl: './source-import.component.html',
+    styleUrls: ['./source-import.component.css'],
+    standalone: false
 })
 export class SourceImportComponent implements OnInit, OnDestroy, AfterViewChecked{
 
@@ -206,14 +207,17 @@ export class SourceImportComponent implements OnInit, OnDestroy, AfterViewChecke
     this.dialogRef.close(saved);
   }
 
-  // TODO: Mergemap is deprecated find another way to do this
   getInstructions(): void {
     if (this.translate) {
       const i1$ = this.translate.get('SOURCE.IMPORT_TYPES');
       const i2$ = this.translate.get('SOURCE.MAX_FILE_SIZE').pipe(
         map((t) => `${t}: ${ServiceUtils.bytesToMB(this.MAXFILESIZE)}`));
 
-      i1$.pipe(mergeMap(value => i2$, (outerValue, innerValue) => `${outerValue}. ${innerValue}`)).subscribe(
+      i1$.pipe(
+        mergeMap((outerValue) => i2$.pipe(
+          map((innerValue) => `${outerValue}. ${innerValue}`)
+        ))
+      ).subscribe(
         (t) => this.fileUploadInstructions = `${t}`);
     }
   }

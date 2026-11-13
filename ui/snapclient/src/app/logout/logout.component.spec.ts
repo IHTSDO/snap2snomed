@@ -17,11 +17,12 @@
 import {ComponentFixture, TestBed} from '@angular/core/testing';
 
 import {LogoutComponent} from './logout.component';
-import {HttpClientTestingModule} from '@angular/common/http/testing';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import {APP_CONFIG} from '../app.config';
 import {provideMockStore} from '@ngrx/store/testing';
 import {AuthService} from '../_services/auth.service';
 import {initialAppState} from '../store/app.state';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 
 describe('LogoutComponent', () => {
   let component: LogoutComponent;
@@ -30,14 +31,15 @@ describe('LogoutComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [
-        HttpClientTestingModule
-      ],
-      providers: [
+    declarations: [LogoutComponent],
+    imports: [],
+    providers: [
         { provide: APP_CONFIG, useValue: {} },
-        provideMockStore({initialState}), AuthService],
-      declarations: [ LogoutComponent ]
-    })
+        provideMockStore({ initialState }), AuthService,
+        provideHttpClient(withInterceptorsFromDi()),
+        provideHttpClientTesting()
+    ]
+})
     .compileComponents();
   });
 

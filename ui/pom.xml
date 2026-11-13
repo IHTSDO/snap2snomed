@@ -54,7 +54,7 @@
         <version>1.15.0</version>
         <configuration>
           <workingDirectory>./snapclient</workingDirectory>
-          <nodeVersion>v14.16.1</nodeVersion>
+          <nodeVersion>v22.15.0</nodeVersion>
           <yarnVersion>v1.22.10</yarnVersion>
         </configuration>
         <executions>
@@ -89,7 +89,7 @@
               <goal>yarn</goal>
             </goals>
             <configuration>
-              <arguments>run build --prod</arguments>
+              <arguments>run build --configuration production</arguments>
             </configuration>
           </execution>
           <execution>
@@ -129,7 +129,7 @@
               <outputDirectory>${basedir}/target/site</outputDirectory>
               <resources>
                 <resource>
-                  <directory>${basedir}/snapclient/dist/snapclient</directory>
+                  <directory>${basedir}/snapclient/dist/snapclient/browser</directory>
                   <excludes>
                     <exclude>**/Snap2X.pdf</exclude>
                   </excludes>
@@ -148,7 +148,7 @@
               <outputDirectory>${basedir}/target/site</outputDirectory>
               <resources>
                 <resource>
-                  <directory>${basedir}/snapclient/dist/snapclient</directory>
+                  <directory>${basedir}/snapclient/dist/snapclient/browser</directory>
                   <includes>
                     <include>**/Snap2X.pdf</include>
                   </includes>

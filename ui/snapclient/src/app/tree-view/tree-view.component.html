@@ -1,4 +1,4 @@
-<mat-card>
+<mat-card appearance="outlined">
   <mat-card-content class="tree-content">
     <mat-tree [dataSource]="nestedData" [treeControl]="treeControl" class="tree-view">
       <!-- This is the tree node template for leaf nodes -->
@@ -17,8 +17,8 @@
       <mat-nested-tree-node *matTreeNodeDef="let node; when: hasChild">
         <div class="mat-tree-node">
           <button mat-icon-button matTreeNodeToggle
-                  (click)="toggle(node)"
-                  [attr.aria-label]="'Toggle ' + node.concept.display">
+            (click)="toggle(node)"
+            [attr.aria-label]="'Toggle ' + node.concept.display">
             <mat-icon class="mat-icon-rtl-mirror">
               {{node.isParent ? 'expand_less' : (treeControl.isExpanded(node) ? 'expand_more' : 'chevron_right')}}
             </mat-icon>
@@ -26,15 +26,19 @@
           <span class="tree-label">
             <span class="definition-status" [appDraggable]="{data: node.concept.payload, zones: ['conceptZone', 'relationshipZone']}">{{node.concept.primitive ? '&nbsp;' : '&#8801;'}}&nbsp;</span>
             <span class="tree-text">{{node.concept.display}}
-              <span *ngIf="node.children?.length"> ({{node.children?.length}})</span>
+              @if (node.children?.length) {
+                <span> ({{node.children?.length}})</span>
+              }
             </span>
           </span>
         </div>
         <!-- There is inline padding applied to this div using styles.
-             This padding value depends on the mat-icon-button width.  -->
-        <div *ngIf="treeControl.isExpanded(node)" role="group">
-          <ng-container matTreeNodeOutlet></ng-container>
-        </div>
+        This padding value depends on the mat-icon-button width.  -->
+        @if (treeControl.isExpanded(node)) {
+          <div role="group">
+            <ng-container matTreeNodeOutlet></ng-container>
+          </div>
+        }
       </mat-nested-tree-node>
     </mat-tree>
   </mat-card-content>

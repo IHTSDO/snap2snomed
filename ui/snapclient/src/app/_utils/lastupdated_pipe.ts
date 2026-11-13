@@ -18,7 +18,10 @@ import {Pipe, PipeTransform} from '@angular/core';
 
 const min = 1000 * 60;
 
-@Pipe({name: 'lastupdated'})
+@Pipe({
+    name: 'lastupdated',
+    standalone: false
+})
 export class LastupdatedPipe implements PipeTransform {
   transform(datefield?: Date | null): string | null {
     if (!datefield) {

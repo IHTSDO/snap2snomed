@@ -27,9 +27,10 @@ import {selectSuggestions} from 'src/app/store/fhir-feature/fhir.selectors';
 import {SEQUENCE as DEFAULT_SEQUENCE} from 'src/app/_services/fhir.service';
 
 @Component({
-  selector: 'app-concept-autosuggest',
-  templateUrl: './concept-autosuggest.component.html',
-  styleUrls: ['./concept-autosuggest.component.css']
+    selector: 'app-concept-autosuggest',
+    templateUrl: './concept-autosuggest.component.html',
+    styleUrls: ['./concept-autosuggest.component.css'],
+    standalone: false
 })
 export class ConceptAutosuggestComponent implements OnInit, OnDestroy {
 

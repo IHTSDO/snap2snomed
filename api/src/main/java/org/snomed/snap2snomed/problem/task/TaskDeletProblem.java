@@ -17,11 +17,11 @@
 package org.snomed.snap2snomed.problem.task;
 
 import org.snomed.snap2snomed.problem.Snap2SnomedProblem;
-import org.zalando.problem.Status;
+import org.springframework.http.HttpStatus;
 
 public class TaskDeletProblem extends Snap2SnomedProblem {
 
-  public TaskDeletProblem(String subUrl, String message, Status status) {
+  public TaskDeletProblem(String subUrl, String message, HttpStatus status) {
     super("task-delete/" + subUrl, "Task cannot be deleted", status, message);
   }
 }

@@ -20,9 +20,10 @@ import {FeedbackWidgetComponent} from "../feedback-widget/feedback-widget.compon
 import {MatDialog} from "@angular/material/dialog";
 
 @Component({
-  selector: 'app-footer',
-  templateUrl: './footer.component.html',
-  styleUrls: ['./footer.component.css']
+    selector: 'app-footer',
+    templateUrl: './footer.component.html',
+    styleUrls: ['./footer.component.css'],
+    standalone: false
 })
 export class FooterComponent implements OnInit {
   si: string;

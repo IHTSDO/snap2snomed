@@ -44,7 +44,7 @@ exports.handler = function(event, _, callback) {
       value: "no-referrer"
     }],
     "permissions-policy": [{
-      value: "accelerometer=(self), autoplay=(self), camera=(self), display-capture=(self), document-domain=(self), encrypted-media=(self), fullscreen=(self), geolocation=(self), gyroscope=(self), magnetometer=(self), microphone=(self), midi=(self), payment=(self), picture-in-picture=(self), sync-xhr=(self), usb=(self), xr-spatial-tracking=(self)"
+      value: "accelerometer=(self), autoplay=(self), camera=(self), display-capture=(self), encrypted-media=(self), fullscreen=(self), geolocation=(self), gyroscope=(self), magnetometer=(self), microphone=(self), midi=(self), payment=(self), picture-in-picture=(self), sync-xhr=(self), usb=(self), xr-spatial-tracking=(self)"
     }],
     "content-security-policy": [{
       key:   'Content-Security-Policy',

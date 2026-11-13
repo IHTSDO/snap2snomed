@@ -47,9 +47,10 @@ export enum TaskAction {
 }
 
 @Component({
-  selector: 'app-task-card',
-  templateUrl: './task-card.component.html',
-  styleUrls: ['./task-card.component.css']
+    selector: 'app-task-card',
+    templateUrl: './task-card.component.html',
+    styleUrls: ['./task-card.component.css'],
+    standalone: false
 })
 export class TaskCardComponent implements OnInit, AfterViewInit, OnDestroy {
 

@@ -27,7 +27,7 @@ import {ErrorInfo} from '../../errormessage/errormessage.component';
 import {Task} from '../../_models/task';
 import {Subscription} from 'rxjs';
 import {FormUtils} from '../../_utils/form_utils';
-import {FormControl} from '@angular/forms';
+import {UntypedFormControl} from '@angular/forms';
 import {DroppableEventObject} from "../../_directives/droppable.directive";
 import {Router} from "@angular/router";
 import {AuthService} from "../../_services/auth.service";
@@ -37,16 +37,17 @@ import {MatSnackBar} from "@angular/material/snack-bar";
 import {ErrorNotifier} from "../../errorhandler/errornotifier";
 
 @Component({
-  selector: 'app-notes-list',
-  templateUrl: './notes-list.component.html',
-  styleUrls: ['./notes-list.component.css']
+    selector: 'app-notes-list',
+    templateUrl: './notes-list.component.html',
+    styleUrls: ['./notes-list.component.css'],
+    standalone: false
 })
 export class NotesListComponent implements OnInit, OnDestroy {
   private subscription: Subscription = new Subscription();
   @Input() currentUser: User | null = null;
   @Input() task: Task | null = null;
   @Input() sourceNavSet: SourceNavSet | null = null;
-  @ViewChild('text') formControl: FormControl | undefined;
+  @ViewChild('text') formControl: UntypedFormControl | undefined;
 
   mapRow: MapRow | null = null;
   error: ErrorInfo = {};

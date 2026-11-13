@@ -1,5 +1,5 @@
 /*
- * Copyright © 2022 SNOMED International
+ * Copyright © 2026 SNOMED International
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,7 +39,7 @@ import {
 } from '../../_models/map_row';
 import {TranslateService} from '@ngx-translate/core';
 import {MapService} from '../../_services/map.service';
-import {debounceTime, startWith, tap} from 'rxjs/operators';
+import {debounceTime, tap} from 'rxjs/operators';
 import {merge, Subscription} from 'rxjs';
 import {MatSort} from '@angular/material/sort';
 import {Task, TaskType} from '../../_models/task';
@@ -48,8 +48,7 @@ import {saveAs} from 'file-saver';
 import {User} from '../../_models/user';
 import {selectTaskList} from '../../store/task-feature/task.selectors';
 import {AssignedWorkComponent} from '../../task/assigned-work/assigned-work.component';
-import {MatTableFilter} from 'mat-table-filter';
-import {HttpParams} from '@angular/common/http';
+import { HttpParams } from '@angular/common/http';
 import {ErrorInfo} from '../../errormessage/errormessage.component';
 import {ServiceUtils} from '../../_utils/service_utils';
 import {LoadMapping, LoadMapView, ViewContext} from 'src/app/store/mapping-feature/mapping.actions';
@@ -68,12 +67,12 @@ import { MappingNotesComponent } from '../mapping-table-notes/mapping-notes.comp
 import { MatCheckboxChange } from '@angular/material/checkbox';
 import { TableColumn } from '../mapping-table/mapping-table.component';
 import { TargetChangedService } from 'src/app/_services/target-changed.service';
-import { cloneDeep } from 'lodash';
 
 @Component({
-  selector: 'app-mapping-view',
-  templateUrl: './mapping-view.component.html',
-  styleUrls: ['./mapping-view.component.css']
+    selector: 'app-mapping-view',
+    templateUrl: './mapping-view.component.html',
+    styleUrls: ['./mapping-view.component.css'],
+    standalone: false
 })
 export class MappingViewComponent implements OnInit, AfterViewInit, OnDestroy {
 
@@ -107,7 +106,9 @@ export class MappingViewComponent implements OnInit, AfterViewInit, OnDestroy {
   // @ts-ignore
   @ViewChild(MappingTableSelectorComponent, {static: false})
   set concent(selector: MappingTableSelectorComponent) {
-    this.mappingTableSelector = selector;
+    // Defer so the @ViewChild resolution doesn't cause NG0100 in dev mode:
+    // the verification pass would see undefined→instance within one CD cycle.
+    Promise.resolve().then(() => this.mappingTableSelector = selector);
   }
 
   page: Page = new Page();
@@ -180,7 +181,7 @@ export class MappingViewComponent implements OnInit, AfterViewInit, OnDestroy {
   currentUser: User = new User(); // loaded in home.component.ts onActivate
   paging: MapViewPaging;
   filterEntity: MapViewFilter;
-  filterType: MatTableFilter;
+  // filterType: MatTableFilter; TODO: replace post Angular upgrade
   filterParams: HttpParams = new HttpParams();
   relationships: MapRowRelationship[];
   statuses: MapRowStatus[];
@@ -196,7 +197,7 @@ export class MappingViewComponent implements OnInit, AfterViewInit, OnDestroy {
   reconcilePageSize = 10;
   reconcileCurrentPage = 0;
 
-  private timeout: NodeJS.Timeout | null = null;
+  private timeout: ReturnType<typeof setTimeout> | null = null;
 
   // tslint:disable-next-line:variable-name
   private _filterEnabled = false;
@@ -226,7 +227,7 @@ export class MappingViewComponent implements OnInit, AfterViewInit, OnDestroy {
 
     this.paging = new MapViewPaging();
     this.filterEntity = new MapViewFilter();
-    this.filterType = MatTableFilter.ANYWHERE;
+    // this.filterType = MatTableFilter.ANYWHERE; TODO: replace post Angular upgrade
     this.relationships = mapRowRelationships;
     this.statuses = mapRowStatuses;
     this.isAdmin = this.authService.isAdmin();
@@ -423,7 +424,7 @@ export class MappingViewComponent implements OnInit, AfterViewInit, OnDestroy {
         }
       })
     );
-    self.subscription.add(this.store.select(selectCurrentView).pipe(startWith(null)).subscribe(
+    self.subscription.add(this.store.select(selectCurrentView).subscribe(
       (page) => {
         if (page) {
 
@@ -572,7 +573,7 @@ export class MappingViewComponent implements OnInit, AfterViewInit, OnDestroy {
 
   loadTaskList(): void {
     const self = this;
-    this.subscription.add(self.store.select(selectTaskList).pipe(startWith(null), debounceTime(200)).subscribe(
+    this.subscription.add(self.store.select(selectTaskList).pipe(debounceTime(200)).subscribe(
       data => {
         if (data) { // cannot ignore empty lists here as it could indicate all tasks being removed
 
@@ -751,7 +752,7 @@ export class MappingViewComponent implements OnInit, AfterViewInit, OnDestroy {
   clickBulkChange(): void {
     const self = this;
     const confirmDialogRef =
-      self.dialog.open(BulkchangeComponent, {data: self.getBulkChangeDialogData()});
+      self.dialog.open(BulkchangeComponent, {width: '800px', maxWidth: '800px', data: self.getBulkChangeDialogData()});
     confirmDialogRef.afterClosed().subscribe(
       (result) => {
         if (result) {
@@ -785,7 +786,7 @@ export class MappingViewComponent implements OnInit, AfterViewInit, OnDestroy {
 
   clickImport(): void {
     const dialogRef = this.dialog.open(MappingImportComponent, {
-      width: this.import_dialog_width, data: {
+      width: this.import_dialog_width, maxWidth: this.import_dialog_width, data: {
         source: new MappingImportSource(),
         createMode: false
       }

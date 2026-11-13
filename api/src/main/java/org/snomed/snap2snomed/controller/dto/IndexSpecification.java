@@ -41,7 +41,7 @@ public class IndexSpecification {
   }
 
   public static IndexSpecification of(String originalIndexSpecification, Long totalCodesInCodeSystem) {
-    return IndexSpecification.of(originalIndexSpecification, totalCodesInCodeSystem, null);
+    return IndexSpecification.of(originalIndexSpecification, totalCodesInCodeSystem, (Set<Long>[]) null);
   }
 
   public static IndexSpecification of(String originalIndexSpecification, Long totalCodesInCodeSystem,

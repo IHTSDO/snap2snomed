@@ -6,13 +6,15 @@
       </mat-card-header>
       <mat-divider></mat-divider>
       <mat-card-content>
-        <div *ngIf="loading">
-          <app-loading-spinner></app-loading-spinner>
-        </div>
+        @if (loading) {
+          <div>
+            <app-loading-spinner></app-loading-spinner>
+          </div>
+        }
         <app-errormessage [error]="error"></app-errormessage>
         <div>
-          <mat-button-toggle-group class="author-mode-toggle-group" id="dualMapMode" name="dualMapMode" 
-          formControlName="dualMapMode" [disabled]="mode !== 'FORM.CREATE'" ngDefaultControl>
+          <mat-button-toggle-group class="author-mode-toggle-group" id="dualMapMode" name="dualMapMode"
+            formControlName="dualMapMode" ngDefaultControl>
             <mat-button-toggle class="mat-primary" [value]="false">
               {{'MAP.SINGLE_AUTHOR_MODE' | translate }}
             </mat-button-toggle>
@@ -24,168 +26,212 @@
         <mat-form-field class="field-full-width" hintLabel="{{'FORM.MAX_CHARS' | translate}} {{MAX_TITLE}}">
           <mat-label>{{ 'MAP.TITLE' | translate }}</mat-label>
           <input matInput
-                 id="title" formControlName="title"
-                 [maxLength]="MAX_TITLE" [pattern]="VALID_STRING_PATTERN"
-                 required>
-          <mat-hint *ngIf="!formGroup.controls.title.invalid" align="end">{{formGroup.controls.title.value?.length || 0}}/{{MAX_TITLE}}</mat-hint>
-          <mat-error *ngIf="formGroup.controls.title.invalid">{{ 'MAP.TITLE_ERROR' | translate }}</mat-error>
-        </mat-form-field>
-        <mat-form-field class="field-full-width" hintLabel="{{'FORM.MAX_CHARS' | translate}} {{MAX_VERSION}}">
-          <mat-label>{{ 'MAP.VERSION' | translate }}</mat-label>
-          <input matInput
-                 id="mapVersion" formControlName="mapVersion"
-                 [maxLength]="MAX_VERSION" [pattern]="VALID_STRING_PATTERN"
-                 required>
-          <mat-hint align="end">{{formGroup.controls.mapVersion.value?.length || 0}}/{{MAX_VERSION}}</mat-hint>
-          <mat-error *ngIf="formGroup.controls.mapVersion.invalid">{{ 'MAP.VERSION_ERROR' | translate }}</mat-error>
-        </mat-form-field>
-        <mat-form-field class="field-full-width" hintLabel="{{'FORM.MAX_CHARS' | translate}} {{MAX_DESCRIPTION}}">
-          <mat-label>{{ 'MAP.DESCRIPTION' | translate }}</mat-label>
-          <textarea matNativeControl
-                    id="description" formControlName="description"
-                    [maxLength]="MAX_DESCRIPTION" [pattern]="VALID_STRING_PATTERN"
-                    ></textarea>
-          <mat-hint align="end">{{formGroup.controls.description.value?.length || 0}}/{{MAX_DESCRIPTION}}</mat-hint>
-          <mat-error *ngIf="formGroup.controls.description.invalid">{{ 'MAP.DESCRIPTION_ERROR' | translate }}</mat-error>
-        </mat-form-field>
-        <div *ngIf="mode === 'FORM.CREATE' || mode === 'FORM.COPY'">
-          <div class="source-field">
-            <mat-form-field class="field-withbutton-width">
-              <mat-label>{{ 'MAP.SOURCE' | translate }}</mat-label>
-              <mat-select id="sourceId" formControlName="sourceId" required>
-                <mat-option disabled value=""><i>{{ 'MAP.SOURCE_SELECT' | translate }}</i></mat-option>
-                <mat-option *ngFor="let src of sources" [value]="src.id">
-                  {{src.name}}: {{src.version}}
-                </mat-option>
-              </mat-select>
-              <mat-error *ngIf="formGroup.controls.sourceId.invalid">{{ 'MAP.SOURCE_REQUIRED' | translate }}</mat-error>
+            id="title" formControlName="title"
+            [maxLength]="MAX_TITLE" [pattern]="VALID_STRING_PATTERN"
+            required>
+            @if (!formGroup.controls.title.invalid) {
+              <mat-hint align="end">{{formGroup.controls.title.value?.length || 0}}/{{MAX_TITLE}}</mat-hint>
+            }
+            @if (formGroup.controls.title.invalid) {
+              <mat-error>{{ 'MAP.TITLE_ERROR' | translate }}</mat-error>
+            }
+          </mat-form-field>
+          <mat-form-field class="field-full-width" hintLabel="{{'FORM.MAX_CHARS' | translate}} {{MAX_VERSION}}">
+            <mat-label>{{ 'MAP.VERSION' | translate }}</mat-label>
+            <input matInput
+              id="mapVersion" formControlName="mapVersion"
+              [maxLength]="MAX_VERSION" [pattern]="VALID_STRING_PATTERN"
+              required>
+              <mat-hint align="end">{{formGroup.controls.mapVersion.value?.length || 0}}/{{MAX_VERSION}}</mat-hint>
+              @if (formGroup.controls.mapVersion.invalid) {
+                <mat-error>{{ 'MAP.VERSION_ERROR' | translate }}</mat-error>
+              }
             </mat-form-field>
-            <button mat-mini-fab color="accent" type="button" title="{{ 'MAP.SOURCE_IMPORT' | translate }}"
+            <mat-form-field class="field-full-width" hintLabel="{{'FORM.MAX_CHARS' | translate}} {{MAX_DESCRIPTION}}">
+              <mat-label>{{ 'MAP.DESCRIPTION' | translate }}</mat-label>
+              <textarea matNativeControl
+                id="description" formControlName="description"
+                [maxLength]="MAX_DESCRIPTION" [pattern]="VALID_STRING_PATTERN"
+              ></textarea>
+              <mat-hint align="end">{{formGroup.controls.description.value?.length || 0}}/{{MAX_DESCRIPTION}}</mat-hint>
+              @if (formGroup.controls.description.invalid) {
+                <mat-error>{{ 'MAP.DESCRIPTION_ERROR' | translate }}</mat-error>
+              }
+            </mat-form-field>
+            @if (mode === 'FORM.CREATE' || mode === 'FORM.COPY') {
+              <div>
+                <div class="source-field">
+                  <mat-form-field class="field-withbutton-width">
+                    <mat-label>{{ 'MAP.SOURCE' | translate }}</mat-label>
+                    <mat-select id="sourceId" formControlName="sourceId" required>
+                      <mat-option disabled value=""><i>{{ 'MAP.SOURCE_SELECT' | translate }}</i></mat-option>
+                      @for (src of sources; track src) {
+                        <mat-option [value]="src.id">
+                          {{src.name}}: {{src.version}}
+                        </mat-option>
+                      }
+                    </mat-select>
+                    @if (formGroup.controls.sourceId.invalid) {
+                      <mat-error>{{ 'MAP.SOURCE_REQUIRED' | translate }}</mat-error>
+                    }
+                  </mat-form-field>
+                  <button mat-mini-fab class="btn-accent" type="button" title="{{ 'MAP.SOURCE_IMPORT' | translate }}"
                     (click)="addSource($event)">
-              <mat-icon>add</mat-icon>
-            </button>
-          </div>
-          <div class="source-field">
-            <mat-form-field class="field-withbutton-width multi-field-row-field">
-              <mat-label>{{ 'MAP.TARGET_EDITION' | translate }}</mat-label>
-              <mat-select id="toEdition" formControlName="toEdition"
-                          required>
-                <mat-option *ngFor="let elem of editionToVersionsMap | keyvalue" [value]="elem.key">
-                  <span *ngIf="elem.value[0].countryCode" class="flag-icon flag-icon-{{elem.value[0].countryCode}}"></span>
-                  {{elem.key}}
-                </mat-option>
-              </mat-select>
-              <mat-error *ngIf="!selectedEdition">{{ 'MAP.TARGET_EDITION_ERROR' | translate }}</mat-error>
-            </mat-form-field>
-            <mat-form-field class="field-withbutton-width multi-field-row-field">
-              <mat-label>{{ 'MAP.TARGET_VERSION' | translate }}</mat-label>
-              <mat-select id="toVersion" formControlName="toVersion"
-                          required>
-                <mat-option *ngFor="let vers of editionVersions" [value]="vers.uri">
-                  {{vers.version}}
-                </mat-option>
-              </mat-select>
-              <mat-error *ngIf="formGroup.controls.toVersion.invalid">{{ 'MAP.TARGET_VERSION_ERROR' | translate }}</mat-error>
-            </mat-form-field>
-            <button mat-mini-fab color="accent" type="button" title="{{ 'MAP.REFRESH_TARGET_VERSIONS' | translate }}"
+                    <mat-icon>add</mat-icon>
+                  </button>
+                </div>
+                <div class="source-field">
+                  <mat-form-field class="field-withbutton-width multi-field-row-field">
+                    <mat-label>{{ 'MAP.TARGET_EDITION' | translate }}</mat-label>
+                    <mat-select id="toEdition" formControlName="toEdition"
+                      required>
+                      @for (elem of editionToVersionsMap | keyvalue; track elem) {
+                        <mat-option [value]="elem.key">
+                          @if (elem.value[0].countryCode) {
+                            <span class="flag-icon flag-icon-{{elem.value[0].countryCode}}"></span>
+                          }
+                          {{elem.key}}
+                        </mat-option>
+                      }
+                    </mat-select>
+                    @if (!selectedEdition) {
+                      <mat-error>{{ 'MAP.TARGET_EDITION_ERROR' | translate }}</mat-error>
+                    }
+                  </mat-form-field>
+                  <mat-form-field class="field-withbutton-width multi-field-row-field">
+                    <mat-label>{{ 'MAP.TARGET_VERSION' | translate }}</mat-label>
+                    <mat-select id="toVersion" formControlName="toVersion"
+                      required>
+                      @for (vers of editionVersions; track vers) {
+                        <mat-option [value]="vers.uri">
+                          {{vers.version}}
+                        </mat-option>
+                      }
+                    </mat-select>
+                    @if (formGroup.controls.toVersion.invalid) {
+                      <mat-error>{{ 'MAP.TARGET_VERSION_ERROR' | translate }}</mat-error>
+                    }
+                  </mat-form-field>
+                  <button mat-mini-fab class="btn-accent" type="button" title="{{ 'MAP.REFRESH_TARGET_VERSIONS' | translate }}"
                     (click)="loadReleases()">
-              <mat-icon>sync</mat-icon>
-            </button>
-          </div>
-          <mat-form-field class="field-full-width" hintLabel="{{'FORM.MAX_CHARS' | translate}} {{MAX_TARGETSCOPE}}">
-            <mat-label for="toScopeSelect">{{ 'MAP.TARGET_SCOPE_COMMON' | translate }}</mat-label>
-            <mat-select id="toScopeSelect" formControlName="toScopeSelect">
-              <mat-option value="*">{{ 'MAP.ECL_ANY' | translate }}</mat-option>
-              <mat-option value="<< 404684003|Clinical finding|">{{ 'MAP.ECL_FINDINGS' | translate }}</mat-option>
-              <mat-option value="<< 71388002|Procedure|">{{ 'MAP.ECL_PROCEDURES' | translate }}</mat-option>
-              <mat-option value="<< (373873005|Pharmaceutical / biologic product| OR 105590001|Substance|)">{{ 'MAP.ECL_MEDICATIONS' | translate }}</mat-option>
-              <mat-option value="<< 410607006|Organism|">{{ 'MAP.ECL_ORGANISMS' | translate }}</mat-option>
-              <mat-option>{{ 'MAP.ECL_CUSTOM' | translate }}</mat-option>
-            </mat-select>
-          </mat-form-field>
-          <mat-form-field class="field-full-width" hintLabel="{{'FORM.MAX_CHARS' | translate}} {{MAX_TARGETSCOPE}}">
-            <mat-label for="toScope">{{ 'MAP.TARGET_SCOPE' | translate }}</mat-label>
-            <textarea id="toScope" class="ecl" matNativeControl
-                      cdkTextareaAutosize
-                      cdkAutosizeMinRows="2"
-                      matInput
-                      formControlName="toScope"
-                      [maxLength]="MAX_TARGETSCOPE" [pattern]="VALID_STRING_PATTERN"
-                      required></textarea>
-            <mat-error
-              *ngIf="formGroup.controls.toScope.invalid || formGroup.controls.toScope.hasError('maxlength')">{{ 'MAP.TARGET_SCOPE_ERROR' | translate }}</mat-error>
-            <a href="https://docs.snomed.org/snomed-ct-specifications/snomed-ct-expression-constraint-language/appendices/appendix-d-ecl-quick-reference" target="_blank">{{ 'MAP.ECL_HELP' | translate }}</a>
-            <mat-hint align="end">
-              {{mappingModel.toScope?.length || 0}}/{{MAX_TARGETSCOPE}}
-            </mat-hint>
-          </mat-form-field>
-          <div *ngIf="mode === 'FORM.CREATE' && !formGroup.controls.dualMapMode.value" class="import-existing-map">
-            <button mat-raised-button color="primary"  title="{{ 'FORM.IMPORT_EXISTING_MAP' | translate }}"
-                type="button" (click)="onImportMapping($event)">
-                {{ 'FORM.IMPORT_EXISTING_MAP' | translate }}
-              </button>
-            <span>Selected Mapping File:</span>
-            <div>
-              {{mappingFile?.source?.source_file?.name}}
-              <mat-icon (click)="onClearSelectedMappingFile($event)"
-                title="{{ 'FORM.CLEAR_SELECTED_FILE' | translate }}"
-                *ngIf="mappingFile?.source?.source_file?.name">cancel</mat-icon>
+                    <mat-icon>sync</mat-icon>
+                  </button>
+                </div>
+                <mat-form-field class="field-full-width" hintLabel="{{'FORM.MAX_CHARS' | translate}} {{MAX_TARGETSCOPE}}">
+                  <mat-label for="toScopeSelect">{{ 'MAP.TARGET_SCOPE_COMMON' | translate }}</mat-label>
+                  <mat-select id="toScopeSelect" formControlName="toScopeSelect">
+                    <mat-option value="*">{{ 'MAP.ECL_ANY' | translate }}</mat-option>
+                    <mat-option value="<< 404684003|Clinical finding|">{{ 'MAP.ECL_FINDINGS' | translate }}</mat-option>
+                    <mat-option value="<< 71388002|Procedure|">{{ 'MAP.ECL_PROCEDURES' | translate }}</mat-option>
+                    <mat-option value="<< (373873005|Pharmaceutical / biologic product| OR 105590001|Substance|)">{{ 'MAP.ECL_MEDICATIONS' | translate }}</mat-option>
+                    <mat-option value="<< 410607006|Organism|">{{ 'MAP.ECL_ORGANISMS' | translate }}</mat-option>
+                    <mat-option>{{ 'MAP.ECL_CUSTOM' | translate }}</mat-option>
+                  </mat-select>
+                </mat-form-field>
+                <mat-form-field class="field-full-width" hintLabel="{{'FORM.MAX_CHARS' | translate}} {{MAX_TARGETSCOPE}}">
+                  <mat-label for="toScope">{{ 'MAP.TARGET_SCOPE' | translate }}</mat-label>
+                  <textarea id="toScope" class="ecl" matNativeControl
+                    cdkTextareaAutosize
+                    cdkAutosizeMinRows="2"
+                    matInput
+                    formControlName="toScope"
+                    [maxLength]="MAX_TARGETSCOPE" [pattern]="VALID_STRING_PATTERN"
+                  required></textarea>
+                  @if (formGroup.controls.toScope.invalid || formGroup.controls.toScope.hasError('maxlength')) {
+                    <mat-error
+                    >{{ 'MAP.TARGET_SCOPE_ERROR' | translate }}</mat-error>
+                  }
+                  <a href="https://docs.snomed.org/snomed-ct-specifications/snomed-ct-expression-constraint-language/appendices/appendix-d-ecl-quick-reference" target="_blank">{{ 'MAP.ECL_HELP' | translate }}</a>
+                  <mat-hint align="end">
+                    {{mappingModel.toScope.length || 0}}/{{MAX_TARGETSCOPE}}
+                  </mat-hint>
+                </mat-form-field>
+                @if (mode === 'FORM.CREATE' && !formGroup.controls.dualMapMode.value) {
+                  <div class="import-existing-map">
+                    <button mat-flat-button title="{{ 'FORM.IMPORT_EXISTING_MAP' | translate }}"
+                      type="button" (click)="onImportMapping($event)">
+                      {{ 'FORM.IMPORT_EXISTING_MAP' | translate }}
+                    </button>
+                    <span>Selected Mapping File:</span>
+                    <div>
+                      {{mappingFile?.source?.source_file?.name}}
+                      @if (mappingFile?.source?.source_file?.name) {
+                        <mat-icon (click)="onClearSelectedMappingFile($event)"
+                          title="{{ 'FORM.CLEAR_SELECTED_FILE' | translate }}"
+                        >cancel</mat-icon>
+                      }
+                    </div>
+                  </div>
+                }
+              </div>
+            }
+            @if (mode === 'FORM.VIEW' || mode === 'FORM.EDIT') {
+              <div>
+                <br/>
+                <div class="info">
+                  <h3>{{'MAP.CODE_SYSTEMS' | translate}}</h3>
+                  <table class="table details-table">
+                    <tr>
+                      <th><b>{{ 'MAP.SOURCE_LABEL' | translate }}:</b></th>
+                      <td>{{mappingModel.source.name}}</td>
+                    </tr>
+                    <tr>
+                      <th><b>{{ 'MAP.SOURCE_VERSION_LABEL' | translate }}:</b></th>
+                      <td>{{mappingModel.source.version}}</td>
+                    </tr>
+                    <tr>
+                      <th><b>{{ 'MAP.TARGET' | translate }}:</b></th>
+                      <td>
+                        <app-source-version [version]="mappingModel.toVersion"></app-source-version>
+                      </td>
+                    </tr>
+                    <tr>
+                      <th><b>{{ 'MAP.TARGET_SCOPE_LABEL' | translate }}:</b></th>
+                      <td>{{mappingModel.toScope}}</td>
+                    </tr>
+                  </table>
+                </div>
+              </div>
+            }
+            @if (mode !== 'FORM.COPY') {
+              <div class="project-roles">
+                <h3>{{'PROJECT.PROJECT_ROLES' | translate}}</h3>
+                <app-project-roles (errorEvent)="errorUpdate($event)" [readonly]="mode === 'FORM.VIEW'" [project]="mappingModel.project"></app-project-roles>
+              </div>
+            }
+          </mat-card-content>
+          @if (!formGroup.controls.dualMapMode.value) {
+            <div class="alert-warning warning-message">
+              <mat-icon class="mat-icon-warning">info</mat-icon>
+              <div [innerHtml]="'IMPORT.IMPORT_LARGE_MAP' | translate" class="infotext"></div>
             </div>
-          </div>
-        </div>
-        <div *ngIf="mode === 'FORM.VIEW' || mode === 'FORM.EDIT'">
-          <br/>
-          <div class="info">
-            <h3>{{'MAP.CODE_SYSTEMS' | translate}}</h3>
-            <table class="table details-table">
-              <tr>
-                <th><b>{{ 'MAP.SOURCE_LABEL' | translate }}:</b></th>
-                <td>{{mappingModel.source.name}}</td>
-              </tr>
-              <tr>
-                <th><b>{{ 'MAP.SOURCE_VERSION_LABEL' | translate }}:</b></th>
-                <td>{{mappingModel.source.version}}</td>
-              </tr>
-              <tr>
-                <th><b>{{ 'MAP.TARGET' | translate }}:</b></th>
-                <td>
-                  <app-source-version [version]="mappingModel.toVersion"></app-source-version>
-                </td>
-              </tr>
-              <tr>
-                <th><b>{{ 'MAP.TARGET_SCOPE_LABEL' | translate }}:</b></th>
-                <td>{{mappingModel.toScope}}</td>
-              </tr>
-            </table>
-          </div>
-        </div>
-        <div *ngIf="mode !== 'FORM.COPY'" class="project-roles">
-          <h3>{{'PROJECT.PROJECT_ROLES' | translate}}</h3>
-          <app-project-roles (errorEvent)="errorUpdate($event)" [readonly]="mode === 'FORM.VIEW'" [project]="mappingModel.project"></app-project-roles>
-        </div>
-      </mat-card-content>
-      <div *ngIf="!formGroup.controls.dualMapMode.value" class="alert-warning warning-message">
-        <mat-icon class="mat-icon-warning">info</mat-icon>
-        <div [innerHtml]="'IMPORT.IMPORT_LARGE_MAP' | translate" class="infotext"></div>
-      </div>
-      <mat-divider></mat-divider>
-      <mat-card-actions>
-        <div class="alert-danger warning-message" *ngIf="warnDelete">
-          <mat-icon class="mat-icon-warning">info</mat-icon>
-          <div [innerHtml]="'FORM.DELETE_WARN' | translate" class="infotext"></div>
-        </div>
-        <div class="alert-warning warning-message" *ngIf="formGroup.controls.dualMapMode.value && mode === 'FORM.COPY'">
-          <mat-icon class="mat-icon-warning">info</mat-icon>
-          <div [innerHtml]="'MAP.CLEARED_AND_REBLINDED_WARN' | translate" class="infotext"></div>
-        </div>
-        <button *ngIf="mode !== 'FORM.VIEW'" mat-raised-button color="primary" type="submit" id="save"
-                [disabled]="formGroup.invalid">{{ 'FORM.SAVE' | translate }}</button>
-        <button mat-raised-button color="default" type="cancel" id="cancel"
-                (click)="onCancel($event)">{{ (mode !== 'FORM.VIEW' ? 'FORM.CLOSE' : 'FORM.CANCEL') | translate }}</button>
-        <button *ngIf="mode === 'FORM.EDIT'" id="delete" mat-raised-button color="accent" (click)="deleteMap()" type="button">
-          {{ (warnDelete ? 'FORM.DELETE_CONFIRM' : 'FORM.DELETE') | translate }}
-        </button>
-      </mat-card-actions>
-    </mat-card>
-  </form>
-</div>
+          }
+          <mat-divider></mat-divider>
+          <mat-card-actions>
+            @if (warnDelete) {
+              <div class="alert-danger warning-message">
+                <mat-icon class="mat-icon-warning">info</mat-icon>
+                <div [innerHtml]="'FORM.DELETE_WARN' | translate" class="infotext"></div>
+              </div>
+            }
+            @if (formGroup.controls.dualMapMode.value && mode === 'FORM.COPY') {
+              <div class="alert-warning warning-message">
+                <mat-icon class="mat-icon-warning">info</mat-icon>
+                <div [innerHtml]="'MAP.CLEARED_AND_REBLINDED_WARN' | translate" class="infotext"></div>
+              </div>
+            }
+            @if (mode !== 'FORM.VIEW') {
+              <button mat-flat-button type="submit" id="save"
+              [disabled]="formGroup.invalid">{{ 'FORM.SAVE' | translate }}</button>
+            }
+            <button mat-raised-button type="cancel" id="cancel"
+            (click)="onCancel($event)">{{ (mode !== 'FORM.VIEW' ? 'FORM.CLOSE' : 'FORM.CANCEL') | translate }}</button>
+            @if (mode === 'FORM.EDIT') {
+              <button id="delete" mat-raised-button class="btn-accent" (click)="deleteMap()" type="button">
+                {{ (warnDelete ? 'FORM.DELETE_CONFIRM' : 'FORM.DELETE') | translate }}
+              </button>
+            }
+          </mat-card-actions>
+        </mat-card>
+      </form>
+    </div>

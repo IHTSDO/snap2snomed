@@ -1,9 +1,23 @@
-.mat-dialog-content {
+.mat-mdc-dialog-content {
   text-align: center;
+}
+
+.confirm-dialog-content p {
+  color: black;
+  font-size: var(--mat-card-subtitle-text-size);
+}
+
+button[mat-raised-button] {
+  --mat-button-protected-label-text-color: black;
 }
 
 .mat-dialog-subtitle {
   margin-bottom: 10px;
+}
+
+.mat-card-subtitle {
+  color: #757575;
+  text-align: center;
 }
 
 .text-success {

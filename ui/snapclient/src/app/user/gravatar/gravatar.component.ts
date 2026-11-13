@@ -1,5 +1,5 @@
 /*
- * Copyright © 2022 SNOMED International
+ * Copyright © 2026 SNOMED International
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,15 +14,16 @@
  * limitations under the License.
  */
 
-import { Component, Input, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
 import {Md5} from 'ts-md5';
 
 const SESSION_STORAGE_FAILED_GRAVATARS_KEY = "failedGravatars";
 
 @Component({
-  selector: 'app-gravatar',
-  templateUrl: './gravatar.component.html',
-  styleUrls: ['./gravatar.component.css']
+    selector: 'app-gravatar',
+    templateUrl: './gravatar.component.html',
+    styleUrls: ['./gravatar.component.css'],
+    standalone: false
 })
 export class GravatarComponent implements OnInit {
 
@@ -30,7 +31,6 @@ export class GravatarComponent implements OnInit {
   @Input() alt: string|undefined;
   @Input() s = '';
 
-  // @ts-ignore
   @ViewChild('avatar', { static: false }) set userContent(avatarDiv: ElementRef<HTMLDivElement>) {
     if (avatarDiv) {
       if (this.email) {

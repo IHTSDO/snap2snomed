@@ -19,7 +19,6 @@ package org.snomed.snap2snomed.repository;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.dsl.BooleanExpression;
-import com.querydsl.core.types.dsl.SimpleExpression;
 import com.querydsl.core.types.dsl.StringExpression;
 import com.querydsl.core.types.dsl.StringPath;
 import java.time.Instant;
@@ -75,6 +74,58 @@ public interface MapRowTargetRepository
       + "                      or u member of mrt.row.map.project.members "
       + "                      or u member of mrt.row.map.project.guests)))")
   List<MapRowTarget> findByMapId(Long mapId);
+
+  // CVE-2026-41837 (Spring Data REST 5.1.0+, pulled in by Boot 4.1) - the generic GET /mapRowTargets
+  // collection search silently drops any query parameter that isn't a literal top-level Jackson-
+  // serialized property name, which breaks Querydsl-web aliases (mapId) and nested dotted paths
+  // (row.sourceCode.index, row.authorTask.id, row.reconcileTask.id) that map.service.ts relied on.
+  // These named finders bind flat parameter names directly via Spring Data's query-method mechanism,
+  // which isn't subject to that gate - the same reason findByMapId above already works.
+  @Query("select mrt from MapRowTarget mrt "
+      + " where mrt.row.map.id = :mapId "
+      + " and mrt.row.sourceCode.index = :sourceCodeIndex "
+      + " and (true = ?#{@authenticationFacadeImpl.isAdminUser()} "
+      + "      or exists (select 1 from User u "
+      + "                 where u.id = ?#{@authenticationFacadeImpl.principalSubject} "
+      + "                 and (u member of mrt.row.map.project.owners "
+      + "                      or u member of mrt.row.map.project.members "
+      + "                      or u member of mrt.row.map.project.guests)))")
+  Page<MapRowTarget> findByMapIdAndSourceCodeIndex(Long mapId, Long sourceCodeIndex, Pageable pageable);
+
+  @Query("select mrt from MapRowTarget mrt "
+      + " where mrt.row.map.id = :mapId "
+      + " and mrt.row.sourceCode.index = :sourceCodeIndex "
+      + " and mrt.row.authorTask.id = :taskId "
+      + " and (true = ?#{@authenticationFacadeImpl.isAdminUser()} "
+      + "      or exists (select 1 from User u "
+      + "                 where u.id = ?#{@authenticationFacadeImpl.principalSubject} "
+      + "                 and (u member of mrt.row.map.project.owners "
+      + "                      or u member of mrt.row.map.project.members "
+      + "                      or u member of mrt.row.map.project.guests)))")
+  Page<MapRowTarget> findByMapIdAndSourceCodeIndexAndAuthorTaskId(Long mapId, Long sourceCodeIndex, Long taskId, Pageable pageable);
+
+  @Query("select mrt from MapRowTarget mrt "
+      + " where mrt.row.map.id = :mapId "
+      + " and mrt.row.sourceCode.index = :sourceCodeIndex "
+      + " and mrt.row.reconcileTask.id = :taskId "
+      + " and (true = ?#{@authenticationFacadeImpl.isAdminUser()} "
+      + "      or exists (select 1 from User u "
+      + "                 where u.id = ?#{@authenticationFacadeImpl.principalSubject} "
+      + "                 and (u member of mrt.row.map.project.owners "
+      + "                      or u member of mrt.row.map.project.members "
+      + "                      or u member of mrt.row.map.project.guests)))")
+  Page<MapRowTarget> findByMapIdAndSourceCodeIndexAndReconcileTaskId(Long mapId, Long sourceCodeIndex, Long taskId, Pageable pageable);
+
+  @Query("select mrt from MapRowTarget mrt "
+      + " where mrt.row.map.id = :mapId "
+      + " and :tag member of mrt.tags "
+      + " and (true = ?#{@authenticationFacadeImpl.isAdminUser()} "
+      + "      or exists (select 1 from User u "
+      + "                 where u.id = ?#{@authenticationFacadeImpl.principalSubject} "
+      + "                 and (u member of mrt.row.map.project.owners "
+      + "                      or u member of mrt.row.map.project.members "
+      + "                      or u member of mrt.row.map.project.guests)))")
+  Page<MapRowTarget> findByMapIdAndTag(Long mapId, String tag, Pageable pageable);
 
   @Override
   @Query("select mrt from MapRowTarget mrt join MapRow mr on mr.id = mrt.row.id where true = ?#{@authenticationFacadeImpl.isAdminUser()} or exists (select 1 from User u where u.id = ?#{@authenticationFacadeImpl.principalSubject} and (u member of mr.map.project.owners or u member of mr.map.project.members or u member of mr.map.project.guests))")
@@ -198,12 +249,10 @@ public interface MapRowTargetRepository
   @Override
   default void customize(QuerydslBindings bindings, QMapRowTarget root) {
     bindings.bind(String.class).first((SingleValueBinding<StringPath, String>) StringExpression::containsIgnoreCase);
-    bindings.bind(root.row.sourceCode).first(SimpleExpression::eq);
     bindings.bind(root.tags).first((path, value) -> value.stream()
         .map(path::contains)
         .reduce(BooleanExpression::and)
         .orElseThrow());
-    bindings.bind(root.row.map.id).as("mapId").first(SimpleExpression::eq);
   }
 
   @Override

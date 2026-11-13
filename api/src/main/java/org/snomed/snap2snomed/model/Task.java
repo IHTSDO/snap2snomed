@@ -17,18 +17,19 @@
 package org.snomed.snap2snomed.model;
 
 import java.time.Instant;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EntityListeners;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
-import javax.persistence.Transient;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Pattern;
-import javax.validation.constraints.Size;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EntityListeners;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -46,6 +47,7 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.annotation.ReadOnlyProperty;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.data.rest.core.config.Projection;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -56,6 +58,7 @@ import org.springframework.data.rest.core.config.Projection;
 @EntityListeners(AuditingEntityListener.class)
 @Table(name = "task")
 @Slf4j
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Task implements Snap2SnomedEntity {
   @Column(name = "created", nullable = false, updatable = false)
   @CreatedDate
@@ -90,6 +93,7 @@ public class Task implements Snap2SnomedEntity {
   private Map map;
 
   @ManyToOne
+  @JoinColumn(name = "assignee_id")
   User assignee;
 
   @Pattern(regexp = SourceRowSpecificationUtils.SOURCE_ROW_SPECIFICATION_PATTERN,

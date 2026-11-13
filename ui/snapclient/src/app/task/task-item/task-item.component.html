@@ -1,9 +1,19 @@
-<span *ngIf="task" class="task-item {{task.type}}">
-  <span class="task-description" #tooltip="matTooltip" matTooltip="{{task.description}}">
-    <mat-icon *ngIf="task.type==='AUTHOR'">edit</mat-icon>
-    <mat-icon *ngIf="task.type==='RECONCILE'">compare_arrows</mat-icon>
-    <mat-icon *ngIf="task.type==='REVIEW'">checklist</mat-icon>
-    {{task.description | trim}}
+@if (task) {
+  <span class="task-item {{task.type}}">
+    <span class="task-description" #tooltip="matTooltip" matTooltip="{{task.description}}">
+      @if (task.type==='AUTHOR') {
+        <mat-icon>edit</mat-icon>
+      }
+      @if (task.type==='RECONCILE') {
+        <mat-icon>compare_arrows</mat-icon>
+      }
+      @if (task.type==='REVIEW') {
+        <mat-icon>checklist</mat-icon>
+      }
+      {{task.description | trim}}
+    </span>
+    @if (showRows) {
+      <span class="two-line-ellipse"><i>{{'TASK.ROWS_LABEL' | translate}} {{task.sourceRowSpecification | trim}}&nbsp;</i></span>
+    }
   </span>
-  <span class="two-line-ellipse" *ngIf="showRows"><i>{{'TASK.ROWS_LABEL' | translate}} {{task.sourceRowSpecification | trim}}&nbsp;</i></span>
-</span>
+}

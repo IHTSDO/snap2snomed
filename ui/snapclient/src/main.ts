@@ -1,5 +1,5 @@
 /*
- * Copyright © 2022 SNOMED International
+ * Copyright © 2026 SNOMED International
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,13 +14,12 @@
  * limitations under the License.
  */
 
-import { enableProdMode } from '@angular/core';
+import { enableProdMode, provideZoneChangeDetection } from '@angular/core';
 import { platformBrowserDynamic } from '@angular/platform-browser-dynamic';
 import * as Sentry from '@sentry/angular';
-import { Integrations } from '@sentry/tracing';
 
 import { AppModule } from './app/app.module';
-import { AppConfig, APP_CONFIG } from './app/app.config';
+import { APP_CONFIG } from './app/app.config';
 
 fetch(`/assets/config.json`)
   .then((response) => response.json())
@@ -44,12 +43,9 @@ fetch(`/assets/config.json`)
             // Registers and configures the Tracing integration,
             // which automatically instruments your application to monitor its
             // performance, including custom Angular routing instrumentation
-            new Integrations.BrowserTracing({
-              tracingOrigins: ['localhost', 'https://snap2snomed.app', 'https://dev.snap2snomed.app'],
-              routingInstrumentation: Sentry.routingInstrumentation,
-            }),
+            Sentry.browserTracingIntegration(),
           ],
-
+          tracePropagationTargets: ['localhost', 'https://snap2snomed.app', 'https://dev.snap2snomed.app'],
           // Set tracesSampleRate to 1.0 to capture 100%
           // of transactions for performance monitoring.
           // We recommend adjusting this value in production
@@ -57,7 +53,7 @@ fetch(`/assets/config.json`)
         });
 
         platformBrowserDynamic([{ provide: APP_CONFIG, useValue: config }])
-          .bootstrapModule(AppModule)
+          .bootstrapModule(AppModule, { applicationProviders: [provideZoneChangeDetection()], })
           .then(success => console.log(`Bootstrap success`))
           .catch((err) => console.error(err));
       })

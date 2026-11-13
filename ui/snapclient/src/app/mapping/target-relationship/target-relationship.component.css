@@ -4,11 +4,11 @@
   overflow-y: auto;
 }
 
-.mat-card {
+.mat-mdc-card {
   margin: 10px 0;
 }
 
-.mat-card-title {
+.mat-mdc-card-title {
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -16,9 +16,15 @@
   color: rgba(0,0,0,.54);
 }
 
-.mat-card-title span {
+.mat-mdc-card-title span {
   font-size: 0.7em;
   margin-left: 0;
+}
+
+.row-target-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
 }
 
 .relationship-add-button {
@@ -28,6 +34,7 @@
   min-width: 40px;
   min-height: 40px;
   padding: 0;
+  --mat-icon-button-icon-color: rgba(0,0,0,.54);
 }
 
 .relationship-add-button-icon {
@@ -53,7 +60,7 @@
   margin: 0;
 }
 
-.mat-option {
+.mat-mdc-option {
   font-size: 1em;
   line-height: 1;
   white-space: break-spaces;
@@ -61,30 +68,45 @@
   padding: 2px 0;
 }
 
-.mat-option button {
+.mat-mdc-option button {
   height: 30px;
   width: 30px;
+  padding: 0;
   box-shadow: none;
 }
 
-.mat-option .mat-icon {
+.mat-mdc-option .mat-icon {
   height: 30px;
   width: 30px;
-  line-height: 16px;
+  line-height: 30px;
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
 
+}
+
+.mat-mdc-option .mat-mdc-mini-fab {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mat-mdc-option .mat-mdc-mini-fab .mat-icon {
+  margin: 0;
 }
 .row-target {
   display: flex;
   flex-direction: row;
+  align-items: center;
   justify-content: space-between;
 }
 
-.mat-selection-list {
+.mat-mdc-selection-list {
   max-height: 500px;
   overflow: auto;
 }
 
-.mat-selected {
+.mat-mdc-selected {
   background-color: white !important;
 }
 

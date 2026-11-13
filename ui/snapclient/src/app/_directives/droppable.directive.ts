@@ -28,7 +28,7 @@ export interface DroppableEventObject {
 }
 
 @Directive({
-  selector: '[appDroppable]'
+    selector: '[appDroppable]'
 })
 export class DroppableDirective implements AfterViewInit, OnDestroy {
 

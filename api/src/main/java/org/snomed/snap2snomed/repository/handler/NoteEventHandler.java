@@ -16,7 +16,6 @@
 
 package org.snomed.snap2snomed.repository.handler;
 
-import org.snomed.snap2snomed.model.MapRow;
 import org.snomed.snap2snomed.model.Note;
 import org.snomed.snap2snomed.problem.BadRequestDataProblem;
 import org.snomed.snap2snomed.problem.auth.MissingJwtProblem;
@@ -31,8 +30,6 @@ import org.springframework.data.rest.core.annotation.HandleBeforeLinkDelete;
 import org.springframework.data.rest.core.annotation.HandleBeforeLinkSave;
 import org.springframework.data.rest.core.annotation.HandleBeforeSave;
 import org.springframework.data.rest.core.annotation.RepositoryEventHandler;
-import org.zalando.problem.Problem;
-import org.zalando.problem.Status;
 
 @RepositoryEventHandler
 public class NoteEventHandler {

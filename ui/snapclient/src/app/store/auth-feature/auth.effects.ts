@@ -47,7 +47,9 @@ export class AuthEffects {
       switchMap((res) => this.authService.getUserInfo(res.access_token).pipe(
         switchMap((userinfo) => of(new LogInSuccess({token: res, userinfo}))),
         catchError((err) => of(new LogInFailure({error: err})))
-      ))))), {dispatch: true, useEffectsErrorHandler: false}
+      )),
+      catchError((err) => of(new LogInFailure({error: err})))
+    ))), {dispatch: true, useEffectsErrorHandler: false}
   );
 
   logInSuccess$ = createEffect(() => this.actions$.pipe(
@@ -136,7 +138,7 @@ export class AuthEffects {
     ofType(AuthActionTypes.LOAD_USER_FAILED),
     map(action => action.payload.error),
     switchMap((error) => {
-      if (error.error && error.error.status === 403 && error.error.detail.indexOf('not verified') > 0) {
+      if (error.error && error.error.status === 403 && error.error.detail?.indexOf('not verified') > 0) {
         this.router.navigate([''], {replaceUrl: true});
         return of(new UnloadUser());
       }

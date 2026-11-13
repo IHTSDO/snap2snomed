@@ -16,7 +16,7 @@
 
 import {Action} from '@ngrx/store';
 import {Task, TaskPage, TaskPageForType} from '../../_models/task';
-import {HttpErrorResponse} from '@angular/common/http';
+import { HttpErrorResponse } from '@angular/common/http';
 
 
 export enum TaskActionTypes {

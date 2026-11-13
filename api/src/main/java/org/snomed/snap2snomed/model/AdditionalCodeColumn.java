@@ -16,10 +16,12 @@
 
 package org.snomed.snap2snomed.model;
 
-import javax.persistence.Embeddable;
-import javax.validation.constraints.NotNull;
+import jakarta.persistence.Convert;
+import jakarta.persistence.Embeddable;
+import jakarta.validation.constraints.NotNull;
 
 import org.snomed.snap2snomed.model.enumeration.ColumnType;
+import org.snomed.snap2snomed.model.enumeration.ColumnTypeConverter;
 import org.springframework.data.annotation.ReadOnlyProperty;
 
 import lombok.AllArgsConstructor;
@@ -38,6 +40,7 @@ public class AdditionalCodeColumn {
 
     @NotNull
     @ReadOnlyProperty
+    @Convert(converter = ColumnTypeConverter.class)
     private ColumnType type;
 
 }

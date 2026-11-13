@@ -15,6 +15,8 @@
  */
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { NO_ERRORS_SCHEMA } from '@angular/core';
+import { MatTableModule } from '@angular/material/table';
 
 import { ConceptListComponent } from './concept-list.component';
 
@@ -24,7 +26,9 @@ describe('ConceptListComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ ConceptListComponent ]
+      declarations: [ ConceptListComponent ],
+      schemas: [ NO_ERRORS_SCHEMA ],
+      imports: [ MatTableModule ]
     })
     .compileComponents();
   });

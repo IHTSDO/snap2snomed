@@ -7,7 +7,7 @@ import org.snomed.snap2snomed.model.Map;
 import org.snomed.snap2snomed.model.Project;
 import org.snomed.snap2snomed.model.User;
 
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotNull;
 import java.time.Instant;
 import java.util.List;
 import java.util.Set;

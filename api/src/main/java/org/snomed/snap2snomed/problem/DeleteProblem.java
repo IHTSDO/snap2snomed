@@ -16,12 +16,11 @@
 
 package org.snomed.snap2snomed.problem;
 
-import org.snomed.snap2snomed.problem.Snap2SnomedProblem;
-import org.zalando.problem.Status;
+import org.springframework.http.HttpStatus;
 
 public class DeleteProblem extends Snap2SnomedProblem {
 
-  public DeleteProblem(String subUrl, String message, Status status) {
+  public DeleteProblem(String subUrl, String message, HttpStatus status) {
     super("delete/" + subUrl, "Cannot be deleted", status, message);
   }
 }

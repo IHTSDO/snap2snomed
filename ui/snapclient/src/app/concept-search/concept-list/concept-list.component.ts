@@ -20,9 +20,10 @@ import {Match} from 'src/app/store/fhir-feature/fhir.reducer';
 import {SelectionService} from 'src/app/_services/selection.service';
 
 @Component({
-  selector: 'app-concept-list',
-  templateUrl: './concept-list.component.html',
-  styleUrls: ['./concept-list.component.css']
+    selector: 'app-concept-list',
+    templateUrl: './concept-list.component.html',
+    styleUrls: ['./concept-list.component.css'],
+    standalone: false
 })
 export class ConceptListComponent implements OnInit, OnDestroy {
 

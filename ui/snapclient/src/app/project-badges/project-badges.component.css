@@ -23,9 +23,9 @@
   margin-right: 5px;
 }
 
-.member-badges .mat-chip-list {
+.member-badges .mat-mdc-chip-set {
   display: inline-flex;
-  margin: 0px;
+  margin: 0;
 }
 
 .member-label {
@@ -33,13 +33,13 @@
   margin-right: 8px;
 }
 
-.member-badges .mat-chip-list-wrapper {
+.member-badges .mdc-evolution-chip-set__chips {
   display: inline-flex !important;
   align-items: flex-start !important;
   justify-content: space-between !important;
 }
 
-.member-badges .mat-standard-chip {
+.member-badges .mat-mdc-standard-chip {
   padding: 10px;
 }
 
@@ -53,20 +53,18 @@
   max-width: 95px;
   white-space: nowrap;
   overflow: hidden;
-  padding: 5px 5px 5px 5px;
+  padding: 5px 5px 5px 10px;
   display: inline;
   display: flex;
   text-align: center;
 }
 
 .mat-badge-content {
-  background-color: #ff4081 ;
-}
-
-.mat-badge-medium.mat-badge-overlap.mat-badge-after .mat-badge-content {
-  right: -5px;
-}
-
-.mat-badge-medium.mat-badge-above .mat-badge-content {
-  top: -10px;
+  background-color: #ff4081;
+  padding: 0 !important;
+  width: 22px !important;
+  height: 22px !important;
+  min-width: unset !important;
+  right: -5px !important;
+  top: -10px !important;
 }

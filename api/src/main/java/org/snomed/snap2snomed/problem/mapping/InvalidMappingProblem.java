@@ -17,7 +17,7 @@
 package org.snomed.snap2snomed.problem.mapping;
 
 import org.snomed.snap2snomed.problem.Snap2SnomedProblem;
-import org.zalando.problem.Status;
+import org.springframework.http.HttpStatus;
 
 public class InvalidMappingProblem extends Snap2SnomedProblem {
 
@@ -25,15 +25,15 @@ public class InvalidMappingProblem extends Snap2SnomedProblem {
 
   public InvalidMappingProblem(String className, Long id) {
     super("invalid-" + className.toLowerCase() + "-id", "Cannot find "
-        + className + " with id " + id, Status.BAD_REQUEST);
+        + className + " with id " + id, HttpStatus.BAD_REQUEST);
   }
 
   public InvalidMappingProblem(String detail) {
-    super("invalid-mapping-input", "Invalid mapping input was provided", Status.BAD_REQUEST, detail);
+    super("invalid-mapping-input", "Invalid mapping input was provided", HttpStatus.BAD_REQUEST, detail);
   }
 
   public InvalidMappingProblem(String problem, String message) {
-    super(problem, message, Status.BAD_REQUEST);
+    super(problem, message, HttpStatus.BAD_REQUEST);
   }
 
 }

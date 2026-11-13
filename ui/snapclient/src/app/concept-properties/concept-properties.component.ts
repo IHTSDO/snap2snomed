@@ -26,9 +26,10 @@ import { selectDisplayResolvedConceptProperties} from '../store/fhir-feature/fhi
 import { SelectionService } from '../_services/selection.service';
 
 @Component({
-  selector: 'app-concept-properties',
-  templateUrl: './concept-properties.component.html',
-  styleUrls: ['./concept-properties.component.css']
+    selector: 'app-concept-properties',
+    templateUrl: './concept-properties.component.html',
+    styleUrls: ['./concept-properties.component.css'],
+    standalone: false
 })
 export class ConceptPropertiesComponent implements OnInit, OnDestroy {
   @Input() active = true;

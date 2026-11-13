@@ -1,5 +1,5 @@
 /*
- * Copyright © 2022 SNOMED International
+ * Copyright © 2026 SNOMED International
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -305,24 +305,24 @@ export function mapRowStatusToIconName(status: MapRowStatus): string {
   }
 }
 
-export const authorStatuses = [
+export const authorStatuses: MapRowStatus[] = [
   MapRowStatus.UNMAPPED,
   MapRowStatus.DRAFT,
   MapRowStatus.MAPPED
 ];
 
-export const reviewStatuses = [
+export const reviewStatuses: MapRowStatus[] = [
   MapRowStatus.INREVIEW,
   MapRowStatus.ACCEPTED,
   MapRowStatus.REJECTED
 ];
 
-export const reconcileStatuses = [
+export const reconcileStatuses: MapRowStatus[] = [
   MapRowStatus.RECONCILE,
   MapRowStatus.MAPPED
 ]
 
-export const mapRowStatuses: MapRowStatus[] = authorStatuses.concat(reviewStatuses).concat(reconcileStatuses);
+export const mapRowStatuses: MapRowStatus[] = [...new Set(authorStatuses.concat(reviewStatuses).concat(reconcileStatuses))];
 
 export const mapRowRelationships = [
   MapRowRelationship.EQUIVALENT,

@@ -1,5 +1,5 @@
 /*
- * Copyright © 2022 SNOMED International
+ * Copyright © 2026 SNOMED International
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,9 +18,10 @@ import {ChangeDetectionStrategy, Component, Input, OnInit} from '@angular/core';
 import {User} from '../../_models/user';
 
 @Component({
-  selector: 'app-user-chip',
-  templateUrl: './user-chip.component.html',
-  styleUrls: ['./user-chip.component.css']
+    selector: 'app-user-chip',
+    templateUrl: './user-chip.component.html',
+    styleUrls: ['./user-chip.component.css'],
+    standalone: false
 })
 export class UserChipComponent implements OnInit {
   @Input() user: User = new User();
@@ -32,6 +33,12 @@ export class UserChipComponent implements OnInit {
   constructor() { }
 
   ngOnInit(): void {
+  }
+
+  getInitials(user: User): string {
+    const first = user.givenName ? user.givenName[0].toUpperCase() : '';
+    const last = user.familyName ? user.familyName[0].toUpperCase() : '';
+    return first + last;
   }
 
 }

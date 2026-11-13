@@ -21,6 +21,7 @@ import java.util.Set;
 import org.snomed.snap2snomed.controller.UserRestController;
 import org.snomed.snap2snomed.model.User;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.history.RevisionRepository;
 import org.springframework.data.repository.query.Param;
@@ -33,7 +34,7 @@ import org.springframework.security.oauth2.jwt.Jwt;
  */
 @RepositoryRestResource
 public interface UserRepository
-    extends RevisionRepository<User, String, Integer>, PagingAndSortingRepository<User, String> {
+    extends RevisionRepository<User, String, Integer>, PagingAndSortingRepository<User, String>, CrudRepository<User, String> {
 
   // ---------------------------------
   // Exported in REST interface

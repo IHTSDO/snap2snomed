@@ -9,6 +9,10 @@
   width: 100%;
 }
 
+.mat-tree {
+  --mat-tree-container-background-color: white;
+}
+
 .mat-tree-node, .mat-tree-leaf {
   display: block ruby;
   justify-content: start;

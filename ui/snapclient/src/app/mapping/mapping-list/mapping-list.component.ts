@@ -46,9 +46,10 @@ import {ErrorDetail} from "../../_models/error_detail";
 import { FormUtils } from 'src/app/_utils/form_utils';
 
 @Component({
-  selector: 'app-mapping-list',
-  templateUrl: './mapping-list.component.html',
-  styleUrls: ['./mapping-list.component.css']
+    selector: 'app-mapping-list',
+    templateUrl: './mapping-list.component.html',
+    styleUrls: ['./mapping-list.component.css'],
+    standalone: false
 })
 export class MappingListComponent implements OnInit, AfterViewInit, OnDestroy {
   error: ErrorInfo = {};
@@ -129,6 +130,8 @@ export class MappingListComponent implements OnInit, AfterViewInit, OnDestroy {
     self.store.select(selectMappingError).subscribe((error) => {
       if (error) {
         this.setError(error);
+      } else {
+        this.error = {};
       }
     });
 
@@ -172,6 +175,7 @@ export class MappingListComponent implements OnInit, AfterViewInit, OnDestroy {
 
   applyFilter: ReturnType<typeof debounce> = debounce((event: Event) => {
     this.filterText = (event.target as HTMLInputElement).value.trim();
+    this.currentPage = 0;
     this.store.dispatch(new LoadProjects({
       pageSize: this.pageSize,
       currentPage: this.currentPage,
@@ -182,6 +186,7 @@ export class MappingListComponent implements OnInit, AfterViewInit, OnDestroy {
 
   applyRoleFilter: ReturnType<typeof debounce> = debounce((event: MatSelectChange) => {
     this.filterRole = event.value;
+    this.currentPage = 0;
     this.store.dispatch(new LoadProjects({
       pageSize: this.pageSize,
       currentPage: this.currentPage,
@@ -193,6 +198,7 @@ export class MappingListComponent implements OnInit, AfterViewInit, OnDestroy {
   clearInput: ReturnType<typeof debounce> = debounce((input: HTMLInputElement) => {
     input.value = "";
     this.filterText = "";
+    this.currentPage = 0;
     this.store.dispatch(new LoadProjects({
       pageSize: this.pageSize,
       currentPage: this.currentPage,

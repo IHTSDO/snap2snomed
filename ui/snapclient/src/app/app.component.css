@@ -1,7 +1,7 @@
 .banner__row {
   display: flex;
   flex-direction: row;
-  height: 90vh;
+  min-height: 90vh;
 }
 
 .banner__container {
@@ -71,6 +71,7 @@
   margin: 0 20%;
   text-align: center;
   font-size: 14px;
+  color: #000000;
 }
 
 .container__notice a {

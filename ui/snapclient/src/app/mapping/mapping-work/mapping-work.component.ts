@@ -1,5 +1,5 @@
 /*
- * Copyright © 2022 SNOMED International
+ * Copyright © 2026 SNOMED International
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,11 +40,10 @@ import {selectTaskList} from 'src/app/store/task-feature/task.selectors';
 import {AssignedWorkComponent} from 'src/app/task/assigned-work/assigned-work.component';
 import {SourceRow} from '../mapping-detail/mapping-detail.component';
 import {SourceNavigationService} from 'src/app/_services/source-navigation.service';
-import {ConceptNode} from '@csiro/shrimp-hierarchy-view';
-import {Coding} from 'src/app/store/fhir-feature/fhir.reducer';
+import {Coding, ConceptNode} from 'src/app/store/fhir-feature/fhir.reducer';
 import {SelectionService} from 'src/app/_services/selection.service';
 import {selectConceptHierarcy} from 'src/app/store/fhir-feature/fhir.selectors';
-import {ConceptHierarchy} from 'src/app/store/fhir-feature/fhir.actions';
+import {ConceptHierarchy, ConceptHierarchyClear} from 'src/app/store/fhir-feature/fhir.actions';
 import {FhirService} from 'src/app/_services/fhir.service';
 import {MapService} from 'src/app/_services/map.service';
 import {MatSnackBar} from '@angular/material/snack-bar';
@@ -65,9 +64,10 @@ const enum TaskMode {
 }
 
 @Component({
-  selector: 'app-mapping-work',
-  templateUrl: './mapping-work.component.html',
-  styleUrls: ['./mapping-work.component.css']
+    selector: 'app-mapping-work',
+    templateUrl: './mapping-work.component.html',
+    styleUrls: ['./mapping-work.component.css'],
+    standalone: false
 })
 export class MappingWorkComponent implements OnInit, OnDestroy {
   private subscription = new Subscription();
@@ -84,7 +84,7 @@ export class MappingWorkComponent implements OnInit, OnDestroy {
 
   nodes: ConceptNode<Coding>[] = [];
   loadingHierarchy = false;
-  private timeout: NodeJS.Timeout | null = null;
+  private timeout: ReturnType<typeof setTimeout> | null = null;
   hierarchyView = 'tree';
   currentSelection: any;
   error: ErrorInfo = {};
@@ -123,6 +123,22 @@ export class MappingWorkComponent implements OnInit, OnDestroy {
     {columnId: 'flagged', columnDisplay: 'TABLE.FLAG', displayed: true},
     {columnId: 'latestNote', columnDisplay: 'SOURCE.TABLE.NOTES', displayed: true},
     {columnId: 'actions', columnDisplay: '', displayed: true}
+  ];
+
+  constantFilteredColumns: string[] = [
+    'filter-id',
+    'filter-sourceIndex',
+    'filter-sourceCode',
+    'filter-sourceDisplay',
+    'filter-targetCode',
+    'filter-targetDisplay',
+    'filter-relationship',
+    'filter-noMap',
+    'filter-status',
+    'filter-targetOutOfScope',
+    'filter-flagged',
+    'filter-notes',
+    'filter-actions'
   ];
   additionalDisplayedColumns: TableColumn[] = [];
   // columns that are eligable for user controlling the hiding / displaying
@@ -225,6 +241,8 @@ export class MappingWorkComponent implements OnInit, OnDestroy {
           self.error.message = err;
           self.error.detail = error;
         });
+      } else {
+        self.error = {};
       }
     }));
 
@@ -253,6 +271,10 @@ export class MappingWorkComponent implements OnInit, OnDestroy {
       this.constantHideShowColumns.push("lastAuthorReviewer");
       // actions should be the final column
       this.constantColumns.splice(-1, 0, {columnId: 'lastAuthorReviewer', columnDisplay: 'TABLE.LAST_AUTHOR', displayed: true});
+    }
+    if (this.constantFilteredColumns.indexOf('filter-lastAuthorReviewer') < 0) {
+      // filter-actions should stay the final column, same as actions above
+      this.constantFilteredColumns.splice(-1, 0, 'filter-lastAuthorReviewer');
     }
 
   }
@@ -283,6 +305,7 @@ export class MappingWorkComponent implements OnInit, OnDestroy {
   toggleHierarchy(): void {
     this.hierarchyView = this.hierarchyView === 'tree' ? 'shrimp' : 'tree';
     localStorage.setItem('hierarchyView', this.hierarchyView);
+    this.nodes = [];
     this.handleSelection();
   }
 
@@ -307,6 +330,7 @@ export class MappingWorkComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.loading = false;
     this.automapping = false;
+    this.store.dispatch(new ConceptHierarchyClear());
     this.subscription.unsubscribe();
     // if (this.navigationSubscription) {
     //   this.navigationSubscription.unsubscribe();
@@ -572,7 +596,7 @@ export class MappingWorkComponent implements OnInit, OnDestroy {
   clickBulkChange(): void {
     const self = this;
     const confirmDialogRef = self.dialog.open(BulkchangeComponent,
-      {data: self.getBulkChangeDialogData()});
+      {width: '800px', maxWidth: '800px', data: self.getBulkChangeDialogData()});
     confirmDialogRef.afterClosed().subscribe(
       (result) => {
         if (result) {

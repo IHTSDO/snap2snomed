@@ -16,7 +16,7 @@
 
 package org.snomed.snap2snomed.controller;
 
-import javax.validation.Valid;
+import jakarta.validation.Valid;
 
 import org.snomed.snap2snomed.Snap2snomedVersion;
 import org.snomed.snap2snomed.config.SecurityConfiguration;

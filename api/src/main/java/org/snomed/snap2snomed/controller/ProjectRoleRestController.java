@@ -27,7 +27,6 @@ import org.snomed.snap2snomed.repository.UserRepository;
 import org.snomed.snap2snomed.repository.handler.ProjectEventHandler;
 import org.snomed.snap2snomed.security.WebSecurity;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;

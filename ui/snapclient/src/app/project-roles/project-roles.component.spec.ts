@@ -1,5 +1,5 @@
 /*
- * Copyright © 2022 SNOMED International
+ * Copyright © 2026 SNOMED International
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,39 +14,59 @@
  * limitations under the License.
  */
 
-import {ComponentFixture, TestBed} from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import {ProjectRolesComponent} from './project-roles.component';
-import {TranslateLoader, TranslateModule, TranslateService} from '@ngx-translate/core';
-import {APP_CONFIG} from '../app.config';
-import {provideMockStore} from '@ngrx/store/testing';
-import {initialAppState} from '../store/app.state';
-import {HttpLoaderFactory} from '../app.module';
-import {HttpClientTestingModule} from '@angular/common/http/testing';
-import {MatTableModule} from '@angular/material/table';
-import {UserService} from '../_services/user.service';
-import {MatSelectModule} from '@angular/material/select';
-import {HarnessLoader} from '@angular/cdk/testing';
-import {MatInputModule} from '@angular/material/input';
-import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
-import {of} from 'rxjs';
-import {MatSortModule} from '@angular/material/sort';
-import {TestbedHarnessEnvironment} from '@angular/cdk/testing/testbed';
-import {MatSelectHarness} from '@angular/material/select/testing';
-import {FormsModule, ReactiveFormsModule} from '@angular/forms';
-import {InitialsPipe} from '../_utils/initialize_pipe';
+import { ProjectRolesComponent } from './project-roles.component';
+import {
+  TranslateLoader,
+  TranslateModule,
+  TranslateService,
+} from '@ngx-translate/core';
+import { APP_CONFIG } from '../app.config';
+import { provideMockStore } from '@ngrx/store/testing';
+import { initialAppState } from '../store/app.state';
+import { HttpLoaderFactory } from '../app.module';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { MatTableModule } from '@angular/material/table';
+import { UserService } from '../_services/user.service';
+import { MatSelectModule } from '@angular/material/select';
+import { HarnessLoader } from '@angular/cdk/testing';
+import { MatInputModule } from '@angular/material/input';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { of } from 'rxjs';
+import { MatSortModule } from '@angular/material/sort';
+import { MatChipsModule } from '@angular/material/chips';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { TestbedHarnessEnvironment } from '@angular/cdk/testing/testbed';
+import { MatSelectHarness } from '@angular/material/select/testing';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { InitialsPipe } from '../_utils/initialize_pipe';
+import { UserChipComponent } from '../user/user-chip/user-chip.component';
+import { GravatarComponent } from '../user/gravatar/gravatar.component';
+import {
+  HttpClient,
+  provideHttpClient,
+  withInterceptorsFromDi,
+} from '@angular/common/http';
 
 describe('ProjectRolesComponent', () => {
   let component: ProjectRolesComponent;
   let fixture: ComponentFixture<ProjectRolesComponent>;
   let translateService: TranslateService;
   let loader: HarnessLoader;
-  const userService = jasmine.createSpyObj('UserService', ['getUsers']);
+  const userService = {
+    getUsers: vi.fn().mockName('UserService.getUsers'),
+  };
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
+      declarations: [
+        ProjectRolesComponent,
+        InitialsPipe,
+        UserChipComponent,
+        GravatarComponent,
+      ],
       imports: [
-        HttpClientTestingModule,
         MatTableModule,
         MatSelectModule,
         MatSortModule,
@@ -55,40 +75,45 @@ describe('ProjectRolesComponent', () => {
         // Hmm these two needed for the mat-selects to have text ??
         FormsModule,
         ReactiveFormsModule,
+        MatChipsModule,
+        MatTooltipModule,
         TranslateModule.forRoot({
           loader: {
             provide: TranslateLoader,
             useFactory: HttpLoaderFactory,
-            deps: [HttpClientTestingModule]
-          }
-        })
+            deps: [HttpClient],
+          },
+        }),
       ],
-      providers: [TranslateService, {provide: APP_CONFIG, useValue: {}},
+      providers: [
+        TranslateService,
+        { provide: APP_CONFIG, useValue: {} },
         { provide: UserService, useValue: userService },
-        provideMockStore({initialState: initialAppState})],
-      declarations: [ProjectRolesComponent, InitialsPipe]
-    })
-    .compileComponents();
+        provideMockStore({ initialState: initialAppState }),
+        provideHttpClient(withInterceptorsFromDi()),
+        provideHttpClientTesting(),
+      ],
+    }).compileComponents();
     translateService = TestBed.inject(TranslateService);
     fixture = TestBed.createComponent(ProjectRolesComponent);
     component = fixture.componentInstance;
     component.translate = translateService;
     // Declare this here so onInit has a userservice object
     // This also makes sure that subscribe comes back with these values
-    userService.getUsers.and.returnValue(
+    userService.getUsers.mockReturnValue(
       of([
         {
           id: 'aaa',
           givenName: 'george',
           familyName: 'test1',
-          email: 'georgetest1@gmail.com'
+          email: 'georgetest1@gmail.com',
         },
         {
           id: 'bbb',
           givenName: 'george',
           familyName: 'test2',
-          email: 'georgetest2@gmail.com'
-        }
+          email: 'georgetest2@gmail.com',
+        },
       ])
     );
   });
@@ -106,7 +131,9 @@ describe('ProjectRolesComponent', () => {
     // Call getusers to populate userservice
     userService.getUsers();
     fixture.detectChanges();
-    const matSelect = await loader.getHarness(MatSelectHarness.with({selector: '#aaa'}));
+    const matSelect = await loader.getHarness(
+      MatSelectHarness.with({ selector: '#aaa' })
+    );
     const selectHarness = await loader.getHarness<MatSelectHarness>(
       MatSelectHarness
     );
@@ -116,5 +143,4 @@ describe('ProjectRolesComponent', () => {
     const actual = (await selectHarness.getOptions()).length;
     expect(actual).toBe(4);
   });
-
 });

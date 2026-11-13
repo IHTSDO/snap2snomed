@@ -226,7 +226,12 @@ public class Snap2snomedRestClient {
 
   public long createProject(String user, String title, String description, Set<String> owners,
       Set<String> members, Set<String> guests) throws JsonProcessingException {
-    final long id = create(givenUser(user), createProjectJson(title, description, owners, members, guests), "/projects");
+    return createProject(user, title, description, owners, members, guests, false);
+  }
+
+  public long createProject(String user, String title, String description, Set<String> owners,
+      Set<String> members, Set<String> guests, boolean dualMapMode) throws JsonProcessingException {
+    final long id = create(givenUser(user), createProjectJson(title, description, owners, members, guests, dualMapMode), "/projects");
 
     givenUser(user)
         .get("/projects/" + id)
@@ -730,7 +735,7 @@ public class Snap2snomedRestClient {
   }
 
   public void deleteTask(String user, Long taskId) {
-    givenUser(user).delete("/tasks/" + taskId).then().statusCode(204);
+    givenUser(user).delete("/tasks/" + taskId).then().statusCode(200);
   }
 
   public void expectDeleteTaskFailure(String user, Long taskId, int statusCode) {
@@ -739,10 +744,15 @@ public class Snap2snomedRestClient {
 
   public String createProjectJson(String title, String description, Set<String> owners, Set<String> members, Set<String> guests)
       throws JsonProcessingException {
+    return createProjectJson(title, description, owners, members, guests, false);
+  }
+
+  public String createProjectJson(String title, String description, Set<String> owners, Set<String> members, Set<String> guests,
+      boolean dualMapMode) throws JsonProcessingException {
     final java.util.Map<String, Object> map = new HashMap<>();
     map.put("title", title);
     map.put("description", description);
-    map.put("dualMapMode", false);
+    map.put("dualMapMode", dualMapMode);
     if (owners != null) {
       map.put("owners", owners.stream().map(o -> "/users/" + o).collect(Collectors.toList()));
     }

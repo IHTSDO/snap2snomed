@@ -1,122 +1,145 @@
-<div *ngIf="task">
-  <mat-drawer-container class="container">
-    <div *ngIf="loading">
-      <app-loading-spinner></app-loading-spinner>
-    </div>
-    <app-errormessage [error]="error"></app-errormessage>
-    <div id="table-view" *ngIf="mapping">
-      <div class="top-row">
-        <div class="mapping-details">
-          <app-mapping-details-card [mapping]="mapping"></app-mapping-details-card>
+<app-errormessage [error]="error"></app-errormessage>
+@if (task) {
+  <div>
+    <mat-drawer-container class="container">
+      @if (loading) {
+        <div>
+          <app-loading-spinner></app-loading-spinner>
         </div>
-        <mat-card class="actions-card">
-          <div class="col-left">
-            <app-task-select [myTasks]="myTasks" [selectedTask]="task"></app-task-select>
-          </div>
-          <div class="col-right">
-            <div class="row-actions">
-                <span *ngIf="task.type === 'AUTHOR'">
-                  <span *ngIf="!automapping; else runAutomap">
-                  <button mat-stroked-button
-                          matTooltip="{{'AUTOMAP.AUTOMAP_TOOLTIP' | translate}}"
-                          matTooltipShowDelay="1000"
-                          (click)="launchAutomap()"
-                          [disabled]="isAdmin && currentUser?.id !== task.assignee?.id">{{'AUTOMAP.AUTOMAP' | translate}}</button>
-                  </span>
-                  <ng-template #runAutomap>
-                    <app-automap [mapping]="mapping"
-                                 [task_id]="task.id"
-                                 [data]="getData()"
-                                 (updateTableEvent)="updateTable($event)"></app-automap>
-                  </ng-template>
-                </span>
-              <button mat-stroked-button
-                      (click)="clickBulkChange()"
-                      [disabled]="(isAdmin && currentUser?.id !== task.assignee?.id) ||  !hasSelectedRows()">
-                {{'TABLE.BULK_CHANGE' | translate}}
-              </button>
+      }
+      @if (mapping) {
+        <div id="table-view">
+          <div class="top-row">
+            <div class="mapping-details">
+              <app-mapping-details-card [mapping]="mapping"></app-mapping-details-card>
             </div>
-            <h2>{{task.type | translate}}</h2>
+            <mat-card appearance="outlined" class="actions-card">
+              <div class="actions-inner">
+                <div class="col-left">
+                  <app-task-select [myTasks]="myTasks" [selectedTask]="task"></app-task-select>
+                </div>
+                <div class="col-right">
+                  <h2>{{task.type | translate}}</h2>
+                  <div class="row-actions">
+                    @if (task.type === 'AUTHOR') {
+                      <span>
+                        @if (!automapping) {
+                          <span>
+                            <button mat-stroked-button
+                              id="automap-button"
+                              matTooltip="{{'AUTOMAP.AUTOMAP_TOOLTIP' | translate}}"
+                              matTooltipShowDelay="1000"
+                              (click)="launchAutomap()"
+                            [disabled]="isAdmin && currentUser?.id !== task.assignee.id">{{'AUTOMAP.AUTOMAP' | translate}}</button>
+                          </span>
+                        } @else {
+                          <app-automap [mapping]="mapping"
+                            [task_id]="task.id"
+                            [data]="getData()"
+                          (updateTableEvent)="updateTable($event)"></app-automap>
+                        }
+                      </span>
+                    }
+                    <button mat-stroked-button
+                      id="bulk-change-button"
+                      (click)="clickBulkChange()"
+                      [disabled]="(isAdmin && currentUser?.id !== task.assignee.id) ||  !hasSelectedRows()">
+                      {{'TABLE.BULK_CHANGE' | translate}}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </mat-card>
           </div>
-        </mat-card>
-      </div>
-      <div class="search-container" layout="row">
-        <div class="search-view card-col">
-          <app-concept-search [active]="!opened"
-                              [scope]="mapping?.toScope || ''"
-                              [version]="mapping?.toVersion || ''"
-                              [initial]="targetConceptSearchText">
-            <span class="search-title">{{'MAP.SEARCH_TARGET' | translate}}</span>
-          </app-concept-search>
-        </div>
-        <div class="tree-view card-col">
-          <button class="view-toggle" mat-icon-button (click)="toggleHierarchy()"
-                  #tooltip="matTooltip"
-                  matTooltip="{{'MAP.SWITCH_VIEW' | translate}}">
-            <mat-icon color="{{hierarchyView === 'tree' ? 'accent' : undefined}}">account_tree</mat-icon>
-          </button>
-          <div *ngIf="hierarchyView === 'tree'">
-            <app-tree-view [task]="task" [active]="!opened"></app-tree-view>
+          <div class="search-container" layout="row">
+            <div class="search-view card-col">
+              <app-concept-search [active]="!opened"
+                [scope]="mapping.toScope || ''"
+                [version]="mapping.toVersion || ''"
+                [initial]="targetConceptSearchText">
+                <span class="search-title">{{'MAP.SEARCH_TARGET' | translate}}</span>
+              </app-concept-search>
+            </div>
+            <div class="tree-view card-col">
+              <button class="view-toggle" mat-icon-button (click)="toggleHierarchy()"
+                #tooltip="matTooltip"
+                matTooltip="{{'MAP.SWITCH_VIEW' | translate}}">
+                <mat-icon [class.accent-icon]="hierarchyView === 'tree'">account_tree</mat-icon>
+              </button>
+              @if (hierarchyView === 'tree') {
+                <div>
+                  <app-tree-view [task]="task" [active]="!opened"></app-tree-view>
+                </div>
+              }
+              @if (hierarchyView !== 'tree') {
+                <div class="hierarchy-view">
+                  @if (loadingHierarchy) {
+                    <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+                  } @else {
+                    @defer {
+                      <lib-shrimp-hierarchy [rows]="nodes" (selected)="onSelected($event)"></lib-shrimp-hierarchy>
+                    }
+                  }
+                </div>
+              }
+            </div>
+            <div class="properties-view card-col">
+              <app-concept-properties [active]="!opened" [version]="mapping.toVersion || ''">
+              </app-concept-properties>
+            </div>
           </div>
-          <div class="hierarchy-view" *ngIf="hierarchyView !== 'tree'">
-            <mat-progress-bar mode="indeterminate" *ngIf="loadingHierarchy; else loadedHeirarchy"></mat-progress-bar>
-            <ng-template #loadedHeirarchy>
-              <lib-shrimp-hierarchy
-                [rows]="nodes"
-                (selected)="onSelected($event)"></lib-shrimp-hierarchy>
-            </ng-template>
+          <div id="container-table-work">
+            <div class="table-actions">
+              <mat-slide-toggle
+              [(ngModel)]="filterEnabled">{{'TABLE_FILTER.TABLE_FILTER_TOGGLE_NAME' | translate}}</mat-slide-toggle>
+              <button mat-stroked-button [disabled]="!filterEnabled"
+              (click)="mapTable.clearFilter()">{{'TABLE_FILTER.CLEAR_FILTER_BUTTON_NAME' | translate}}</button>
+              <button mat-stroked-button [matMenuTriggerFor]="menu">{{'TABLE_FILTER.SHOW_HIDE_BUTTON_NAME' | translate}}</button>
+              <mat-menu #menu="matMenu">
+                <!-- mat-checkbox is in a div to stop multiple items appearing on the one line and to make scroll work-->
+                @for (column of hideShowColumns; track column) {
+                  <div mat-menu-item>
+                    <mat-checkbox [checked]="true" (change)="onHideShowChange($event, column)">{{getHideShowItemLabel(column) | translate}}</mat-checkbox>
+                  </div>
+                }
+              </mat-menu>
+              &nbsp;
+            </div>
+            <div class="container-table">
+              <app-mapping-table #mapTable
+                [task]="task"
+                [isOwner]="false"
+                [paging]="tableParams"
+                [filterEntity]="tableFilter"
+                [filterEnabled]="filterEnabled"
+                (showDetail)="showDetail($event)"
+                (filterChange)="filterChange($event)"
+                (sortChange)="sortChange($event)"
+                (pagingChange)="pagingChange($event)"
+                (updateTableEvent)="updateTable($event)"
+                (targetConceptSearchString)="targetConceptSearchString($event)"
+                (allSelectedEvent)="allSelectedChange($event)"
+                [displayedColumns]="displayedColumns"
+                [constantFilteredColumns]="constantFilteredColumns"
+              ></app-mapping-table>
+            </div>
           </div>
         </div>
-        <div class="properties-view card-col">
-          <app-concept-properties [active]="!opened" [version]="mapping?.toVersion || ''">
-          </app-concept-properties>
-        </div>
-      </div>
-      <div id="container-table-work">
-        <div class="table-actions">
-          <mat-slide-toggle
-            [(ngModel)]="filterEnabled">{{'TABLE_FILTER.TABLE_FILTER_TOGGLE_NAME' | translate}}</mat-slide-toggle>
-          <button mat-stroked-button [disabled]="!filterEnabled"
-                  (click)="mapTable.clearFilter()">{{'TABLE_FILTER.CLEAR_FILTER_BUTTON_NAME' | translate}}</button>
-          <button mat-stroked-button [matMenuTriggerFor]="menu">{{'TABLE_FILTER.SHOW_HIDE_BUTTON_NAME' | translate}}</button>
-          <mat-menu #menu="matMenu">
-            <!-- mat-checkbox is in a div to stop multiple items appearing on the one line and to make scroll work-->
-            <div mat-menu-item *ngFor="let column of hideShowColumns">
-              <mat-checkbox [checked]="true" (change)="onHideShowChange($event, column)">{{getHideShowItemLabel(column) | translate}}</mat-checkbox> 
-            </div>          
-          </mat-menu>
-          &nbsp;
-        </div>
-        <div class="container-table">
-          <app-mapping-table #mapTable
-                             [task]="task"
-                             [isOwner]="false"
-                             [paging]="tableParams"
-                             [filterEntity]="tableFilter"
-                             [filterEnabled]="filterEnabled"
-                             (showDetail)="showDetail($event)"
-                             (filterChange)="filterChange($event)"
-                             (sortChange)="sortChange($event)"
-                             (pagingChange)="pagingChange($event)"
-                             (updateTableEvent)="updateTable($event)"
-                             (targetConceptSearchString)="targetConceptSearchString($event)"
-                             (allSelectedEvent)="allSelectedChange($event)"
-                             [displayedColumns]="displayedColumns"
-          ></app-mapping-table>
-        </div>
-      </div>
-    </div> <!-- end Table view -->
-    <mat-drawer #drawer class="details-drawer" position="end" mode="over" [(opened)]="opened"
-                (closedStart)="hideDetail()">
-      <div id="details-view" *ngIf="isDetailsView()">
-        <app-mapping-detail [task]="task"
-                            [currentUser]="currentUser"
-                            (detailClose)="detailClosed()"
-                            [paging]="tableParams"
-                            [filterEntity]="tableFilter"
-                            [additionalDisplayedColumns]="additionalDisplayedColumns"
-        ></app-mapping-detail>
-      </div>
-    </mat-drawer>
-  </mat-drawer-container>
-</div>
+        } <!-- end Table view -->
+        <mat-drawer #drawer class="details-drawer" position="end" mode="over" [(opened)]="opened"
+          (closedStart)="hideDetail()">
+          @if (isDetailsView()) {
+            <div id="details-view">
+              <app-mapping-detail [task]="task"
+                [currentUser]="currentUser"
+                (detailClose)="detailClosed()"
+                [paging]="tableParams"
+                [filterEntity]="tableFilter"
+                [additionalDisplayedColumns]="additionalDisplayedColumns"
+              ></app-mapping-detail>
+            </div>
+          }
+        </mat-drawer>
+      </mat-drawer-container>
+    </div>
+  }

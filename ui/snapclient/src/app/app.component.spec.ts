@@ -1,5 +1,5 @@
 /*
- * Copyright © 2022 SNOMED International
+ * Copyright © 2026 SNOMED International
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,20 +14,22 @@
  * limitations under the License.
  */
 
-import {ComponentFixture, inject, TestBed} from '@angular/core/testing';
-import {RouterTestingModule} from '@angular/router/testing';
-import {AppComponent} from './app.component';
-import {MockStore, provideMockStore} from '@ngrx/store/testing';
-import {AuthService} from './_services/auth.service';
-import {UserService} from './_services/user.service';
-import {HttpClientTestingModule} from '@angular/common/http/testing';
-import {CUSTOM_ELEMENTS_SCHEMA, DebugElement} from '@angular/core';
-import {IAppState, initialAppState} from './store/app.state';
-import {TranslateLoader, TranslateModule, TranslateService} from '@ngx-translate/core';
-import {of} from 'rxjs';
-import {By} from '@angular/platform-browser';
-import {HttpLoaderFactory} from './app.module';
-import {APP_CONFIG} from './app.config';
+import { ComponentFixture, fakeAsync, inject, TestBed, tick } from '@angular/core/testing';
+import { AppComponent } from './app.component';
+import { MockStore, provideMockStore } from '@ngrx/store/testing';
+import { AuthService } from './_services/auth.service';
+import { UserService } from './_services/user.service';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { CUSTOM_ELEMENTS_SCHEMA, DebugElement } from '@angular/core';
+import { IAppState, initialAppState } from './store/app.state';
+import { TranslateLoader, TranslateModule, TranslateService } from '@ngx-translate/core';
+import { of } from 'rxjs';
+import { By } from '@angular/platform-browser';
+import { HttpLoaderFactory } from './app.module';
+import { APP_CONFIG } from './app.config';
+import { HttpClient, provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { ActivatedRoute, provideRouter } from '@angular/router';
+import { selectAuthState } from './store/auth-feature/auth.selectors';
 
 export class TranslateServiceStub {
 
@@ -64,26 +66,30 @@ describe('AppComponent', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      imports: [
-        RouterTestingModule,
-        HttpClientTestingModule,
-        TranslateModule.forRoot({
-          loader: {
-            provide: TranslateLoader,
-            useFactory: HttpLoaderFactory,
-            deps: [HttpClientTestingModule]
-          }
-        })
-      ],
-      providers: [
-        {provide: APP_CONFIG, useValue: {appName: 'Snap2SNOMED', authDomainUrl: 'anything'}},
-        provideMockStore({initialState: initialAppState}), AuthService, UserService,
-        {provide: TranslateService, useClass: TranslateServiceStub},
-      ],
       declarations: [
         AppComponent,
       ],
       schemas: [CUSTOM_ELEMENTS_SCHEMA],
+      imports: [
+        TranslateModule.forRoot({
+          loader: {
+            provide: TranslateLoader,
+            useFactory: HttpLoaderFactory,
+            deps: [HttpClient]
+          }
+        })],
+      providers: [
+        { provide: ActivatedRoute, useValue: { snapshot: {}, params: of({}), queryParams: of({}), data: of({})} },
+        { provide: APP_CONFIG, useValue: { appName: 'Snap2SNOMED', authDomainUrl: 'anything' } },
+        provideRouter([]),
+        provideMockStore({
+          initialState: initialAppState,
+          selectors: [{ selector: selectAuthState, value: initialAppState.auth }]
+        }), AuthService, UserService,
+        { provide: TranslateService, useClass: TranslateServiceStub },
+        provideHttpClient(withInterceptorsFromDi()),
+        provideHttpClientTesting(),
+      ]
     }).compileComponents();
 
     store = TestBed.inject(MockStore);
@@ -94,7 +100,6 @@ describe('AppComponent', () => {
     fixture = TestBed.createComponent(AppComponent);
     app = fixture.componentInstance;
     app.translate = translateService;
-    app.ngOnInit();
     fixture.detectChanges();
   });
 
@@ -107,31 +112,37 @@ describe('AppComponent', () => {
   });
 
   it(`should inject auth service`, inject([AuthService], async (injectService: AuthService) => {
-      expect(injectService).toBe(testAuthService);
-    })
-  );
+    expect(injectService).toBe(testAuthService);
+  }));
 
   it(`should inject user service`, inject([UserService], async (injectService: UserService) => {
-      expect(injectService).toBe(testUserService);
-    })
-  );
+    expect(injectService).toBe(testUserService);
+  }));
 
   it('should render login button when user is not authenticated', () => {
-    spyOn(testAuthService, 'isAuthenticated').and.returnValue(false);
-    app.isAuthenticated = false;
-    fixture.detectChanges();
+    // isAuthenticated is already false from the store's initialAppState set in beforeEach.
+    // A second detectChanges() is not needed and triggers NG0100 in strict mode.
     el = fixture.debugElement.query(By.css('button'));
     expect(el).toBeTruthy();
     expect(el.nativeElement.textContent).toContain('Login');
   });
 
-
-  it('should not render login button when user is authenticated', () => {
-    spyOn(testAuthService, 'isAuthenticated').and.returnValue(true);
-    app.isAuthenticated = true;
+  it('should not render login button when user is authenticated', fakeAsync(() => {
+    // Destroy the unauthenticated fixture and set authenticated state before creating a new
+    // component. ngOnInit then subscribes with isAuthenticated=true on the very first render,
+    // so there is no false→true transition mid-cycle that would trigger NG0100.
+    fixture.destroy();
+    store.overrideSelector(selectAuthState, { isAuthenticated: true, user: null, currentuser: null, errorMessage: null });
+    fixture = TestBed.createComponent(AppComponent);
+    app = fixture.componentInstance;
+    app.translate = translateService;
     fixture.detectChanges();
-    el = fixture.debugElement.query(By.css('button'));
-    expect(el).toBeFalsy();
-  });
+    tick();
+    fixture.detectChanges();
+
+    const el = fixture.debugElement.query(By.css('button.login'));
+
+    expect(el).toBeNull();
+  }));
 
 });

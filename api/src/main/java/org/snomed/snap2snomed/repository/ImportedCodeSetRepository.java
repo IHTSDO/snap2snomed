@@ -23,6 +23,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.history.RevisionRepository;
 import org.springframework.data.rest.core.annotation.RepositoryRestResource;
@@ -30,7 +31,7 @@ import org.springframework.data.rest.core.annotation.RestResource;
 
 @RepositoryRestResource
 public interface ImportedCodeSetRepository
-    extends RevisionRepository<ImportedCodeSet, Long, Integer>, PagingAndSortingRepository<ImportedCodeSet, Long>{
+    extends RevisionRepository<ImportedCodeSet, Long, Integer>, PagingAndSortingRepository<ImportedCodeSet, Long>, CrudRepository<ImportedCodeSet, Long> {
 
   // ---------------------------------
   // Exported in REST interface

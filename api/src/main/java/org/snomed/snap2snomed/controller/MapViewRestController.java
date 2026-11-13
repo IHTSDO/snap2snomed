@@ -27,7 +27,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.Map;
 
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
@@ -49,6 +49,7 @@ import org.snomed.snap2snomed.model.MapView;
 import org.snomed.snap2snomed.model.Project;
 import org.snomed.snap2snomed.model.enumeration.MapStatus;
 import org.snomed.snap2snomed.model.enumeration.MappingRelationship;
+import org.snomed.snap2snomed.problem.Snap2SnomedProblem;
 import org.snomed.snap2snomed.problem.auth.NoSuchUserProblem;
 import org.snomed.snap2snomed.problem.auth.NotAuthorisedProblem;
 import org.snomed.snap2snomed.repository.MapRepository;
@@ -61,6 +62,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.EntityModel;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -69,8 +71,6 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.zalando.problem.Problem;
-import org.zalando.problem.Status;
 
 import ca.uhn.fhir.parser.IParser;
 import io.swagger.v3.oas.annotations.Operation;
@@ -292,7 +292,7 @@ public class MapViewRestController {
         break;
 
       default:
-        throw Problem.valueOf(Status.UNSUPPORTED_MEDIA_TYPE,
+        throw Snap2SnomedProblem.of(HttpStatus.UNSUPPORTED_MEDIA_TYPE,
             "Content type '" + contentType + "' requested in the Accept header is not supported");
 
     }
@@ -355,7 +355,7 @@ public class MapViewRestController {
       csvPrinter.flush();
       writer.flush();
     } catch (final IOException e) {
-      throw Problem.builder().withDetail("IO error exporting").build();
+      throw Snap2SnomedProblem.of(HttpStatus.INTERNAL_SERVER_ERROR, "IO error exporting");
     }
   }
 
@@ -510,7 +510,7 @@ public class MapViewRestController {
           parser.encodeResourceToWriter(cm, writer);
           writer.flush();
       } catch (final IOException e) {
-          throw Problem.builder().withDetail("IO error exporting").build();
+          throw Snap2SnomedProblem.of(HttpStatus.INTERNAL_SERVER_ERROR, "IO error exporting");
       }
   }
 

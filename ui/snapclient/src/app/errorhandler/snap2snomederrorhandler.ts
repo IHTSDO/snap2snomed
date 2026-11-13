@@ -98,7 +98,6 @@ export class Snap2SnomedErrorHandler implements ErrorHandler {
   }
 
   protected backendError(backendUrl: string | null, errorStatus: number): string {
-console.log('backendError', backendUrl, errorStatus);
     const matchedUrls = this.errorMessageMap.filter((error) => {
       return backendUrl?.indexOf(error.url) !== -1;
     });

@@ -1,5 +1,5 @@
 /*
- * Copyright © 2022 SNOMED International
+ * Copyright © 2026 SNOMED International
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import {ErrorHandler, NgModule, NgZone} from '@angular/core';
+import {ErrorHandler, NgModule, NgZone, CUSTOM_ELEMENTS_SCHEMA} from '@angular/core';
+import {ShrimpHierarchyViewModule} from '@csiro/shrimp-hierarchy-view';
 import {BrowserModule} from '@angular/platform-browser';
 import {AppRoutingModule} from './app-routing.module';
 import {AppComponent} from './app.component';
@@ -23,7 +24,7 @@ import {MatButtonModule} from '@angular/material/button';
 import {MatDividerModule} from '@angular/material/divider';
 import {AuthService} from './_services/auth.service';
 import {AuthGuard} from './auth.guard';
-import {HTTP_INTERCEPTORS, HttpClient, HttpClientModule} from '@angular/common/http';
+import { HTTP_INTERCEPTORS, HttpClient, provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import {StoreModule} from '@ngrx/store';
 import {StoreDevtoolsModule} from '@ngrx/store-devtools';
 import {EffectsModule} from '@ngrx/effects';
@@ -48,7 +49,7 @@ import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {MapService} from './_services/map.service';
 import {MAT_DATE_LOCALE} from '@angular/material/core';
 import {MatInputModule} from '@angular/material/input';
-import {BreadcrumbModule} from 'xng-breadcrumb';
+import {BreadcrumbComponent, BreadcrumbItemDirective} from 'xng-breadcrumb';
 import {MappingEffects} from './store/mapping-feature/mapping.effects';
 import {MatGridListModule} from '@angular/material/grid-list';
 import {MatChipsModule} from '@angular/material/chips';
@@ -66,7 +67,6 @@ import {MatPaginatorModule} from '@angular/material/paginator';
 import {MatTableModule} from '@angular/material/table';
 import {MatTabsModule} from '@angular/material/tabs';
 import {LoadingSpinnerComponent} from './loading-spinner/loading-spinner.component';
-import {MatTableFilterModule} from 'mat-table-filter';
 import {FhirEffects} from './store/fhir-feature/fhir.effects';
 import {metaReducers} from './store/store.module';
 import {Router} from '@angular/router';
@@ -114,7 +114,6 @@ import {ConceptListComponent} from './concept-search/concept-list/concept-list.c
 import {ProjectRolesComponent} from './project-roles/project-roles.component';
 import {ProjectBadgesComponent} from './project-badges/project-badges.component';
 import {TaskCreateComponent} from './task/task-create/task-create.component';
-import {ShrimpHierarchyViewModule} from '@csiro/shrimp-hierarchy-view';
 import {TreeViewComponent} from './tree-view/tree-view.component';
 import {BulkchangeComponent} from './mapping/bulkchange/bulkchange.component';
 import {MatTreeModule} from '@angular/material/tree';
@@ -139,134 +138,126 @@ export function HttpLoaderFactory(httpClient: HttpClient): TranslateHttpLoader {
 }
 
 
-@NgModule({
-  declarations: [
-    AppComponent,
-    HomeComponent,
-    MappingAddComponent,
-    MappingViewComponent,
-    MappingListComponent,
-    InitialsPipe,
-    LastupdatedPipe,
-    TrimPipe,
-    ErrormessageComponent,
-    SourceImportComponent,
-    LoadingSpinnerComponent,
-    ConceptSearchComponent,
-    AssignedWorkComponent,
-    MappingWorkComponent,
-    AutomapDialogComponent,
-    MappingTableComponent,
-    MappingNotesComponent,
-    DraggableDirective,
-    DroppableDirective,
-    ConceptPropertiesComponent,
-    TaskCardComponent,
-    TargetVersionComponent,
-    TaskAddComponent,
-    TaskItemComponent,
-    UserChipComponent,
-    TaskSelectComponent,
-    MappingDetailComponent,
-    MappingDetailsCardComponent,
-    SourceDetailComponent,
-    TargetRelationshipComponent,
-    TargetRowsComponent,
-    ConfirmDialogComponent,
-    GravatarComponent,
-    ConceptAutosuggestComponent,
-    ConceptListComponent,
-    NotesItemComponent,
-    NotesListComponent,
-    ProjectRolesComponent,
-    ProjectBadgesComponent,
-    TaskCreateComponent,
-    BulkchangeComponent,
-    TreeViewComponent,
-    AutomapComponent,
-    ResultsdialogComponent,
-    MappingTableSelectorComponent,
-    NotauthorizedComponent,
-    LogoutComponent,
-    MappingImportComponent,
-    FooterComponent,
-    FeedbackWidgetComponent,
-    AcceptTermsComponent,
-    ResizeColumnComponent
-  ],
-  imports: [
-    BrowserModule,
-    BrowserAnimationsModule,
-    AppRoutingModule,
-    StoreModule.forRoot(appReducers, {initialState: getInitialState(), metaReducers}),
-    StoreDevtoolsModule.instrument({maxAge: 10}),
-    EffectsModule.forRoot([AuthEffects, MappingEffects, SourceEffects, FhirEffects, TaskEffects]),
-    TranslateModule.forRoot({
-      loader: {
-        provide: TranslateLoader,
-        useFactory: HttpLoaderFactory,
-        deps: [HttpClient]
-      },
-    }),
-    HttpClientModule,
-    BreadcrumbModule,
-    MatDialogModule,
-    MatButtonModule,
-    MatDividerModule,
-    MatIconModule,
-    MatListModule,
-    MatMenuModule,
-    MatToolbarModule,
-    MatCardModule,
-    MatFormFieldModule,
-    FormsModule,
-    ReactiveFormsModule,
-    MatInputModule,
-    MatGridListModule,
-    MatChipsModule,
-    MatSelectModule,
-    MatCheckboxModule,
-    MatTableModule,
-    MatPaginatorModule,
-    MatSortModule,
-    MatProgressSpinnerModule,
-    MatProgressBarModule,
-    MatTableFilterModule,
-    MatTabsModule,
-    MatExpansionModule,
-    MatSnackBarModule,
-    MatRadioModule,
-    MatBadgeModule,
-    MatTooltipModule,
-    MatTreeModule,
-    MatSidenavModule,
-    DragDropModule,
-    ClipboardModule,
-    MatBottomSheetModule,
-    MatSlideToggleModule,
-    ShrimpHierarchyViewModule,
-    MatButtonToggleModule,
-  ],
-  exports: [MatToolbarModule, MatButtonModule, TranslateModule],
-  providers: [AuthService, AuthGuard, UserService, MapService, TranslateService,
-    {provide: MAT_DATE_LOCALE, useValue: 'en-AU'},
-    {provide: MAT_FORM_FIELD_DEFAULT_OPTIONS, useValue: {appearance: 'fill'}},
-    {
-      provide: ErrorHandler,
-      useClass: Snap2SnomedErrorHandler,
-      deps: [APP_CONFIG, ErrorNotifier, TranslateService, NgZone]
-    },
-    {provide: Sentry.TraceService, deps: [Router]},
-    {provide: HTTP_INTERCEPTORS, useClass: TokenInterceptor, multi: true},
-    {
-      provide: HTTP_INTERCEPTORS,
-      useClass: Snap2SnomedHttpErrorInterceptor,
-      multi: true,
-      deps: [Snap2SnomedErrorHandler]
-    }
-  ],
-  bootstrap: [AppComponent]
-})
+@NgModule({ declarations: [
+        AppComponent,
+        HomeComponent,
+        MappingAddComponent,
+        MappingViewComponent,
+        MappingListComponent,
+        InitialsPipe,
+        LastupdatedPipe,
+        TrimPipe,
+        ErrormessageComponent,
+        SourceImportComponent,
+        LoadingSpinnerComponent,
+        ConceptSearchComponent,
+        AssignedWorkComponent,
+        MappingWorkComponent,
+        AutomapDialogComponent,
+        MappingTableComponent,
+        MappingNotesComponent,
+        DraggableDirective,
+        ConceptPropertiesComponent,
+        TaskCardComponent,
+        TargetVersionComponent,
+        TaskAddComponent,
+        TaskItemComponent,
+        UserChipComponent,
+        TaskSelectComponent,
+        MappingDetailComponent,
+        MappingDetailsCardComponent,
+        SourceDetailComponent,
+        TargetRelationshipComponent,
+        TargetRowsComponent,
+        ConfirmDialogComponent,
+        GravatarComponent,
+        ConceptAutosuggestComponent,
+        ConceptListComponent,
+        NotesItemComponent,
+        NotesListComponent,
+        ProjectRolesComponent,
+        ProjectBadgesComponent,
+        TaskCreateComponent,
+        BulkchangeComponent,
+        TreeViewComponent,
+        AutomapComponent,
+        ResultsdialogComponent,
+        MappingTableSelectorComponent,
+        NotauthorizedComponent,
+        LogoutComponent,
+        MappingImportComponent,
+        FooterComponent,
+        FeedbackWidgetComponent,
+        AcceptTermsComponent,
+        ResizeColumnComponent,
+    ],
+    exports: [MatToolbarModule, MatButtonModule, TranslateModule, GravatarComponent],
+    bootstrap: [AppComponent], imports: [BrowserModule,
+        DroppableDirective,
+        BrowserAnimationsModule,
+        AppRoutingModule,
+        StoreModule.forRoot(appReducers, { initialState: getInitialState(), metaReducers }),
+        StoreDevtoolsModule.instrument({ maxAge: 10 , connectInZone: true}),
+        EffectsModule.forRoot([AuthEffects, MappingEffects, SourceEffects, FhirEffects, TaskEffects]),
+        TranslateModule.forRoot({
+            loader: {
+                provide: TranslateLoader,
+                useFactory: HttpLoaderFactory,
+                deps: [HttpClient]
+            },
+        }),
+        MatDialogModule,
+        MatButtonModule,
+        MatDividerModule,
+        MatIconModule,
+        MatListModule,
+        MatMenuModule,
+        MatToolbarModule,
+        MatCardModule,
+        MatFormFieldModule,
+        FormsModule,
+        ReactiveFormsModule,
+        MatInputModule,
+        MatGridListModule,
+        MatChipsModule,
+        MatSelectModule,
+        MatCheckboxModule,
+        MatTableModule,
+        MatPaginatorModule,
+        MatSortModule,
+        MatProgressSpinnerModule,
+        MatProgressBarModule,
+        MatTabsModule,
+        MatExpansionModule,
+        MatSnackBarModule,
+        MatRadioModule,
+        MatBadgeModule,
+        MatTooltipModule,
+        MatTreeModule,
+        MatSidenavModule,
+        DragDropModule,
+        ClipboardModule,
+        MatBottomSheetModule,
+        MatSlideToggleModule,
+        MatButtonToggleModule,
+        BreadcrumbComponent,
+        BreadcrumbItemDirective,
+        ShrimpHierarchyViewModule], providers: [AuthService, AuthGuard, UserService, MapService, TranslateService,
+        { provide: MAT_DATE_LOCALE, useValue: 'en-AU' },
+        { provide: MAT_FORM_FIELD_DEFAULT_OPTIONS, useValue: { appearance: 'fill' } },
+        {
+            provide: ErrorHandler,
+            useClass: Snap2SnomedErrorHandler,
+            deps: [APP_CONFIG, ErrorNotifier, TranslateService, NgZone]
+        },
+        { provide: Sentry.TraceService, deps: [Router] },
+        { provide: HTTP_INTERCEPTORS, useClass: TokenInterceptor, multi: true },
+        {
+            provide: HTTP_INTERCEPTORS,
+            useClass: Snap2SnomedHttpErrorInterceptor,
+            multi: true,
+            deps: [Snap2SnomedErrorHandler]
+        }, provideHttpClient(withInterceptorsFromDi())] })
 export class AppModule {
   constructor(trace: Sentry.TraceService) {
   }

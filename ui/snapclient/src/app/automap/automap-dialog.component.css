@@ -8,22 +8,18 @@
 
 .automap-progress {
   flex: 1;
-  margin-right: 10px;
-  height: 35px;
+  --mat-progress-bar-track-height: 20px;
+  --mat-progress-bar-active-indicator-height: 20px;
+  --mat-progress-bar-track-shape: 10px;
 }
 
-.mat-dialog-title{
+.mat-mdc-dialog-title{
   margin: 0;
 }
 
-.mat-dialog-content {
+.mat-mdc-dialog-content {
   max-height: 80vh !important;
   margin: 0;
-}
-
-.mat-progress-bar {
-  height: 20px;
-  border-radius: 10px;
 }
 
 .mat-progress-text {

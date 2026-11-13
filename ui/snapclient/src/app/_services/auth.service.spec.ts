@@ -17,11 +17,12 @@
 import {TestBed} from '@angular/core/testing';
 
 import {AuthService} from './auth.service';
-import {HttpClientTestingModule} from '@angular/common/http/testing';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import {provideMockStore} from '@ngrx/store/testing';
 import {UserService} from './user.service';
 import {initialAppState} from '../store/app.state';
 import { APP_CONFIG } from '../app.config';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 
 describe('AuthService', () => {
   let service: AuthService;
@@ -30,13 +31,14 @@ describe('AuthService', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      imports: [
-        HttpClientTestingModule
-      ],
-      providers: [
+    imports: [],
+    providers: [
         { provide: APP_CONFIG, useValue: {} },
-        provideMockStore({initialState}), AuthService],
-    });
+        provideMockStore({ initialState }), AuthService,
+        provideHttpClient(withInterceptorsFromDi()),
+        provideHttpClientTesting()
+    ]
+});
     service = TestBed.inject(AuthService);
   });
 

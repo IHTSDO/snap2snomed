@@ -16,8 +16,8 @@
 
 package org.snomed.snap2snomed.model;
 
-import javax.persistence.Embeddable;
-import javax.validation.constraints.NotNull;
+import jakarta.persistence.Embeddable;
+import jakarta.validation.constraints.NotNull;
 
 import org.springframework.data.annotation.ReadOnlyProperty;
 

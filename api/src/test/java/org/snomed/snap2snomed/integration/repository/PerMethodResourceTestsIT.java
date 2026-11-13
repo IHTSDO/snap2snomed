@@ -19,7 +19,6 @@ package org.snomed.snap2snomed.integration.repository;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasEntry;
 import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.not;
 
 import java.io.File;
 import java.io.IOException;

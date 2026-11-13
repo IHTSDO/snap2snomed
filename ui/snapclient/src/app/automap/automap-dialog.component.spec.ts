@@ -14,19 +14,23 @@
  * limitations under the License.
  */
 
-import {ComponentFixture, TestBed} from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import {MAT_DIALOG_DATA, MatDialogModule, MatDialogRef} from '@angular/material/dialog';
-import {AutomapDialogComponent} from './automap-dialog.component';
-import {DebugElement} from '@angular/core';
-import {By} from '@angular/platform-browser';
+import {
+  MAT_DIALOG_DATA,
+  MatDialogModule,
+  MatDialogRef,
+} from '@angular/material/dialog';
+import { AutomapDialogComponent } from './automap-dialog.component';
+import { DebugElement } from '@angular/core';
+import { By } from '@angular/platform-browser';
 
 describe('AutomapDialogComponent', () => {
   let component: AutomapDialogComponent;
   let fixture: ComponentFixture<AutomapDialogComponent>;
   let el: DebugElement;
   const mockDialogRef = {
-    close: jasmine.createSpy('close')
+    close: vi.fn(),
   };
 
   const test_title = 'test title';
@@ -41,20 +45,20 @@ describe('AutomapDialogComponent', () => {
       declarations: [AutomapDialogComponent],
       imports: [MatDialogModule],
       providers: [
-        {provide: MatDialogRef, useValue: mockDialogRef},
+        { provide: MatDialogRef, useValue: mockDialogRef },
         {
-          provide: MAT_DIALOG_DATA, useValue: {
+          provide: MAT_DIALOG_DATA,
+          useValue: {
             title: test_title,
             message: test_message,
             button: test_button,
             cancel: test_cancel,
             automapPercent: test_automapPercent,
-            error: test_error
-          }
+            error: test_error,
+          },
         },
-      ]
-    })
-      .compileComponents();
+      ],
+    }).compileComponents();
   });
 
   beforeEach(() => {

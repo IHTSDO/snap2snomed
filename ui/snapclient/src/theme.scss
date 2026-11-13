@@ -1,0 +1,42 @@
+@use '@angular/material' as mat;
+
+html {
+  @include mat.core();
+  @include mat.all-component-themes(mat.define-theme((
+    color: (
+      theme-type: light,
+      primary: mat.$azure-palette,
+    ),
+    typography: (
+      plain-family: 'Montserrat, sans-serif',
+      brand-family: 'Montserrat, sans-serif',
+    ),
+    density: (
+      scale: 0,
+    ),
+  )));
+
+  --mat-sys-primary: #3F51B5;
+  --mat-button-filled-container-color: #3F51B5;
+  --mat-button-filled-label-text-color: white;
+  --mat-button-outlined-label-text-color: #3F51B5;
+  --mat-button-outlined-outline-color: rgba(63, 81, 181, 0.38);
+  --mat-button-text-label-text-color: #3F51B5;
+  --mat-button-protected-label-text-color: #3F51B5;
+  --mat-icon-button-icon-color: #3F51B5;
+  --mat-sidenav-container-background-color: white;
+  --mat-card-elevated-container-color: white;
+  --mat-card-outlined-container-color: white;
+  --mat-sys-surface: white;
+  --mat-sys-surface-container-low: white;
+  --mat-sys-surface-container: white;
+  --mat-toolbar-container-background-color: white;
+  --mat-table-background-color: white;
+  --mat-paginator-container-background-color: white;
+  --mat-button-toggle-selected-state-text-color: white;
+  --mat-fab-small-container-color: #ff4081;
+  --mat-fab-small-foreground-color: white;
+  --mat-select-panel-background-color: white;
+  --mat-menu-container-color: white;
+  --mat-dialog-container-color: white;
+}

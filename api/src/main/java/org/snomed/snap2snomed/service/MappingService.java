@@ -21,7 +21,6 @@ import org.snomed.snap2snomed.controller.dto.*;
 import org.snomed.snap2snomed.model.Map;
 import org.snomed.snap2snomed.model.*;
 import org.snomed.snap2snomed.model.enumeration.MapStatus;
-import org.snomed.snap2snomed.model.enumeration.MappingRelationship;
 import org.snomed.snap2snomed.model.enumeration.TaskType;
 import org.snomed.snap2snomed.problem.Snap2SnomedProblem;
 import org.snomed.snap2snomed.problem.auth.NotAuthorisedProblem;
@@ -36,16 +35,16 @@ import org.snomed.snap2snomed.security.AuthenticationFacade;
 import org.snomed.snap2snomed.security.WebSecurity;
 import org.snomed.snap2snomed.util.EntityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ProblemDetail;
 import org.springframework.stereotype.Component;
-import org.zalando.problem.Problem;
-import org.zalando.problem.Status;
+import org.springframework.web.ErrorResponseException;
 
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-import javax.transaction.Transactional;
-import javax.validation.constraints.NotNull;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.transaction.Transactional;
+import jakarta.validation.constraints.NotNull;
 import java.io.IOException;
-import java.net.URI;
 import java.text.MessageFormat;
 import java.time.Instant;
 import java.util.*;
@@ -89,7 +88,7 @@ public class MappingService {
     }
     else {
       throw new DeleteMapProblem("last-map", "This is the only version of this Map and cannot be deleted",
-          Status.METHOD_NOT_ALLOWED);
+          HttpStatus.METHOD_NOT_ALLOWED);
     }
   }
 
@@ -616,16 +615,17 @@ public class MappingService {
   @Transactional
   public Long newMappingVersion(Long mapId, Long newSourceId, String mapVersion, String targetVersion, String targetScope) throws IOException {
     final Map originalMap = mapRepository.findById(mapId)
-        .orElseThrow(() -> Problem.valueOf(Status.NOT_FOUND, "No Map found with id " + mapId));
+        .orElseThrow(() -> Snap2SnomedProblem.of(HttpStatus.NOT_FOUND, "No Map found with id " + mapId));
     final ImportedCodeSet newSource = importedCodeSetRepository.findById(newSourceId)
-        .orElseThrow(() -> Problem.valueOf(Status.NOT_FOUND, "No ImportedSourceCode found with id " + newSourceId));
+        .orElseThrow(() -> Snap2SnomedProblem.of(HttpStatus.NOT_FOUND, "No ImportedSourceCode found with id " + newSourceId));
     final Long projectId = originalMap.getProject().getId();
 
     if (!mapRepository.findAllByProjectIdAndVersion(projectId, mapVersion).isEmpty()) {
-      throw Problem.builder().withStatus(Status.BAD_REQUEST)
-          .withType(URI.create(Snap2SnomedProblem.BASE_PROBLEM_TYPE_URI + "new-map-version/duplicate-version"))
-          .withTitle("Map already exists with specified version")
-          .withDetail("A map already exists with version " + mapVersion + " in project " + projectId).build();
+      ProblemDetail body = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST,
+          "A map already exists with version " + mapVersion + " in project " + projectId);
+      body.setTitle("Map already exists with specified version");
+      body.setType(Snap2SnomedProblem.toTypeUri("new-map-version/duplicate-version"));
+      throw new ErrorResponseException(HttpStatus.BAD_REQUEST, body, null);
     }
 
     final User currentUser = authenticationFacade.getAuthenticatedUser();

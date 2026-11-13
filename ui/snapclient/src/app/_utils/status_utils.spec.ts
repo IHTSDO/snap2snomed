@@ -61,7 +61,7 @@ describe('StatusUtils', () => {
     let testLoop = 1;
     [test1, test2, test3, test4, test5, test6, test7, test8].forEach(
       (test) => {
-        expect(StatusUtils.inAuthoredState(test[0].status as MapRowStatus)).toBe(test[1], `Test:${testLoop}`);
+        expect(StatusUtils.inAuthoredState(test[0].status as MapRowStatus), `Test:${testLoop}`).toBe(test[1]);
         testLoop += 1;
       });
   });
@@ -78,7 +78,7 @@ describe('StatusUtils', () => {
     let testLoop = 1;
     [test1, test2, test3, test4, test5, test6, test7, test8].forEach(
       (test) => {
-        expect(StatusUtils.inReviewedState(test[0].status as MapRowStatus)).toBe(test[1], `Test:${testLoop}`);
+        expect(StatusUtils.inReviewedState(test[0].status as MapRowStatus), `Test:${testLoop}`).toBe(test[1]);
         testLoop += 1;
       });
   });
@@ -98,7 +98,7 @@ describe('StatusUtils', () => {
     let testLoop = 1;
     testcases.forEach(
       (test) => {
-        expect(StatusUtils.isStatusOptionDisabled(test[0], test[1], test[2])).toBe(test[3], `Test:${testLoop}`);
+        expect(StatusUtils.isStatusOptionDisabled(test[0], test[1], test[2]), `Test:${testLoop}`).toBe(test[3]);
         testLoop += 1;
       });
   });
@@ -118,7 +118,7 @@ describe('StatusUtils', () => {
     let testLoop = 1;
     testcases.forEach(
       (test) => {
-        expect(StatusUtils.isStatusOptionDisabled(test[0], test[1], test[2])).toBe(test[3], `Test:${testLoop}`);
+        expect(StatusUtils.isStatusOptionDisabled(test[0], test[1], test[2]), `Test:${testLoop}`).toBe(test[3]);
         testLoop += 1;
       });
   });
@@ -138,7 +138,7 @@ describe('StatusUtils', () => {
     let testLoop = 1;
     testcases.forEach(
       (test) => {
-        expect(StatusUtils.isStatusOptionDisabled(test[0], test[1], test[2])).toBe(test[3], `Test:${testLoop}`);
+        expect(StatusUtils.isStatusOptionDisabled(test[0], test[1], test[2]), `Test:${testLoop}`).toBe(test[3]);
         testLoop += 1;
       });
   });
@@ -158,7 +158,7 @@ describe('StatusUtils', () => {
     let testLoop = 1;
     testcases.forEach(
       (test) => {
-        expect(StatusUtils.isStatusOptionDisabled(test[0], test[1], test[2])).toBe(test[3], `Test:${testLoop}`);
+        expect(StatusUtils.isStatusOptionDisabled(test[0], test[1], test[2]), `Test:${testLoop}`).toBe(test[3]);
         testLoop += 1;
       });
   });
@@ -178,7 +178,7 @@ describe('StatusUtils', () => {
     let testLoop = 1;
     testcases.forEach(
       (test) => {
-        expect(StatusUtils.isStatusOptionDisabled(test[0], test[1], test[2])).toBe(test[3], `Test:${testLoop}`);
+        expect(StatusUtils.isStatusOptionDisabled(test[0], test[1], test[2]), `Test:${testLoop}`).toBe(test[3]);
         testLoop += 1;
       });
   });
@@ -198,7 +198,7 @@ describe('StatusUtils', () => {
     let testLoop = 1;
     testcases.forEach(
       (test) => {
-        expect(StatusUtils.isStatusOptionDisabled(test[0], test[1], test[2])).toBe(test[3], `Test:${testLoop}`);
+        expect(StatusUtils.isStatusOptionDisabled(test[0], test[1], test[2]), `Test:${testLoop}`).toBe(test[3]);
         testLoop += 1;
       });
   });
@@ -218,7 +218,7 @@ describe('StatusUtils', () => {
     let testLoop = 1;
     testcases.forEach(
       (test) => {
-        expect(StatusUtils.isStatusOptionDisabled(test[0], test[1], test[2])).toBe(test[3], `Test:${testLoop}`);
+        expect(StatusUtils.isStatusOptionDisabled(test[0], test[1], test[2]), `Test:${testLoop}`).toBe(test[3]);
         testLoop += 1;
       });
   });
@@ -238,7 +238,7 @@ describe('StatusUtils', () => {
     let testLoop = 1;
     testcases.forEach(
       (test) => {
-        expect(StatusUtils.isStatusOptionDisabled(test[0], test[1], test[2])).toBe(test[3], `Test:${testLoop}`);
+        expect(StatusUtils.isStatusOptionDisabled(test[0], test[1], test[2]), `Test:${testLoop}`).toBe(test[3]);
         testLoop += 1;
       });
   });
@@ -258,7 +258,7 @@ describe('StatusUtils', () => {
     let testLoop = 1;
     testcases.forEach(
       (test) => {
-        expect(StatusUtils.isStatusOptionDisabled(test[0], test[1], test[2])).toBe(test[3], `Test:${testLoop}`);
+        expect(StatusUtils.isStatusOptionDisabled(test[0], test[1], test[2]), `Test:${testLoop}`).toBe(test[3]);
         testLoop += 1;
       });
   });
@@ -278,7 +278,7 @@ describe('StatusUtils', () => {
     let testLoop = 1;
     testcases.forEach(
       (test) => {
-        expect(StatusUtils.isStatusOptionDisabled(test[0], test[1], test[2])).toBe(test[3], `Test:${testLoop}`);
+        expect(StatusUtils.isStatusOptionDisabled(test[0], test[1], test[2]), `Test:${testLoop}`).toBe(test[3]);
         testLoop += 1;
       });
   });
@@ -298,7 +298,7 @@ describe('StatusUtils', () => {
     let testLoop = 1;
     testcases.forEach(
       (test) => {
-        expect(StatusUtils.isStatusOptionDisabled(test[0], test[1], test[2])).toBe(test[3], `Test:${testLoop}`);
+        expect(StatusUtils.isStatusOptionDisabled(test[0], test[1], test[2]), `Test:${testLoop}`).toBe(test[3]);
         testLoop += 1;
       });
   });
@@ -318,7 +318,7 @@ describe('StatusUtils', () => {
     let testLoop = 1;
     testcases.forEach(
       (test) => {
-        expect(StatusUtils.isStatusOptionDisabled(test[0], test[1], test[2])).toBe(test[3], `Test:${testLoop}`);
+        expect(StatusUtils.isStatusOptionDisabled(test[0], test[1], test[2]), `Test:${testLoop}`).toBe(test[3]);
         testLoop += 1;
       });
   });
@@ -337,7 +337,7 @@ describe('StatusUtils', () => {
     let testLoop = 1;
     testcases.forEach(
       (test) => {
-        expect(StatusUtils.getAvailableStatusOptions(test[0], test[1].status as MapRowStatus)).toEqual(test[2], `Test:${testLoop}`);
+        expect(StatusUtils.getAvailableStatusOptions(test[0], test[1].status as MapRowStatus), `Test:${testLoop}`).toEqual(test[2]);
         testLoop += 1;
       });
   });
@@ -358,7 +358,7 @@ describe('StatusUtils', () => {
     let testLoop = 1;
     testcases.forEach(
       (test) => {
-        expect(StatusUtils.getAvailableStatusOptions(test[0], test[1].status as MapRowStatus)).toEqual(test[2], `Test:${testLoop}`);
+        expect(StatusUtils.getAvailableStatusOptions(test[0], test[1].status as MapRowStatus), `Test:${testLoop}`).toEqual(test[2]);
         testLoop += 1;
       });
   });

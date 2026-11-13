@@ -1,5 +1,5 @@
 /*
- * Copyright © 2022 SNOMED International
+ * Copyright © 2026 SNOMED International
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@ import {By} from '@angular/platform-browser';
 import {MatTabsModule} from '@angular/material/tabs';
 import {AssignedWorkComponent} from './assigned-work.component';
 import {TranslateLoader, TranslateModule, TranslateService} from '@ngx-translate/core';
-import {HttpClientTestingModule} from '@angular/common/http/testing';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import {HttpLoaderFactory} from '../../app.module';
 import {NoopAnimationsModule} from '@angular/platform-browser/animations';
 import {MockStore, provideMockStore} from '@ngrx/store/testing';
@@ -33,6 +33,11 @@ import {InitialsPipe} from '../../_utils/initialize_pipe';
 import {ErrormessageComponent} from '../../errormessage/errormessage.component';
 import {MatSnackBarModule} from '@angular/material/snack-bar';
 import {MatTooltipModule} from '@angular/material/tooltip';
+import {MatCardModule} from '@angular/material/card';
+import {MatPaginatorModule} from '@angular/material/paginator';
+import {MatIconModule} from '@angular/material/icon';
+import {MatBadgeModule} from '@angular/material/badge';
+import { HttpClient, provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 
 describe('AssignedWorkComponent', () => {
   let component: AssignedWorkComponent;
@@ -51,36 +56,36 @@ describe('AssignedWorkComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [
-        HttpClientTestingModule,
-        NoopAnimationsModule,
-        MatSnackBarModule,
-        MatTabsModule,
-        MatTooltipModule,
-        TranslateModule.forRoot({
-          loader: {
-            provide: TranslateLoader,
-            useFactory: HttpLoaderFactory,
-            deps: [HttpClientTestingModule]
-          }
-        })
-      ],
-      declarations: [
+    declarations: [
         AssignedWorkComponent,
         InitialsPipe,
         ErrormessageComponent
-      ],
-      providers: [TranslateService,
-        {provide: APP_CONFIG, useValue: {}},
+    ],
+    imports: [NoopAnimationsModule,
+        MatSnackBarModule,
+        MatTabsModule,
+        MatTooltipModule,
+        MatCardModule,
+        MatPaginatorModule,
+        MatIconModule,
+        MatBadgeModule,
+        TranslateModule.forRoot({
+            loader: {
+                provide: TranslateLoader,
+                useFactory: HttpLoaderFactory,
+                deps: [HttpClient]
+            }
+        })],
+    providers: [TranslateService,
+        { provide: APP_CONFIG, useValue: {} },
         provideMockStore({
-          initialState: initialAppState,
-          selectors: [
-            {selector: selectTaskSaveError, value: 'MockError'},
-            {selector: selectTaskList, value: [task]},
-          ]
-        })
-      ]
-    })
+            initialState: initialAppState,
+            selectors: [
+                { selector: selectTaskSaveError, value: 'MockError' },
+                { selector: selectTaskList, value: [task] },
+            ]
+        }), provideHttpClient(withInterceptorsFromDi()), provideHttpClientTesting()]
+})
       .compileComponents();
     store = TestBed.inject(MockStore);
     translateService = TestBed.inject(TranslateService);

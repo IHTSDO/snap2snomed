@@ -1,18 +1,21 @@
 <div class="container">
-  <div *ngIf="loading">
-    <app-loading-spinner></app-loading-spinner>
-  </div>
-  <mat-card class="source-details-card" *ngIf="task && source">
-    <mat-card-content>
-      <div class="panel-header">
-        <div class="col">
-          <button mat-icon-button color="accent" type="button" title="Close" (click)="backToTask()">
-            <mat-icon>cancel</mat-icon>
-          </button>
-        </div>
-        <div class="col-main">
-          <h2><b>{{'SOURCE.SOURCE' | translate}}:</b> {{source.display}}
-            <button mat-icon-button color="any" type="button" title="Copy source label"
+  @if (loading) {
+    <div>
+      <app-loading-spinner></app-loading-spinner>
+    </div>
+  }
+  @if (task && source) {
+    <mat-card appearance="outlined" class="source-details-card">
+      <mat-card-content>
+        <div class="panel-header">
+          <div class="col">
+            <button mat-icon-button class="btn-accent" type="button" title="Close" (click)="backToTask()">
+              <mat-icon>cancel</mat-icon>
+            </button>
+          </div>
+          <div class="col-main">
+            <h2><b>{{'SOURCE.SOURCE' | translate}}:</b> {{source.display}}
+            <button mat-icon-button type="button" title="Copy source label"
               [cdkCopyToClipboard]="source.display">
               <mat-icon>content_copy</mat-icon>
             </button>
@@ -30,29 +33,33 @@
         </div>
         <div class="col-additional">
           <table class="additional-source-table">
-            <tr *ngFor="let additionalCol of source.additionalColumnValues; let idx = index; " id="source-index-row">
-              <th>{{source.additionalColumnNames && source.additionalColumnNames[idx] ?
+            @for (additionalCol of source.additionalColumnValues; track additionalCol; let idx = $index) {
+              <tr id="source-index-row">
+                <th>{{source.additionalColumnNames && source.additionalColumnNames[idx] ?
                 source.additionalColumnNames[idx] : ''}}</th>
-              <td>{{additionalCol}}</td>
-            </tr>
+                <td>{{additionalCol}}</td>
+              </tr>
+            }
           </table>
         </div>
         <div class="col-status">
-          <button mat-button color="any" type="button" title="Previous code" (click)="loadPrevious()"
+          <button id="previous-code-button" mat-button type="button" title="Previous code" (click)="loadPrevious()"
             [disabled]="!hasPrevious()">
             <mat-icon>navigate_before</mat-icon>
             {{'MAP.PREVIOUS' | translate}}
           </button>
           <span class="status-group">
             <mat-button-toggle-group name="status" aria-label="Status"
-                                     [(ngModel)]="source.status">
-              <mat-button-toggle *ngFor="let status of getStatusList()"
-                                 [value]="status"
-                                 (click)="updateStatus2(status)">
-                                 {{'STATUS.' + status | translate}}</mat-button-toggle>
+              [(ngModel)]="source.status">
+              @for (status of getStatusList(); track status) {
+                <mat-button-toggle
+                  [value]="status"
+                  (click)="updateStatus2(status)">
+                {{'STATUS.' + status | translate}}</mat-button-toggle>
+              }
             </mat-button-toggle-group>
           </span>
-          <button mat-button color="any" type="button" title="Next code" (click)="loadNext()"
+          <button id="next-code-button" mat-button type="button" title="Next code" (click)="loadNext()"
             [disabled]="!hasNext()">{{'MAP.NEXT' | translate}}
             <mat-icon>navigate_next</mat-icon>
           </button>
@@ -63,18 +70,22 @@
         </div>
       </div>
       <div class="row">
-        <mat-chip-list aria-label="Filters">
-          <mat-chip *ngFor="let filter of appliedFilters" [disabled]="true" #tooltip="matTooltip"
-            matTooltip="{{'DETAILS.APPLIED_FILTER' | translate}}">{{filter | translate}}</mat-chip>
-        </mat-chip-list>
+        <mat-chip-listbox aria-label="Filters">
+          @for (filter of appliedFilters; track filter) {
+            <mat-chip-option [disabled]="true" [selected]="false" #tooltip="matTooltip"
+            matTooltip="{{'DETAILS.APPLIED_FILTER' | translate}}">{{filter | translate}}</mat-chip-option>
+          }
+        </mat-chip-listbox>
       </div>
     </mat-card-content>
   </mat-card>
-  <app-errormessage [error]="error"></app-errormessage>
-  <div class="container-panels" *ngIf="task && source">
+}
+<app-errormessage [error]="error"></app-errormessage>
+@if (task && source) {
+  <div class="container-panels">
     <div class="container-row">
       <div class="search-view card-col">
-        <app-concept-search [scope]="task.mapping?.toScope || ''" [version]="task.mapping?.toVersion || ''"
+        <app-concept-search [scope]="task.mapping.toScope" [version]="task.mapping.toVersion || ''"
           [initial]="source.display" [autosuggest]="source.display">
           <span class="search-title">{{'MAP.SEARCH_TARGET' | translate}}</span>
         </app-concept-search>
@@ -82,68 +93,80 @@
       <div class="tree-view card-col">
         <button class="view-toggle" mat-icon-button (click)="toggleHierarchy()" #tooltip="matTooltip"
           matTooltip="{{'MAP.SWITCH_VIEW' | translate}}">
-          <mat-icon color="{{hierarchyView === 'tree' ? 'accent' : undefined}}">account_tree</mat-icon>
+          <mat-icon [class.accent-icon]="hierarchyView === 'tree'">account_tree</mat-icon>
         </button>
-        <div *ngIf="hierarchyView === 'tree'">
-          <app-tree-view [task]="task"></app-tree-view>
-        </div>
-        <div class="hierarchy-view" *ngIf="hierarchyView !== 'tree'">
-          <mat-progress-bar mode="indeterminate" *ngIf="loadingHierarchy; else heirarchyLoaded"></mat-progress-bar>
-          <ng-template #heirarchyLoaded>
-            <lib-shrimp-hierarchy [rows]="nodes" (selected)="onSelected($event)"></lib-shrimp-hierarchy>
-          </ng-template>
-        </div>
+        @if (hierarchyView === 'tree') {
+          <div>
+            <app-tree-view [task]="task"></app-tree-view>
+          </div>
+        }
+        @if (hierarchyView !== 'tree') {
+          <div class="hierarchy-view">
+            @if (loadingHierarchy) {
+              <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+            } @else {
+              @defer {
+                <lib-shrimp-hierarchy [rows]="nodes" (selected)="onSelected($event)"></lib-shrimp-hierarchy>
+              }
+            }
+          </div>
+        }
       </div>
-        <div class="relationship-view card-col">
-          <mat-card>
-            <mat-card-header>
-              <mat-card-title>{{'DETAILS.TARGET_BY_RELATIONSHIP' | translate}}</mat-card-title>
-              <span class="cbNoMap pull-right">
-                <app-user-chip id="targetLastAuthorUserChip" *ngIf="isReconcileTask() && isNoMapChecked()" 
+      <div class="relationship-view card-col">
+        <mat-card appearance="outlined">
+          <mat-card-header>
+            <mat-card-title>{{'DETAILS.TARGET_BY_RELATIONSHIP' | translate}}</mat-card-title>
+            <span class="cbNoMap pull-right">
+              @if (isReconcileTask() && isNoMapChecked()) {
+                <app-user-chip id="targetLastAuthorUserChip"
                 [user]="getNoMapAuthor()" [font_size]="'12px'"></app-user-chip>
-                <mat-checkbox [checked]="isNoMapChecked()"
-                              [disabled]="isEditDisabled()"
-                              (change)="updateNoMap($event)">{{'TABLE.NO_MAP' | translate}}</mat-checkbox>
-              </span>
+              }
+              <mat-checkbox [checked]="isNoMapChecked()"
+                [disabled]="isEditDisabled()"
+              (change)="updateNoMap($event)">{{'TABLE.NO_MAP' | translate}}</mat-checkbox>
+            </span>
           </mat-card-header>
           <mat-card-content>
             <app-target-relationship [task]="task" [targetRows]="mapRows" [source]="getSource()" [sourceNavSet]="selectedRowset"
-                                     [savingRelationship]="savingRelationship"
-                                     (newTargetEvent)="saveTarget($event)"
-                                     [disableActions]="isEditDisabled()"
-                                     [disableFlagging]="writeDisableUtils.isFlaggingDisabled(this.task?.type, toMapRowStatus(source.status))"
-                                     (removeTargetEvent)="removeTarget($event)"
-                                     (flagEvent)="updateFlag($event)"
+              (newTargetEvent)="saveTarget($event)"
+              [savingRelationship]="savingRelationship"
+              [disableActions]="isEditDisabled()"
+              [disableFlagging]="writeDisableUtils.isFlaggingDisabled(this.task.type, toMapRowStatus(source.status))"
+              (removeTargetEvent)="removeTarget($event)"
+              (flagEvent)="updateFlag($event)"
             ></app-target-relationship>
           </mat-card-content>
           <mat-card-footer>
             <span class="button-actions">
-              <button (click)="loadPrevious()" [disabled]="!hasPrevious()" color="any" mat-icon-button
+              <button (click)="loadPrevious()" [disabled]="!hasPrevious()" mat-icon-button
                 title="Previous code" type="button">
                 <mat-icon>navigate_before</mat-icon>
               </button>
               <mat-button-toggle-group (change)="updateStatus($event.value)" [(ngModel)]="source.status"
-                [disabled]="writeDisableUtils.isStatusSelectionDisabled(this.task?.type, toMapRowStatus(source.status))"
+                [disabled]="writeDisableUtils.isStatusSelectionDisabled(this.task.type, toMapRowStatus(source.status))"
                 aria-label="Status" name="status">
-                <mat-button-toggle *ngFor="let status of getStatusList()" [value]="status"
-                  matTooltip="{{'STATUS.'   + status | translate}}">
-                  <mat-icon>{{toIconName(status)}}</mat-icon></mat-button-toggle>
-              </mat-button-toggle-group>
-              <button (click)="loadNext()" [disabled]="!hasNext()" color="any" mat-icon-button title="Next code"
-                type="button">
-                <mat-icon>navigate_next</mat-icon>
-              </button>
-            </span>
-          </mat-card-footer>
-        </mat-card>
+                @for (status of getStatusList(); track status) {
+                  <mat-button-toggle [value]="status"
+                    matTooltip="{{'STATUS.'   + status | translate}}">
+                    <mat-icon>{{toIconName(status)}}</mat-icon></mat-button-toggle>
+                  }
+                </mat-button-toggle-group>
+                <button (click)="loadNext()" [disabled]="!hasNext()" mat-icon-button title="Next code"
+                  type="button">
+                  <mat-icon>navigate_next</mat-icon>
+                </button>
+              </span>
+            </mat-card-footer>
+          </mat-card>
+        </div>
+        <app-concept-properties class="tab-view card-col" [version]="task.mapping.toVersion || ''">
+        </app-concept-properties>
       </div>
-      <app-concept-properties class="tab-view card-col" [version]="task.mapping?.toVersion || ''">
-      </app-concept-properties>
-    </div>
-    <div class="container-row">
-      <div class="notes-view card-col">
-        <app-notes-list [currentUser]="currentUser" [task]="task" [sourceNavSet]="selectedRowset"></app-notes-list>
+      <div class="container-row">
+        <div class="notes-view card-col">
+          <app-notes-list [currentUser]="currentUser" [task]="task" [sourceNavSet]="selectedRowset"></app-notes-list>
+        </div>
       </div>
     </div>
-  </div>
+  }
 </div>

@@ -1,4 +1,6 @@
 <div [ngClass]="{ 'alert-danger' : error }" class="sheet-container">
-  <mat-icon *ngIf="infoIcon">info</mat-icon>
+  @if (infoIcon) {
+    <mat-icon>info</mat-icon>
+  }
   {{message}}
 </div>
